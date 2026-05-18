@@ -1,0 +1,10 @@
+# Build
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+
+# Logs / diagnostics
+build_diag.txt

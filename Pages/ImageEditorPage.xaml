@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Files_Tools.Pages.ImageEditorPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid x:Name="PageRoot" Padding="20" SizeChanged="PageRoot_SizeChanged">
+            <Grid RowSpacing="16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button
+                        x:Name="BackButton"
+                        Width="42"
+                        Height="36"
+                        Click="BackButton_Click"
+                        ToolTipService.ToolTip="Back">
+                        <FontIcon Glyph="&#xE72B;" />
+                    </Button>
+
+                    <StackPanel Grid.Column="1" Spacing="2">
+                        <TextBlock FontSize="30" FontWeight="SemiBold" Text="Image Editor" />
+                        <TextBlock Opacity="0.72" Text="Upload an image, choose your operations, and apply all changes in one run." />
+                    </StackPanel>
+                </Grid>
+
+                <Grid
+                    x:Name="EditorGrid"
+                    Grid.Row="1"
+                    ColumnSpacing="18"
+                    RowSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition x:Name="LeftColumn" Width="7*" />
+                        <ColumnDefinition x:Name="RightColumn" Width="3*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid x:Name="PreviewSection" Grid.Column="0" RowSpacing="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Border
+                            x:Name="UploadSurface"
+                            AllowDrop="True"
+                            MinHeight="420"
+                            Padding="16"
+                            CornerRadius="14"
+                            BorderThickness="2"
+                            BorderBrush="#24B9FF"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            DragOver="UploadSurface_DragOver"
+                            Drop="UploadSurface_Drop"
+                            PointerPressed="UploadSurface_PointerPressed">
+                            <Grid>
+                                <Image x:Name="PreviewImage" Stretch="Uniform" Visibility="Collapsed" />
+
+                                <StackPanel
+                                    x:Name="DropHintPanel"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Spacing="10">
+                                    <FontIcon HorizontalAlignment="Center" FontSize="56" Glyph="&#xE898;" />
+                                    <TextBlock HorizontalAlignment="Center" FontSize="24" FontWeight="SemiBold" Text="Drop image here" />
+                                    <TextBlock HorizontalAlignment="Center" Opacity="0.8" Text="Or click to choose a file" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <TextBlock
+                            x:Name="LoadedImageInfoTextBlock"
+                            Grid.Row="1"
+                            Opacity="0.76"
+                            Text="No image loaded yet." />
+
+                        <Button
+                            x:Name="ApplyButton"
+                            Grid.Row="2"
+                            Height="56"
+                            HorizontalAlignment="Stretch"
+                            FontSize="22"
+                            Content="Apply"
+                            Click="ApplyButton_Click" />
+                    </Grid>
+
+                    <Border
+                        x:Name="OptionsPanel"
+                        Grid.Column="1"
+                        Grid.RowSpan="3"
+                        MinHeight="420"
+                        Padding="14"
+                        CornerRadius="14"
+                        BorderThickness="2"
+                        BorderBrush="#24B9FF"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel Spacing="14">
+                                <TextBlock FontSize="22" FontWeight="SemiBold" Text="Options" />
+
+                                <StackPanel Spacing="8">
+                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Format and quality" />
+                                    <ComboBox x:Name="OutputFormatComboBox" SelectedIndex="0" SelectionChanged="OptionsSelectionChanged">
+                                        <ComboBoxItem Content="Keep original format" />
+                                        <ComboBoxItem Content="JPEG" />
+                                        <ComboBoxItem Content="PNG" />
+                                        <ComboBoxItem Content="WebP" />
+                                        <ComboBoxItem Content="AVIF" />
+                                        <ComboBoxItem Content="TIFF" />
+                                        <ComboBoxItem Content="HEIF" />
+                                        <ComboBoxItem Content="GIF" />
+                                    </ComboBox>
+
+                                    <CheckBox
+                                        x:Name="PreserveOriginalQualityCheckBox"
+                                        IsChecked="True"
+                                        Checked="PreserveQualityCheckBox_Changed"
+                                        Unchecked="PreserveQualityCheckBox_Changed"
+                                        Content="Preserve original quality" />
+
+                                    <StackPanel x:Name="QualitySelectorPanel" Spacing="4">
+                                        <TextBlock x:Name="QualityPercentTextBlock" Text="Output quality: 90%" />
+                                        <Slider
+                                            x:Name="QualitySlider"
+                                            Minimum="1"
+                                            Maximum="100"
+                                            StepFrequency="1"
+                                            Value="90"
+                                            ValueChanged="QualitySlider_ValueChanged" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Spacing="8">
+                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Resize" />
+                                    <CheckBox
+                                        x:Name="EnableResizeCheckBox"
+                                        Checked="OptionsCheckBox_Changed"
+                                        Unchecked="OptionsCheckBox_Changed"
+                                        Content="Enable resize" />
+
+                                    <Grid x:Name="ResizeInputsGrid" ColumnSpacing="10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="Width" />
+                                            <NumberBox
+                                                x:Name="ResizeWidthNumberBox"
+                                                Minimum="1"
+                                                SmallChange="1"
+                                                SpinButtonPlacementMode="Compact"
+                                                Value="1920"
+                                                ValueChanged="ResizeDimensionNumberBox_ValueChanged" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="Height" />
+                                            <NumberBox
+                                                x:Name="ResizeHeightNumberBox"
+                                                Minimum="1"
+                                                SmallChange="1"
+                                                SpinButtonPlacementMode="Compact"
+                                                Value="1080"
+                                                ValueChanged="ResizeDimensionNumberBox_ValueChanged" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <CheckBox
+                                        x:Name="PreserveAspectRatioCheckBox"
+                                        IsChecked="True"
+                                        Checked="OptionsCheckBox_Changed"
+                                        Unchecked="OptionsCheckBox_Changed"
+                                        Content="Preserve aspect ratio" />
+                                </StackPanel>
+
+                                <StackPanel Spacing="8">
+                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Upscale" />
+                                    <CheckBox
+                                        x:Name="EnableUpscaleCheckBox"
+                                        Checked="OptionsCheckBox_Changed"
+                                        Unchecked="OptionsCheckBox_Changed"
+                                        Content="Enable upscale" />
+
+                                    <Grid x:Name="UpscaleInputsGrid" ColumnSpacing="10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="Target width" />
+                                            <NumberBox
+                                                x:Name="UpscaleWidthNumberBox"
+                                                Minimum="1"
+                                                SmallChange="1"
+                                                SpinButtonPlacementMode="Compact"
+                                                Value="2560"
+                                                ValueChanged="UpscaleDimensionNumberBox_ValueChanged" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="Target height" />
+                                            <NumberBox
+                                                x:Name="UpscaleHeightNumberBox"
+                                                Minimum="1"
+                                                SmallChange="1"
+                                                SpinButtonPlacementMode="Compact"
+                                                Value="1440"
+                                                ValueChanged="UpscaleDimensionNumberBox_ValueChanged" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <CheckBox
+                                        x:Name="PreserveUpscaleAspectRatioCheckBox"
+                                        IsChecked="True"
+                                        Checked="OptionsCheckBox_Changed"
+                                        Unchecked="OptionsCheckBox_Changed"
+                                        Content="Preserve aspect ratio" />
+
+                                    <TextBlock
+                                        x:Name="UpscaleValidationTextBlock"
+                                        Foreground="Tomato"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+
+                                <StackPanel Spacing="8">
+                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Rotation" />
+                                    <CheckBox
+                                        x:Name="EnableRotationCheckBox"
+                                        Checked="OptionsCheckBox_Changed"
+                                        Unchecked="OptionsCheckBox_Changed"
+                                        Content="Enable rotation" />
+
+                                    <ComboBox x:Name="RotationComboBox" SelectedIndex="0" SelectionChanged="OptionsSelectionChanged">
+                                        <ComboBoxItem Tag="0" Content="0 deg" />
+                                        <ComboBoxItem Tag="90" Content="90 deg" />
+                                        <ComboBoxItem Tag="180" Content="180 deg" />
+                                        <ComboBoxItem Tag="270" Content="270 deg" />
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <StackPanel Spacing="8">
+                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Mirroring" />
+                                    <CheckBox
+                                        x:Name="MirrorHorizontalCheckBox"
+                                        Checked="OptionsCheckBox_Changed"
+                                        Unchecked="OptionsCheckBox_Changed"
+                                        Content="Flip horizontally" />
+                                    <CheckBox
+                                        x:Name="MirrorVerticalCheckBox"
+                                        Checked="OptionsCheckBox_Changed"
+                                        Unchecked="OptionsCheckBox_Changed"
+                                        Content="Flip vertically" />
+                                </StackPanel>
+
+                                <StackPanel Spacing="8">
+                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="RGB adjustments" />
+                                    <CheckBox
+                                        x:Name="EnableRgbAdjustmentCheckBox"
+                                        Checked="OptionsCheckBox_Changed"
+                                        Unchecked="OptionsCheckBox_Changed"
+                                        Content="Enable RGB adjustments" />
+
+                                    <StackPanel x:Name="RgbControlsPanel" Spacing="4">
+                                        <TextBlock x:Name="RedSliderTextBlock" Text="Red: 100%" />
+                                        <Slider x:Name="RedSlider" Minimum="0" Maximum="200" StepFrequency="1" Value="100" ValueChanged="RgbSlider_ValueChanged" />
+                                        <TextBlock x:Name="GreenSliderTextBlock" Text="Green: 100%" />
+                                        <Slider x:Name="GreenSlider" Minimum="0" Maximum="200" StepFrequency="1" Value="100" ValueChanged="RgbSlider_ValueChanged" />
+                                        <TextBlock x:Name="BlueSliderTextBlock" Text="Blue: 100%" />
+                                        <Slider x:Name="BlueSlider" Minimum="0" Maximum="200" StepFrequency="1" Value="100" ValueChanged="RgbSlider_ValueChanged" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Spacing="8">
+                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Output folder" />
+                                    <TextBlock x:Name="OutputFolderTextBlock" Opacity="0.82" Text="Same folder as input image" TextWrapping="Wrap" />
+                                    <Button Content="Select output folder" Click="SelectOutputFolderButton_Click" />
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</Page>
