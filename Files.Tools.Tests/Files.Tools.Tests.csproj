@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Compile Include="..\Services\ImageProcessingService.cs" Link="Services\ImageProcessingService.cs" />
+    <Compile Include="..\Services\VideoProcessingService.cs" Link="Services\VideoProcessingService.cs" />
   </ItemGroup>
 
 </Project>

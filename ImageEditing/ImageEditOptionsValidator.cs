@@ -7,9 +7,16 @@ namespace Files_Tools.ImageEditing
     /// </summary>
     public static class ImageEditOptionsValidator
     {
-        public static IReadOnlyList<string> Validate(ImageEditOptions options, int? originalWidth, int? originalHeight)
+        public static IReadOnlyList<string> Validate(
+            ImageEditOptions options,
+            int? originalWidth,
+            int? originalHeight,
+            int? workingWidth = null,
+            int? workingHeight = null)
         {
             var errors = new List<string>();
+            workingWidth ??= originalWidth;
+            workingHeight ??= originalHeight;
 
             if (!options.PreserveOriginalQuality && (options.QualityPercent < 1 || options.QualityPercent > 100))
             {
@@ -21,6 +28,24 @@ namespace Files_Tools.ImageEditing
                 errors.Add("Resize width and height must be greater than 0.");
             }
 
+            if (options.EnableCrop)
+            {
+                if (options.CropLeft < 0 || options.CropTop < 0 || options.CropWidth < 1 || options.CropHeight < 1)
+                {
+                    errors.Add("Crop must use a valid image area.");
+                }
+
+                if (originalWidth.HasValue && options.CropLeft + options.CropWidth > originalWidth.Value)
+                {
+                    errors.Add("Crop area cannot exceed the original image width.");
+                }
+
+                if (originalHeight.HasValue && options.CropTop + options.CropHeight > originalHeight.Value)
+                {
+                    errors.Add("Crop area cannot exceed the original image height.");
+                }
+            }
+
             if (options.EnableUpscale)
             {
                 if (options.UpscaleWidth < 1 || options.UpscaleHeight < 1)
@@ -28,21 +53,21 @@ namespace Files_Tools.ImageEditing
                     errors.Add("Upscale width and height must be greater than 0.");
                 }
 
-                if (originalWidth.HasValue && options.UpscaleWidth < originalWidth.Value)
+                if (workingWidth.HasValue && options.UpscaleWidth < workingWidth.Value)
                 {
-                    errors.Add("Upscale width cannot be smaller than the original width.");
+                    errors.Add("Upscale width cannot be smaller than the working image width.");
                 }
 
-                if (originalHeight.HasValue && options.UpscaleHeight < originalHeight.Value)
+                if (workingHeight.HasValue && options.UpscaleHeight < workingHeight.Value)
                 {
-                    errors.Add("Upscale height cannot be smaller than the original height.");
+                    errors.Add("Upscale height cannot be smaller than the working image height.");
                 }
 
-                if (options.EnableResize && originalWidth.HasValue && originalHeight.HasValue)
+                if (options.EnableResize && workingWidth.HasValue && workingHeight.HasValue)
                 {
                     var resizeWouldReduce =
-                        options.ResizeWidth < originalWidth.Value ||
-                        options.ResizeHeight < originalHeight.Value;
+                        options.ResizeWidth < workingWidth.Value ||
+                        options.ResizeHeight < workingHeight.Value;
 
                     if (resizeWouldReduce)
                     {
@@ -59,11 +84,11 @@ namespace Files_Tools.ImageEditing
 
             if (options.EnableRgbAdjustments)
             {
-                if (options.RedPercent < 0 || options.RedPercent > 200 ||
-                    options.GreenPercent < 0 || options.GreenPercent > 200 ||
-                    options.BluePercent < 0 || options.BluePercent > 200)
+                if (options.RedPercent < 0 || options.RedPercent > 100 ||
+                    options.GreenPercent < 0 || options.GreenPercent > 100 ||
+                    options.BluePercent < 0 || options.BluePercent > 100)
                 {
-                    errors.Add("RGB sliders must be between 0% and 200%.");
+                    errors.Add("RGB sliders must be between 0% and 100%.");
                 }
             }
 

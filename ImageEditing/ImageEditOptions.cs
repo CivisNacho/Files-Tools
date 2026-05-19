@@ -12,6 +12,16 @@ namespace Files_Tools.ImageEditing
 
         public int QualityPercent { get; set; } = 90;
 
+        public bool EnableCrop { get; set; }
+
+        public int CropLeft { get; set; }
+
+        public int CropTop { get; set; }
+
+        public int CropWidth { get; set; }
+
+        public int CropHeight { get; set; }
+
         public bool EnableResize { get; set; }
 
         public int ResizeWidth { get; set; } = 1920;

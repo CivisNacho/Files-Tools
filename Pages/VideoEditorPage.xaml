@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Files_Tools.Pages.VideoEditorPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <Page.Resources>
+        <SolidColorBrush x:Key="ImageAccentBrush" Color="#FF3B82F6" />
+        <SolidColorBrush x:Key="ImageAccentDarkBrush" Color="#FF2563EB" />
+        <SolidColorBrush x:Key="VideoAccentBrush" Color="#FF14B8A6" />
+        <SolidColorBrush x:Key="VideoAccentDarkBrush" Color="#FF0F766E" />
+        <LinearGradientBrush x:Key="VideoHintBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#FFE8FFFB" Offset="0" />
+            <GradientStop Color="#FFCFFBF4" Offset="1" />
+        </LinearGradientBrush>
+        <Style x:Key="SettingsCardStyle" TargetType="Border">
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="Background" Value="{ThemeResource LayerFillColorDefaultBrush}" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid
+            x:Name="PageRoot"
+            Padding="32,24,32,28"
+            SizeChanged="PageRoot_SizeChanged">
+            <Grid
+                x:Name="ContentRoot"
+                HorizontalAlignment="Center"
+                MaxWidth="1440"
+                RowSpacing="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel MaxWidth="880" Spacing="6">
+                    <TextBlock FontSize="38" FontWeight="SemiBold" Text="Video Editor" />
+                    <TextBlock
+                        Opacity="0.78"
+                        Text="Import a video, tune processing options, and run FFmpeg-backed edits with a layout that keeps preview and decisions easy to follow."
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <Grid
+                    x:Name="EditorGrid"
+                    Grid.Row="1"
+                    ColumnSpacing="20"
+                    RowSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition x:Name="LeftColumn" Width="8*" />
+                        <ColumnDefinition x:Name="RightColumn" Width="4*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        x:Name="PreviewSection"
+                        Grid.Column="0"
+                        VerticalAlignment="Top"
+                        Padding="20"
+                        CornerRadius="16"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                        <Grid RowSpacing="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Spacing="4">
+                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="Preview" />
+                                <TextBlock
+                                    Opacity="0.72"
+                                    Text="Drop a video or click the preview surface to start. Playback and edit options stay centered around this working area."
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <Border
+                                x:Name="UploadSurface"
+                                Grid.Row="1"
+                                AllowDrop="True"
+                                MinHeight="240"
+                                MaxHeight="560"
+                                Padding="16"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Top"
+                                CornerRadius="14"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                DragOver="UploadSurface_DragOver"
+                                Drop="UploadSurface_Drop"
+                                PointerPressed="UploadSurface_PointerPressed">
+                                <Grid RowSpacing="12">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <Grid
+                                        x:Name="PreviewHost"
+                                        MaxHeight="360">
+                                        <MediaPlayerElement
+                                            x:Name="VideoPlayer"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Stretch"
+                                            AreTransportControlsEnabled="True"
+                                            Stretch="Uniform"
+                                            Visibility="Collapsed" />
+                                    </Grid>
+
+                                    <StackPanel
+                                        x:Name="TrimTimelinePanel"
+                                        Grid.Row="1"
+                                        Visibility="Collapsed"
+                                        Spacing="8">
+                                        <TextBlock
+                                            x:Name="TrimSelectionInfoTextBlock"
+                                            HorizontalAlignment="Center"
+                                            FontSize="14"
+                                            FontWeight="SemiBold"
+                                            Text="00:00:00 - 00:00:00" />
+
+                                        <Grid>
+                                            <Canvas
+                                                x:Name="TrimTimelineCanvas"
+                                                Height="36"
+                                                HorizontalAlignment="Stretch"
+                                                SizeChanged="TrimTimelineCanvas_SizeChanged"
+                                                PointerMoved="TrimTimelineCanvas_PointerMoved"
+                                                PointerReleased="TrimTimelineCanvas_PointerReleased"
+                                                PointerCanceled="TrimTimelineCanvas_PointerReleased">
+                                                <Border
+                                                    x:Name="TrimTimelineRail"
+                                                    Height="6"
+                                                    Width="0"
+                                                    CornerRadius="3"
+                                                    Background="{ThemeResource ControlFillColorSecondaryBrush}" />
+                                                <Border
+                                                    x:Name="TrimSelectedRange"
+                                                    Height="6"
+                                                    Width="0"
+                                                    CornerRadius="3"
+                                                    Background="{ThemeResource AccentFillColorDefaultBrush}" />
+                                                <Border
+                                                    x:Name="TrimStartHandle"
+                                                    Width="16"
+                                                    Height="24"
+                                                    CornerRadius="8"
+                                                    Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                                    PointerPressed="TrimHandle_PointerPressed"
+                                                    Tag="Start" />
+                                                <Border
+                                                    x:Name="TrimEndHandle"
+                                                    Width="16"
+                                                    Height="24"
+                                                    CornerRadius="8"
+                                                    Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                                    PointerPressed="TrimHandle_PointerPressed"
+                                                    Tag="End" />
+                                            </Canvas>
+                                        </Grid>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock
+                                                x:Name="TrimStartTimeTextBlock"
+                                                Text="00:00:00"
+                                                Opacity="0.76" />
+                                            <TextBlock
+                                                x:Name="TrimEndTimeTextBlock"
+                                                Grid.Column="1"
+                                                HorizontalAlignment="Right"
+                                                Text="00:00:00"
+                                                Opacity="0.76" />
+                                        </Grid>
+                                    </StackPanel>
+
+                                    <StackPanel
+                                        x:Name="DropHintPanel"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Grid.RowSpan="2"
+                                        MaxWidth="360"
+                                        Spacing="12">
+                                        <Border
+                                            HorizontalAlignment="Center"
+                                            Padding="18"
+                                            CornerRadius="999"
+                                            Background="{StaticResource VideoHintBackgroundBrush}">
+                                            <FontIcon
+                                                HorizontalAlignment="Center"
+                                                FontSize="52"
+                                                Foreground="{StaticResource VideoAccentDarkBrush}"
+                                                Glyph="&#xE714;" />
+                                        </Border>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            FontSize="24"
+                                            FontWeight="SemiBold"
+                                            Text="Drop a video here"
+                                            TextAlignment="Center" />
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            Opacity="0.76"
+                                            Text="You can also click this surface to browse for a file. Trim, resize, repair, and container options stay available from the options panel."
+                                            TextAlignment="Center"
+                                            TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Grid Grid.Row="2" ColumnSpacing="16" RowSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    x:Name="LoadedVideoInfoTextBlock"
+                                    VerticalAlignment="Center"
+                                    Opacity="0.76"
+                                    Text="No video loaded yet."
+                                    TextWrapping="Wrap" />
+                                <Button
+                                    x:Name="ApplyButton"
+                                    Grid.Column="1"
+                                    MinWidth="180"
+                                    Height="44"
+                                    HorizontalAlignment="Right"
+                                    Content="Apply changes"
+                                    Background="{StaticResource ImageAccentBrush}"
+                                    BorderBrush="{StaticResource ImageAccentBrush}"
+                                    Foreground="White"
+                                    Click="ApplyButton_Click" />
+                            </Grid>
+
+                            <StackPanel
+                                x:Name="ProcessingStatusPanel"
+                                Grid.Row="3"
+                                Visibility="Collapsed"
+                                Spacing="8">
+                                <Grid ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock
+                                        x:Name="ProcessingStatusTextBlock"
+                                        FontWeight="SemiBold"
+                                        Text="Processing video..." />
+                                    <TextBlock
+                                        x:Name="ProcessingEtaTextBlock"
+                                        Grid.Column="1"
+                                        Opacity="0.76"
+                                        Text="ETA calculating..." />
+                                </Grid>
+
+                                <ProgressBar
+                                    x:Name="ProcessingProgressBar"
+                                    Height="6"
+                                    Minimum="0"
+                                    Maximum="1"
+                                    Value="0" />
+
+                                <TextBlock
+                                    x:Name="ProcessingDetailTextBlock"
+                                    Opacity="0.76"
+                                    Text="Preparing FFmpeg..." />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Border
+                        x:Name="OptionsPanel"
+                        Grid.Column="1"
+                        Grid.RowSpan="2"
+                        MinWidth="360"
+                        Padding="20"
+                        CornerRadius="16"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                        <Grid RowSpacing="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Spacing="4">
+                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="Options" />
+                                <TextBlock
+                                    Opacity="0.72"
+                                    Text="Use the section list to move between media, transform, and advanced settings."
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <StackPanel Spacing="2">
+                                    <TextBlock x:Name="SelectedOptionHeaderTextBlock" Margin="0,0,0,12" FontSize="22" FontWeight="SemiBold" Text="Select an option" />
+
+                                    <StackPanel x:Name="MediaPanel" Visibility="Collapsed" Spacing="12">
+
+                                        <StackPanel x:Name="MediaFormatPanel" Visibility="Visible">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Format and codecs" />
+                                                    <ComboBox x:Name="OutputContainerComboBox" Header="Output format" SelectionChanged="OutputContainerComboBox_SelectionChanged">
+                                                        <ComboBoxItem Content="Keep original" />
+                                                        <ComboBoxItem Content="MP4" />
+                                                        <ComboBoxItem Content="MKV" />
+                                                        <ComboBoxItem Content="WebM" />
+                                                        <ComboBoxItem Content="MOV" />
+                                                        <ComboBoxItem Content="AVI" />
+                                                        <ComboBoxItem Content="GIF" />
+                                                    </ComboBox>
+                                                    <ComboBox x:Name="VideoCodecComboBox" Header="Video codec" PlaceholderText="Video codec" SelectionChanged="AnyOptionChanged_SelectionChanged">
+                                                        <ComboBoxItem Content="Keep original" />
+                                                        <ComboBoxItem Content="H264" />
+                                                        <ComboBoxItem Content="H265" />
+                                                        <ComboBoxItem Content="AV1" />
+                                                        <ComboBoxItem Content="VP9" />
+                                                        <ComboBoxItem Content="VP8" />
+                                                        <ComboBoxItem Content="MPEG4" />
+                                                    </ComboBox>
+                                                    <ComboBox x:Name="AudioCodecComboBox" Header="Audio codec" PlaceholderText="Audio codec" SelectionChanged="AnyOptionChanged_SelectionChanged">
+                                                        <ComboBoxItem Content="Keep original" />
+                                                        <ComboBoxItem Content="AAC" />
+                                                        <ComboBoxItem Content="Opus" />
+                                                        <ComboBoxItem Content="Vorbis" />
+                                                        <ComboBoxItem Content="MP3" />
+                                                        <ComboBoxItem Content="AC3" />
+                                                        <ComboBoxItem Content="FLAC" />
+                                                        <ComboBoxItem Content="PCM_S16LE" />
+                                                        <ComboBoxItem Content="Remove audio" />
+                                                    </ComboBox>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel x:Name="MediaCompressionPanel" Visibility="Collapsed">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Compression" />
+                                                    <CheckBox x:Name="EnableCompressionCheckBox" Content="Enable compression preset" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <ContentControl x:Name="CompressionOptionsPanel">
+                                                        <ComboBox x:Name="CompressionPresetComboBox" Header="Compression preset" SelectionChanged="AnyOptionChanged_SelectionChanged">
+                                                            <ComboBoxItem Content="VeryHigh" />
+                                                            <ComboBoxItem Content="High" />
+                                                            <ComboBoxItem Content="Balanced" />
+                                                            <ComboBoxItem Content="SmallSize" />
+                                                        </ComboBox>
+                                                    </ContentControl>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel x:Name="MediaAudioPanel" Visibility="Collapsed">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Audio and volume" />
+                                                    <Button
+                                                        x:Name="ExtractAudioButton"
+                                                        HorizontalAlignment="Left"
+                                                        Content="Extract audio"
+                                                        Click="ExtractAudioButton_Click" />
+                                                    <CheckBox x:Name="EnableAudioVolumeCheckBox" Content="Adjust output volume" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <StackPanel x:Name="AudioVolumePanel" Spacing="4">
+                                                        <TextBlock x:Name="AudioVolumeTextBlock" Text="Volume: 100%" />
+                                                        <Slider
+                                                            x:Name="AudioVolumeSlider"
+                                                            Minimum="0"
+                                                            Maximum="200"
+                                                            StepFrequency="1"
+                                                            Value="100"
+                                                            ValueChanged="AudioVolumeSlider_ValueChanged" />
+                                                    </StackPanel>
+                                                    <TextBlock
+                                                        Opacity="0.76"
+                                                        Text="This slider changes the final exported audio level, including replacement audio when muxing is enabled."
+                                                        TextWrapping="Wrap" />
+                                                    <CheckBox x:Name="EnableNormalizeAudioCheckBox" Content="Normalize audio" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <StackPanel x:Name="NormalizeAudioPanel" Spacing="4">
+                                                        <TextBlock
+                                                            Opacity="0.76"
+                                                            Text="Applies a simple loudness normalization pass to the final output audio."
+                                                            TextWrapping="Wrap" />
+                                                    </StackPanel>
+                                                    <CheckBox x:Name="EnableAudioSyncCheckBox" Content="Fix audio sync" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <StackPanel x:Name="AudioSyncPanel" Spacing="8">
+                                                        <ComboBox x:Name="AudioSyncDirectionComboBox" Header="Move audio" SelectionChanged="AudioSyncDirectionComboBox_SelectionChanged">
+                                                            <ComboBoxItem Content="Earlier" />
+                                                            <ComboBoxItem Content="Later" />
+                                                        </ComboBox>
+                                                        <StackPanel Spacing="4">
+                                                            <TextBlock x:Name="AudioSyncOffsetTextBlock" Text="Audio offset: 0 ms earlier" />
+                                                            <Slider
+                                                                x:Name="AudioSyncOffsetSlider"
+                                                                Minimum="0"
+                                                                Maximum="5000"
+                                                                StepFrequency="1"
+                                                                Value="0"
+                                                                ValueChanged="AudioSyncOffsetSlider_ValueChanged" />
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                    <CheckBox x:Name="EnableAudioMuxCheckBox" Content="Add or replace audio track" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <ContentControl x:Name="AudioMuxOptionsPanel">
+                                                        <StackPanel Spacing="12">
+                                                            <TextBox x:Name="AudioMuxPathTextBox" Header="Audio file" PlaceholderText="Choose an audio source" TextChanged="AnyOptionChanged_TextChanged" />
+                                                            <Button HorizontalAlignment="Left" Content="Browse audio file" Click="BrowseAudioMuxButton_Click" />
+                                                            <CheckBox x:Name="ReplaceAudioCheckBox" Content="Replace existing audio" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                            <CheckBox x:Name="UseShortestCheckBox" Content="Use shortest duration" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                            <CheckBox x:Name="SetDefaultAudioCheckBox" Content="Set as default audio" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                        </StackPanel>
+                                                    </ContentControl>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel x:Name="MediaSubtitlesPanel" Visibility="Collapsed">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Subtitles" />
+                                                    <CheckBox x:Name="EnableSubtitleMuxCheckBox" Content="Add subtitles" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <ContentControl x:Name="SubtitleMuxOptionsPanel">
+                                                        <StackPanel Spacing="12">
+                                                            <TextBox x:Name="SubtitlePathTextBox" Header="Subtitle file" PlaceholderText="Choose a subtitle source" TextChanged="AnyOptionChanged_TextChanged" />
+                                                            <Button HorizontalAlignment="Left" Content="Browse subtitle file" Click="BrowseSubtitleMuxButton_Click" />
+                                                            <ComboBox x:Name="SubtitleModeComboBox" Header="Subtitle mode" SelectionChanged="AnyOptionChanged_SelectionChanged">
+                                                                <ComboBoxItem Content="SoftMux" />
+                                                                <ComboBoxItem Content="BurnIn" />
+                                                            </ComboBox>
+                                                            <TextBox x:Name="SubtitleLanguageTextBox" Header="Language tag" PlaceholderText="Example: en" TextChanged="AnyOptionChanged_TextChanged" />
+                                                            <TextBox x:Name="SubtitleTitleTextBox" Header="Subtitle title" PlaceholderText="Example: English" TextChanged="AnyOptionChanged_TextChanged" />
+                                                            <CheckBox x:Name="SetDefaultSubtitleCheckBox" Content="Set as default subtitle" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                        </StackPanel>
+                                                    </ContentControl>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <TextBlock x:Name="MediaValidationTextBlock" Foreground="Tomato" TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <StackPanel x:Name="TransformPanel" Visibility="Collapsed" Spacing="12">
+
+                                        <StackPanel x:Name="TransformResizePanel" Visibility="Visible">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Resize" />
+                                                    <CheckBox x:Name="EnableResizeCheckBox" Content="Enable resize" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <ContentControl x:Name="ResizeOptionsPanel">
+                                                        <StackPanel Spacing="12">
+                                                            <Grid ColumnSpacing="12">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*" />
+                                                                    <ColumnDefinition Width="*" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <NumberBox x:Name="ResizeWidthNumberBox" Header="Width" Minimum="1" Value="1920" SpinButtonPlacementMode="Compact" ValueChanged="AnyOptionChanged_NumberChanged" />
+                                                                <NumberBox x:Name="ResizeHeightNumberBox" Grid.Column="1" Header="Height" Minimum="1" Value="1080" SpinButtonPlacementMode="Compact" ValueChanged="AnyOptionChanged_NumberChanged" />
+                                                            </Grid>
+                                                            <ComboBox x:Name="ResizeModeComboBox" Header="Resize mode" SelectionChanged="AnyOptionChanged_SelectionChanged">
+                                                                <ComboBoxItem Content="PadToFit" />
+                                                                <ComboBoxItem Content="CropToFill" />
+                                                                <ComboBoxItem Content="Stretch" />
+                                                            </ComboBox>
+                                                            <TextBox x:Name="PadColorTextBox" Header="Padding color" PlaceholderText="For example black or #000000" Text="black" TextChanged="AnyOptionChanged_TextChanged" />
+                                                        </StackPanel>
+                                                    </ContentControl>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel x:Name="TransformTrimPanel" Visibility="Collapsed">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Trim" />
+                                                    <CheckBox x:Name="EnableTrimCheckBox" Content="Enable trim" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <TextBlock
+                                                        Opacity="0.76"
+                                                        Text="Drag the trim handles under the preview to choose the start and end points."
+                                                        TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel x:Name="TransformRotatePanel" Visibility="Collapsed">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Rotate and mirror" />
+                                                    <ComboBox x:Name="RotationComboBox" Header="Rotation" SelectionChanged="AnyOptionChanged_SelectionChanged">
+                                                        <ComboBoxItem Content="0" />
+                                                        <ComboBoxItem Content="90" />
+                                                        <ComboBoxItem Content="180" />
+                                                        <ComboBoxItem Content="270" />
+                                                    </ComboBox>
+                                                    <CheckBox x:Name="MirrorHorizontalCheckBox" Content="Mirror horizontally" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <CheckBox x:Name="MirrorVerticalCheckBox" Content="Mirror vertically" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <TextBlock x:Name="TransformValidationTextBlock" Foreground="Tomato" TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <StackPanel x:Name="AdvancedPanel" Visibility="Collapsed" Spacing="12">
+
+                                        <StackPanel x:Name="AdvancedMetadataPanel" Visibility="Visible">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Metadata" />
+                                                    <CheckBox x:Name="RemoveMetadataCheckBox" Content="Remove metadata" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel x:Name="AdvancedRepairPanel" Visibility="Collapsed">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Repair" />
+                                                    <CheckBox x:Name="EnableRepairCheckBox" Content="Enable repair mode" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <ContentControl x:Name="RepairOptionsPanel">
+                                                        <StackPanel Spacing="12">
+                                                            <ComboBox x:Name="RepairModeComboBox" Header="Repair mode" SelectionChanged="AnyOptionChanged_SelectionChanged">
+                                                                <ComboBoxItem Content="Remux" />
+                                                                <ComboBoxItem Content="Reencode" />
+                                                            </ComboBox>
+                                                            <CheckBox x:Name="RegeneratePtsCheckBox" Content="Regenerate timestamps" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                            <CheckBox x:Name="IgnoreRecoverableErrorsCheckBox" Content="Ignore recoverable errors" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                            <CheckBox x:Name="DropNonEssentialStreamsCheckBox" Content="Drop non-essential streams" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                            <CheckBox x:Name="RepairRemoveMetadataCheckBox" Content="Remove metadata during repair" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                        </StackPanel>
+                                                    </ContentControl>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <TextBlock x:Name="AdvancedValidationTextBlock" Foreground="Tomato" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</Page>

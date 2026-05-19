@@ -1,73 +1,115 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Animation;
 using System;
-using System.Numerics;
+using System.Linq;
+using System.Threading.Tasks;
+using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage;
+using Windows.Storage.Pickers;
 
 namespace Files_Tools.Pages
 {
     public sealed partial class HomePage : Page
     {
+        private static readonly string[] SupportedImageExtensions = [".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp"];
+        private static readonly string[] SupportedVideoExtensions = [".mp4", ".mov", ".mkv", ".avi", ".wmv", ".webm", ".m4v"];
+
         public HomePage()
         {
             InitializeComponent();
             UpdateResponsiveLayout(1200);
         }
 
-        private void ImagesCard_Click(object sender, RoutedEventArgs e)
+        private async void DropZoneSurface_PointerPressed(object sender, PointerRoutedEventArgs e)
         {
-            NavigationService.Navigate(typeof(ImageEditorPage), null, new DrillInNavigationTransitionInfo());
+            await PickAndRouteFileAsync();
         }
 
-        private void VideoCard_Click(object sender, RoutedEventArgs e)
+        private void DropZoneSurface_DragOver(object sender, DragEventArgs e)
         {
-            // Video page will be connected when implemented.
+            e.AcceptedOperation = DataPackageOperation.Copy;
+            e.DragUIOverride.Caption = "Drop image or video to continue";
+            e.DragUIOverride.IsCaptionVisible = true;
+            e.DragUIOverride.IsGlyphVisible = true;
         }
 
-        private void DocumentsCard_Click(object sender, RoutedEventArgs e)
+        private async void DropZoneSurface_Drop(object sender, DragEventArgs e)
         {
-            // Documents page will be connected when implemented.
-        }
-
-        private void AudioCard_Click(object sender, RoutedEventArgs e)
-        {
-            // Audio page will be connected when implemented.
-        }
-
-        private void Card_PointerEntered(object sender, PointerRoutedEventArgs e)
-        {
-            if (sender is not FrameworkElement card)
+            if (!e.DataView.Contains(StandardDataFormats.StorageItems))
             {
                 return;
             }
 
-            AnimateCard(card, scale: 1.03f, durationMs: 220);
-        }
-
-        private void Card_PointerExited(object sender, PointerRoutedEventArgs e)
-        {
-            if (sender is not FrameworkElement card)
+            var items = await e.DataView.GetStorageItemsAsync();
+            var file = items.OfType<StorageFile>().FirstOrDefault(IsSupportedLandingFile);
+            if (file is null)
             {
                 return;
             }
 
-            AnimateCard(card, scale: 1.0f, durationMs: 220);
+            RouteFile(file);
         }
 
-        private static void AnimateCard(FrameworkElement card, float scale, int durationMs)
+        private async Task PickAndRouteFileAsync()
         {
-            var visual = ElementCompositionPreview.GetElementVisual(card);
-            var compositor = visual.Compositor;
+            if (App.MainWindow is null)
+            {
+                return;
+            }
 
-            visual.CenterPoint = new Vector3((float)card.ActualWidth / 2, (float)card.ActualHeight / 2, 0f);
+            var picker = new FileOpenPicker();
+            foreach (var extension in SupportedImageExtensions.Concat(SupportedVideoExtensions).Append(".gif"))
+            {
+                if (!picker.FileTypeFilter.Contains(extension))
+                {
+                    picker.FileTypeFilter.Add(extension);
+                }
+            }
 
-            var scaleAnimation = compositor.CreateVector3KeyFrameAnimation();
-            scaleAnimation.InsertKeyFrame(1.0f, new Vector3(scale, scale, 1.0f));
-            scaleAnimation.Duration = TimeSpan.FromMilliseconds(durationMs);
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
 
-            visual.StartAnimation(nameof(visual.Scale), scaleAnimation);
+            var selectedFile = await picker.PickSingleFileAsync();
+            if (selectedFile is null)
+            {
+                return;
+            }
+
+            RouteFile(selectedFile);
+        }
+
+        private void RouteFile(StorageFile file)
+        {
+            var extension = file.FileType;
+            if (SupportedImageExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
+            {
+                NavigateToPage(typeof(ImageEditorPage), new FileNavigationRequest { File = file });
+                return;
+            }
+
+            if (IsSupportedVideoFile(file))
+            {
+                NavigateToPage(typeof(VideoEditorPage), new FileNavigationRequest { File = file });
+            }
+        }
+
+        private static bool IsSupportedLandingFile(StorageFile file)
+        {
+            return SupportedImageExtensions.Contains(file.FileType, StringComparer.OrdinalIgnoreCase) ||
+                   IsSupportedVideoFile(file);
+        }
+
+        private static bool IsSupportedVideoFile(StorageFile file)
+        {
+            return SupportedVideoExtensions.Contains(file.FileType, StringComparer.OrdinalIgnoreCase) ||
+                   string.Equals(file.FileType, ".gif", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static void NavigateToPage(Type pageType, object? parameter = null)
+        {
+            NavigationService.Navigate(pageType, parameter, new DrillInNavigationTransitionInfo());
         }
 
         private void LayoutRoot_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -89,48 +131,9 @@ namespace Files_Tools.Pages
                     : new Thickness(32, 24, 32, 28);
 
             LayoutRoot.Padding = pagePadding;
-
-            var availableContentWidth = Math.Max(320, windowWidth - pagePadding.Left - pagePadding.Right);
-            ContentContainer.Width = Math.Min(1240, availableContentWidth);
-
-            var useSingleColumn = ContentContainer.Width < 860;
-
-            HeaderText.FontSize = useSingleColumn ? 34 : 44;
-            SubtitleText.FontSize = useSingleColumn ? 16 : 19;
-            CardsGrid.ColumnSpacing = useSingleColumn ? 0 : 28;
-            CardsGrid.RowSpacing = useSingleColumn ? 16 : 24;
-
-            ApplyCardLayout(useSingleColumn);
-        }
-
-        private void ApplyCardLayout(bool singleColumn)
-        {
-            CardsColumnLeft.Width = new GridLength(1, GridUnitType.Star);
-            CardsColumnRight.Width = singleColumn
-                ? new GridLength(0)
-                : new GridLength(1, GridUnitType.Star);
-
-            if (singleColumn)
-            {
-                PositionCard(ImagesCardButton, row: 0, column: 0, centered: true);
-                PositionCard(VideoCardButton, row: 1, column: 0, centered: true);
-                PositionCard(DocumentsCardButton, row: 2, column: 0, centered: true);
-                PositionCard(AudioCardButton, row: 3, column: 0, centered: true);
-                return;
-            }
-
-            PositionCard(ImagesCardButton, row: 0, column: 0, centered: false);
-            PositionCard(VideoCardButton, row: 0, column: 1, centered: false);
-            PositionCard(DocumentsCardButton, row: 1, column: 0, centered: false);
-            PositionCard(AudioCardButton, row: 1, column: 1, centered: false);
-        }
-
-        private static void PositionCard(Button card, int row, int column, bool centered)
-        {
-            Grid.SetRow(card, row);
-            Grid.SetColumn(card, column);
-            card.HorizontalAlignment = centered ? HorizontalAlignment.Center : HorizontalAlignment.Stretch;
-            card.MaxWidth = centered ? 640 : double.PositiveInfinity;
+            var compact = windowWidth < 760;
+            HeaderText.FontSize = compact ? 34 : 44;
+            SubtitleText.FontSize = compact ? 16 : 18;
         }
     }
 }

@@ -39,6 +39,11 @@ public interface IImageProcessingService
     Task ResizeAsync(string inputPath, string outputPath, ResizeOptions options, OutputOptions? outputOptions = null, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Crops an image to a rectangular pixel region.
+    /// </summary>
+    Task CropAsync(string inputPath, string outputPath, CropOptions options, OutputOptions? outputOptions = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Upscales an image to larger dimensions using Lanczos3.
     /// </summary>
     Task UpscaleAsync(string inputPath, string outputPath, UpscaleOptions options, OutputOptions? outputOptions = null, CancellationToken cancellationToken = default);
@@ -96,6 +101,11 @@ public enum ImageQualityMode
 public sealed class ProcessImageOptions
 {
     /// <summary>
+    /// Optional crop operation. Coordinates are measured in source-image pixels before resize, rotation or mirroring.
+    /// </summary>
+    public CropOptions? Crop { get; init; }
+
+    /// <summary>
     /// Optional strict downscale operation.
     /// </summary>
     public ResizeOptions? Resize { get; init; }
@@ -129,6 +139,7 @@ public sealed class ProcessImageOptions
     /// Returns true when any pixel-transform operation is configured.
     /// </summary>
     public bool HasPixelOperations =>
+        Crop is not null ||
         Resize is not null ||
         Upscale is not null ||
         Rotate is not null ||
@@ -196,6 +207,32 @@ public sealed class CompressionOptions
     /// Keeps metadata in output.
     /// </summary>
     public bool KeepMetadata { get; init; } = true;
+}
+
+/// <summary>
+/// Pixel crop options.
+/// </summary>
+public sealed class CropOptions
+{
+    /// <summary>
+    /// Left edge of the crop rectangle in source-image pixels. Must be greater than or equal to 0.
+    /// </summary>
+    public int Left { get; init; }
+
+    /// <summary>
+    /// Top edge of the crop rectangle in source-image pixels. Must be greater than or equal to 0.
+    /// </summary>
+    public int Top { get; init; }
+
+    /// <summary>
+    /// Width of the crop rectangle in pixels. Must be positive and fit inside the source image.
+    /// </summary>
+    public int Width { get; init; }
+
+    /// <summary>
+    /// Height of the crop rectangle in pixels. Must be positive and fit inside the source image.
+    /// </summary>
+    public int Height { get; init; }
 }
 
 /// <summary>
@@ -396,6 +433,22 @@ public sealed class ImageProcessingService : IImageProcessingService
     }
 
     /// <inheritdoc />
+    public Task CropAsync(string inputPath, string outputPath, CropOptions options, OutputOptions? outputOptions = null, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+
+        return ProcessImageAsync(
+            inputPath,
+            outputPath,
+            new ProcessImageOptions
+            {
+                Crop = options,
+                Output = outputOptions ?? new OutputOptions()
+            },
+            cancellationToken);
+    }
+
+    /// <inheritdoc />
     public Task UpscaleAsync(string inputPath, string outputPath, UpscaleOptions options, OutputOptions? outputOptions = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -490,12 +543,27 @@ public sealed class ImageProcessingService : IImageProcessingService
     {
         var current = image.Copy();
 
-        current = ApplyResizeOrUpscale(current, options);
+        current = ApplyCrop(current, options.Crop);
         current = ApplyRotate(current, options.Rotate);
         current = ApplyMirror(current, options.Mirror);
+        current = ApplyResizeOrUpscale(current, options);
         current = ApplyRgbAdjustments(current, options.RgbAdjust);
 
         return current;
+    }
+
+    private static Image ApplyCrop(Image image, CropOptions? options)
+    {
+        if (options is null)
+        {
+            return image;
+        }
+
+        ValidateCropOptions(options, image.Width, image.Height);
+
+        using var cropped = image.Crop(options.Left, options.Top, options.Width, options.Height);
+        image.Dispose();
+        return cropped.Copy();
     }
 
     private static Image ApplyPipelineToAnimated(Image strip, ProcessImageOptions options)
@@ -724,21 +792,11 @@ public sealed class ImageProcessingService : IImageProcessingService
                 break;
 
             case ImageFormat.Heif:
-                image.Heifsave(outputPath,
-                    q: quality,
-                    compression: Enums.ForeignHeifCompression.Hevc,
-                    lossless: output.Lossless,
-                    keep: keep,
-                    pageHeight: pageHeight);
+                SaveHeifWithFallback(image, outputPath, quality, output.Lossless, keep, pageHeight);
                 break;
 
             case ImageFormat.Tiff:
-                image.Tiffsave(outputPath,
-                    compression: Enums.ForeignTiffCompression.Deflate,
-                    q: quality,
-                    lossless: output.Lossless,
-                    keep: keep,
-                    pageHeight: pageHeight);
+                SaveTiffWithCompatibleOptions(image, outputPath, quality, output.Lossless, keep, pageHeight);
                 break;
 
             case ImageFormat.Gif:
@@ -749,6 +807,49 @@ public sealed class ImageProcessingService : IImageProcessingService
             default:
                 throw new ArgumentOutOfRangeException(nameof(format), format, "Unsupported output format.");
         }
+    }
+
+    private static void SaveHeifWithFallback(Image image, string outputPath, int quality, bool lossless, Enums.ForeignKeep keep, int? pageHeight)
+    {
+        try
+        {
+            image.Heifsave(outputPath,
+                q: quality,
+                compression: Enums.ForeignHeifCompression.Hevc,
+                lossless: lossless,
+                keep: keep,
+                pageHeight: pageHeight);
+        }
+        catch
+        {
+            // Some libvips builds lack HEVC encoder support. Fallback to AV1.
+            image.Heifsave(outputPath,
+                q: quality,
+                compression: Enums.ForeignHeifCompression.Av1,
+                lossless: lossless,
+                keep: keep,
+                pageHeight: pageHeight);
+        }
+    }
+
+    private static void SaveTiffWithCompatibleOptions(Image image, string outputPath, int quality, bool lossless, Enums.ForeignKeep keep, int? pageHeight)
+    {
+        if (lossless)
+        {
+            image.Tiffsave(outputPath,
+                compression: Enums.ForeignTiffCompression.Deflate,
+                lossless: true,
+                keep: keep,
+                pageHeight: pageHeight);
+            return;
+        }
+
+        // TIFF quality only applies to JPEG-compressed TIFF output.
+        image.Tiffsave(outputPath,
+            compression: Enums.ForeignTiffCompression.Jpeg,
+            q: quality,
+            keep: keep,
+            pageHeight: pageHeight);
     }
 
     private static int ResolveQuality(ImageFormat format, OutputOptions options)
@@ -967,6 +1068,11 @@ public sealed class ImageProcessingService : IImageProcessingService
             ValidateQuality(options.Output.Quality.Value);
         }
 
+        if (options.Crop is not null)
+        {
+            ValidateCropOptions(options.Crop);
+        }
+
         if (options.Rotate is not null && options.Rotate.Angle is not (90 or 180 or 270))
         {
             throw new ArgumentOutOfRangeException(nameof(options.Rotate.Angle), "Rotation angle must be 90, 180 or 270 degrees.");
@@ -975,6 +1081,39 @@ public sealed class ImageProcessingService : IImageProcessingService
         if (options.RgbAdjust is not null)
         {
             ValidateRgbOptions(options.RgbAdjust);
+        }
+    }
+
+    private static void ValidateCropOptions(CropOptions options, int? sourceWidth = null, int? sourceHeight = null)
+    {
+        if (options.Left < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(options.Left), "Crop left must be greater than or equal to 0.");
+        }
+
+        if (options.Top < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(options.Top), "Crop top must be greater than or equal to 0.");
+        }
+
+        if (options.Width <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(options.Width), "Crop width must be greater than 0.");
+        }
+
+        if (options.Height <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(options.Height), "Crop height must be greater than 0.");
+        }
+
+        if (sourceWidth.HasValue && options.Left + options.Width > sourceWidth.Value)
+        {
+            throw new InvalidOperationException($"Crop rectangle exceeds source width. Source width: {sourceWidth.Value}, Crop: left {options.Left}, width {options.Width}.");
+        }
+
+        if (sourceHeight.HasValue && options.Top + options.Height > sourceHeight.Value)
+        {
+            throw new InvalidOperationException($"Crop rectangle exceeds source height. Source height: {sourceHeight.Value}, Crop: top {options.Top}, height {options.Height}.");
         }
     }
 

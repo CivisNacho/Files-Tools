@@ -5,212 +5,73 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    AllowDrop="True"
     mc:Ignorable="d">
-
-    <ScrollViewer
-        HorizontalScrollBarVisibility="Disabled"
-        HorizontalScrollMode="Disabled"
-        VerticalScrollBarVisibility="Auto"
-        VerticalScrollMode="Auto">
-        <Grid
-            x:Name="LayoutRoot"
-            Padding="32,24,32,28"
-            SizeChanged="LayoutRoot_SizeChanged">
-            <Grid
-                x:Name="ContentContainer"
-                HorizontalAlignment="Center"
-                MaxWidth="1240"
-                RowSpacing="22">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-
-                <TextBlock
-                    x:Name="HeaderText"
+    <Grid
+        x:Name="LayoutRoot"
+        Padding="18"
+        SizeChanged="LayoutRoot_SizeChanged">
+        <Border
+            x:Name="DropZoneSurface"
+            AllowDrop="True"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Padding="32"
+            CornerRadius="28"
+            BorderThickness="1"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            Background="{ThemeResource LayerFillColorDefaultBrush}"
+            DragOver="DropZoneSurface_DragOver"
+            Drop="DropZoneSurface_Drop"
+            PointerPressed="DropZoneSurface_PointerPressed">
+            <Grid>
+                <StackPanel
                     HorizontalAlignment="Center"
-                    FontSize="44"
-                    FontWeight="SemiBold"
-                    Text="CHOOSE AN OPTION" />
+                    VerticalAlignment="Center"
+                    MaxWidth="760"
+                    Spacing="16">
+                    <Border
+                        HorizontalAlignment="Center"
+                        Padding="20"
+                        CornerRadius="999"
+                        Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1">
+                        <FontIcon
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontSize="68"
+                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                            Glyph="&#xE898;" />
+                    </Border>
 
-                <TextBlock
-                    x:Name="SubtitleText"
-                    Grid.Row="1"
-                    HorizontalAlignment="Center"
-                    MaxWidth="940"
-                    FontSize="19"
-                    Opacity="0.85"
-                    TextAlignment="Center"
-                    TextWrapping="Wrap"
-                    Text="Pick a tool category to start processing your files quickly." />
+                    <TextBlock
+                        x:Name="HeaderText"
+                        HorizontalAlignment="Center"
+                        FontSize="44"
+                        FontWeight="SemiBold"
+                        Text="Drop an image or video here"
+                        TextAlignment="Center"
+                        TextWrapping="Wrap" />
 
-                <Grid
-                    x:Name="CardsGrid"
-                    Grid.Row="2"
-                    Margin="0,12,0,0"
-                    ColumnSpacing="28"
-                    RowSpacing="24">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition x:Name="CardsColumnLeft" Width="*" />
-                        <ColumnDefinition x:Name="CardsColumnRight" Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+                    <TextBlock
+                        x:Name="SubtitleText"
+                        HorizontalAlignment="Center"
+                        FontSize="18"
+                        Opacity="0.82"
+                        Text="Drop a file anywhere on this screen and the app will open the correct editor with it already loaded. You can also click anywhere on this surface to browse from Explorer."
+                        TextAlignment="Center"
+                        TextWrapping="Wrap" />
 
-                    <Button
-                        x:Name="ImagesCardButton"
-                        Grid.Row="0"
-                        Grid.Column="0"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Stretch"
-                        PointerEntered="Card_PointerEntered"
-                        PointerExited="Card_PointerExited"
-                        Click="ImagesCard_Click">
-                        <Border
-                            MinHeight="290"
-                            Padding="14"
-                            CornerRadius="12"
-                            BorderThickness="1"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                            <StackPanel Spacing="10">
-                                <Border
-                                    Height="170"
-                                    CornerRadius="10"
-                                    Background="{ThemeResource LayerFillColorDefaultBrush}">
-                                    <Viewbox Margin="10">
-                                        <SymbolIcon Symbol="Pictures" />
-                                    </Viewbox>
-                                </Border>
-                                <TextBlock
-                                    FontSize="24"
-                                    FontWeight="SemiBold"
-                                    Text="Images" />
-                                <TextBlock
-                                    Opacity="0.8"
-                                    TextWrapping="Wrap"
-                                    Text="Resize, convert, and optimize image files." />
-                            </StackPanel>
-                        </Border>
-                    </Button>
-
-                    <Button
-                        x:Name="VideoCardButton"
-                        Grid.Row="0"
-                        Grid.Column="1"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Stretch"
-                        PointerEntered="Card_PointerEntered"
-                        PointerExited="Card_PointerExited"
-                        Click="VideoCard_Click">
-                        <Border
-                            MinHeight="290"
-                            Padding="14"
-                            CornerRadius="12"
-                            BorderThickness="1"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                            <StackPanel Spacing="10">
-                                <Border
-                                    Height="170"
-                                    CornerRadius="10"
-                                    Background="{ThemeResource LayerFillColorDefaultBrush}">
-                                    <Viewbox Margin="10">
-                                        <SymbolIcon Symbol="Video" />
-                                    </Viewbox>
-                                </Border>
-                                <TextBlock
-                                    FontSize="24"
-                                    FontWeight="SemiBold"
-                                    Text="Video" />
-                                <TextBlock
-                                    Opacity="0.8"
-                                    TextWrapping="Wrap"
-                                    Text="Change formats and tune quality for videos." />
-                            </StackPanel>
-                        </Border>
-                    </Button>
-
-                    <Button
-                        x:Name="DocumentsCardButton"
-                        Grid.Row="1"
-                        Grid.Column="0"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Stretch"
-                        PointerEntered="Card_PointerEntered"
-                        PointerExited="Card_PointerExited"
-                        Click="DocumentsCard_Click">
-                        <Border
-                            MinHeight="290"
-                            Padding="14"
-                            CornerRadius="12"
-                            BorderThickness="1"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                            <StackPanel Spacing="10">
-                                <Border
-                                    Height="170"
-                                    CornerRadius="10"
-                                    Background="{ThemeResource LayerFillColorDefaultBrush}">
-                                    <Viewbox Margin="10">
-                                        <SymbolIcon Symbol="Document" />
-                                    </Viewbox>
-                                </Border>
-                                <TextBlock
-                                    FontSize="24"
-                                    FontWeight="SemiBold"
-                                    Text="Documents" />
-                                <TextBlock
-                                    Opacity="0.8"
-                                    TextWrapping="Wrap"
-                                    Text="Manage document conversions in a few clicks." />
-                            </StackPanel>
-                        </Border>
-                    </Button>
-
-                    <Button
-                        x:Name="AudioCardButton"
-                        Grid.Row="1"
-                        Grid.Column="1"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Stretch"
-                        PointerEntered="Card_PointerEntered"
-                        PointerExited="Card_PointerExited"
-                        Click="AudioCard_Click">
-                        <Border
-                            MinHeight="290"
-                            Padding="14"
-                            CornerRadius="12"
-                            BorderThickness="1"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                            <StackPanel Spacing="10">
-                                <Border
-                                    Height="170"
-                                    CornerRadius="10"
-                                    Background="{ThemeResource LayerFillColorDefaultBrush}">
-                                    <Viewbox Margin="10">
-                                        <SymbolIcon Symbol="Audio" />
-                                    </Viewbox>
-                                </Border>
-                                <TextBlock
-                                    FontSize="24"
-                                    FontWeight="SemiBold"
-                                    Text="Audio" />
-                                <TextBlock
-                                    Opacity="0.8"
-                                    TextWrapping="Wrap"
-                                    Text="Convert and adjust audio files quickly." />
-                            </StackPanel>
-                        </Border>
-                    </Button>
-                </Grid>
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        FontSize="15"
+                        Opacity="0.68"
+                        Text="Images: PNG, JPG, JPEG, BMP, GIF, WebP   •   Video: MP4, MOV, MKV, AVI, WMV, WebM, M4V, GIF"
+                        TextAlignment="Center"
+                        TextWrapping="Wrap" />
+                </StackPanel>
             </Grid>
-        </Grid>
-    </ScrollViewer>
+        </Border>
+    </Grid>
 </Page>

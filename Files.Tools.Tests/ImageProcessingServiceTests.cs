@@ -155,6 +155,116 @@ public class ImageProcessingServiceTests
     }
 
     [TestMethod]
+    public async Task CropAsync_ProducesRequestedDimensions()
+    {
+        var input = CreateGradientJpeg("crop-source.jpg", 220, 140);
+        var outputBase = Path.Combine(_tempRoot, "crop-output");
+
+        await _service.CropAsync(input, outputBase, new CropOptions
+        {
+            Left = 20,
+            Top = 10,
+            Width = 80,
+            Height = 60
+        }, new OutputOptions
+        {
+            Format = ImageFormat.Png,
+            QualityMode = ImageQualityMode.MaintainOriginal
+        });
+
+        var output = Path.ChangeExtension(outputBase, ".png");
+        Assert.IsTrue(File.Exists(output));
+
+        using var image = Image.NewFromFile(output, access: Enums.Access.Sequential);
+        Assert.AreEqual(80, image.Width);
+        Assert.AreEqual(60, image.Height);
+    }
+
+    [TestMethod]
+    public async Task CropAsync_RejectsRectangleOutsideSourceBounds()
+    {
+        var input = CreateSolidImage("crop-invalid-source.png", 100, 80, ImageFormat.Png);
+        var output = Path.Combine(_tempRoot, "crop-invalid-output.png");
+
+        await AssertThrowsAsync<InvalidOperationException>(async () =>
+            await _service.CropAsync(input, output, new CropOptions
+            {
+                Left = 70,
+                Top = 10,
+                Width = 40,
+                Height = 40
+            }));
+    }
+
+    [TestMethod]
+    public async Task ProcessImageAsync_CropPreventsCopyThroughAndKeepsDimensions()
+    {
+        var input = CreateSolidImage("crop-copy-source.png", 90, 70, ImageFormat.Png);
+        var outputBase = Path.Combine(_tempRoot, "crop-copy-output");
+
+        await _service.ProcessImageAsync(input, outputBase, new ProcessImageOptions
+        {
+            Crop = new CropOptions
+            {
+                Left = 0,
+                Top = 0,
+                Width = 90,
+                Height = 70
+            },
+            Output = new OutputOptions
+            {
+                Format = null,
+                QualityMode = ImageQualityMode.MaintainOriginal,
+                KeepMetadata = true
+            }
+        });
+
+        var output = Path.ChangeExtension(outputBase, ".png");
+        Assert.IsTrue(File.Exists(output));
+
+        using var image = Image.NewFromFile(output, access: Enums.Access.Sequential);
+        Assert.AreEqual(90, image.Width);
+        Assert.AreEqual(70, image.Height);
+    }
+
+    [TestMethod]
+    public async Task ProcessImageAsync_AppliesCropAndRotationBeforeResize()
+    {
+        var input = CreateSolidImage("crop-rotate-resize-source.png", 100, 80, ImageFormat.Png);
+        var outputBase = Path.Combine(_tempRoot, "crop-rotate-resize-output");
+
+        await _service.ProcessImageAsync(input, outputBase, new ProcessImageOptions
+        {
+            Crop = new CropOptions
+            {
+                Left = 10,
+                Top = 10,
+                Width = 60,
+                Height = 40
+            },
+            Rotate = new RotateOptions { Angle = 90 },
+            Resize = new ResizeOptions
+            {
+                Width = 20,
+                Height = 30
+            },
+            Output = new OutputOptions
+            {
+                Format = ImageFormat.Png,
+                QualityMode = ImageQualityMode.MaintainOriginal,
+                KeepMetadata = true
+            }
+        });
+
+        var output = Path.ChangeExtension(outputBase, ".png");
+        Assert.IsTrue(File.Exists(output));
+
+        using var image = Image.NewFromFile(output, access: Enums.Access.Sequential);
+        Assert.AreEqual(20, image.Width);
+        Assert.AreEqual(30, image.Height);
+    }
+
+    [TestMethod]
     public async Task ProcessImageAsync_AnimatedGif_PreservesFrameCount()
     {
         var input = CreateAnimatedGif("animated-source.gif", frameCount: 3, frameWidth: 80, frameHeight: 60);
@@ -178,6 +288,40 @@ public class ImageProcessingServiceTests
         var pages = (int)animated.Get("n-pages");
         Assert.AreEqual(3, pages);
         Assert.AreEqual(60, animated.PageHeight);
+    }
+
+    [TestMethod]
+    public async Task ProcessImageAsync_AnimatedGifCrop_PreservesFrameCountAndUpdatesPageHeight()
+    {
+        var input = CreateAnimatedGif("animated-crop-source.gif", frameCount: 3, frameWidth: 80, frameHeight: 60);
+        var outputBase = Path.Combine(_tempRoot, "animated-crop-output");
+
+        await _service.ProcessImageAsync(input, outputBase, new ProcessImageOptions
+        {
+            Crop = new CropOptions
+            {
+                Left = 10,
+                Top = 12,
+                Width = 40,
+                Height = 30
+            },
+            Output = new OutputOptions
+            {
+                Format = ImageFormat.Gif,
+                QualityMode = ImageQualityMode.MaintainOriginal,
+                KeepMetadata = true
+            }
+        });
+
+        var output = Path.ChangeExtension(outputBase, ".gif");
+        Assert.IsTrue(File.Exists(output));
+
+        using var animated = LoadAllFrames(output);
+        var pages = (int)animated.Get("n-pages");
+        Assert.AreEqual(3, pages);
+        Assert.AreEqual(30, animated.PageHeight);
+        Assert.AreEqual(40, animated.Width);
+        Assert.AreEqual(90, animated.Height);
     }
 
     private string CreateSolidImage(string fileName, int width, int height, ImageFormat format)

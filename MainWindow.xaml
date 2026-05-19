@@ -12,5 +12,169 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Frame x:Name="RootFrame" />
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="ImageEditorNavColumn" Width="0" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <NavigationView
+            x:Name="ImageEditorOptionsNavigationView"
+            Grid.RowSpan="2"
+            Grid.Column="0"
+            Visibility="Collapsed"
+            IsBackButtonVisible="Collapsed"
+            IsPaneToggleButtonVisible="False"
+            IsPaneOpen="True"
+            IsSettingsVisible="False"
+            CompactPaneLength="56"
+            OpenPaneLength="180"
+            PaneDisplayMode="Left"
+            SelectionChanged="ImageEditorOptionsNavigationView_SelectionChanged">
+            <NavigationView.MenuItems>
+                <NavigationViewItem x:Name="TitleMediaNavigationItem" Content="Media" Tag="Media">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Pictures" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="TitleMediaFormatNavigationItem" Content="Format" Tag="Media:Format">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Document" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="TitleTransformNavigationItem" Content="Transform" Tag="Transform">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Rotate" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="TitleTransformCropNavigationItem" Content="Crop" Tag="Transform:Crop">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Crop" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="TitleTransformResizeNavigationItem" Content="Resize" Tag="Transform:Resize">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Switch" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="TitleTransformUpscaleNavigationItem" Content="Upscale" Tag="Transform:Upscale">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="ZoomIn" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="TitleTransformRotateNavigationItem" Content="Rotate" Tag="Transform:Rotate">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Rotate" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="TitleAdjustNavigationItem" Content="Adjust" Tag="Adjust">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="AllApps" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="TitleAdjustColorNavigationItem" Content="Color" Tag="Adjust:Color">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Highlight" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="VideoMediaNavigationItem" Visibility="Collapsed" Content="Media" Tag="Media">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Video" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="VideoMediaFormatNavigationItem" Content="Format" Tag="Media:Format">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Document" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="VideoMediaAudioNavigationItem" Content="Audio" Tag="Media:Audio">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Audio" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="VideoMediaSubtitlesNavigationItem" Content="Subtitles" Tag="Media:Subtitles">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Comment" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="VideoTransformNavigationItem" Visibility="Collapsed" Content="Transform" Tag="Transform">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Rotate" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="VideoTransformResizeNavigationItem" Content="Resize" Tag="Transform:Resize">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Switch" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="VideoTransformTrimNavigationItem" Content="Trim" Tag="Transform:Trim">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Cut" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="VideoTransformRotateNavigationItem" Content="Rotate" Tag="Transform:Rotate">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Rotate" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="VideoAdvancedNavigationItem" Visibility="Collapsed" Content="Advanced" Tag="Advanced">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Setting" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="VideoAdvancedMetadataNavigationItem" Content="Metadata" Tag="Advanced:Metadata">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Tag" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="VideoAdvancedRepairNavigationItem" Content="Repair" Tag="Advanced:Repair">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Repair" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+        </NavigationView>
+
+        <TitleBar
+            x:Name="AppTitleBar"
+            Grid.Row="0"
+            Grid.Column="1"
+            Title="Files Tools"
+            IsBackButtonVisible="False"
+            BackRequested="AppTitleBar_BackRequested" />
+
+        <Button
+            x:Name="LicensesButton"
+            Grid.Row="0"
+            Grid.Column="1"
+            Margin="0,4,140,4"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Content="Licenses"
+            Background="{ThemeResource AccentFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+            Foreground="White"
+            Click="LicensesButton_Click" />
+
+        <Frame
+            x:Name="RootFrame"
+            Grid.Row="1"
+            Grid.Column="1" />
+    </Grid>
 </Window>

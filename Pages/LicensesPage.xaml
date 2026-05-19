@@ -13,6 +13,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <TextBlock FontSize="34" FontWeight="SemiBold" Text="Licenses" />
@@ -47,6 +48,33 @@
                             VerticalAlignment="Center"
                             Content="Show License"
                             Click="ShowLibvipsLicense_Click" />
+                    </Grid>
+                </Border>
+
+                <Border
+                    Grid.Row="3"
+                    Padding="16"
+                    CornerRadius="10"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Spacing="2">
+                            <TextBlock FontSize="20" FontWeight="SemiBold" Text="FFmpeg" />
+                            <TextBlock Opacity="0.82" Text="License: LGPL-2.1-or-later" />
+                            <TextBlock Opacity="0.82" Text="Usage: video/audio processing and transcoding" />
+                        </StackPanel>
+
+                        <Button
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Content="Show License"
+                            Click="ShowFfmpegLicense_Click" />
                     </Grid>
                 </Border>
             </Grid>
