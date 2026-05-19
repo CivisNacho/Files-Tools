@@ -334,6 +334,8 @@ Rules:
 - overlays should remain inside the preview bounds
 - handles must remain visible on top of the preview
 - preview layout should not jump when overlays appear
+- live preview recomputation should call `ImageProcessingService` with the same pipeline contract used by final apply/export
+- avoid duplicate manual pixel-transform pipelines in page code-behind
 
 ### Video pages
 

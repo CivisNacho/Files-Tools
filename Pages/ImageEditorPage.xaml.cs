@@ -3,7 +3,6 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Imaging;
-using Files_Tools.ImageEditing;
 using Files_Tools.Services;
 using System;
 using System.Collections.Generic;
@@ -858,56 +857,57 @@ namespace Files_Tools.Pages
             _updatingLivePreview = true;
             try
             {
-                var crop = GetBaseWorkingCropForPreview();
-                var rotationDegrees = GetSelectedRotationDegrees();
-                var mirrorHorizontal = MirrorHorizontalCheckBox?.IsChecked ?? false;
-                var mirrorVertical = MirrorVerticalCheckBox?.IsChecked ?? false;
-
-                using var stream = await _sourceImageFile.OpenAsync(FileAccessMode.Read);
-                var decoder = await BitmapDecoder.CreateAsync(stream);
-                var transform = new BitmapTransform
+                var previewOptions = BuildCurrentOptions();
+                var processOptions = BuildProcessOptions(previewOptions);
+                var previewProcessOptions = new ProcessImageOptions
                 {
-                    Bounds = new BitmapBounds
+                    Crop = processOptions.Crop,
+                    Resize = processOptions.Resize,
+                    Upscale = processOptions.Upscale,
+                    Rotate = processOptions.Rotate,
+                    Mirror = processOptions.Mirror,
+                    RgbAdjust = processOptions.RgbAdjust,
+                    Output = new OutputOptions
                     {
-                        X = (uint)crop.Left,
-                        Y = (uint)crop.Top,
-                        Width = (uint)crop.Width,
-                        Height = (uint)crop.Height
+                        Format = Services.ImageFormat.Png,
+                        QualityMode = ImageQualityMode.MaintainOriginal,
+                        Quality = null,
+                        KeepMetadata = false
                     }
                 };
 
-                var pixels = await decoder.GetPixelDataAsync(
-                    BitmapPixelFormat.Bgra8,
-                    BitmapAlphaMode.Premultiplied,
-                    transform,
-                    ExifOrientationMode.RespectExifOrientation,
-                    ColorManagementMode.DoNotColorManage);
+                var previewOutputPath = Path.Combine(Path.GetTempPath(), $"files-tools-preview-{Guid.NewGuid():N}.png");
 
-                var pixelBytes = pixels.DetachPixelData();
-                var transformed = TransformBgraPixels(
-                    pixelBytes,
-                    crop.Width,
-                    crop.Height,
-                    rotationDegrees,
-                    mirrorHorizontal,
-                    mirrorVertical);
-
-                ApplyRgbPreviewAdjustments(
-                    transformed.Pixels,
-                    EnableRgbAdjustmentCheckBox?.IsChecked ?? false,
-                    (RedSlider?.Value ?? 100) / 100d,
-                    (GreenSlider?.Value ?? 100) / 100d,
-                    (BlueSlider?.Value ?? 100) / 100d);
-
-                var writeableBitmap = new WriteableBitmap(transformed.Width, transformed.Height);
-                using (var pixelStream = writeableBitmap.PixelBuffer.AsStream())
+                try
                 {
-                    await pixelStream.WriteAsync(transformed.Pixels, 0, transformed.Pixels.Length);
+                    await _imageProcessingService.ProcessImageAsync(_sourceImageFile.Path, previewOutputPath, previewProcessOptions, CancellationToken.None);
+
+                    var previewStorageFile = await StorageFile.GetFileFromPathAsync(previewOutputPath);
+                    using var previewStream = await previewStorageFile.OpenAsync(FileAccessMode.Read);
+                    var previewDecoder = await BitmapDecoder.CreateAsync(previewStream);
+                    _previewImageWidth = (int)previewDecoder.OrientedPixelWidth;
+                    _previewImageHeight = (int)previewDecoder.OrientedPixelHeight;
+                    previewStream.Seek(0);
+
+                    var previewBitmap = new BitmapImage();
+                    await previewBitmap.SetSourceAsync(previewStream);
+                    PreviewImage.Source = previewBitmap;
+                }
+                finally
+                {
+                    try
+                    {
+                        if (File.Exists(previewOutputPath))
+                        {
+                            File.Delete(previewOutputPath);
+                        }
+                    }
+                    catch
+                    {
+                        // Best-effort temp cleanup.
+                    }
                 }
 
-                PreviewImage.Source = writeableBitmap;
-                _previewImageWidth = transformed.Width;
-                _previewImageHeight = transformed.Height;
                 UpdateDimensionBoundsForWorkingImage();
                 LoadedImageInfoTextBlock.Text = BuildLoadedImageInfoText();
                 UpdateCropOverlayForCurrentPreview();
@@ -916,93 +916,6 @@ namespace Files_Tools.Pages
             {
                 _updatingLivePreview = false;
             }
-        }
-
-        private (int Left, int Top, int Width, int Height) GetBaseWorkingCropForPreview()
-        {
-            if (_committedCropPixels is { } committedCrop)
-            {
-                return committedCrop;
-            }
-
-            return (0, 0, _originalImageWidth ?? 1, _originalImageHeight ?? 1);
-        }
-
-        private int GetSelectedRotationDegrees()
-        {
-            var rotationTag = (RotationComboBox?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "0";
-            return int.TryParse(rotationTag, out var rotationDegrees) ? rotationDegrees : 0;
-        }
-
-        private static (byte[] Pixels, int Width, int Height) TransformBgraPixels(
-            byte[] source,
-            int sourceWidth,
-            int sourceHeight,
-            int rotationDegrees,
-            bool mirrorHorizontal,
-            bool mirrorVertical)
-        {
-            var normalizedRotation = ((rotationDegrees % 360) + 360) % 360;
-            var outputWidth = normalizedRotation is 90 or 270 ? sourceHeight : sourceWidth;
-            var outputHeight = normalizedRotation is 90 or 270 ? sourceWidth : sourceHeight;
-            var output = new byte[outputWidth * outputHeight * 4];
-
-            for (var y = 0; y < sourceHeight; y++)
-            {
-                for (var x = 0; x < sourceWidth; x++)
-                {
-                    var (rotatedX, rotatedY) = RotateCoordinate(x, y, sourceWidth, sourceHeight, normalizedRotation);
-                    if (mirrorHorizontal)
-                    {
-                        rotatedX = outputWidth - 1 - rotatedX;
-                    }
-
-                    if (mirrorVertical)
-                    {
-                        rotatedY = outputHeight - 1 - rotatedY;
-                    }
-
-                    var sourceIndex = (y * sourceWidth + x) * 4;
-                    var outputIndex = (rotatedY * outputWidth + rotatedX) * 4;
-                    output[outputIndex] = source[sourceIndex];
-                    output[outputIndex + 1] = source[sourceIndex + 1];
-                    output[outputIndex + 2] = source[sourceIndex + 2];
-                    output[outputIndex + 3] = source[sourceIndex + 3];
-                }
-            }
-
-            return (output, outputWidth, outputHeight);
-        }
-
-        private static (int X, int Y) RotateCoordinate(int x, int y, int width, int height, int rotationDegrees)
-        {
-            return rotationDegrees switch
-            {
-                90 => (height - 1 - y, x),
-                180 => (width - 1 - x, height - 1 - y),
-                270 => (y, width - 1 - x),
-                _ => (x, y)
-            };
-        }
-
-        private static void ApplyRgbPreviewAdjustments(byte[] pixels, bool enabled, double redScale, double greenScale, double blueScale)
-        {
-            if (!enabled)
-            {
-                return;
-            }
-
-            for (var i = 0; i < pixels.Length; i += 4)
-            {
-                pixels[i] = ScaleColorChannel(pixels[i], blueScale);
-                pixels[i + 1] = ScaleColorChannel(pixels[i + 1], greenScale);
-                pixels[i + 2] = ScaleColorChannel(pixels[i + 2], redScale);
-            }
-        }
-
-        private static byte ScaleColorChannel(byte value, double scale)
-        {
-            return (byte)Math.Clamp((int)Math.Round(value * scale), 0, 255);
         }
 
         private void UpdateDimensionBoundsForWorkingImage(bool resetDisabledInputs = false)
@@ -1055,6 +968,12 @@ namespace Files_Tools.Pages
             }
 
             return $"Loaded image: {_originalImageWidth} x {_originalImageHeight} px";
+        }
+
+        private int GetSelectedRotationDegrees()
+        {
+            var rotationTag = (RotationComboBox?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "0";
+            return int.TryParse(rotationTag, out var rotationDegrees) ? rotationDegrees : 0;
         }
 
         private void InitializeCropToFullImage()

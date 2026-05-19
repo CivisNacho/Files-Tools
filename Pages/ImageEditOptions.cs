@@ -1,4 +1,4 @@
-namespace Files_Tools.ImageEditing
+namespace Files_Tools.Pages
 {
     /// <summary>
     /// Represents all user-selected operations for a single image edit run.

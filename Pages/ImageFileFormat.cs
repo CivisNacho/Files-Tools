@@ -1,4 +1,4 @@
-namespace Files_Tools.ImageEditing
+namespace Files_Tools.Pages
 {
     /// <summary>
     /// Supported output image formats exposed by the editor UX.

@@ -47,7 +47,7 @@ All wrappers call `ProcessImageAsync(...)` internally.
 
 - `ResizeOptions`: strict downscale only (`target <= source`)
 - `UpscaleOptions`: strict upscale only (`target >= source`, always Lanczos3)
-- `RotateOptions`: only `90` and `180`
+- `RotateOptions`: `90`, `180`, or `270`
 - `MirrorOptions`: horizontal and/or vertical
 - `RgbAdjustOptions`: brightness, contrast, saturation
 - `OutputOptions`: output format, quality mode, quality value, lossless, metadata behavior
@@ -56,13 +56,22 @@ All wrappers call `ProcessImageAsync(...)` internally.
 
 The pipeline always applies operations in this order:
 
-1. Resize or upscale
+1. Crop
 2. Rotation
 3. Mirroring
-4. RGB adjustments
-5. Final single encode/save
+4. Resize or upscale
+5. RGB adjustments
+6. Final single encode/save
 
 This avoids multiple re-encodes and quality loss.
+
+## UI Integration Rule
+
+- `ImageEditorPage` must use `ImageProcessingService` for both:
+  - final output processing (`Apply` action)
+  - live preview recomputation after option changes
+- Do not keep a separate manual pixel-transform implementation in page code-behind for preview.
+- This guarantees preview/output parity and keeps transform semantics in one place.
 
 ## Quality Modes
 
@@ -169,7 +178,7 @@ await service.UpscaleAsync(
 
 - Confirm input format is one of supported formats.
 - Validate target dimensions relative to source before calling resize/upscale.
-- Validate rotation angle (`90` or `180`) before calling rotate.
+- Validate rotation angle (`90`, `180`, or `270`) before calling rotate.
 - Log full exception messages (validation exceptions are actionable by design).
 - For GIF animation checks, inspect output metadata (`n-pages`, `page-height`, `delay`, `loop`).
 - Verify runtime architecture (`x86`, `x64`, `ARM64`) matches deployed build.

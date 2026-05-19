@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Files_Tools.ImageEditing
+namespace Files_Tools.Pages
 {
     /// <summary>
     /// Performs lightweight UX-side validation before image processing runs.
