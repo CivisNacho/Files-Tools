@@ -1,6 +1,10 @@
 # Build
 bin/
 obj/
+AppPackages/
+BundleArtifacts/
+TestResults/
+artifacts/
 
 # Visual Studio
 .vs/
