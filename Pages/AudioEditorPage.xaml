@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Files_Tools.Pages.AudioEditorPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <Page.Resources>
+        <SolidColorBrush x:Key="ImageAccentBrush" Color="#FF3B82F6" />
+        <SolidColorBrush x:Key="ImageAccentDarkBrush" Color="#FF2563EB" />
+        <SolidColorBrush x:Key="AudioAccentBrush" Color="#FF8B5CF6" />
+        <SolidColorBrush x:Key="AudioAccentDarkBrush" Color="#FF6D28D9" />
+        <LinearGradientBrush x:Key="AudioHintBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#FFF4EDFF" Offset="0" />
+            <GradientStop Color="#FFE9D5FF" Offset="1" />
+        </LinearGradientBrush>
+        <Style x:Key="SettingsCardStyle" TargetType="Border">
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="Background" Value="{ThemeResource LayerFillColorDefaultBrush}" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid x:Name="PageRoot" Padding="32,24,32,28" SizeChanged="PageRoot_SizeChanged">
+            <Grid x:Name="ContentRoot" HorizontalAlignment="Center" MaxWidth="1440" RowSpacing="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel MaxWidth="880" Spacing="6">
+                    <TextBlock FontSize="38" FontWeight="SemiBold" Text="Audio Editor" />
+                    <TextBlock Opacity="0.78" Text="Load an audio file, build a processing chain, and apply all selected operations in one run." TextWrapping="Wrap" />
+                </StackPanel>
+
+                <Grid x:Name="EditorGrid" Grid.Row="1" ColumnSpacing="20" RowSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition x:Name="LeftColumn" Width="7*" />
+                        <ColumnDefinition x:Name="RightColumn" Width="3*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Border x:Name="PreviewSection" Grid.Column="0" VerticalAlignment="Top" Padding="20" CornerRadius="16" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                        <Grid RowSpacing="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Spacing="4">
+                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="Preview" />
+                                <TextBlock Opacity="0.72" Text="Drop an audio file or click the surface to pick one. Processing status appears below when running." TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <Border x:Name="UploadSurface" Grid.Row="1" AllowDrop="True" MinHeight="240" MaxHeight="560" Padding="16" HorizontalAlignment="Stretch" VerticalAlignment="Top" CornerRadius="14" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource LayerFillColorDefaultBrush}" DragOver="UploadSurface_DragOver" Drop="UploadSurface_Drop" PointerPressed="UploadSurface_PointerPressed">
+                                <Grid RowSpacing="12">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel x:Name="PreviewHost" Spacing="12" VerticalAlignment="Center">
+                                        <MediaPlayerElement
+                                            x:Name="AudioPlayer"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Top"
+                                            MinHeight="120"
+                                            AreTransportControlsEnabled="True"
+                                            AutoPlay="False"
+                                            Visibility="Collapsed" />
+
+                                        <StackPanel Spacing="8">
+                                            <TextBlock FontSize="18" FontWeight="SemiBold" Text="Audio details" />
+                                            <TextBlock x:Name="PreviewCodecTextBlock" Opacity="0.8" Text="Codec: -" />
+                                            <TextBlock x:Name="PreviewRateTextBlock" Opacity="0.8" Text="Sample rate: -" />
+                                            <TextBlock x:Name="PreviewChannelsTextBlock" Opacity="0.8" Text="Channels: -" />
+                                            <TextBlock x:Name="PreviewDurationTextBlock" Opacity="0.8" Text="Duration: -" />
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <StackPanel
+                                        x:Name="TrimTimelinePanel"
+                                        Grid.Row="1"
+                                        Visibility="Collapsed"
+                                        Spacing="8">
+                                        <TextBlock
+                                            x:Name="TrimSelectionInfoTextBlock"
+                                            HorizontalAlignment="Center"
+                                            FontSize="14"
+                                            FontWeight="SemiBold"
+                                            Text="00:00:00 - 00:00:00" />
+
+                                        <Grid>
+                                            <Canvas
+                                                x:Name="TrimTimelineCanvas"
+                                                Height="36"
+                                                HorizontalAlignment="Stretch"
+                                                SizeChanged="TrimTimelineCanvas_SizeChanged"
+                                                PointerMoved="TrimTimelineCanvas_PointerMoved"
+                                                PointerReleased="TrimTimelineCanvas_PointerReleased"
+                                                PointerCanceled="TrimTimelineCanvas_PointerReleased">
+                                                <Border
+                                                    x:Name="TrimTimelineRail"
+                                                    Height="6"
+                                                    Width="0"
+                                                    CornerRadius="3"
+                                                    Background="{ThemeResource ControlFillColorSecondaryBrush}" />
+                                                <Border
+                                                    x:Name="TrimSelectedRange"
+                                                    Height="6"
+                                                    Width="0"
+                                                    CornerRadius="3"
+                                                    Background="{ThemeResource AccentFillColorDefaultBrush}" />
+                                                <Border
+                                                    x:Name="TrimStartHandle"
+                                                    Width="16"
+                                                    Height="24"
+                                                    CornerRadius="8"
+                                                    Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                                    PointerPressed="TrimHandle_PointerPressed"
+                                                    Tag="Start" />
+                                                <Border
+                                                    x:Name="TrimEndHandle"
+                                                    Width="16"
+                                                    Height="24"
+                                                    CornerRadius="8"
+                                                    Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                                    PointerPressed="TrimHandle_PointerPressed"
+                                                    Tag="End" />
+                                            </Canvas>
+                                        </Grid>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock
+                                                x:Name="TrimStartTimeTextBlock"
+                                                Text="00:00:00"
+                                                Opacity="0.76" />
+                                            <TextBlock
+                                                x:Name="TrimEndTimeTextBlock"
+                                                Grid.Column="1"
+                                                HorizontalAlignment="Right"
+                                                Text="00:00:00"
+                                                Opacity="0.76" />
+                                        </Grid>
+                                    </StackPanel>
+
+                                    <StackPanel x:Name="DropHintPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.RowSpan="2" MaxWidth="360" Spacing="12">
+                                        <Border HorizontalAlignment="Center" Padding="18" CornerRadius="999" Background="{StaticResource AudioHintBackgroundBrush}">
+                                            <FontIcon HorizontalAlignment="Center" FontSize="52" Foreground="{StaticResource AudioAccentDarkBrush}" Glyph="&#xE189;" />
+                                        </Border>
+                                        <TextBlock HorizontalAlignment="Center" FontSize="24" FontWeight="SemiBold" Text="Drop audio here" TextAlignment="Center" />
+                                        <TextBlock HorizontalAlignment="Center" Opacity="0.76" Text="Click to browse a track. Format, normalization, trim, EQ, denoise, and metadata tools are in the options panel." TextAlignment="Center" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Grid Grid.Row="2" ColumnSpacing="16" RowSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock x:Name="LoadedAudioInfoTextBlock" VerticalAlignment="Center" Opacity="0.76" Text="No audio loaded yet." TextWrapping="Wrap" />
+
+                                <Button x:Name="ApplyButton" Grid.Column="1" MinWidth="180" Height="44" HorizontalAlignment="Right" Content="Apply changes" Background="{StaticResource ImageAccentBrush}" BorderBrush="{StaticResource ImageAccentBrush}" Foreground="White" Click="ApplyButton_Click" />
+                            </Grid>
+
+                            <StackPanel x:Name="ProcessingStatusPanel" Grid.Row="3" Visibility="Collapsed" Spacing="8">
+                                <Grid ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="ProcessingStatusTextBlock" FontWeight="SemiBold" Text="Processing audio..." />
+                                    <TextBlock x:Name="ProcessingEtaTextBlock" Grid.Column="1" Opacity="0.76" Text="ETA calculating..." />
+                                </Grid>
+
+                                <ProgressBar x:Name="ProcessingProgressBar" Height="6" Minimum="0" Maximum="1" Value="0" />
+
+                                <TextBlock x:Name="ProcessingDetailTextBlock" Opacity="0.76" Text="Preparing pipeline..." />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Border x:Name="OptionsPanel" Grid.Column="1" Grid.RowSpan="3" MinWidth="360" MinHeight="420" Padding="20" CornerRadius="16" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                        <Grid RowSpacing="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <StackPanel Spacing="2">
+                                    <TextBlock x:Name="SelectedOptionHeaderTextBlock" Margin="0,0,0,12" FontSize="22" FontWeight="SemiBold" Text="Select an option" />
+                                    <StackPanel x:Name="MediaPanel" Visibility="Collapsed" Spacing="12" />
+                                    <StackPanel x:Name="TransformPanel" Visibility="Collapsed" Spacing="12" />
+                                    <StackPanel x:Name="AdjustPanel" Visibility="Collapsed" Spacing="12" />
+                                    <StackPanel x:Name="TranscriptionPanel" Visibility="Collapsed" Spacing="12" />
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</Page>

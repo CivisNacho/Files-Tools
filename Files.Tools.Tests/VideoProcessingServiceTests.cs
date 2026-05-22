@@ -392,6 +392,34 @@ public class VideoProcessingServiceTests
     }
 
     [TestMethod]
+    public async Task ProcessVideoAsync_MirroredKaraokeBurnIn_PreservesWordHighlightTiming()
+    {
+        var input = CreateSampleVideo("mirror-karaoke-source.mp4", durationSeconds: 3);
+        var subtitle = CreateKaraokeAssFile("mirror-karaoke.ass");
+        var output = Path.Combine(_tempRoot, "mirror-karaoke-output.mp4");
+
+        await _service.ProcessVideoAsync(input, output, new ProcessVideoOptions
+        {
+            Transform = new TransformOptions
+            {
+                MirrorHorizontal = true
+            },
+            SubtitleMux = new MuxSubtitleOptions
+            {
+                SubtitlePath = subtitle,
+                Mode = SubtitleMode.BurnIn
+            }
+        });
+
+        var earlyFrameHash = GetFrameMd5AtTime(output, TimeSpan.FromMilliseconds(400));
+        var laterFrameHash = GetFrameMd5AtTime(output, TimeSpan.FromMilliseconds(1400));
+        var info = ProbeMedia(output);
+
+        Assert.IsEmpty(info.SubtitleStreams);
+        Assert.AreNotEqual(earlyFrameHash, laterFrameHash, "Expected karaoke highlight state to change between timed words after mirroring.");
+    }
+
+    [TestMethod]
     public async Task ProcessVideoAsync_FfmpegFailureIncludesDiagnostics()
     {
         var input = CreateSampleVideo("diag-source.mp4");
@@ -439,6 +467,38 @@ public class VideoProcessingServiceTests
             {
                 Format = VideoContainerFormat.Mkv
             }, cts.Token));
+    }
+
+    [TestMethod]
+    public void CreateVideoEncoderPlan_PrefersVerifiedHardwareEncoder()
+    {
+        var plan = VideoProcessingService.CreateVideoEncoderPlan(
+            VideoCodec.H264,
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "h264_qsv" },
+            preferHardwareEncoding: true);
+
+        Assert.AreEqual("h264_qsv", plan.EncoderName);
+        Assert.IsTrue(plan.IsHardwareAccelerated);
+    }
+
+    [TestMethod]
+    public void CreateVideoEncoderPlan_FallsBackToSoftwareWhenHardwareIsUnavailable()
+    {
+        var plan = VideoProcessingService.CreateVideoEncoderPlan(
+            VideoCodec.H265,
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase),
+            preferHardwareEncoding: true);
+
+        Assert.AreEqual("libx265", plan.EncoderName);
+        Assert.IsFalse(plan.IsHardwareAccelerated);
+    }
+
+    [TestMethod]
+    public void GetHardwareEncoderCandidates_ReturnsExpectedPriorityOrder()
+    {
+        CollectionAssert.AreEqual(
+            new[] { "h264_nvenc", "h264_amf", "h264_qsv" },
+            VideoProcessingService.GetHardwareEncoderCandidates(VideoCodec.H264).ToArray());
     }
 
     private string CreateSampleVideo(string fileName, int width = 160, int height = 120, int durationSeconds = 2, string? metadataTitle = null)
@@ -512,6 +572,30 @@ public class VideoProcessingServiceTests
         return output;
     }
 
+    private string CreateKaraokeAssFile(string fileName)
+    {
+        var output = Path.Combine(_tempRoot, fileName);
+        File.WriteAllText(output,
+            """
+            [Script Info]
+            Title: Test Karaoke
+            ScriptType: v4.00+
+            PlayResX: 1920
+            PlayResY: 1080
+            WrapStyle: 0
+            ScaledBorderAndShadow: yes
+
+            [V4+ Styles]
+            Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+            Style: KaraokeImpact,Impact,72,&H00FFFFFF,&H00006EFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,5,0,2,80,80,90,1
+
+            [Events]
+            Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+            Dialogue: 0,0:00:00.00,0:00:02.00,KaraokeImpact,,0,0,0,,{\kf100}One{\kf100} two
+            """.Replace("\n", Environment.NewLine, StringComparison.Ordinal));
+        return output;
+    }
+
     private MediaInfo ProbeMedia(string path)
     {
         var json = RunProcessAndCapture("ffprobe",
@@ -572,6 +656,24 @@ public class VideoProcessingServiceTests
         var output = RunProcessAndCapture("ffmpeg",
         [
             "-v", "error",
+            "-i", path,
+            "-frames:v", "1",
+            "-f", "framemd5",
+            "-"
+        ]);
+
+        return output
+            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+            .First(line => !line.StartsWith("#", StringComparison.Ordinal))
+            .Trim();
+    }
+
+    private string GetFrameMd5AtTime(string path, TimeSpan timestamp)
+    {
+        var output = RunProcessAndCapture("ffmpeg",
+        [
+            "-v", "error",
+            "-ss", timestamp.ToString(@"hh\:mm\:ss\.fff", CultureInfo.InvariantCulture),
             "-i", path,
             "-frames:v", "1",
             "-f", "framemd5",

@@ -148,6 +148,79 @@
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
+                <NavigationViewItem x:Name="AudioMediaNavigationItem" Visibility="Collapsed" Content="Media" Tag="Media">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Audio" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="AudioMediaFormatNavigationItem" Content="Format" Tag="Media:Format">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Document" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="AudioMediaMetadataNavigationItem" Content="Metadata" Tag="Media:Metadata">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Tag" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="AudioMediaPodcastNavigationItem" Content="Podcast" Tag="Media:Podcast">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Microphone" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="AudioTransformNavigationItem" Visibility="Collapsed" Content="Transform" Tag="Transform">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Cut" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="AudioTransformTrimNavigationItem" Content="Trim" Tag="Transform:Trim">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Cut" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="AudioTransformSilenceNavigationItem" Content="Silence" Tag="Transform:Silence">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Setting" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="AudioAdjustNavigationItem" Visibility="Collapsed" Content="Adjust" Tag="Adjust">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="AllApps" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="AudioAdjustNormalizeNavigationItem" Content="Normalize" Tag="Adjust:Normalize">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Switch" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="AudioAdjustEqNavigationItem" Content="EQ" Tag="Adjust:EQ">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="AllApps" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="AudioAdjustDenoiseNavigationItem" Content="Denoise" Tag="Adjust:Denoise">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Audio" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="AudioTranscriptionNavigationItem" Visibility="Collapsed" Content="Transcription" Tag="Transcription">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Comment" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="AudioTranscriptionGenerateNavigationItem" Content="Generate" Tag="Transcription:Generate">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Edit" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
         </NavigationView>
 

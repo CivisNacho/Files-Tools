@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -160,6 +161,22 @@ public enum SubtitleMode
 }
 
 /// <summary>
+/// Normalized subtitle placement selected from the editor preview.
+/// </summary>
+public sealed class SubtitlePlacementOptions
+{
+    /// <summary>
+    /// Horizontal subtitle anchor point normalized from 0 to 1.
+    /// </summary>
+    public double NormalizedX { get; init; } = 0.5d;
+
+    /// <summary>
+    /// Vertical subtitle anchor point normalized from 0 to 1.
+    /// </summary>
+    public double NormalizedY { get; init; } = 0.88d;
+}
+
+/// <summary>
 /// Repair strategy used to recover broken timestamps, stale indexes, or damaged container metadata.
 /// </summary>
 public enum RepairMode
@@ -229,6 +246,11 @@ public sealed class ProcessVideoOptions
     public MuxSubtitleOptions? SubtitleMux { get; init; }
 
     /// <summary>
+    /// Optional audio denoise request. This is orchestrated as a post-processing stage by callers.
+    /// </summary>
+    public AudioDenoiseRequestOptions? AudioDenoise { get; init; }
+
+    /// <summary>
     /// Optional repair strategy for damaged media inputs.
     /// </summary>
     public RepairOptions? Repair { get; init; }
@@ -247,6 +269,27 @@ public sealed class ProcessVideoOptions
     /// </summary>
     public bool RequiresAudioFiltering =>
         AudioAdjust is not null && !AudioAdjust.IsIdentity;
+}
+
+/// <summary>
+/// High-level denoise request options captured from UI. Execution is delegated to <see cref="IVideoAudioDenoiseService"/>.
+/// </summary>
+public sealed class AudioDenoiseRequestOptions
+{
+    /// <summary>
+    /// Enables denoise when true.
+    /// </summary>
+    public bool Enabled { get; init; }
+
+    /// <summary>
+    /// Denoise mode selection.
+    /// </summary>
+    public AudioDenoiseMode Mode { get; init; } = AudioDenoiseMode.Mono;
+
+    /// <summary>
+    /// Denoise strength from 0 to 100.
+    /// </summary>
+    public int Strength { get; init; } = 50;
 }
 
 /// <summary>
@@ -459,6 +502,11 @@ public sealed class MuxSubtitleOptions
     /// Marks the subtitle stream as default when true.
     /// </summary>
     public bool SetAsDefault { get; init; } = false;
+
+    /// <summary>
+    /// Optional subtitle placement chosen in the editor preview.
+    /// </summary>
+    public SubtitlePlacementOptions? Placement { get; init; }
 }
 
 /// <summary>
@@ -627,7 +675,11 @@ public sealed class VideoProcessingException : InvalidOperationException
 /// </summary>
 public sealed class VideoProcessingService : IVideoProcessingService
 {
+    private static readonly ConcurrentDictionary<string, string> VerifiedExecutableCache = new(StringComparer.OrdinalIgnoreCase);
+
     private const string FfprobeJsonArgs = "-v error -print_format json -show_streams -show_format";
+    private static readonly object VideoEncoderPlanCacheLock = new();
+    private static readonly Dictionary<string, VideoEncoderPlan> VideoEncoderPlanCache = new(StringComparer.OrdinalIgnoreCase);
 
     /// <inheritdoc />
     public async Task<VideoProcessingEstimate> EstimateProcessAsync(string inputPath, ProcessVideoOptions options, CancellationToken cancellationToken = default)
@@ -856,7 +908,9 @@ public sealed class VideoProcessingService : IVideoProcessingService
 
             ValidateOptionsAgainstMedia(options, outputFormat, inputInfo);
 
-            var ffmpegArgs = BuildFfmpegArguments(inputPath, finalOutputPath, outputFormat, options, inputInfo);
+            var streamPlan = ResolveStreamPlan(options, outputFormat, inputInfo);
+            var videoEncoderPlan = await ResolveVideoEncoderPlanAsync(ffmpegCandidates, streamPlan, cancellationToken).ConfigureAwait(false);
+            var ffmpegArgs = BuildFfmpegArguments(inputPath, finalOutputPath, outputFormat, options, inputInfo, streamPlan, videoEncoderPlan);
             var progressObserver = CreateProgressObserver(EstimateOutputDuration(inputInfo, options), progress);
 
             await RunProcessWithFallbackAsync(ffmpegCandidates, ffmpegArgs, cancellationToken, probeJson, progressObserver).ConfigureAwait(false);
@@ -895,7 +949,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
         }
     }
 
-    private static List<string> BuildFfmpegArguments(string inputPath, string outputPath, VideoContainerFormat outputFormat, ProcessVideoOptions options, MediaInfo inputInfo)
+    private static List<string> BuildFfmpegArguments(string inputPath, string outputPath, VideoContainerFormat outputFormat, ProcessVideoOptions options, MediaInfo inputInfo, StreamPlan streamPlan, VideoEncoderPlan videoEncoderPlan)
     {
         var args = new List<string>
         {
@@ -923,7 +977,9 @@ public sealed class VideoProcessingService : IVideoProcessingService
             args.Add(Path.GetFullPath(options.AudioMux.AudioPath));
         }
 
-        if (options.SubtitleMux is { Mode: SubtitleMode.SoftMux })
+        var shouldBurnInAssFallback = ShouldBurnInAssSubtitleFallback(options, outputFormat);
+
+        if (options.SubtitleMux is { Mode: SubtitleMode.SoftMux } && !shouldBurnInAssFallback)
         {
             args.Add("-i");
             args.Add(Path.GetFullPath(options.SubtitleMux.SubtitlePath));
@@ -936,16 +992,14 @@ public sealed class VideoProcessingService : IVideoProcessingService
             args.Add(ToFfmpegTimestamp(duration));
         }
 
-        var videoFilterChain = BuildVideoFilter(options);
+        var videoFilterChain = BuildVideoFilter(options, outputFormat, inputInfo);
         var audioFilterChain = BuildAudioFilter(options);
         var audioStreamIndex = options.AudioMux is not null ? 1 : -1;
-        var subtitleStreamIndex = options.SubtitleMux is { Mode: SubtitleMode.SoftMux }
+        var subtitleStreamIndex = options.SubtitleMux is { Mode: SubtitleMode.SoftMux } && !shouldBurnInAssFallback
             ? (options.AudioMux is not null ? 2 : 1)
             : -1;
 
-        AddMappingArguments(args, options, inputInfo, audioStreamIndex, subtitleStreamIndex);
-
-        var streamPlan = ResolveStreamPlan(options, outputFormat, inputInfo);
+        AddMappingArguments(args, options, inputInfo, audioStreamIndex, subtitleStreamIndex, shouldBurnInAssFallback);
 
         if (!string.IsNullOrWhiteSpace(videoFilterChain))
         {
@@ -959,7 +1013,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
             args.Add(audioFilterChain);
         }
 
-        ApplyVideoCodecArguments(args, streamPlan);
+        ApplyVideoCodecArguments(args, streamPlan, videoEncoderPlan);
         ApplyAudioCodecArguments(args, streamPlan, options);
         ApplySubtitleCodecArguments(args, streamPlan, options, outputFormat);
         ApplyMetadataArguments(args, options, inputInfo);
@@ -974,7 +1028,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
         return args;
     }
 
-    private static void AddMappingArguments(List<string> args, ProcessVideoOptions options, MediaInfo inputInfo, int audioMuxInputIndex, int subtitleInputIndex)
+    private static void AddMappingArguments(List<string> args, ProcessVideoOptions options, MediaInfo inputInfo, int audioMuxInputIndex, int subtitleInputIndex, bool shouldBurnInAssFallback)
     {
         args.Add("-map");
         args.Add("0:v:0");
@@ -996,7 +1050,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
             args.Add("0:a?");
         }
 
-        if (options.SubtitleMux is { Mode: SubtitleMode.SoftMux })
+        if (options.SubtitleMux is { Mode: SubtitleMode.SoftMux } && !shouldBurnInAssFallback)
         {
             args.Add("-map");
             args.Add($"{subtitleInputIndex}:s:0");
@@ -1008,13 +1062,15 @@ public sealed class VideoProcessingService : IVideoProcessingService
         }
     }
 
-    private static string? BuildVideoFilter(ProcessVideoOptions options)
+    private static string? BuildVideoFilter(ProcessVideoOptions options, VideoContainerFormat outputFormat, MediaInfo inputInfo)
     {
         var filters = new List<string>();
 
-        if (options.SubtitleMux is { Mode: SubtitleMode.BurnIn } subtitleOptions)
+        var shouldBurnInAssFallback = ShouldBurnInAssSubtitleFallback(options, outputFormat);
+        if (options.SubtitleMux is { } subtitleOptions && (subtitleOptions.Mode == SubtitleMode.BurnIn || shouldBurnInAssFallback))
         {
-            filters.Add($"subtitles='{EscapeSubtitleFilterPath(subtitleOptions.SubtitlePath)}'");
+            var (estimatedWidth, estimatedHeight) = EstimateOutputDimensions(inputInfo, options);
+            filters.Add(BuildSubtitleFilter(subtitleOptions, estimatedWidth, estimatedHeight));
         }
 
         if (options.Transform is not null && !options.Transform.IsIdentity)
@@ -1061,6 +1117,105 @@ public sealed class VideoProcessingService : IVideoProcessingService
         return filters.Count == 0
             ? null
             : string.Join(",", filters);
+    }
+
+    private static string BuildSubtitleFilter(MuxSubtitleOptions subtitleOptions, int width, int height)
+    {
+        var builder = new StringBuilder();
+        builder.Append("subtitles='");
+        builder.Append(EscapeSubtitleFilterPath(subtitleOptions.SubtitlePath));
+        builder.Append('\'');
+
+        var forceStyle = BuildSubtitleForceStyle(subtitleOptions.Placement, width, height);
+        if (!string.IsNullOrWhiteSpace(forceStyle))
+        {
+            builder.Append(":force_style='");
+            builder.Append(forceStyle);
+            builder.Append('\'');
+        }
+
+        return builder.ToString();
+    }
+
+    private static string? BuildSubtitleForceStyle(SubtitlePlacementOptions? placement, int width, int height)
+    {
+        if (placement is null || width <= 0 || height <= 0)
+        {
+            return null;
+        }
+
+        var normalizedX = Math.Clamp(placement.NormalizedX, 0d, 1d);
+        var normalizedY = Math.Clamp(placement.NormalizedY, 0d, 1d);
+        var alignment = ResolveAssAlignment(normalizedX, normalizedY);
+        var marginVertical = ResolveAssVerticalMargin(normalizedY, height);
+        var marginLeft = ResolveAssHorizontalMargin(normalizedX, width, isLeftAligned: alignment is 1 or 4 or 7);
+        var marginRight = ResolveAssHorizontalMargin(normalizedX, width, isLeftAligned: false, isRightAligned: alignment is 3 or 6 or 9);
+
+        return FormattableString.Invariant(
+            $"Alignment={alignment},MarginV={marginVertical},MarginL={marginLeft},MarginR={marginRight}");
+    }
+
+    private static int ResolveAssAlignment(double normalizedX, double normalizedY)
+    {
+        var horizontalBand = normalizedX switch
+        {
+            < 0.33d => -1,
+            > 0.67d => 1,
+            _ => 0
+        };
+
+        var verticalBand = normalizedY switch
+        {
+            < 0.33d => 1,
+            > 0.67d => -1,
+            _ => 0
+        };
+
+        return (verticalBand, horizontalBand) switch
+        {
+            (1, -1) => 7,
+            (1, 0) => 8,
+            (1, 1) => 9,
+            (0, -1) => 4,
+            (0, 0) => 5,
+            (0, 1) => 6,
+            (-1, -1) => 1,
+            (-1, 0) => 2,
+            (-1, 1) => 3,
+            _ => 2
+        };
+    }
+
+    private static int ResolveAssVerticalMargin(double normalizedY, int height)
+    {
+        var safeMargin = Math.Max(24, (int)Math.Round(height * 0.04d, MidpointRounding.AwayFromZero));
+        if (normalizedY < 0.33d)
+        {
+            return Math.Max(safeMargin, (int)Math.Round(height * normalizedY, MidpointRounding.AwayFromZero));
+        }
+
+        if (normalizedY > 0.67d)
+        {
+            return Math.Max(safeMargin, (int)Math.Round(height * (1d - normalizedY), MidpointRounding.AwayFromZero));
+        }
+
+        return 0;
+    }
+
+    private static int ResolveAssHorizontalMargin(double normalizedX, int width, bool isLeftAligned, bool isRightAligned = false)
+    {
+        var safeMargin = Math.Max(24, (int)Math.Round(width * 0.04d, MidpointRounding.AwayFromZero));
+        if (isLeftAligned)
+        {
+            return Math.Max(safeMargin, (int)Math.Round(width * normalizedX, MidpointRounding.AwayFromZero));
+        }
+
+        if (isRightAligned)
+        {
+            return Math.Max(safeMargin, (int)Math.Round(width * (1d - normalizedX), MidpointRounding.AwayFromZero));
+        }
+
+        return 0;
     }
 
     private static IEnumerable<string> BuildTransformFilters(TransformOptions options)
@@ -1120,6 +1275,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
 
         var requiresVideoEncode =
             options.RequiresVideoFiltering ||
+            ShouldBurnInAssSubtitleFallback(options, outputFormat) ||
             options.Trim is not null ||
             options.Compression is not null ||
             requestedVideoCodec.HasValue;
@@ -1198,7 +1354,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
         };
     }
 
-    private static void ApplyVideoCodecArguments(List<string> args, StreamPlan plan)
+    private static void ApplyVideoCodecArguments(List<string> args, StreamPlan plan, VideoEncoderPlan encoderPlan)
     {
         if (plan.CopyAllStreams)
         {
@@ -1214,11 +1370,10 @@ public sealed class VideoProcessingService : IVideoProcessingService
             return;
         }
 
-        var encoder = GetVideoEncoder(plan.VideoCodec);
         args.Add("-c:v");
-        args.Add(encoder);
+        args.Add(encoderPlan.EncoderName);
 
-        if (plan.VideoCodec != VideoCodec.Gif && plan.VideoCrf.HasValue)
+        if (!encoderPlan.IsHardwareAccelerated && plan.VideoCodec != VideoCodec.Gif && plan.VideoCrf.HasValue)
         {
             args.Add("-crf");
             args.Add(plan.VideoCrf.Value.ToString(CultureInfo.InvariantCulture));
@@ -1290,7 +1445,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
             return;
         }
 
-        if (options.SubtitleMux.Mode == SubtitleMode.BurnIn)
+        if (options.SubtitleMux.Mode == SubtitleMode.BurnIn || ShouldBurnInAssSubtitleFallback(options, outputFormat))
         {
             args.Add("-sn");
             return;
@@ -1332,6 +1487,123 @@ public sealed class VideoProcessingService : IVideoProcessingService
             args.Add("-map_chapters");
             args.Add("-1");
         }
+    }
+
+    private static async Task<VideoEncoderPlan> ResolveVideoEncoderPlanAsync(IReadOnlyList<string> ffmpegCandidates, StreamPlan streamPlan, CancellationToken cancellationToken)
+    {
+        var cacheKey = BuildVideoEncoderCacheKey(ffmpegCandidates, streamPlan);
+        lock (VideoEncoderPlanCacheLock)
+        {
+            if (VideoEncoderPlanCache.TryGetValue(cacheKey, out var cachedPlan))
+            {
+                return cachedPlan;
+            }
+        }
+
+        VideoEncoderPlan resolvedPlan;
+        if (!CanUseHardwareEncoding(streamPlan))
+        {
+            resolvedPlan = CreateSoftwareVideoEncoderPlan(streamPlan.VideoCodec);
+        }
+        else
+        {
+            resolvedPlan = await DetectWorkingHardwareEncoderPlanAsync(ffmpegCandidates, streamPlan.VideoCodec, cancellationToken).ConfigureAwait(false)
+                ?? CreateSoftwareVideoEncoderPlan(streamPlan.VideoCodec);
+        }
+
+        lock (VideoEncoderPlanCacheLock)
+        {
+            VideoEncoderPlanCache[cacheKey] = resolvedPlan;
+        }
+
+        return resolvedPlan;
+    }
+
+    private static async Task<VideoEncoderPlan?> DetectWorkingHardwareEncoderPlanAsync(IReadOnlyList<string> ffmpegCandidates, VideoCodec codec, CancellationToken cancellationToken)
+    {
+        foreach (var encoderName in GetHardwareEncoderCandidates(codec))
+        {
+            if (await IsVideoEncoderUsableAsync(ffmpegCandidates, encoderName, cancellationToken).ConfigureAwait(false))
+            {
+                return new VideoEncoderPlan(encoderName, IsHardwareAccelerated: true);
+            }
+        }
+
+        return null;
+    }
+
+    private static async Task<bool> IsVideoEncoderUsableAsync(IReadOnlyList<string> ffmpegCandidates, string encoderName, CancellationToken cancellationToken)
+    {
+        var args = new List<string>
+        {
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-f",
+            "lavfi",
+            "-i",
+            "color=c=black:s=64x64:d=0.1",
+            "-frames:v",
+            "1",
+            "-an",
+            "-c:v",
+            encoderName,
+            "-f",
+            "null",
+            "-"
+        };
+
+        try
+        {
+            var result = await RunProcessWithFallbackAsync(ffmpegCandidates, args, cancellationToken, probeJson: null).ConfigureAwait(false);
+            return result.ExitCode == 0;
+        }
+        catch (VideoProcessingException)
+        {
+            return false;
+        }
+    }
+
+    private static bool CanUseHardwareEncoding(StreamPlan streamPlan)
+    {
+        return streamPlan.VideoNeedsEncoding &&
+               !streamPlan.CopyAllStreams &&
+               !streamPlan.VideoCrf.HasValue &&
+               streamPlan.VideoCodec is VideoCodec.H264 or VideoCodec.H265 or VideoCodec.Av1;
+    }
+
+    internal static VideoEncoderPlan CreateVideoEncoderPlan(VideoCodec codec, IReadOnlySet<string> workingHardwareEncoders, bool preferHardwareEncoding)
+    {
+        if (preferHardwareEncoding)
+        {
+            foreach (var encoderName in GetHardwareEncoderCandidates(codec))
+            {
+                if (workingHardwareEncoders.Contains(encoderName))
+                {
+                    return new VideoEncoderPlan(encoderName, IsHardwareAccelerated: true);
+                }
+            }
+        }
+
+        return CreateSoftwareVideoEncoderPlan(codec);
+    }
+
+    internal static IReadOnlyList<string> GetHardwareEncoderCandidates(VideoCodec codec)
+    {
+        return codec switch
+        {
+            VideoCodec.H264 => ["h264_nvenc", "h264_amf", "h264_qsv"],
+            VideoCodec.H265 => ["hevc_nvenc", "hevc_amf", "hevc_qsv"],
+            VideoCodec.Av1 => ["av1_nvenc", "av1_amf", "av1_qsv"],
+            _ => []
+        };
+    }
+
+    private static VideoEncoderPlan CreateSoftwareVideoEncoderPlan(VideoCodec codec) => new(GetVideoEncoder(codec), IsHardwareAccelerated: false);
+
+    private static string BuildVideoEncoderCacheKey(IReadOnlyList<string> ffmpegCandidates, StreamPlan streamPlan)
+    {
+        return $"{string.Join("|", ffmpegCandidates)}::{streamPlan.VideoCodec}::{streamPlan.VideoNeedsEncoding}::{streamPlan.CopyAllStreams}::{streamPlan.VideoCrf.HasValue}";
     }
 
     private static void ValidateOptions(ProcessVideoOptions options)
@@ -1825,7 +2097,71 @@ public sealed class VideoProcessingService : IVideoProcessingService
         }
 
         candidates.Add(executableName);
+
+        if (VerifiedExecutableCache.TryGetValue(executableName, out var cachedExecutable))
+        {
+            return [cachedExecutable];
+        }
+
+        foreach (var candidate in candidates)
+        {
+            if (!CanLaunchExecutable(candidate))
+            {
+                continue;
+            }
+
+            VerifiedExecutableCache[executableName] = candidate;
+            return [candidate];
+        }
+
         return candidates;
+    }
+
+    private static bool CanLaunchExecutable(string binaryPath)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = binaryPath,
+            RedirectStandardError = true,
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            WorkingDirectory = Path.IsPathRooted(binaryPath)
+                ? (Path.GetDirectoryName(binaryPath) ?? AppContext.BaseDirectory)
+                : AppContext.BaseDirectory
+        };
+
+        startInfo.ArgumentList.Add("-version");
+
+        try
+        {
+            using var process = new Process { StartInfo = startInfo };
+            if (!process.Start())
+            {
+                return false;
+            }
+
+            process.WaitForExit(5000);
+            if (!process.HasExited)
+            {
+                try
+                {
+                    process.Kill(entireProcessTree: true);
+                }
+                catch
+                {
+                    // Best effort only.
+                }
+
+                return false;
+            }
+
+            return process.ExitCode == 0;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private static string GetCurrentRid()
@@ -2045,6 +2381,23 @@ public sealed class VideoProcessingService : IVideoProcessingService
             VideoContainerFormat.Webm => "webvtt",
             _ => null
         };
+    }
+
+    private static bool ShouldBurnInAssSubtitleFallback(ProcessVideoOptions options, VideoContainerFormat outputFormat)
+    {
+        if (options.SubtitleMux is not { Mode: SubtitleMode.SoftMux } subtitleOptions)
+        {
+            return false;
+        }
+
+        if (outputFormat is not (VideoContainerFormat.Mp4 or VideoContainerFormat.Mov))
+        {
+            return false;
+        }
+
+        var extension = Path.GetExtension(subtitleOptions.SubtitlePath);
+        return extension.Equals(".ass", StringComparison.OrdinalIgnoreCase) ||
+               extension.Equals(".ssa", StringComparison.OrdinalIgnoreCase);
     }
 
     private static VideoCodec? MapVideoCodec(string? codecName)
@@ -2435,6 +2788,8 @@ public sealed class VideoProcessingService : IVideoProcessingService
     }
 
     private sealed record AudioExtractionTarget(string EncoderName, string ProbeCodecName);
+
+    internal sealed record VideoEncoderPlan(string EncoderName, bool IsHardwareAccelerated);
 
     private sealed class StreamPlan
     {

@@ -1,5 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Text;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Windowing;
 using Microsoft.UI;
 using Windows.UI;
@@ -23,6 +25,7 @@ namespace Files_Tools
             InitializeComponent();
             NavigationService.Initialize(RootFrame);
             RootFrame.Navigated += RootFrame_Navigated;
+            SizeChanged += MainWindow_SizeChanged;
             NavigationService.Navigate(typeof(Pages.HomePage));
 
             InitializeTitleBarThemeSync();
@@ -33,14 +36,80 @@ namespace Files_Tools
             AppTitleBar.IsBackButtonVisible = RootFrame.CanGoBack;
             var isImageEditorPage = RootFrame.Content is Pages.ImageEditorPage;
             var isVideoEditorPage = RootFrame.Content is Pages.VideoEditorPage;
-            var showEditorRail = isImageEditorPage || isVideoEditorPage;
+            var isAudioEditorPage = RootFrame.Content is Pages.AudioEditorPage;
+            var showEditorRail = isImageEditorPage || isVideoEditorPage || isAudioEditorPage;
+            UpdateNavigationRailWidth(showEditorRail);
 
             ImageEditorOptionsNavigationView.Visibility = showEditorRail ? Visibility.Visible : Visibility.Collapsed;
-            ImageEditorNavColumn.Width = showEditorRail ? new GridLength(180) : new GridLength(0);
+            ImageEditorNavColumn.Width = showEditorRail
+                ? new GridLength(ImageEditorOptionsNavigationView.OpenPaneLength)
+                : new GridLength(0);
             ImageEditorOptionsNavigationView.SelectedItem = null;
 
             SetImageEditorNavigationVisibility(isImageEditorPage);
             SetVideoEditorNavigationVisibility(isVideoEditorPage);
+            SetAudioEditorNavigationVisibility(isAudioEditorPage);
+        }
+
+        private void MainWindow_SizeChanged(object sender, WindowSizeChangedEventArgs args)
+        {
+            var showEditorRail = RootFrame.Content is Pages.ImageEditorPage or Pages.VideoEditorPage or Pages.AudioEditorPage;
+            UpdateNavigationRailWidth(showEditorRail);
+            ImageEditorNavColumn.Width = showEditorRail
+                ? new GridLength(ImageEditorOptionsNavigationView.OpenPaneLength)
+                : new GridLength(0);
+        }
+
+        private void UpdateNavigationRailWidth(bool showEditorRail)
+        {
+            if (!showEditorRail)
+            {
+                return;
+            }
+
+            var responsivePaneLength = AppTitleBar.ActualWidth * 0.18d;
+            var requiredContentWidth = MeasureRequiredNavigationPaneWidth(ImageEditorOptionsNavigationView);
+            ImageEditorOptionsNavigationView.OpenPaneLength = Math.Max(responsivePaneLength, requiredContentWidth);
+        }
+
+        private static double MeasureRequiredNavigationPaneWidth(NavigationView navigationView)
+        {
+            const double iconAndPadding = 104d;
+            const double minPane = 160d;
+
+            var maxHeaderWidth = 0d;
+            MeasureNavigationItems(navigationView.MenuItems, ref maxHeaderWidth);
+            var required = maxHeaderWidth + iconAndPadding;
+            return Math.Max(minPane, Math.Ceiling(required));
+        }
+
+        private static void MeasureNavigationItems(System.Collections.Generic.IEnumerable<object> items, ref double maxHeaderWidth)
+        {
+            foreach (var item in items)
+            {
+                if (item is not NavigationViewItem nvi)
+                {
+                    continue;
+                }
+
+                var headerText = nvi.Content?.ToString();
+                if (!string.IsNullOrWhiteSpace(headerText))
+                {
+                    var probe = new TextBlock
+                    {
+                        Text = headerText,
+                        FontSize = 14,
+                        FontWeight = FontWeights.Normal
+                    };
+                    probe.Measure(new Windows.Foundation.Size(double.PositiveInfinity, double.PositiveInfinity));
+                    maxHeaderWidth = Math.Max(maxHeaderWidth, probe.DesiredSize.Width);
+                }
+
+                if (nvi.MenuItems.Count > 0)
+                {
+                    MeasureNavigationItems(nvi.MenuItems, ref maxHeaderWidth);
+                }
+            }
         }
 
         private void AppTitleBar_BackRequested(TitleBar sender, object args)
@@ -140,6 +209,10 @@ namespace Files_Tools
             {
                 videoEditorPage.ApplyOptionSelection(tag);
             }
+            else if (RootFrame.Content is Pages.AudioEditorPage audioEditorPage)
+            {
+                audioEditorPage.ApplyOptionSelection(tag);
+            }
         }
 
         private void SetImageEditorNavigationVisibility(bool isVisible)
@@ -156,6 +229,15 @@ namespace Files_Tools
             VideoMediaNavigationItem.Visibility = visibility;
             VideoTransformNavigationItem.Visibility = visibility;
             VideoAdvancedNavigationItem.Visibility = visibility;
+        }
+
+        private void SetAudioEditorNavigationVisibility(bool isVisible)
+        {
+            var visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+            AudioMediaNavigationItem.Visibility = visibility;
+            AudioTransformNavigationItem.Visibility = visibility;
+            AudioAdjustNavigationItem.Visibility = visibility;
+            AudioTranscriptionNavigationItem.Visibility = visibility;
         }
     }
 }

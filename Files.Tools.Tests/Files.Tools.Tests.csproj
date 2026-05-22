@@ -9,8 +9,11 @@
 
   <ItemGroup>
     <PackageReference Include="MSTest" Version="4.0.2" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.22.0" />
     <PackageReference Include="NetVips" Version="3.2.0" />
     <PackageReference Include="NetVips.Native.win-x64" Version="8.18.2" />
+    <PackageReference Include="Whisper.net" Version="1.9.0" />
+    <PackageReference Include="Whisper.net.Runtime" Version="1.9.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,7 +22,11 @@
 
   <ItemGroup>
     <Compile Include="..\Services\ImageProcessingService.cs" Link="Services\ImageProcessingService.cs" />
+    <Compile Include="..\Services\AudioProcessingService.cs" Link="Services\AudioProcessingService.cs" />
+    <Compile Include="..\Services\AudioTranscriptionService.cs" Link="Services\AudioTranscriptionService.cs" />
+    <Compile Include="..\Services\SubtitlesService.cs" Link="Services\SubtitlesService.cs" />
     <Compile Include="..\Services\VideoProcessingService.cs" Link="Services\VideoProcessingService.cs" />
+    <Compile Include="..\Services\VideoAudioDenoise.cs" Link="Services\VideoAudioDenoise.cs" />
   </ItemGroup>
 
 </Project>

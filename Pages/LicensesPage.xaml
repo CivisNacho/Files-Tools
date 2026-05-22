@@ -14,6 +14,9 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <TextBlock FontSize="34" FontWeight="SemiBold" Text="Licenses" />
@@ -75,6 +78,87 @@
                             VerticalAlignment="Center"
                             Content="Show License"
                             Click="ShowFfmpegLicense_Click" />
+                    </Grid>
+                </Border>
+
+                <Border
+                    Grid.Row="4"
+                    Padding="16"
+                    CornerRadius="10"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Spacing="2">
+                            <TextBlock FontSize="20" FontWeight="SemiBold" Text="DTLN pretrained ONNX models" />
+                            <TextBlock Opacity="0.82" Text="License: MIT" />
+                            <TextBlock Opacity="0.82" Text="Usage: local audio noise suppression model inference" />
+                        </StackPanel>
+
+                        <Button
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Content="Show License"
+                            Click="ShowDtlnLicense_Click" />
+                    </Grid>
+                </Border>
+
+                <Border
+                    Grid.Row="5"
+                    Padding="16"
+                    CornerRadius="10"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Spacing="2">
+                            <TextBlock FontSize="20" FontWeight="SemiBold" Text="ONNX Runtime" />
+                            <TextBlock Opacity="0.82" Text="License: MIT" />
+                            <TextBlock Opacity="0.82" Text="Usage: executing DTLN ONNX models" />
+                        </StackPanel>
+
+                        <Button
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Content="Show License"
+                            Click="ShowOnnxRuntimeLicense_Click" />
+                    </Grid>
+                </Border>
+
+                <Border
+                    Grid.Row="6"
+                    Padding="16"
+                    CornerRadius="10"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Spacing="2">
+                            <TextBlock FontSize="20" FontWeight="SemiBold" Text="Whisper.net / whisper.cpp" />
+                            <TextBlock Opacity="0.82" Text="License: MIT" />
+                            <TextBlock Opacity="0.82" Text="Usage: local speech-to-text transcription and subtitle generation" />
+                        </StackPanel>
+
+                        <Button
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Content="Show License"
+                            Click="ShowWhisperLicense_Click" />
                     </Grid>
                 </Border>
             </Grid>
