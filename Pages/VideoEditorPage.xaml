@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:Primitives="using:Microsoft.UI.Xaml.Controls.Primitives"
     mc:Ignorable="d">
     <Page.Resources>
         <SolidColorBrush x:Key="ImageAccentBrush" Color="#FF3B82F6" />
@@ -122,33 +123,36 @@
                                             Stretch="Uniform"
                                             Visibility="Collapsed" />
                                         <Canvas x:Name="SubtitlePlacementCanvas">
-                                            <Border
+                                            <Primitives:Thumb
                                                 x:Name="SubtitlePlacementMarker"
                                                 Width="180"
                                                 MinHeight="58"
-                                                Padding="12,10"
-                                                CornerRadius="12"
-                                                BorderThickness="1"
-                                                BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
-                                                Background="#B20F172A"
                                                 Visibility="Collapsed"
-                                                PointerPressed="SubtitlePlacementMarker_PointerPressed"
-                                                PointerMoved="SubtitlePlacementMarker_PointerMoved"
-                                                PointerReleased="SubtitlePlacementMarker_PointerReleased"
-                                                PointerCanceled="SubtitlePlacementMarker_PointerReleased">
-                                                <StackPanel Spacing="4">
-                                                    <TextBlock
-                                                        Foreground="White"
-                                                        FontWeight="SemiBold"
-                                                        Text="Subtitle position" />
-                                                    <TextBlock
-                                                        x:Name="SubtitlePlacementPreviewTextBlock"
-                                                        Foreground="White"
-                                                        Opacity="0.82"
-                                                        Text="Drag to place subtitles"
-                                                        TextWrapping="Wrap" />
-                                                </StackPanel>
-                                            </Border>
+                                                DragDelta="SubtitlePlacementMarker_DragDelta">
+                                                <Primitives:Thumb.Template>
+                                                    <ControlTemplate TargetType="Primitives:Thumb">
+                                                        <Border
+                                                            Padding="12,10"
+                                                            CornerRadius="12"
+                                                            BorderThickness="1"
+                                                            BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+                                                            Background="{ThemeResource ControlFillColorSecondaryBrush}">
+                                                            <StackPanel Spacing="4">
+                                                                <TextBlock
+                                                                    Foreground="White"
+                                                                    FontWeight="SemiBold"
+                                                                    Text="Subtitle position" />
+                                                                <TextBlock
+                                                                    x:Name="SubtitlePlacementPreviewTextBlock"
+                                                                    Foreground="White"
+                                                                    Opacity="0.82"
+                                                                    Text="Drag to place subtitles"
+                                                                    TextWrapping="Wrap" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Primitives:Thumb.Template>
+                                            </Primitives:Thumb>
                                         </Canvas>
                                     </Grid>
 
@@ -359,7 +363,7 @@
 
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                 <StackPanel Spacing="2">
-                                    <TextBlock x:Name="SelectedOptionHeaderTextBlock" Margin="0,0,0,12" FontSize="22" FontWeight="SemiBold" Text="Select an option" />
+                                    <TextBlock x:Name="SelectedOptionHeaderTextBlock" Margin="0,0,0,12" FontSize="20" FontWeight="SemiBold" Text="Select an option" />
 
                                     <StackPanel x:Name="MediaPanel" Visibility="Collapsed" Spacing="12">
 
@@ -510,7 +514,7 @@
                                                             <TextBlock FontWeight="SemiBold" Text="Transcription" />
                                                             <TextBlock
                                                                 Opacity="0.76"
-                                                                Text="Choose basic SRT or advanced ASS generation. Advanced styled mode now pauses for transcription review before the final ASS is rendered."
+                                                                Text="Choose basic SRT or advanced styled ASS subtitles generation."
                                                                 TextWrapping="Wrap" />
                                                             <Button
                                                                 x:Name="DownloadTranscriptionFeatureButton"
@@ -691,7 +695,7 @@
                                                                     <TextBlock
                                                                         x:Name="SubtitlePlacementStatusTextBlock"
                                                                         Opacity="0.76"
-                                                                        Text="Placement is rendered exactly for generated ASS subtitles and approximated for burn-in text subtitles."
+                                                                        Text="Placement is rendered exactly for generated ASS subtitles and approximated for burn-in text subtitles, including boxed and animated presentation presets."
                                                                         TextWrapping="Wrap" />
                                                                 </StackPanel>
                                                             </Border>

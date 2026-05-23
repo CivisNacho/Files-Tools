@@ -88,7 +88,6 @@ namespace Files_Tools.Pages
         private bool _isSubtitleSectionActive;
         private bool _isSynchronizingSubtitleSectionDurationControls;
         private bool _isSynchronizingSubtitlePlacementControls;
-        private bool _isDraggingSubtitlePlacement;
         private double _subtitlePlacementX = DefaultSubtitlePlacementX;
         private double _subtitlePlacementY = DefaultSubtitlePlacementY;
         private Size _previewVideoSize = new(1920d, 1080d);
@@ -128,11 +127,18 @@ namespace Files_Tools.Pages
             Karaoke
         }
 
-        private enum AdvancedSubtitleBasePreset
+        private enum StyledSubtitleBasePreset
         {
             SocialImpact,
             CleanSans,
-            CaptionBox
+            CaptionBox,
+            BroadcastLowerThird
+        }
+
+        private enum KaraokeSubtitleBasePreset
+        {
+            NeonKaraoke,
+            Punch
         }
 
         private sealed class SubtitleEditableRow : INotifyPropertyChanged
@@ -173,7 +179,9 @@ namespace Files_Tools.Pages
 
         private sealed class SubtitlePresetConfiguration
         {
-            public AdvancedSubtitleBasePreset BasePreset { get; set; } = AdvancedSubtitleBasePreset.SocialImpact;
+            public StyledSubtitleBasePreset StyledPreset { get; set; } = StyledSubtitleBasePreset.SocialImpact;
+
+            public KaraokeSubtitleBasePreset KaraokePreset { get; set; } = KaraokeSubtitleBasePreset.NeonKaraoke;
 
             public string FontFamily { get; set; } = "Impact";
 
@@ -193,7 +201,8 @@ namespace Files_Tools.Pages
             {
                 return new SubtitlePresetConfiguration
                 {
-                    BasePreset = AdvancedSubtitleBasePreset.SocialImpact,
+                    StyledPreset = StyledSubtitleBasePreset.SocialImpact,
+                    KaraokePreset = KaraokeSubtitleBasePreset.NeonKaraoke,
                     FontFamily = "Impact",
                     KaraokeHighlightColor = new SubtitleColor(0, 255, 110, 0)
                 };
@@ -890,39 +899,26 @@ namespace Files_Tools.Pages
             ApplySubtitlePlacementValue(_subtitlePlacementX * 100d, sender.Value, synchronizeX: true, synchronizeY: false);
         }
 
-        private void SubtitlePlacementMarker_PointerPressed(object sender, PointerRoutedEventArgs e)
+        private void SubtitlePlacementMarker_DragDelta(object sender, DragDeltaEventArgs e)
         {
-            if (!ShouldShowSubtitlePlacementControls() || sender is not UIElement element)
+            if (!ShouldShowSubtitlePlacementControls() || SubtitlePlacementCanvas is null)
             {
                 return;
             }
 
-            _isDraggingSubtitlePlacement = true;
-            element.CapturePointer(e.Pointer);
-            UpdateSubtitlePlacementFromPointer(e);
-            e.Handled = true;
-        }
-
-        private void SubtitlePlacementMarker_PointerMoved(object sender, PointerRoutedEventArgs e)
-        {
-            if (!_isDraggingSubtitlePlacement)
+            var videoBounds = GetPreviewVideoBounds();
+            if (videoBounds.Width <= 0 || videoBounds.Height <= 0)
             {
                 return;
             }
 
-            UpdateSubtitlePlacementFromPointer(e);
-            e.Handled = true;
-        }
+            var normalizedDeltaX = e.HorizontalChange / videoBounds.Width;
+            var normalizedDeltaY = e.VerticalChange / videoBounds.Height;
 
-        private void SubtitlePlacementMarker_PointerReleased(object sender, PointerRoutedEventArgs e)
-        {
-            if (sender is UIElement element)
-            {
-                element.ReleasePointerCaptures();
-            }
+            var newNormalizedX = Math.Clamp(_subtitlePlacementX + normalizedDeltaX, 0d, 1d);
+            var newNormalizedY = Math.Clamp(_subtitlePlacementY + normalizedDeltaY, 0d, 1d);
 
-            _isDraggingSubtitlePlacement = false;
-            e.Handled = true;
+            ApplySubtitlePlacementValue(newNormalizedX * 100d, newNormalizedY * 100d, synchronizeX: true, synchronizeY: true);
         }
 
         private void ResetSubtitlePlacementButton_Click(object sender, RoutedEventArgs e)
@@ -1027,18 +1023,30 @@ namespace Files_Tools.Pages
                 _isInstallingTranscriptionModel = true;
                 RefreshValidationAndState();
 
+                var lastProgressUpdate = DateTimeOffset.UtcNow;
                 var progress = new Progress<AudioTranscriptionInstallProgress>(update =>
                 {
-                    if (TranscriptionDownloadProgressBar is not null)
+                    var now = DateTimeOffset.UtcNow;
+                    if ((now - lastProgressUpdate).TotalMilliseconds < 200d)
                     {
-                        TranscriptionDownloadProgressBar.IsIndeterminate = false;
-                        TranscriptionDownloadProgressBar.Value = Math.Clamp(update.FractionComplete, 0d, 1d);
+                        return;
                     }
 
-                    if (TranscriptionDownloadStatusTextBlock is not null)
+                    lastProgressUpdate = now;
+
+                    DispatcherQueue.TryEnqueue(() =>
                     {
-                        TranscriptionDownloadStatusTextBlock.Text = $"{update.Stage} ({(Math.Clamp(update.FractionComplete, 0d, 1d) * 100d):0}%)";
-                    }
+                        if (TranscriptionDownloadProgressBar is not null)
+                        {
+                            TranscriptionDownloadProgressBar.IsIndeterminate = false;
+                            TranscriptionDownloadProgressBar.Value = Math.Clamp(update.FractionComplete, 0d, 1d);
+                        }
+
+                        if (TranscriptionDownloadStatusTextBlock is not null)
+                        {
+                            TranscriptionDownloadStatusTextBlock.Text = $"{update.Stage} ({(Math.Clamp(update.FractionComplete, 0d, 1d) * 100d):0}%)";
+                        }
+                    });
                 });
 
                 await _audioTranscriptionService.InstallAsync(progress, _transcriptionOperationCancellation.Token);
@@ -1419,19 +1427,37 @@ namespace Files_Tools.Pages
 
         private async void ConfigureAdvancedSubtitlesButton_Click(object sender, RoutedEventArgs e)
         {
+            var isKaraokeMode = IsKaraokeAdvancedSubtitleTypeSelected();
+
             var basePresetComboBox = new ComboBox
             {
                 Header = "Base preset"
             };
-            basePresetComboBox.Items.Add(new ComboBoxItem { Content = "SocialImpact" });
-            basePresetComboBox.Items.Add(new ComboBoxItem { Content = "CleanSans" });
-            basePresetComboBox.Items.Add(new ComboBoxItem { Content = "CaptionBox" });
-            basePresetComboBox.SelectedIndex = _advancedSubtitlePresetConfiguration.BasePreset switch
+
+            if (isKaraokeMode)
             {
-                AdvancedSubtitleBasePreset.CleanSans => 1,
-                AdvancedSubtitleBasePreset.CaptionBox => 2,
-                _ => 0
-            };
+                basePresetComboBox.Items.Add(new ComboBoxItem { Content = "NeonKaraoke" });
+                basePresetComboBox.Items.Add(new ComboBoxItem { Content = "Punch" });
+                basePresetComboBox.SelectedIndex = _advancedSubtitlePresetConfiguration.KaraokePreset switch
+                {
+                    KaraokeSubtitleBasePreset.Punch => 1,
+                    _ => 0
+                };
+            }
+            else
+            {
+                basePresetComboBox.Items.Add(new ComboBoxItem { Content = "SocialImpact" });
+                basePresetComboBox.Items.Add(new ComboBoxItem { Content = "CleanSans" });
+                basePresetComboBox.Items.Add(new ComboBoxItem { Content = "CaptionBox" });
+                basePresetComboBox.Items.Add(new ComboBoxItem { Content = "BroadcastLowerThird" });
+                basePresetComboBox.SelectedIndex = _advancedSubtitlePresetConfiguration.StyledPreset switch
+                {
+                    StyledSubtitleBasePreset.CleanSans => 1,
+                    StyledSubtitleBasePreset.CaptionBox => 2,
+                    StyledSubtitleBasePreset.BroadcastLowerThird => 3,
+                    _ => 0
+                };
+            }
 
             var fontSizeNumberBox = new NumberBox
             {
@@ -1487,7 +1513,6 @@ namespace Files_Tools.Pages
                 IsChecked = _advancedSubtitlePresetConfiguration.Uppercase
             };
 
-            var isKaraokeMode = IsKaraokeAdvancedSubtitleTypeSelected();
             var karaokeAccentColorPicker = new ColorPicker
             {
                 Color = ToUiColor(_advancedSubtitlePresetConfiguration.KaraokeHighlightColor),
@@ -1506,7 +1531,7 @@ namespace Files_Tools.Pages
             };
             content.Children.Add(new TextBlock
             {
-                Text = "Choose a preset and tune the typography used for advanced subtitle rendering.",
+                Text = "Choose a preset and tune the typography, presentation, and karaoke accent used for advanced subtitle rendering.",
                 TextWrapping = TextWrapping.Wrap,
                 Opacity = 0.76
             });
@@ -1552,22 +1577,35 @@ namespace Files_Tools.Pages
                 return;
             }
 
-            _advancedSubtitlePresetConfiguration = new SubtitlePresetConfiguration
+            var newConfig = SubtitlePresetConfiguration.CreateDefault();
+            newConfig.FontFamily = (fontFamilyComboBox.SelectedItem as string) ?? GetDefaultFontFamilyForPreset(basePresetComboBox.SelectedIndex, isKaraokeMode);
+            newConfig.FontSize = Math.Clamp(double.IsNaN(fontSizeNumberBox.Value) ? 72d : fontSizeNumberBox.Value, 24d, 160d);
+            newConfig.OutlineWidth = Math.Clamp(double.IsNaN(outlineNumberBox.Value) ? 5d : outlineNumberBox.Value, 0d, 20d);
+            newConfig.MarginVertical = Math.Clamp(double.IsNaN(marginVerticalNumberBox.Value) ? 90 : (int)Math.Round(marginVerticalNumberBox.Value), 0, 400);
+            newConfig.Bold = boldCheckBox.IsChecked == true;
+            newConfig.Uppercase = uppercaseCheckBox.IsChecked == true;
+            newConfig.KaraokeHighlightColor = FromUiColor(karaokeAccentColorPicker.Color);
+
+            if (isKaraokeMode)
             {
-                BasePreset = basePresetComboBox.SelectedIndex switch
+                newConfig.KaraokePreset = basePresetComboBox.SelectedIndex switch
                 {
-                    1 => AdvancedSubtitleBasePreset.CleanSans,
-                    2 => AdvancedSubtitleBasePreset.CaptionBox,
-                    _ => AdvancedSubtitleBasePreset.SocialImpact
-                },
-                FontFamily = (fontFamilyComboBox.SelectedItem as string) ?? GetDefaultFontFamilyForPreset(basePresetComboBox.SelectedIndex),
-                FontSize = Math.Clamp(double.IsNaN(fontSizeNumberBox.Value) ? 72d : fontSizeNumberBox.Value, 24d, 160d),
-                OutlineWidth = Math.Clamp(double.IsNaN(outlineNumberBox.Value) ? 5d : outlineNumberBox.Value, 0d, 20d),
-                MarginVertical = Math.Clamp(double.IsNaN(marginVerticalNumberBox.Value) ? 90 : (int)Math.Round(marginVerticalNumberBox.Value), 0, 400),
-                Bold = boldCheckBox.IsChecked == true,
-                Uppercase = uppercaseCheckBox.IsChecked == true,
-                KaraokeHighlightColor = FromUiColor(karaokeAccentColorPicker.Color)
-            };
+                    1 => KaraokeSubtitleBasePreset.Punch,
+                    _ => KaraokeSubtitleBasePreset.NeonKaraoke
+                };
+            }
+            else
+            {
+                newConfig.StyledPreset = basePresetComboBox.SelectedIndex switch
+                {
+                    1 => StyledSubtitleBasePreset.CleanSans,
+                    2 => StyledSubtitleBasePreset.CaptionBox,
+                    3 => StyledSubtitleBasePreset.BroadcastLowerThird,
+                    _ => StyledSubtitleBasePreset.SocialImpact
+                };
+            }
+
+            _advancedSubtitlePresetConfiguration = newConfig;
 
             UpdateAdvancedSubtitlePresetSummary();
         }
@@ -1579,75 +1617,42 @@ namespace Files_Tools.Pages
                 return;
             }
 
-            var presetName = _advancedSubtitlePresetConfiguration.BasePreset.ToString();
+            var isKaraokeMode = IsKaraokeAdvancedSubtitleTypeSelected();
+            var (presetName, presentation) = isKaraokeMode
+                ? (_advancedSubtitlePresetConfiguration.KaraokePreset.ToString(), _advancedSubtitlePresetConfiguration.KaraokePreset switch
+                {
+                    KaraokeSubtitleBasePreset.Punch => "Punch karaoke",
+                    _ => "Neon karaoke"
+                })
+                : (_advancedSubtitlePresetConfiguration.StyledPreset.ToString(), _advancedSubtitlePresetConfiguration.StyledPreset switch
+                {
+                    StyledSubtitleBasePreset.CaptionBox => "Boxed caption",
+                    StyledSubtitleBasePreset.BroadcastLowerThird => "Lower third",
+                    StyledSubtitleBasePreset.CleanSans => "Clean fade",
+                    _ => "Impact pop"
+                });
             var textTransform = _advancedSubtitlePresetConfiguration.Uppercase ? "Uppercase" : "Original case";
             var fontWeight = _advancedSubtitlePresetConfiguration.Bold ? "Bold" : "Regular";
             AdvancedSubtitlePresetSummaryTextBlock.Text =
-                $"Preset: {presetName} | {_advancedSubtitlePresetConfiguration.FontFamily} {_advancedSubtitlePresetConfiguration.FontSize:0.#} | {fontWeight} | {textTransform} | Outline {_advancedSubtitlePresetConfiguration.OutlineWidth:0.#}";
+                $"Preset: {presetName} ({presentation}) | {_advancedSubtitlePresetConfiguration.FontFamily} {_advancedSubtitlePresetConfiguration.FontSize:0.#} | {fontWeight} | {textTransform} | Outline {_advancedSubtitlePresetConfiguration.OutlineWidth:0.#}";
         }
 
         private SubtitleStylePreset CreateAdvancedSubtitleStylePresetFromConfiguration()
         {
-            var basePreset = _advancedSubtitlePresetConfiguration.BasePreset switch
-            {
-                AdvancedSubtitleBasePreset.CleanSans => new SubtitleStylePreset
+            var isKaraokeMode = IsKaraokeAdvancedSubtitleTypeSelected();
+            var basePreset = isKaraokeMode
+                ? _advancedSubtitlePresetConfiguration.KaraokePreset switch
                 {
-                    Name = "CleanSans",
-                    AssStyleName = "CleanSans",
-                    ScriptTitle = "Styled subtitles",
-                    PlayResX = 1920,
-                    PlayResY = 1080,
-                    WrapStyle = 0,
-                    ScaledBorderAndShadow = true,
-                    PrimaryFontFamily = "Segoe UI",
-                    FontFamilyFallbacks = ["Segoe UI", "Arial", "Helvetica"],
-                    FontSize = 62,
-                    Bold = true,
-                    Italic = false,
-                    TextTransform = SubtitleTextTransform.None,
-                    FillColor = SubtitleColor.White,
-                    OutlineColor = SubtitleColor.Black,
-                    ShadowColor = SubtitleColor.Black,
-                    UseBackgroundBox = false,
-                    OutlineWidth = 4,
-                    ShadowDepth = 0,
-                    Alignment = SubtitleVisualAlignment.BottomCenter,
-                    MarginLeft = 80,
-                    MarginRight = 80,
-                    MarginVertical = 90,
-                    MaxLines = 2,
-                    MaxCharsPerLine = 34
-                },
-                AdvancedSubtitleBasePreset.CaptionBox => new SubtitleStylePreset
+                    KaraokeSubtitleBasePreset.Punch => KaraokeSubtitlePresets.CreatePunch(),
+                    _ => KaraokeSubtitlePresets.CreateNeonKaraoke()
+                }
+                : _advancedSubtitlePresetConfiguration.StyledPreset switch
                 {
-                    Name = "CaptionBox",
-                    AssStyleName = "CaptionBox",
-                    ScriptTitle = "Styled subtitles",
-                    PlayResX = 1920,
-                    PlayResY = 1080,
-                    WrapStyle = 0,
-                    ScaledBorderAndShadow = true,
-                    PrimaryFontFamily = "Arial",
-                    FontFamilyFallbacks = ["Arial", "Helvetica", "Segoe UI"],
-                    FontSize = 58,
-                    Bold = true,
-                    Italic = false,
-                    TextTransform = SubtitleTextTransform.None,
-                    FillColor = SubtitleColor.White,
-                    OutlineColor = SubtitleColor.Black,
-                    ShadowColor = SubtitleColor.Black,
-                    UseBackgroundBox = true,
-                    OutlineWidth = 2,
-                    ShadowDepth = 0,
-                    Alignment = SubtitleVisualAlignment.BottomCenter,
-                    MarginLeft = 80,
-                    MarginRight = 80,
-                    MarginVertical = 110,
-                    MaxLines = 2,
-                    MaxCharsPerLine = 34
-                },
-                _ => SubtitleStylePresets.CreateSocialImpact()
-            };
+                    StyledSubtitleBasePreset.CleanSans => StyledSubtitlePresets.CreateCleanSans(),
+                    StyledSubtitleBasePreset.CaptionBox => StyledSubtitlePresets.CreateCaptionBox(),
+                    StyledSubtitleBasePreset.BroadcastLowerThird => StyledSubtitlePresets.CreateBroadcastLowerThird(),
+                    _ => StyledSubtitlePresets.CreateSocialImpact()
+                };
 
             return new SubtitleStylePreset
             {
@@ -1669,6 +1674,10 @@ namespace Files_Tools.Pages
                 ShadowColor = basePreset.ShadowColor,
                 KaraokeHighlightColor = _advancedSubtitlePresetConfiguration.KaraokeHighlightColor,
                 UseBackgroundBox = basePreset.UseBackgroundBox,
+                PresentationAnimation = basePreset.PresentationAnimation,
+                EntryFadeMilliseconds = basePreset.EntryFadeMilliseconds,
+                ExitFadeMilliseconds = basePreset.ExitFadeMilliseconds,
+                IntroScale = basePreset.IntroScale,
                 OutlineWidth = _advancedSubtitlePresetConfiguration.OutlineWidth,
                 ShadowDepth = basePreset.ShadowDepth,
                 Alignment = basePreset.Alignment,
@@ -1682,12 +1691,22 @@ namespace Files_Tools.Pages
             };
         }
 
-        private static string GetDefaultFontFamilyForPreset(int basePresetIndex)
+        private static string GetDefaultFontFamilyForPreset(int basePresetIndex, bool isKaraokeMode)
         {
+            if (isKaraokeMode)
+            {
+                return basePresetIndex switch
+                {
+                    1 => "Arial Black",
+                    _ => "Segoe UI Semibold"
+                };
+            }
+
             return basePresetIndex switch
             {
                 1 => "Segoe UI",
                 2 => "Arial",
+                3 => "Segoe UI Semibold",
                 _ => "Impact"
             };
         }
@@ -1821,30 +1840,10 @@ namespace Files_Tools.Pages
             }
         }
 
-        private void UpdateSubtitlePlacementFromPointer(PointerRoutedEventArgs e)
-        {
-            if (SubtitlePlacementCanvas is null)
-            {
-                return;
-            }
-
-            var videoBounds = GetPreviewVideoBounds();
-            if (videoBounds.Width <= 0 || videoBounds.Height <= 0)
-            {
-                return;
-            }
-
-            var point = e.GetCurrentPoint(SubtitlePlacementCanvas).Position;
-            var normalizedX = Math.Clamp((point.X - videoBounds.X) / videoBounds.Width, 0d, 1d);
-            var normalizedY = Math.Clamp((point.Y - videoBounds.Y) / videoBounds.Height, 0d, 1d);
-            ApplySubtitlePlacementValue(normalizedX * 100d, normalizedY * 100d, synchronizeX: true, synchronizeY: true);
-        }
-
         private void UpdateSubtitlePlacementPreview()
         {
             if (SubtitlePlacementMarker is null ||
                 SubtitlePlacementCanvas is null ||
-                SubtitlePlacementPreviewTextBlock is null ||
                 SubtitlePlacementStatusTextBlock is null)
             {
                 return;
@@ -1853,7 +1852,13 @@ namespace Files_Tools.Pages
             var shouldShow = ShouldShowSubtitlePlacementControls();
             SubtitlePlacementMarker.Visibility = shouldShow ? Visibility.Visible : Visibility.Collapsed;
             SubtitlePlacementCanvas.IsHitTestVisible = shouldShow;
-            SubtitlePlacementPreviewTextBlock.Text = $"X {(int)Math.Round(_subtitlePlacementX * 100d):0}%  Y {(int)Math.Round(_subtitlePlacementY * 100d):0}%";
+
+            var previewTextBlock = FindSubtitlePlacementPreviewTextBlock();
+            if (previewTextBlock is not null)
+            {
+                previewTextBlock.Text = $"X {(int)Math.Round(_subtitlePlacementX * 100d):0}%  Y {(int)Math.Round(_subtitlePlacementY * 100d):0}%";
+            }
+
             SubtitlePlacementStatusTextBlock.Text = BuildSubtitlePlacementStatusText();
 
             if (!shouldShow)
@@ -1880,6 +1885,37 @@ namespace Files_Tools.Pages
 
             Canvas.SetLeft(SubtitlePlacementMarker, left);
             Canvas.SetTop(SubtitlePlacementMarker, top);
+        }
+
+        private TextBlock? FindSubtitlePlacementPreviewTextBlock()
+        {
+            if (SubtitlePlacementMarker?.Template is null)
+            {
+                return null;
+            }
+
+            return FindChildByName<TextBlock>(SubtitlePlacementMarker, "SubtitlePlacementPreviewTextBlock");
+        }
+
+        private T? FindChildByName<T>(DependencyObject parent, string name) where T : DependencyObject
+        {
+            var childCount = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childCount; i++)
+            {
+                var child = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChild(parent, i);
+                if (child is T typedChild && child.GetValue(FrameworkElement.NameProperty) as string == name)
+                {
+                    return typedChild;
+                }
+
+                var result = FindChildByName<T>(child, name);
+                if (result is not null)
+                {
+                    return result;
+                }
+            }
+
+            return null;
         }
 
         private Rect GetPreviewVideoBounds()
