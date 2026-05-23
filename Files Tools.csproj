@@ -12,6 +12,7 @@
     <WinUISDKReferences>false</WinUISDKReferences>
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
+    <InternalsVisibleTo>Files.Tools.Tests</InternalsVisibleTo>
   </PropertyGroup>
 
   <ItemGroup>

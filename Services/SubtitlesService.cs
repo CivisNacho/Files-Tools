@@ -183,6 +183,14 @@ public sealed class SubtitleStylePreset
 
     public bool UseBackgroundBox { get; init; }
 
+    public SubtitlePresentationAnimation PresentationAnimation { get; init; } = SubtitlePresentationAnimation.None;
+
+    public int EntryFadeMilliseconds { get; init; }
+
+    public int ExitFadeMilliseconds { get; init; }
+
+    public double IntroScale { get; init; } = 1d;
+
     public double OutlineWidth { get; init; } = 5;
 
     public double ShadowDepth { get; init; }
@@ -205,11 +213,28 @@ public sealed class SubtitleStylePreset
 }
 
 /// <summary>
-/// Built-in subtitle style presets.
+/// Small animation profile used when rendering ASS subtitle cues.
 /// </summary>
-public static class SubtitleStylePresets
+public enum SubtitlePresentationAnimation
+{
+    None,
+    Fade,
+    Pop,
+    FadePop
+}
+
+/// <summary>
+/// Built-in styled ASS subtitle presets.
+/// </summary>
+public static class StyledSubtitlePresets
 {
     public static SubtitleStylePreset SocialImpact => CreateSocialImpact();
+
+    public static SubtitleStylePreset CleanSans => CreateCleanSans();
+
+    public static SubtitleStylePreset CaptionBox => CreateCaptionBox();
+
+    public static SubtitleStylePreset BroadcastLowerThird => CreateBroadcastLowerThird();
 
     public static SubtitleStylePreset CreateSocialImpact()
     {
@@ -232,12 +257,208 @@ public static class SubtitleStylePresets
             OutlineColor = SubtitleColor.Black,
             ShadowColor = SubtitleColor.Black,
             UseBackgroundBox = false,
+            PresentationAnimation = SubtitlePresentationAnimation.FadePop,
+            EntryFadeMilliseconds = 120,
+            ExitFadeMilliseconds = 120,
+            IntroScale = 1.08d,
             OutlineWidth = 5,
             ShadowDepth = 0,
             Alignment = SubtitleVisualAlignment.BottomCenter,
             MarginLeft = 80,
             MarginRight = 80,
             MarginVertical = 90,
+            MaxLines = 2,
+            MaxCharsPerLine = 28
+        };
+    }
+
+    public static SubtitleStylePreset CreateCleanSans()
+    {
+        return new SubtitleStylePreset
+        {
+            Name = "CleanSans",
+            AssStyleName = "CleanSans",
+            ScriptTitle = "Styled subtitles",
+            PlayResX = 1920,
+            PlayResY = 1080,
+            WrapStyle = 0,
+            ScaledBorderAndShadow = true,
+            PrimaryFontFamily = "Segoe UI",
+            FontFamilyFallbacks = ["Segoe UI", "Arial", "Helvetica", "Noto Sans"],
+            FontSize = 62,
+            Bold = true,
+            Italic = false,
+            TextTransform = SubtitleTextTransform.None,
+            FillColor = SubtitleColor.White,
+            OutlineColor = SubtitleColor.Black,
+            ShadowColor = SubtitleColor.Black,
+            UseBackgroundBox = false,
+            PresentationAnimation = SubtitlePresentationAnimation.Fade,
+            EntryFadeMilliseconds = 100,
+            ExitFadeMilliseconds = 100,
+            IntroScale = 1d,
+            OutlineWidth = 3.5,
+            ShadowDepth = 0.5,
+            Alignment = SubtitleVisualAlignment.BottomCenter,
+            MarginLeft = 80,
+            MarginRight = 80,
+            MarginVertical = 96,
+            MaxLines = 2,
+            MaxCharsPerLine = 34
+        };
+    }
+
+    public static SubtitleStylePreset CreateCaptionBox()
+    {
+        return new SubtitleStylePreset
+        {
+            Name = "CaptionBox",
+            AssStyleName = "CaptionBox",
+            ScriptTitle = "Styled subtitles",
+            PlayResX = 1920,
+            PlayResY = 1080,
+            WrapStyle = 0,
+            ScaledBorderAndShadow = true,
+            PrimaryFontFamily = "Arial",
+            FontFamilyFallbacks = ["Arial", "Helvetica", "Segoe UI"],
+            FontSize = 58,
+            Bold = true,
+            Italic = false,
+            TextTransform = SubtitleTextTransform.None,
+            FillColor = SubtitleColor.White,
+            OutlineColor = SubtitleColor.Black,
+            ShadowColor = new SubtitleColor(140, 0, 0, 0),
+            UseBackgroundBox = true,
+            PresentationAnimation = SubtitlePresentationAnimation.Fade,
+            EntryFadeMilliseconds = 140,
+            ExitFadeMilliseconds = 140,
+            IntroScale = 1d,
+            OutlineWidth = 2,
+            ShadowDepth = 0,
+            Alignment = SubtitleVisualAlignment.BottomCenter,
+            MarginLeft = 88,
+            MarginRight = 88,
+            MarginVertical = 114,
+            MaxLines = 2,
+            MaxCharsPerLine = 34
+        };
+    }
+
+    public static SubtitleStylePreset CreateBroadcastLowerThird()
+    {
+        return new SubtitleStylePreset
+        {
+            Name = "BroadcastLowerThird",
+            AssStyleName = "BroadcastLowerThird",
+            ScriptTitle = "Styled subtitles",
+            PlayResX = 1920,
+            PlayResY = 1080,
+            WrapStyle = 0,
+            ScaledBorderAndShadow = true,
+            PrimaryFontFamily = "Segoe UI Semibold",
+            FontFamilyFallbacks = ["Segoe UI Semibold", "Segoe UI", "Arial"],
+            FontSize = 52,
+            Bold = true,
+            Italic = false,
+            TextTransform = SubtitleTextTransform.Uppercase,
+            FillColor = SubtitleColor.White,
+            OutlineColor = SubtitleColor.Black,
+            ShadowColor = new SubtitleColor(170, 16, 24, 40),
+            UseBackgroundBox = true,
+            PresentationAnimation = SubtitlePresentationAnimation.Pop,
+            EntryFadeMilliseconds = 100,
+            ExitFadeMilliseconds = 120,
+            IntroScale = 1.1d,
+            OutlineWidth = 3,
+            ShadowDepth = 0,
+            Alignment = SubtitleVisualAlignment.BottomLeft,
+            MarginLeft = 96,
+            MarginRight = 96,
+            MarginVertical = 82,
+            MaxLines = 2,
+            MaxCharsPerLine = 30
+        };
+    }
+}
+
+/// <summary>
+/// Built-in karaoke subtitle presets.
+/// </summary>
+public static class KaraokeSubtitlePresets
+{
+    public static SubtitleStylePreset NeonKaraoke => CreateNeonKaraoke();
+
+    public static SubtitleStylePreset Punch => CreatePunch();
+
+    public static SubtitleStylePreset CreateNeonKaraoke()
+    {
+        return new SubtitleStylePreset
+        {
+            Name = "NeonKaraoke",
+            AssStyleName = "NeonKaraoke",
+            ScriptTitle = "Karaoke subtitles",
+            PlayResX = 1920,
+            PlayResY = 1080,
+            WrapStyle = 0,
+            ScaledBorderAndShadow = true,
+            PrimaryFontFamily = "Segoe UI Semibold",
+            FontFamilyFallbacks = ["Segoe UI Semibold", "Segoe UI", "Arial"],
+            FontSize = 64,
+            Bold = true,
+            Italic = false,
+            TextTransform = SubtitleTextTransform.None,
+            FillColor = SubtitleColor.White,
+            OutlineColor = SubtitleColor.Black,
+            ShadowColor = new SubtitleColor(170, 0, 0, 0),
+            KaraokeHighlightColor = new SubtitleColor(0, 255, 214, 0),
+            UseBackgroundBox = false,
+            PresentationAnimation = SubtitlePresentationAnimation.FadePop,
+            EntryFadeMilliseconds = 80,
+            ExitFadeMilliseconds = 80,
+            IntroScale = 1.12d,
+            OutlineWidth = 6,
+            ShadowDepth = 0.6,
+            Alignment = SubtitleVisualAlignment.BottomCenter,
+            MarginLeft = 80,
+            MarginRight = 80,
+            MarginVertical = 92,
+            MaxLines = 2,
+            MaxCharsPerLine = 30
+        };
+    }
+
+public static SubtitleStylePreset CreatePunch()
+    {
+        return new SubtitleStylePreset
+        {
+            Name = "Punch",
+            AssStyleName = "Punch",
+            ScriptTitle = "Karaoke subtitles",
+            PlayResX = 1920,
+            PlayResY = 1080,
+            WrapStyle = 0,
+            ScaledBorderAndShadow = true,
+            PrimaryFontFamily = "Arial Black",
+            FontFamilyFallbacks = ["Arial Black", "Impact", "Arial"],
+            FontSize = 72,
+            Bold = true,
+            Italic = false,
+            TextTransform = SubtitleTextTransform.None,
+            FillColor = SubtitleColor.White,
+            OutlineColor = new SubtitleColor(0, 50, 50, 50),
+            ShadowColor = SubtitleColor.Black,
+            KaraokeHighlightColor = new SubtitleColor(0, 255, 100, 0),
+            UseBackgroundBox = false,
+            PresentationAnimation = SubtitlePresentationAnimation.None,
+            EntryFadeMilliseconds = 0,
+            ExitFadeMilliseconds = 0,
+            IntroScale = 1d,
+            OutlineWidth = 10,
+            ShadowDepth = 1.5,
+            Alignment = SubtitleVisualAlignment.BottomCenter,
+            MarginLeft = 80,
+            MarginRight = 80,
+            MarginVertical = 92,
             MaxLines = 2,
             MaxCharsPerLine = 28
         };
@@ -640,19 +861,18 @@ public sealed class SubtitlesService : ISubtitlesService
             .Append(preset.MarginLeft).Append(',')
             .Append(preset.MarginRight).Append(',')
             .Append(preset.MarginVertical).Append(',')
-            .AppendLine("1");
+            .AppendLine(preset.UseBackgroundBox ? "3" : "1");
         builder.AppendLine();
 
         builder.AppendLine("[Events]");
         builder.AppendLine("Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text");
-        var positionOverride = BuildAssPositionOverride(preset.Alignment, preset.PositionX, preset.PositionY);
         foreach (var cue in styledDraft.Cues)
         {
             builder.Append("Dialogue: 0,")
                 .Append(FormatAssTimestamp(cue.Start)).Append(',')
                 .Append(FormatAssTimestamp(cue.End)).Append(',')
                 .Append(preset.AssStyleName).Append(", ,0,0,0,,")
-                .Append(positionOverride)
+                .Append(BuildAssCueOverrides(preset, cue.Start, cue.End))
                 .AppendLine(cue.Text.Replace("\r", string.Empty).Replace("\n", "\\N"));
         }
 
@@ -693,13 +913,11 @@ public sealed class SubtitlesService : ISubtitlesService
             .Append(preset.MarginLeft).Append(',')
             .Append(preset.MarginRight).Append(',')
             .Append(preset.MarginVertical).Append(',')
-            .AppendLine("1");
+            .AppendLine(preset.UseBackgroundBox ? "3" : "1");
         builder.AppendLine();
 
         builder.AppendLine("[Events]");
         builder.AppendLine("Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text");
-        var positionOverride = BuildAssPositionOverride(preset.Alignment, preset.PositionX, preset.PositionY);
-
         foreach (var cue in cues)
         {
             if (cue.Words.Count == 0)
@@ -707,7 +925,7 @@ public sealed class SubtitlesService : ISubtitlesService
                 continue;
             }
 
-            builder.AppendLine(BuildAssDialogueLine(0, cue.Start, cue.End, preset.StyleName, positionOverride + RenderKaraokeCueText(cue)));
+            builder.AppendLine(BuildAssDialogueLine(0, cue.Start, cue.End, preset.StyleName, BuildAssCueOverrides(preset, cue.Start, cue.End) + RenderKaraokeCueText(cue, preset)));
         }
 
         return builder.ToString();
@@ -1270,11 +1488,11 @@ public sealed class SubtitlesService : ISubtitlesService
 
     private static KaraokeRenderPreset CreateDefaultKaraokePreset(SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null)
     {
-        var basePreset = ApplyPlacementToPreset(NormalizePreset(preset ?? SubtitleStylePresets.SocialImpact), placement);
+        var basePreset = ApplyPlacementToPreset(NormalizePreset(preset ?? KaraokeSubtitlePresets.NeonKaraoke), placement);
         return new KaraokeRenderPreset
         {
             ScriptTitle = "Karaoke subtitles",
-            StyleName = "KaraokeImpact",
+            StyleName = basePreset.AssStyleName,
             PlayResX = basePreset.PlayResX,
             PlayResY = basePreset.PlayResY,
             WrapStyle = basePreset.WrapStyle,
@@ -1291,10 +1509,15 @@ public sealed class SubtitlesService : ISubtitlesService
             MarginVertical = basePreset.MarginVertical,
             PositionX = basePreset.PositionX,
             PositionY = basePreset.PositionY,
-            BaseColor = SubtitleColor.White,
+            UseBackgroundBox = basePreset.UseBackgroundBox,
+            PresentationAnimation = basePreset.PresentationAnimation,
+            EntryFadeMilliseconds = basePreset.EntryFadeMilliseconds,
+            ExitFadeMilliseconds = basePreset.ExitFadeMilliseconds,
+            IntroScale = basePreset.IntroScale,
+            BaseColor = basePreset.FillColor,
             HighlightColor = basePreset.KaraokeHighlightColor,
-            OutlineColor = SubtitleColor.Black,
-            ShadowColor = SubtitleColor.Black
+            OutlineColor = basePreset.OutlineColor,
+            ShadowColor = basePreset.ShadowColor
         };
     }
 
@@ -1303,18 +1526,31 @@ public sealed class SubtitlesService : ISubtitlesService
         return $"Dialogue: {layer},{FormatAssTimestamp(start)},{FormatAssTimestamp(end > start ? end : start + MinimumPositiveDuration)},{styleName},,0,0,0,,{text}";
     }
 
-    private static string RenderKaraokeCueText(KaraokeCue cue)
+    private static string RenderKaraokeCueText(KaraokeCue cue, KaraokeRenderPreset preset)
     {
         var builder = new StringBuilder();
+        var useInstantFill = preset.PresentationAnimation == SubtitlePresentationAnimation.None;
+
         for (var index = 0; index < cue.Words.Count; index++)
         {
             var word = cue.Words[index];
             var durationCentiseconds = Math.Max(1, (int)Math.Round((word.End - word.Start).TotalMilliseconds / 10d, MidpointRounding.AwayFromZero));
             var prefix = word.BreakBefore ? @"\N" : index > 0 ? " " : string.Empty;
-            builder.Append(@"{\kf")
-                .Append(durationCentiseconds.ToString(System.Globalization.CultureInfo.InvariantCulture))
-                .Append('}')
-                .Append(prefix)
+
+            if (useInstantFill)
+            {
+                builder.Append(@"{\k")
+                    .Append(durationCentiseconds.ToString(System.Globalization.CultureInfo.InvariantCulture))
+                    .Append('}');
+            }
+            else
+            {
+                builder.Append(@"{\kf")
+                    .Append(durationCentiseconds.ToString(System.Globalization.CultureInfo.InvariantCulture))
+                    .Append('}');
+            }
+
+            builder.Append(prefix)
                 .Append(EscapeAssText(word.Text));
         }
 
@@ -1345,6 +1581,46 @@ public sealed class SubtitlesService : ISubtitlesService
         return $"&H{color.Alpha:X2}{color.Blue:X2}{color.Green:X2}{color.Red:X2}&";
     }
 
+    private static string BuildAssCueOverrides(SubtitleStylePreset preset, TimeSpan start, TimeSpan end)
+    {
+        ArgumentNullException.ThrowIfNull(preset);
+
+        var tags = new List<string>(2);
+        var positionOverride = BuildAssPositionOverride(preset.Alignment, preset.PositionX, preset.PositionY);
+        if (positionOverride.Length > 0)
+        {
+            tags.Add(positionOverride);
+        }
+
+        var animationOverride = BuildAssAnimationOverride(preset, start, end);
+        if (animationOverride.Length > 0)
+        {
+            tags.Add(animationOverride);
+        }
+
+        return tags.Count == 0 ? string.Empty : $"{{{string.Join(string.Empty, tags)}}}";
+    }
+
+    private static string BuildAssCueOverrides(KaraokeRenderPreset preset, TimeSpan start, TimeSpan end)
+    {
+        ArgumentNullException.ThrowIfNull(preset);
+
+        var tags = new List<string>(2);
+        var positionOverride = BuildAssPositionOverride(preset.Alignment, preset.PositionX, preset.PositionY);
+        if (positionOverride.Length > 0)
+        {
+            tags.Add(positionOverride);
+        }
+
+        var animationOverride = BuildAssAnimationOverride(preset.PresentationAnimation, preset.EntryFadeMilliseconds, preset.ExitFadeMilliseconds, preset.IntroScale, start, end);
+        if (animationOverride.Length > 0)
+        {
+            tags.Add(animationOverride);
+        }
+
+        return tags.Count == 0 ? string.Empty : $"{{{string.Join(string.Empty, tags)}}}";
+    }
+
     private static string BuildAssPositionOverride(SubtitleVisualAlignment alignment, int? positionX, int? positionY)
     {
         if (!positionX.HasValue || !positionY.HasValue)
@@ -1352,7 +1628,51 @@ public sealed class SubtitlesService : ISubtitlesService
             return string.Empty;
         }
 
-        return FormattableString.Invariant($@"{{\an{GetAssAlignmentCode(alignment)}\pos({positionX.Value},{positionY.Value})}}");
+        return FormattableString.Invariant($@"\an{GetAssAlignmentCode(alignment)}\pos({positionX.Value},{positionY.Value})");
+    }
+
+    private static string BuildAssAnimationOverride(SubtitleStylePreset preset, TimeSpan start, TimeSpan end)
+    {
+        return BuildAssAnimationOverride(preset.PresentationAnimation, preset.EntryFadeMilliseconds, preset.ExitFadeMilliseconds, preset.IntroScale, start, end);
+    }
+
+    private static string BuildAssAnimationOverride(SubtitlePresentationAnimation presentationAnimation, int entryFadeMilliseconds, int exitFadeMilliseconds, double introScale, TimeSpan start, TimeSpan end)
+    {
+        var builder = new StringBuilder();
+
+        var entryFade = Math.Clamp(entryFadeMilliseconds, 0, 5000);
+        var exitFade = Math.Clamp(exitFadeMilliseconds, 0, 5000);
+        if (entryFade > 0 || exitFade > 0)
+        {
+            builder.Append(@"\fad(")
+                .Append(entryFade)
+                .Append(',')
+                .Append(exitFade)
+                .Append(')');
+        }
+
+        var wantsScaleAnimation = presentationAnimation is SubtitlePresentationAnimation.Pop or SubtitlePresentationAnimation.FadePop;
+        introScale = introScale > 0 ? introScale : 1d;
+        if (wantsScaleAnimation && Math.Abs(introScale - 1d) > 0.01d)
+        {
+            var scalePercent = Math.Max(1, (int)Math.Round(introScale * 100d, MidpointRounding.AwayFromZero));
+            builder.Append(@"\fscx")
+                .Append(scalePercent)
+                .Append(@"\fscy")
+                .Append(scalePercent)
+                .Append(@"\t(0,160,\fscx100\fscy100)");
+        }
+        else if (wantsScaleAnimation)
+        {
+            builder.Append(@"\fscx108\fscy108\t(0,160,\fscx100\fscy100)");
+        }
+
+        if (builder.Length > 0 && start >= end)
+        {
+            return string.Empty;
+        }
+
+        return builder.ToString();
     }
 
     private static int GetAssAlignmentCode(SubtitleVisualAlignment alignment)
@@ -1516,7 +1836,7 @@ public sealed class SubtitlesService : ISubtitlesService
 
     private static SubtitleStylePreset NormalizePreset(SubtitleStylePreset? preset)
     {
-        var source = preset ?? SubtitleStylePresets.SocialImpact;
+        var source = preset ?? StyledSubtitlePresets.SocialImpact;
         var fontFallbacks = source.FontFamilyFallbacks is { Count: > 0 }
             ? source.FontFamilyFallbacks.ToArray()
             : [source.PrimaryFontFamily];
@@ -1541,6 +1861,10 @@ public sealed class SubtitlesService : ISubtitlesService
             ShadowColor = source.ShadowColor ?? SubtitleColor.Black,
             KaraokeHighlightColor = source.KaraokeHighlightColor,
             UseBackgroundBox = source.UseBackgroundBox,
+            PresentationAnimation = source.PresentationAnimation,
+            EntryFadeMilliseconds = Math.Max(0, source.EntryFadeMilliseconds),
+            ExitFadeMilliseconds = Math.Max(0, source.ExitFadeMilliseconds),
+            IntroScale = source.IntroScale > 0 ? source.IntroScale : 1d,
             OutlineWidth = Math.Max(0, source.OutlineWidth),
             ShadowDepth = Math.Max(0, source.ShadowDepth),
             Alignment = source.Alignment,
@@ -1591,6 +1915,10 @@ public sealed class SubtitlesService : ISubtitlesService
             ShadowColor = preset.ShadowColor,
             KaraokeHighlightColor = preset.KaraokeHighlightColor,
             UseBackgroundBox = preset.UseBackgroundBox,
+            PresentationAnimation = preset.PresentationAnimation,
+            EntryFadeMilliseconds = preset.EntryFadeMilliseconds,
+            ExitFadeMilliseconds = preset.ExitFadeMilliseconds,
+            IntroScale = preset.IntroScale,
             OutlineWidth = preset.OutlineWidth,
             ShadowDepth = preset.ShadowDepth,
             Alignment = alignment,
@@ -2548,6 +2876,16 @@ public sealed class SubtitlesService : ISubtitlesService
         public int? PositionX { get; init; }
 
         public int? PositionY { get; init; }
+
+        public bool UseBackgroundBox { get; init; }
+
+        public SubtitlePresentationAnimation PresentationAnimation { get; init; }
+
+        public int EntryFadeMilliseconds { get; init; }
+
+        public int ExitFadeMilliseconds { get; init; }
+
+        public double IntroScale { get; init; } = 1d;
 
         public required SubtitleColor BaseColor { get; init; }
 

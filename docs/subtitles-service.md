@@ -145,21 +145,38 @@ Recommended advanced app pipeline:
 5. render final `.ass` with `RenderStyledAss(...)`
 6. use the rendered `.ass` for mux/burn
 
-Current built-in preset:
+### Styled ASS Subtitle Presets
 
-- `SubtitleStylePresets.SocialImpact`
+Built-in presets for styled `.ass` subtitle output (`StyledSubtitlePresets`):
 
-This preset is aimed at bold social-style subtitles:
+- `StyledSubtitlePresets.SocialImpact` — bold social-style subtitles:
+  - primary font: `Impact`, fallback stack: `Impact`, `Anton`, `Bebas Neue`, `Arial Black`
+  - uppercase transform, white fill, thick black outline
+  - fade-plus-pop animation, bottom-center alignment
+  - max lines: 2, max chars per line: 28
 
-- primary font: `Impact`
-- fallback stack: `Impact`, `Anton`, `Bebas Neue`, `Arial Black`
-- uppercase transform
-- white fill
-- thick black outline
-- no background box
-- bottom-center alignment
-- max lines: `2`
-- max chars per line: `28`
+- `StyledSubtitlePresets.CleanSans` — clean sans-serif captions with subtle fade-in/out
+- `StyledSubtitlePresets.CaptionBox` — boxed captions with opaque background styling
+- `StyledSubtitlePresets.BroadcastLowerThird` — broadcast-style lower thirds with uppercase text and pop animation
+
+### Karaoke Subtitle Presets
+
+Built-in presets for karaoke `.ass` subtitle output (`KaraokeSubtitlePresets`). Each preset has a distinct default font for visual differentiation:
+
+- `KaraokeSubtitlePresets.NeonKaraoke` — neon-style karaoke with bold pop animation
+  - **default font**: `Segoe UI Semibold`
+  - bright cyan-to-yellow highlight color for high-energy word effects
+  - scale pop (112% → 100%) animation on entry
+  - 80ms fade duration, bottom-center alignment
+  - designed for fast-paced, energetic presentations
+
+- `KaraokeSubtitlePresets.Punch` — bold, high-impact word emphasis style
+  - **default font**: `Arial Black` (bold, standard case)
+  - white fill with strong black outline for maximum contrast
+  - user-selectable highlight color for current-word emphasis (default: orange)
+  - instant fill (no animation) — highlights entire word at once
+  - 10px outline, 1.5px black shadow for depth
+  - optimized for emphasizing individual words with full-word coloring
 
 The preset model remains separate from file export so future styled outputs can reuse the same readability pipeline.
 

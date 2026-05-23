@@ -269,7 +269,7 @@ public sealed class AudioTranscriptionProgress
 /// </summary>
 public sealed class AudioTranscriptionService : IAudioTranscriptionService
 {
-    private const string BaseModelFileName = "ggml-base.bin";
+    private const string BaseModelFileName = "ggml-medium.bin";
     private static readonly string[] SupportedVideoExtensions = [".mp4", ".mov", ".mkv", ".avi", ".wmv", ".webm", ".m4v", ".gif"];
 
     private readonly string _modelPath;
@@ -341,7 +341,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
         Directory.CreateDirectory(modelDirectory);
         var copyProgress = progress is null
             ? null
-            : new CallbackProgress<double>(value =>
+            : new ThrottledProgress<double>(value =>
             {
                 var fraction = Math.Clamp(value, 0d, 1d);
                 progress.Report(new AudioTranscriptionInstallProgress
@@ -349,7 +349,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
                     Stage = fraction >= 1d ? "Transcription feature downloaded." : "Downloading transcription feature...",
                     FractionComplete = fraction
                 });
-            });
+            }, throttleMilliseconds: 200);
 
         await _modelInstaller.InstallBaseModelAsync(_modelPath, copyProgress, cancellationToken).ConfigureAwait(false);
         progress?.Report(new AudioTranscriptionInstallProgress
@@ -568,6 +568,31 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
         }
     }
 
+    private sealed class ThrottledProgress<T> : IProgress<T>
+    {
+        private readonly Action<T> _callback;
+        private readonly int _throttleMilliseconds;
+        private DateTimeOffset _lastReportTime = DateTimeOffset.MinValue;
+
+        public ThrottledProgress(Action<T> callback, int throttleMilliseconds = 200)
+        {
+            _callback = callback ?? throw new ArgumentNullException(nameof(callback));
+            _throttleMilliseconds = throttleMilliseconds;
+        }
+
+        public void Report(T value)
+        {
+            var now = DateTimeOffset.UtcNow;
+            if ((now - _lastReportTime).TotalMilliseconds < _throttleMilliseconds)
+            {
+                return;
+            }
+
+            _lastReportTime = now;
+            _callback(value);
+        }
+    }
+
     internal sealed class PreparedAudio : IDisposable
     {
         public PreparedAudio(string audioPath, string workingDirectory)
@@ -613,7 +638,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
 
     private sealed class WhisperModelInstaller : IWhisperModelInstaller
     {
-        private const double UnknownLengthTargetBytes = 75d * 1024d * 1024d;
+        private const double UnknownLengthTargetBytes = 1500d * 1024d * 1024d;
 
         public async Task InstallBaseModelAsync(string modelPath, IProgress<double>? progress, CancellationToken cancellationToken)
         {
@@ -623,7 +648,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
                 return;
             }
 
-            await using var sourceStream = await WhisperGgmlDownloader.Default.GetGgmlModelAsync(GgmlType.Base, QuantizationType.NoQuantization, cancellationToken).ConfigureAwait(false);
+            await using var sourceStream = await WhisperGgmlDownloader.Default.GetGgmlModelAsync(GgmlType.Medium, QuantizationType.NoQuantization, cancellationToken).ConfigureAwait(false);
             var totalLength = sourceStream.CanSeek ? sourceStream.Length : -1L;
             await using var targetStream = File.Create(modelPath);
             var buffer = new byte[81920];
@@ -658,7 +683,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
         }
     }
 
-    private sealed class WhisperNetTranscriber : IWhisperTranscriber
+    internal sealed class WhisperNetTranscriber : IWhisperTranscriber
     {
         private const float DefaultTokenTimestampThreshold = 0.01f;
         private const long WhisperTimestampUnitMilliseconds = 10L;
@@ -703,15 +728,12 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
 
         private static async Task<AudioTranscriptionDetailedResult> TranscribeDetailedAsync(string modelPath, string audioPath, IProgress<double>? progress, CancellationToken cancellationToken)
         {
-            // Native DTW / token-timestamp passes were causing AccessViolationException
-            // crashes in the current Whisper.net integration path. Keep the detailed
-            // result contract, but derive subtitle words from the stable segment pass.
-            var segments = await TranscribeDetailedSegmentsAsync(modelPath, audioPath, WhisperPassMode.Segments, progress, cancellationToken).ConfigureAwait(false);
-            var segmentFallbackWords = CleanupAlignedWords(
+            var segments = await TranscribeDetailedSegmentsAsync(modelPath, audioPath, WhisperPassMode.RawTokens, progress, cancellationToken).ConfigureAwait(false);
+            var tokenAlignedWords = CleanupAlignedWords(
                 segments,
-                BuildSegmentFallbackWords(segments),
-                AudioTranscriptionTimingSource.SegmentFallback);
-            return new AudioTranscriptionDetailedResult(segments, segmentFallbackWords);
+                AlignWordsFromTokens(segments),
+                AudioTranscriptionTimingSource.RawTokenAlignment);
+            return new AudioTranscriptionDetailedResult(segments, tokenAlignedWords);
         }
 
         private static async Task<IReadOnlyList<AudioTranscriptionDetailedSegment>> TranscribeDetailedSegmentsAsync(string modelPath, string audioPath, WhisperPassMode passMode, IProgress<double>? progress, CancellationToken cancellationToken)
@@ -784,10 +806,26 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
                 .WithLanguageDetection()
                 .WithProgressHandler(value => progress?.Report(Math.Clamp(value / 100d, 0d, 1d)));
 
+            if (passMode == WhisperPassMode.RawTokens)
+            {
+                builder.WithTokenTimestamps()
+                    .WithTokenTimestampsThreshold(DefaultTokenTimestampThreshold);
+            }
+
             return builder.Build();
         }
 
-        private static IReadOnlyList<WorkingAlignedWord> AlignWordsFromTokens(IReadOnlyList<AudioTranscriptionDetailedSegment> segments)
+        internal static (TimeSpan Start, TimeSpan End) GetTokenTiming(AudioTranscriptionToken token)
+        {
+            if (token.DtwTimestamp.HasValue)
+            {
+                return (token.DtwTimestamp.Value, token.DtwTimestamp.Value + (token.End - token.Start));
+            }
+
+            return (token.Start, token.End);
+        }
+
+        internal static IReadOnlyList<WorkingAlignedWord> AlignWordsFromTokens(IReadOnlyList<AudioTranscriptionDetailedSegment> segments)
         {
             var words = new List<WorkingAlignedWord>();
             var sequence = 0;
@@ -834,11 +872,13 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
                         continue;
                     }
 
+                    var (tokenStart, tokenEnd) = GetTokenTiming(token);
+
                     if (IsPunctuationOnlyToken(fragment))
                     {
                         if (current is not null)
                         {
-                            current.Append(fragment, token.Start, token.End);
+                            current.Append(fragment, tokenStart, tokenEnd);
                         }
                         else
                         {
@@ -861,14 +901,15 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
                             var prefixText = NormalizeTokenFragment(prefixToken.Text);
                             if (prefixText.Length > 0)
                             {
-                                current.Append(prefixText, prefixToken.Start, prefixToken.End);
+                                var (prefixStart, prefixEnd) = GetTokenTiming(prefixToken);
+                                current.Append(prefixText, prefixStart, prefixEnd);
                             }
                         }
 
                         pendingPrefixTokens.Clear();
                     }
 
-                    current.Append(fragment, token.Start, token.End);
+                    current.Append(fragment, tokenStart, tokenEnd);
                 }
 
                 FlushCurrent();
@@ -951,7 +992,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             return words;
         }
 
-        private static IReadOnlyList<AudioTranscriptionAlignedWord> CleanupAlignedWords(
+        internal static IReadOnlyList<AudioTranscriptionAlignedWord> CleanupAlignedWords(
             IReadOnlyList<AudioTranscriptionDetailedSegment> segments,
             IReadOnlyList<WorkingAlignedWord> candidateWords,
             AudioTranscriptionTimingSource timingSource)
@@ -1008,7 +1049,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
 
             if (NeedsRedistribution(segment, words))
             {
-                RedistributeSegmentWordTimings(segment, words);
+                RedistributeSegmentWordTimingsWithConfidence(segment, words, segment.Tokens);
                 return;
             }
 
@@ -1039,7 +1080,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
                     end = Min(segment.End, start + TimeSpan.FromTicks(MinimumDurationTicks));
                     if (end <= start)
                     {
-                        RedistributeSegmentWordTimings(segment, words);
+                        RedistributeSegmentWordTimingsWithConfidence(segment, words, segment.Tokens);
                         return;
                     }
                 }
@@ -1051,7 +1092,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
 
             if (words[^1].End < words[^1].Start)
             {
-                RedistributeSegmentWordTimings(segment, words);
+                RedistributeSegmentWordTimingsWithConfidence(segment, words, segment.Tokens);
             }
         }
 
@@ -1104,6 +1145,82 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
                     : Math.Max(
                         MinimumDurationTicks,
                         (long)Math.Round(segmentDurationTicks * (double)weight / Math.Max(1, totalWeight)));
+                var maxTicksForCurrent = Math.Max(MinimumDurationTicks, remainingTicks - (remainingWords - 1) * MinimumDurationTicks);
+                allocatedTicks = Math.Min(allocatedTicks, maxTicksForCurrent);
+
+                var end = index == words.Count - 1
+                    ? segment.End
+                    : cursor + TimeSpan.FromTicks(allocatedTicks);
+                if (end <= cursor)
+                {
+                    end = cursor + TimeSpan.FromTicks(MinimumDurationTicks);
+                }
+
+                words[index].Start = cursor;
+                words[index].End = Min(segment.End, end);
+                cursor = words[index].End;
+            }
+
+            if (words.Count > 0)
+            {
+                words[^1].End = segment.End > words[^1].Start
+                    ? segment.End
+                    : words[^1].Start + TimeSpan.FromTicks(MinimumDurationTicks);
+            }
+        }
+
+        private static void RedistributeSegmentWordTimingsWithConfidence(AudioTranscriptionDetailedSegment segment, List<WorkingAlignedWord> words, IReadOnlyList<AudioTranscriptionToken> tokens)
+        {
+            var segmentDurationTicks = Math.Max(
+                MinimumDurationTicks * words.Count,
+                (segment.End > segment.Start ? segment.End - segment.Start : TimeSpan.FromMilliseconds(1)).Ticks);
+
+            var tokensByTimeRange = tokens
+                .Where(t => !t.IsSpecial && t.Start < t.End)
+                .ToList();
+
+            var wordWeights = new List<double>();
+            for (var i = 0; i < words.Count; i++)
+            {
+                var word = words[i];
+                var wordStart = word.Start;
+                var wordEnd = word.End;
+
+                var overlappingTokens = tokensByTimeRange
+                    .Where(t => t.End > wordStart && t.Start < wordEnd)
+                    .ToList();
+
+                if (overlappingTokens.Count > 0)
+                {
+                    var avgProbability = overlappingTokens.Average(t => t.Probability);
+                    var avgTimestampProb = overlappingTokens.Average(t => t.TimestampProbability);
+                    var confidence = Math.Max(0.1d, avgProbability * 0.7d + avgTimestampProb * 0.3d);
+                    wordWeights.Add(confidence);
+                }
+                else
+                {
+                    wordWeights.Add(1d);
+                }
+            }
+
+            var totalWeight = wordWeights.Sum();
+            var cursor = segment.Start;
+
+            for (var index = 0; index < words.Count; index++)
+            {
+                var remainingWords = words.Count - index;
+                var remainingTicks = segment.End.Ticks - cursor.Ticks;
+                if (remainingTicks < MinimumDurationTicks * remainingWords)
+                {
+                    remainingTicks = MinimumDurationTicks * remainingWords;
+                }
+
+                var weight = wordWeights[index];
+                var allocatedTicks = index == words.Count - 1
+                    ? Math.Max(MinimumDurationTicks, remainingTicks)
+                    : Math.Max(
+                        MinimumDurationTicks,
+                        (long)Math.Round(segmentDurationTicks * weight / Math.Max(0.1d, totalWeight)));
                 var maxTicksForCurrent = Math.Max(MinimumDurationTicks, remainingTicks - (remainingWords - 1) * MinimumDurationTicks);
                 allocatedTicks = Math.Min(allocatedTicks, maxTicksForCurrent);
 
@@ -1304,7 +1421,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             Words
         }
 
-        private sealed class WorkingAlignedWord
+        internal sealed class WorkingAlignedWord
         {
             public WorkingAlignedWord(int sequence, int segmentIndex, TimeSpan start, TimeSpan end, string text)
             {

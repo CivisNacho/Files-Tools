@@ -1553,15 +1553,8 @@ public sealed class VideoProcessingService : IVideoProcessingService
             "-"
         };
 
-        try
-        {
-            var result = await RunProcessWithFallbackAsync(ffmpegCandidates, args, cancellationToken, probeJson: null).ConfigureAwait(false);
-            return result.ExitCode == 0;
-        }
-        catch (VideoProcessingException)
-        {
-            return false;
-        }
+        var result = await TryRunProcessWithFallbackAsync(ffmpegCandidates, args, cancellationToken).ConfigureAwait(false);
+        return result?.ExitCode == 0;
     }
 
     private static bool CanUseHardwareEncoding(StreamPlan streamPlan)
@@ -1905,6 +1898,27 @@ public sealed class VideoProcessingService : IVideoProcessingService
         }
 
         throw lastException ?? new InvalidOperationException("No FFmpeg executable candidates were available.");
+    }
+
+    private static async Task<ProcessResult?> TryRunProcessWithFallbackAsync(IReadOnlyList<string> binaryCandidates, IReadOnlyList<string> arguments, CancellationToken cancellationToken)
+    {
+        foreach (var candidate in binaryCandidates)
+        {
+            try
+            {
+                return await RunProcessAsync(candidate, arguments, cancellationToken, probeJson: null).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (VideoProcessingException)
+            {
+                // Silently continue to next candidate during testing
+            }
+        }
+
+        return null;
     }
 
     private static async Task<ProcessResult> RunProcessAsync(string binaryPath, IReadOnlyList<string> arguments, CancellationToken cancellationToken, string? probeJson, Action<string>? standardErrorLineObserver = null)

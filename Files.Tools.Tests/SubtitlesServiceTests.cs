@@ -459,7 +459,8 @@ public class SubtitlesServiceTests
         StringAssert.Contains(ass, "[V4+ Styles]");
         StringAssert.Contains(ass, "Style: KaraokeImpact");
         StringAssert.Contains(ass, "Dialogue: 0,");
-        StringAssert.Contains(ass, "Dialogue: 1,");
+        Assert.IsFalse(ass.Contains("Dialogue: 1,", StringComparison.Ordinal));
+        StringAssert.Contains(ass, @"{\fad(120,120)\fscx108\fscy108\t(0,160,\fscx100\fscy100)}");
     }
 
     [TestMethod]
@@ -613,9 +614,9 @@ public class SubtitlesServiceTests
     }
 
     [TestMethod]
-    public void SubtitleStylePresets_SocialImpact_ExposesExpectedDefaults()
+    public void StyledSubtitlePresets_SocialImpact_ExposesExpectedDefaults()
     {
-        var preset = SubtitleStylePresets.SocialImpact;
+        var preset = StyledSubtitlePresets.SocialImpact;
 
         Assert.AreEqual("SocialImpact", preset.Name);
         Assert.AreEqual("Impact", preset.PrimaryFontFamily);
@@ -627,6 +628,32 @@ public class SubtitlesServiceTests
         Assert.AreEqual(5d, preset.OutlineWidth);
         Assert.AreEqual(0d, preset.ShadowDepth);
         Assert.IsFalse(preset.UseBackgroundBox);
+    }
+
+    [TestMethod]
+    public void StyledSubtitlePresets_CaptionBox_UsesBoxPresentation()
+    {
+        var preset = StyledSubtitlePresets.CaptionBox;
+
+        Assert.AreEqual("CaptionBox", preset.Name);
+        Assert.IsTrue(preset.UseBackgroundBox);
+        Assert.AreEqual(SubtitlePresentationAnimation.Fade, preset.PresentationAnimation);
+        Assert.AreEqual(140, preset.EntryFadeMilliseconds);
+        Assert.AreEqual(140, preset.ExitFadeMilliseconds);
+        Assert.AreEqual(SubtitleVisualAlignment.BottomCenter, preset.Alignment);
+    }
+
+    [TestMethod]
+    public void KaraokeSubtitlePresets_NeonKaraoke_UsesAnimatedKaraokeDefaults()
+    {
+        var preset = KaraokeSubtitlePresets.NeonKaraoke;
+
+        Assert.AreEqual("NeonKaraoke", preset.Name);
+        Assert.AreEqual(SubtitlePresentationAnimation.FadePop, preset.PresentationAnimation);
+        Assert.AreEqual(80, preset.EntryFadeMilliseconds);
+        Assert.AreEqual(80, preset.ExitFadeMilliseconds);
+        Assert.AreEqual(1.12d, preset.IntroScale, 0.0001d);
+        Assert.AreEqual(new SubtitleColor(0, 255, 214, 0), preset.KaraokeHighlightColor);
     }
 
     [TestMethod]
@@ -665,6 +692,37 @@ public class SubtitlesServiceTests
         Assert.AreEqual(draft.Cues[0].Id, styled.Cues[0].Id);
         Assert.AreEqual(draft.Cues[0].Start, styled.Cues[0].Start);
         Assert.AreEqual(draft.Cues[0].End, styled.Cues[0].End);
+    }
+
+    [TestMethod]
+    public async Task BuildStyledAss_WithCaptionBox_EmitsFadeAnimation()
+    {
+        _audioTranscriptionService.Segments =
+        [
+            new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2), "caption box sample")
+        ];
+
+        var draft = await _service.GenerateAdvancedDraftAsync(CreateInputFile());
+        var styled = _service.ApplyStylePreset(draft, StyledSubtitlePresets.CaptionBox);
+        var ass = SubtitlesService.BuildStyledAss(styled);
+
+        StringAssert.Contains(ass, "Style: CaptionBox");
+        StringAssert.Contains(ass, @"{\fad(140,140)}");
+    }
+
+    [TestMethod]
+    public async Task RenderKaraokeAss_WithNeonKaraoke_EmitsPopAnimation()
+    {
+        _audioTranscriptionService.Segments =
+        [
+            new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2), "neon karaoke sample")
+        ];
+
+        var draft = await _service.GenerateAdvancedDraftAsync(CreateInputFile());
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.NeonKaraoke);
+
+        StringAssert.Contains(ass, @"{\fad(80,80)\fscx112\fscy112\t(0,160,\fscx100\fscy100)}");
+        StringAssert.Contains(ass, "Style: KaraokeImpact");
     }
 
     [TestMethod]
@@ -708,7 +766,7 @@ public class SubtitlesServiceTests
                 NormalizedY = 0.5d
             });
 
-        StringAssert.Contains(ass, @"{\an5\pos(960,540)}");
+        StringAssert.Contains(ass, @"\an5\pos(960,540)");
     }
 
     private string CreateInputFile()
