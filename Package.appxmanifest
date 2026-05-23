@@ -8,15 +8,15 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="dde35eef-31d9-44e4-922b-2e9207eb32a9"
-    Publisher="CN=Nacho"
-    Version="0.5.2.0" />
+    Name="NachoGarcaGmez.MediaTools"
+    Publisher="CN=DA0ED678-FA79-4B56-A0A1-FF73C9058BEB"
+    Version="0.5.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="dde35eef-31d9-44e4-922b-2e9207eb32a9" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="864af31e-f506-419f-9e31-6bdc84b62889" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>Files Tools</DisplayName>
-    <PublisherDisplayName>Nacho</PublisherDisplayName>
+    <DisplayName>Media Tools</DisplayName>
+    <PublisherDisplayName>Nacho García Gómez</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -34,8 +34,8 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="Files Tools"
-        Description="Files Tools"
+        DisplayName="Media Tools"
+        Description="Media Tools"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png">

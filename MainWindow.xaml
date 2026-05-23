@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="Files Tools">
+    Title="Media Tools">
 
     <Window.SystemBackdrop>
         <MicaBackdrop />
@@ -228,7 +228,7 @@
             x:Name="AppTitleBar"
             Grid.Row="0"
             Grid.Column="1"
-            Title="Files Tools"
+            Title="Media Tools"
             IsBackButtonVisible="False"
             BackRequested="AppTitleBar_BackRequested" />
 

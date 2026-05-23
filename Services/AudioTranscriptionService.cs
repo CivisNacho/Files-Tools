@@ -510,7 +510,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
     {
         var root = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "Files Tools",
+            "Media Tools",
             "Whisper");
 
         return Path.Combine(root, BaseModelFileName);
