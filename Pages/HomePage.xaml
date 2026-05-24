@@ -50,7 +50,7 @@
                         HorizontalAlignment="Center"
                         FontSize="44"
                         FontWeight="SemiBold"
-                        Text="Drop an image, video, or audio file here"
+                        Text="Drop a file to get started"
                         TextAlignment="Center"
                         TextWrapping="Wrap" />
 
@@ -67,7 +67,7 @@
                         HorizontalAlignment="Center"
                         FontSize="15"
                         Opacity="0.68"
-                        Text="Images: PNG, JPG, JPEG, BMP, GIF, WebP   •   Video: MP4, MOV, MKV, AVI, WMV, WebM, M4V, GIF   •   Audio: MP3, AAC, M4A, WAV, FLAC, OPUS, OGG, AC3"
+                        Text="Images: PNG, JPG, JPEG, BMP, GIF, WebP   •   Video: MP4, MOV, MKV, AVI, WMV, WebM, M4V, GIF   •   Audio: MP3, AAC, M4A, WAV, FLAC, OPUS, OGG, AC3   •   Documents: DOCX, DOC, PPTX, XLSX, PDF, and more"
                         TextAlignment="Center"
                         TextWrapping="Wrap" />
                 </StackPanel>

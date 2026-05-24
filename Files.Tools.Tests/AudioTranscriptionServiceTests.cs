@@ -207,24 +207,23 @@ public class AudioTranscriptionServiceTests
     }
 
     [TestMethod]
-    public async Task TranscribeToWordsAsync_ReturnsTimestampedWords()
+    public async Task TranscribeToWordsAsync_DerivesWordsFromSegments()
     {
         CreateInstalledModel();
         var input = CreateInputFile("input.wav");
-        _transcriber.DetailedResult = new AudioTranscriptionDetailedResult(
+        _transcriber.Segments =
         [
-            new AudioTranscriptionDetailedSegment(0, TimeSpan.Zero, TimeSpan.FromSeconds(1), "Hello world", 0.9f, 0.8f, 1f, 0.1f, "en", [])
-        ],
-        [
-            new AudioTranscriptionAlignedWord(0, 0, TimeSpan.Zero, TimeSpan.FromMilliseconds(450), "Hello", AudioTranscriptionTimingSource.RawTokenAlignment),
-            new AudioTranscriptionAlignedWord(0, 1, TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(1), "world", AudioTranscriptionTimingSource.RawTokenAlignment)
-        ]);
+            new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(1), "Hello world")
+        ];
 
         var words = await _service.TranscribeToWordsAsync(input);
 
         Assert.AreEqual(2, words.Count);
         Assert.AreEqual("Hello", words[0].Text);
-        Assert.AreEqual(TimeSpan.FromMilliseconds(500), words[1].Start);
+        Assert.AreEqual("world", words[1].Text);
+        Assert.AreEqual(TimeSpan.Zero, words[0].Start);
+        Assert.AreEqual(TimeSpan.FromSeconds(1), words[^1].End);
+        Assert.IsTrue(words[1].Start >= words[0].End);
     }
 
     [TestMethod]
@@ -232,13 +231,10 @@ public class AudioTranscriptionServiceTests
     {
         CreateInstalledModel();
         var input = CreateInputFile("input.wav");
-        _transcriber.DetailedResult = new AudioTranscriptionDetailedResult(
+        _transcriber.Segments =
         [
-            new AudioTranscriptionDetailedSegment(0, TimeSpan.Zero, TimeSpan.FromMilliseconds(500), "First", 0.9f, 0.8f, 1f, 0.1f, "en", [])
-        ],
-        [
-            new AudioTranscriptionAlignedWord(0, 0, TimeSpan.Zero, TimeSpan.FromMilliseconds(500), "First", AudioTranscriptionTimingSource.WhisperWordTiming)
-        ]);
+            new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromMilliseconds(500), "First")
+        ];
 
         var progress = new CollectingProgress<AudioTranscriptionProgress>();
 
@@ -246,42 +242,6 @@ public class AudioTranscriptionServiceTests
 
         Assert.IsTrue(progress.Items.Any(update => update.Stage == AudioTranscriptionStage.PreparingAudio));
         Assert.IsTrue(progress.Items.Any(update => update.Stage == AudioTranscriptionStage.Transcribing));
-    }
-
-    [TestMethod]
-    public async Task TranscribeToDetailedResultAsync_ReturnsDetailedSegmentsTokensAndWords()
-    {
-        CreateInstalledModel();
-        var input = CreateInputFile("input.wav");
-        _transcriber.DetailedResult = new AudioTranscriptionDetailedResult(
-        [
-            new AudioTranscriptionDetailedSegment(
-                0,
-                TimeSpan.Zero,
-                TimeSpan.FromSeconds(1),
-                "Hello, world",
-                0.93f,
-                0.75f,
-                0.99f,
-                0.05f,
-                "en",
-                [
-                    new AudioTranscriptionToken(0, 0, 11, 0, "Hello", TimeSpan.Zero, TimeSpan.FromMilliseconds(400), TimeSpan.FromMilliseconds(180), 0.9f, -0.1f, 0.8f, 0.81f, 1f, false),
-                    new AudioTranscriptionToken(0, 1, 12, 0, ",", TimeSpan.FromMilliseconds(400), TimeSpan.FromMilliseconds(450), null, 0.7f, -0.2f, 0.7f, 0.71f, 1f, false),
-                    new AudioTranscriptionToken(0, 2, 13, 0, " world", TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(730), 0.92f, -0.08f, 0.83f, 0.84f, 1f, false)
-                ])
-        ],
-        [
-            new AudioTranscriptionAlignedWord(0, 0, TimeSpan.Zero, TimeSpan.FromMilliseconds(450), "Hello,", AudioTranscriptionTimingSource.RawTokenAlignment),
-            new AudioTranscriptionAlignedWord(0, 1, TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(1), "world", AudioTranscriptionTimingSource.RawTokenAlignment)
-        ]);
-
-        var result = await _service.TranscribeToDetailedResultAsync(input);
-
-        Assert.AreEqual(1, result.Segments.Count);
-        Assert.AreEqual(3, result.Segments[0].Tokens.Count);
-        Assert.AreEqual("Hello,", result.Words[0].Text);
-        Assert.AreEqual(AudioTranscriptionTimingSource.RawTokenAlignment, result.Words[0].TimingSource);
     }
 
     private string CreateInputFile(string fileName)
@@ -315,39 +275,12 @@ public class AudioTranscriptionServiceTests
     private sealed class FakeWhisperTranscriber : AudioTranscriptionService.IWhisperTranscriber
     {
         public IReadOnlyList<AudioTranscriptionSegment> Segments { get; set; } = [];
-        public AudioTranscriptionDetailedResult? DetailedResult { get; set; }
 
-        public Task<AudioTranscriptionService.AudioTranscriptionResult> TranscribeAsync(string modelPath, string audioPath, AudioTranscriptionService.TranscriptionGranularity granularity, IProgress<double>? progress, CancellationToken cancellationToken)
+        public Task<IReadOnlyList<AudioTranscriptionSegment>> TranscribeAsync(string modelPath, string audioPath, IProgress<double>? progress, CancellationToken cancellationToken)
         {
             progress?.Report(0.25d);
             progress?.Report(1d);
-            return Task.FromResult(granularity == AudioTranscriptionService.TranscriptionGranularity.Detailed
-                ? new AudioTranscriptionService.AudioTranscriptionResult(Segments, DetailedResult ?? BuildDetailedResult())
-                : new AudioTranscriptionService.AudioTranscriptionResult(Segments, detailedResult: null));
-        }
-
-        private AudioTranscriptionDetailedResult BuildDetailedResult()
-        {
-            var detailedSegments = Segments
-                .Select((segment, index) => new AudioTranscriptionDetailedSegment(index, segment.Start, segment.End, segment.Text, 0.9f, 0.8f, 1f, 0.1f, "en", []))
-                .ToArray();
-            var detailedWords = Segments
-                .SelectMany((segment, segmentIndex) =>
-                    BuildWordsFromSegment(segment)
-                        .Select((word, wordIndex) => new AudioTranscriptionAlignedWord(segmentIndex, wordIndex, word.Start, word.End, word.Text, AudioTranscriptionTimingSource.SegmentFallback)))
-                .ToArray();
-            return new AudioTranscriptionDetailedResult(detailedSegments, detailedWords);
-        }
-
-        private static IReadOnlyList<AudioTranscriptionWord> BuildWordsFromSegment(AudioTranscriptionSegment segment)
-        {
-            var text = segment.Text.Trim();
-            if (text.Length == 0)
-            {
-                return [];
-            }
-
-            return [new AudioTranscriptionWord(segment.Start, segment.End, text)];
+            return Task.FromResult(Segments);
         }
     }
 

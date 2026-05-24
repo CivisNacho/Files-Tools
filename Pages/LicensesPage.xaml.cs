@@ -63,6 +63,42 @@ public sealed partial class LicensesPage : Page
         "Usage: Executes the bundled DTLN ONNX models for audio denoise.\n\n" +
         MitLicenseText;
 
+    private const string LibreOfficeLicenseText =
+        "Component: LibreOffice\n" +
+        "Copyright: Copyright (C) The Document Foundation and contributors\n" +
+        "License: MPL-2.0\n\n" +
+        "Project URL:\n" +
+        "https://www.libreoffice.org\n\n" +
+        "Usage: document format conversion — DOCX, DOC, ODT, PPTX, PPT, ODP to PDF " +
+        "via headless CLI invocation (soffice --headless --convert-to pdf).\n\n" +
+        "LibreOffice is distributed under the Mozilla Public License 2.0 (MPL-2.0).\n" +
+        "Source code is available at https://cgit.freedesktop.org/libreoffice/core/\n\n" +
+        "Mozilla Public License Version 2.0\n" +
+        "-----------------------------------\n\n" +
+        "1. Definitions\n\n" +
+        "1.1. \"Contributor\" means each individual or legal entity that creates, contributes to the " +
+        "creation of, or owns Covered Software.\n\n" +
+        "1.2. \"Contributor Version\" means the combination of the Contributions of others (if any) " +
+        "used by a Contributor and that particular Contributor's Contribution.\n\n" +
+        "1.3. \"Contribution\" means Covered Software of a particular Contributor.\n\n" +
+        "1.4. \"Covered Software\" means Source Code Form to which the initial Contributor has " +
+        "attached the notice in Exhibit A, the Executable Form of such Source Code Form, and " +
+        "Modifications of such Source Code Form, in each case including portions thereof.\n\n" +
+        "2. License Grants and Conditions\n\n" +
+        "2.1. Grants — Each Contributor hereby grants you a world-wide, royalty-free, " +
+        "non-exclusive license to reproduce, prepare Derivative Works of, publicly display, " +
+        "publicly perform, distribute, and sublicense the Covered Software, in each case " +
+        "under the terms of this License.\n\n" +
+        "2.2. Effective Date — The licenses granted in Section 2.1 with respect to any " +
+        "Contribution become effective for each Contribution on the date the Contributor " +
+        "first distributes such Contribution.\n\n" +
+        "3. Responsibilities — If You distribute Covered Software, You must make the Source " +
+        "Code Form of the Covered Software available under the terms of this License.\n\n" +
+        "Full license text: https://mozilla.org/MPL/2.0/\n\n" +
+        "LibreOffice is downloaded on-demand by this application when the user first " +
+        "uses the Document Editor. The download (~420 MB) is stored in the user's local " +
+        "app data folder and is not bundled or redistributed with this application.";
+
     private const string WhisperLicenseText =
         "Component: Whisper.net / whisper.cpp\n" +
         "License: MIT\n\n" +
@@ -101,6 +137,11 @@ public sealed partial class LicensesPage : Page
     private void ShowWhisperLicense_Click(object sender, RoutedEventArgs e)
     {
         ShowLicenseDialog("Whisper License", WhisperLicenseText);
+    }
+
+    private void ShowLibreOfficeLicense_Click(object sender, RoutedEventArgs e)
+    {
+        ShowLicenseDialog("LibreOffice License", LibreOfficeLicenseText);
     }
 
     private void ShowLicenseDialog(string title, string licenseText)

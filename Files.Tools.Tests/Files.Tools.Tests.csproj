@@ -27,6 +27,8 @@
     <Compile Include="..\Services\SubtitlesService.cs" Link="Services\SubtitlesService.cs" />
     <Compile Include="..\Services\VideoProcessingService.cs" Link="Services\VideoProcessingService.cs" />
     <Compile Include="..\Services\VideoAudioDenoise.cs" Link="Services\VideoAudioDenoise.cs" />
+    <Compile Include="..\Services\DocumentProcessingService.cs" Link="Services\DocumentProcessingService.cs" />
+    <Compile Include="..\Services\LibreOfficeSetupService.cs" Link="Services\LibreOfficeSetupService.cs" />
   </ItemGroup>
 
 </Project>

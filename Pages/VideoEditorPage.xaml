@@ -518,6 +518,8 @@
                                                                 TextWrapping="Wrap" />
                                                             <Button
                                                                 x:Name="DownloadTranscriptionFeatureButton"
+                                                                MinWidth="200"
+                                                                Height="40"
                                                                 HorizontalAlignment="Left"
                                                                 Content="Download transcription feature"
                                                                 Click="DownloadTranscriptionFeatureButton_Click" />

@@ -10,16 +10,15 @@
 
 This service is responsible for:
 
-- checking whether the Whisper base model is installed
-- downloading the Whisper base model when missing
+- checking whether the Whisper model is installed
+- downloading the Whisper model when missing
 - preparing input audio or video into mono `16 kHz` WAV for Whisper
 - running Whisper transcription locally
 - exposing transcript output as:
   - plain text
   - timestamped text
   - timestamped segments
-  - timestamped words
-  - detailed segment, token, and aligned-word results
+  - timestamped words (synthesized from segment envelopes)
 
 This service does not write subtitle files. Subtitle shaping, karaoke cue construction, styling, and file generation live in `SubtitlesService`.
 
@@ -29,52 +28,12 @@ This service does not write subtitle files. Subtitle shaping, karaoke cue constr
 - `InstallAsync(...)`
 - `TranscribeToSegmentsAsync(...)`
 - `TranscribeToWordsAsync(...)`
-- `TranscribeToDetailedResultAsync(...)`
 - `TranscribeToTextAsync(...)`
 - `TranscribeToTimestampedTextAsync(...)`
 
-## Timing Modes
+## Timing
 
-The service now supports two internal transcription granularities:
-
-- segment mode:
-  - used by plain transcript and timestamped segment callers
-  - returns `AudioTranscriptionSegment`
-- detailed mode:
-  - used by karaoke and subtitle-oriented flows
-  - returns `AudioTranscriptionDetailedResult`
-  - includes `AudioTranscriptionDetailedSegment`, raw `AudioTranscriptionToken`, and cleaned `AudioTranscriptionAlignedWord`
-
-## Detailed Timing Pipeline
-
-The detailed path uses this timing pipeline:
-
-1. run Whisper with normal segments plus token timestamps
-2. capture `SegmentData.Text`, `Start`, `End`, `Probability`, `NoSpeechProbability`, `Language`, and raw `Tokens`
-3. align raw tokens into words
-4. clean word timing per source segment
-5. expose the cleaned result to subtitle-oriented callers
-
-The adapter intentionally does not use `SplitOnWord()` in the primary detailed pass because karaoke generation needs raw token boundaries first, not already-split word output.
-
-For the detailed pass, the default `Whisper.net` adapter attempts to enable richer timing with:
-
-- `WhisperFactoryOptions.UseDtwTimeStamps = true`
-- `WithTokenTimestamps()`
-- `WithTokenTimestampsThreshold(...)`
-- `WithTokenTimestampsSumThreshold(...)`
-
-## Fallback Chain
-
-If raw token timing is unavailable or not usable for some non-empty segments, the service falls back in this order:
-
-1. `AudioTranscriptionTimingSource.RawTokenAlignment`
-2. `AudioTranscriptionTimingSource.WhisperWordTiming`
-   - runs a secondary Whisper pass with `SplitOnWord()`
-3. `AudioTranscriptionTimingSource.SegmentFallback`
-   - synthesizes word timing from the source segment envelope
-
-This keeps `TranscribeToWordsAsync(...)` stable for existing callers while letting karaoke consumers inspect the richer timing source and raw token payload.
+The service runs a single Whisper segment pass and returns `AudioTranscriptionSegment` values. Word-level output (`AudioTranscriptionWord`) is synthesized by splitting segment text on whitespace and distributing each segment's duration across its words proportional to character count. This avoids relying on Whisper.net token timestamps, which were observed to be unreliable for word-level alignment.
 
 ## Input Handling
 

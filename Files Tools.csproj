@@ -88,4 +88,11 @@
     <PackageCertificateKeyFile>Files Tools_TemporaryKey.pfx</PackageCertificateKeyFile>
     <GenerateTemporaryStoreCertificate>True</GenerateTemporaryStoreCertificate>
   </PropertyGroup>
+
+  <!--
+    LibreOffice is not bundled with the app.
+    It is downloaded on-demand by LibreOfficeSetupService when the user first opens
+    the Document Editor and clicks "Download LibreOffice".
+    Downloaded binaries are stored in %LOCALAPPDATA%\FilesTools\libreoffice\<rid>\.
+  -->
 </Project>

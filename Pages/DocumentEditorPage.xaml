@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Files_Tools.Pages.DocumentEditorPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    KeyDown="Page_KeyDown"
+    mc:Ignorable="d">
+    <Page.Resources>
+        <SolidColorBrush x:Key="DocumentAccentBrush" Color="#FFEB8C00" />
+        <SolidColorBrush x:Key="DocumentAccentDarkBrush" Color="#FFD67600" />
+        <LinearGradientBrush x:Key="DocumentHintBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#FFFEF3E6" Offset="0" />
+            <GradientStop Color="#FFFCE5D1" Offset="1" />
+        </LinearGradientBrush>
+        <Style x:Key="SettingsCardStyle" TargetType="Border">
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="Background" Value="{ThemeResource LayerFillColorDefaultBrush}" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid
+            x:Name="PageRoot"
+            Padding="32,24,32,28"
+            SizeChanged="PageRoot_SizeChanged">
+            <Grid
+                x:Name="ContentRoot"
+                HorizontalAlignment="Center"
+                MaxWidth="1440"
+                RowSpacing="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel MaxWidth="880" Spacing="6">
+                    <TextBlock FontSize="38" FontWeight="SemiBold" Text="Document Processing" />
+                    <TextBlock
+                        Opacity="0.78"
+                        Text="Convert documents to PDF, repair corrupted files, or extract embedded images. Select an operation from the panel and drop or browse for your document."
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <!--
+                    LibreOffice Setup Banner
+                    Visible when LibreOffice has not been downloaded yet.
+                    Collapses automatically once the download completes.
+                -->
+                <Border
+                    x:Name="LibreOfficeSetupBanner"
+                    Grid.Row="1"
+                    Padding="20"
+                    CornerRadius="16"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <Grid RowSpacing="14">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Spacing="4" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <FontIcon
+                                        FontSize="18"
+                                        Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                        Glyph="&#xE8A5;" />
+                                    <TextBlock
+                                        FontSize="17"
+                                        FontWeight="SemiBold"
+                                        Text="LibreOffice required"
+                                        VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock
+                                    x:Name="LibreOfficeSetupStatusText"
+                                    Opacity="0.78"
+                                    TextWrapping="Wrap"
+                                    Text="Document processing requires LibreOffice, which needs to be downloaded (~420 MB). This is a one-time download that stays on your machine." />
+                            </StackPanel>
+
+                            <StackPanel
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="8">
+                                <Button
+                                    x:Name="DownloadLibreOfficeButton"
+                                    MinWidth="200"
+                                    Height="40"
+                                    Content="Download LibreOffice"
+                                    Click="DownloadLibreOfficeButton_Click" />
+                                <Button
+                                    x:Name="CancelLibreOfficeButton"
+                                    Height="40"
+                                    Content="Cancel"
+                                    Visibility="Collapsed"
+                                    Click="CancelLibreOfficeButton_Click" />
+                            </StackPanel>
+                        </Grid>
+
+                        <ProgressBar
+                            x:Name="LibreOfficeSetupProgressBar"
+                            Grid.Row="1"
+                            Minimum="0"
+                            Maximum="100"
+                            Value="0"
+                            Visibility="Collapsed" />
+                    </Grid>
+                </Border>
+
+                <Grid
+                    x:Name="EditorGrid"
+                    Grid.Row="2"
+                    ColumnSpacing="20"
+                    RowSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition x:Name="LeftColumn" Width="7*" />
+                        <ColumnDefinition x:Name="RightColumn" Width="3*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        x:Name="PreviewSection"
+                        Grid.Column="0"
+                        VerticalAlignment="Top"
+                        Padding="20"
+                        CornerRadius="16"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                        <Grid RowSpacing="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Spacing="4">
+                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="Document" />
+                                <TextBlock
+                                    Opacity="0.72"
+                                    Text="Drop a document or click the surface to browse. The selected operation will be applied when you click the action button."
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <Border
+                                x:Name="UploadSurface"
+                                Grid.Row="1"
+                                AllowDrop="True"
+                                MinHeight="240"
+                                MaxHeight="560"
+                                Padding="16"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Top"
+                                CornerRadius="14"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                DragOver="UploadSurface_DragOver"
+                                Drop="UploadSurface_Drop"
+                                PointerPressed="UploadSurface_PointerPressed">
+                                <Grid>
+                                    <Grid x:Name="PreviewHost">
+                                        <TextBlock
+                                            x:Name="LoadedDocumentPreview"
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Center"
+                                            Opacity="0.9"
+                                            TextWrapping="Wrap"
+                                            TextAlignment="Center" />
+                                    </Grid>
+
+                                    <StackPanel
+                                        x:Name="DropHintPanel"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        MaxWidth="360"
+                                        Spacing="12">
+                                        <Border
+                                            HorizontalAlignment="Center"
+                                            Padding="18"
+                                            CornerRadius="999"
+                                            Background="{StaticResource DocumentHintBackgroundBrush}">
+                                            <FontIcon
+                                                HorizontalAlignment="Center"
+                                                FontSize="52"
+                                                Foreground="{StaticResource DocumentAccentDarkBrush}"
+                                                Glyph="&#xE8A5;" />
+                                        </Border>
+                                        <TextBlock HorizontalAlignment="Center" FontSize="24" FontWeight="SemiBold" Text="Drop a document here" TextAlignment="Center" />
+                                        <TextBlock HorizontalAlignment="Center" Opacity="0.76" Text="You can also click this surface to browse for a file. Supported formats include DOCX, PDF, PPTX, XLSX, and more." TextAlignment="Center" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Grid Grid.Row="2" ColumnSpacing="16" RowSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock
+                                    x:Name="LoadedDocumentInfoTextBlock"
+                                    VerticalAlignment="Center"
+                                    Opacity="0.76"
+                                    Text="No document loaded yet."
+                                    TextWrapping="Wrap" />
+
+                                <Button
+                                    x:Name="ApplyButton"
+                                    Grid.Column="1"
+                                    MinWidth="180"
+                                    Height="44"
+                                    HorizontalAlignment="Right"
+                                    Content="Process document"
+                                    Background="{StaticResource DocumentAccentBrush}"
+                                    BorderBrush="{StaticResource DocumentAccentBrush}"
+                                    Foreground="White"
+                                    Click="ApplyButton_Click"
+                                    IsEnabled="False" />
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <Border
+                        x:Name="OptionsPanel"
+                        Grid.Column="1"
+                        Grid.RowSpan="3"
+                        MinWidth="360"
+                        MinHeight="420"
+                        Padding="20"
+                        CornerRadius="16"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                        <Grid RowSpacing="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <StackPanel Spacing="2">
+                                    <TextBlock x:Name="SelectedOptionHeaderTextBlock" Margin="0,0,0,12" FontSize="22" FontWeight="SemiBold" Text="Select an operation" />
+
+                                    <StackPanel x:Name="ConvertToPdfPanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <TextBlock FontSize="18" FontWeight="SemiBold" Text="PDF Variant" />
+                                                <ComboBox x:Name="PdfVariantComboBox" Header="Output standard" SelectedIndex="0" SelectionChanged="OptionsSelectionChanged">
+                                                    <ComboBoxItem Tag="0" Content="Standard PDF 1.4" />
+                                                    <ComboBoxItem Tag="1" Content="PDF/A-1b (Long-term archival)" />
+                                                    <ComboBoxItem Tag="2" Content="PDF/A-2b (Extended archival)" />
+                                                    <ComboBoxItem Tag="3" Content="PDF/A-3b (With attachments)" />
+                                                </ComboBox>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <TextBlock FontSize="18" FontWeight="SemiBold" Text="Image Compression" />
+                                                <ComboBox x:Name="ImageCompressionComboBox" Header="Compression method" SelectedIndex="0" SelectionChanged="OptionsSelectionChanged">
+                                                    <ComboBoxItem Tag="0" Content="Default compression" />
+                                                    <ComboBoxItem Tag="1" Content="Lossless (no quality loss)" />
+                                                    <ComboBoxItem Tag="2" Content="JPEG (smaller file size)" />
+                                                </ComboBox>
+
+                                                <StackPanel x:Name="JpegQualityPanel" Spacing="4" Visibility="Collapsed">
+                                                    <TextBlock x:Name="JpegQualityTextBlock" Text="JPEG quality: 90%" />
+                                                    <Slider
+                                                        x:Name="JpegQualitySlider"
+                                                        Minimum="1"
+                                                        Maximum="100"
+                                                        StepFrequency="1"
+                                                        Value="90"
+                                                        ValueChanged="JpegQualitySlider_ValueChanged" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <TextBlock FontSize="18" FontWeight="SemiBold" Text="Page Range (optional)" />
+                                                <TextBox
+                                                    x:Name="PageRangeTextBox"
+                                                    Header="Pages to include"
+                                                    PlaceholderText="Leave empty for all pages. Example: 1-3,5,8-10"
+                                                    TextChanged="PageRangeTextBox_TextChanged" />
+                                                <TextBlock
+                                                    x:Name="PageRangeValidationTextBlock"
+                                                    Foreground="Tomato"
+                                                    TextWrapping="Wrap"
+                                                    Visibility="Collapsed" />
+                                                <TextBlock
+                                                    Opacity="0.76"
+                                                    Text="Comma-separated list of pages or ranges. For presentations, use slide numbers. For spreadsheets, use sheet indices."
+                                                    TextWrapping="Wrap" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <StackPanel x:Name="RepairPanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <TextBlock FontSize="18" FontWeight="SemiBold" Text="Output Format" />
+                                                <ComboBox x:Name="RepairOutputFormatComboBox" Header="Save as" SelectedIndex="0" SelectionChanged="OptionsSelectionChanged">
+                                                    <ComboBoxItem Content="Keep original format" />
+                                                    <ComboBoxItem Content="DOCX (Word)" />
+                                                    <ComboBoxItem Content="PPTX (PowerPoint)" />
+                                                    <ComboBoxItem Content="XLSX (Excel)" />
+                                                    <ComboBoxItem Content="ODT (OpenDocument Text)" />
+                                                    <ComboBoxItem Content="ODP (OpenDocument Presentation)" />
+                                                    <ComboBoxItem Content="ODS (OpenDocument Spreadsheet)" />
+                                                </ComboBox>
+                                                <TextBlock
+                                                    Opacity="0.76"
+                                                    Text="The repair process will fix corrupted structures. You can optionally convert to a different format during repair."
+                                                    TextWrapping="Wrap" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <StackPanel x:Name="ExtractImagesPanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <TextBlock FontSize="18" FontWeight="SemiBold" Text="Extract Settings" />
+                                                <TextBlock
+                                                    Opacity="0.76"
+                                                    Text="All embedded images will be extracted and packed into a ZIP archive. The archive will be created at your chosen location."
+                                                    TextWrapping="Wrap" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</Page>

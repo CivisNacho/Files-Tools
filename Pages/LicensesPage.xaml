@@ -17,6 +17,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <TextBlock FontSize="34" FontWeight="SemiBold" Text="Licenses" />
@@ -159,6 +160,33 @@
                             VerticalAlignment="Center"
                             Content="Show License"
                             Click="ShowWhisperLicense_Click" />
+                    </Grid>
+                </Border>
+
+                <Border
+                    Grid.Row="7"
+                    Padding="16"
+                    CornerRadius="10"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Spacing="2">
+                            <TextBlock FontSize="20" FontWeight="SemiBold" Text="LibreOffice" />
+                            <TextBlock Opacity="0.82" Text="License: MPL-2.0" />
+                            <TextBlock Opacity="0.82" Text="Usage: document format conversion (DOCX, ODT, PPTX, ODP → PDF)" />
+                        </StackPanel>
+
+                        <Button
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Content="Show License"
+                            Click="ShowLibreOfficeLicense_Click" />
                     </Grid>
                 </Border>
             </Grid>

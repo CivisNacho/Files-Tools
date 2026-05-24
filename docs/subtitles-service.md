@@ -121,7 +121,7 @@ The review-based karaoke path used by the video editor uses this pipeline:
 4. karaoke cue grouping and line layout
 5. ASS rendering
 
-The one-shot karaoke generation path still uses detailed Whisper timing from `AudioTranscriptionService.TranscribeToDetailedResultAsync(...)`.
+The one-shot karaoke generation path calls `AudioTranscriptionService.TranscribeToSegmentsAsync(...)` and synthesizes per-word timing from segment envelopes (duration distributed proportional to word character count).
 
 The renderer behavior is:
 

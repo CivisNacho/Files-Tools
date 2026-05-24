@@ -16,6 +16,7 @@ namespace Files_Tools.Pages
         private static readonly string[] SupportedImageExtensions = [".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp"];
         private static readonly string[] SupportedVideoExtensions = [".mp4", ".mov", ".mkv", ".avi", ".wmv", ".webm", ".m4v"];
         private static readonly string[] SupportedAudioExtensions = [".mp3", ".aac", ".m4a", ".wav", ".flac", ".opus", ".ogg", ".ac3"];
+        private static readonly string[] SupportedDocumentExtensions = [".docx", ".doc", ".odt", ".pptx", ".ppt", ".odp", ".xlsx", ".xls", ".ods", ".csv", ".pdf"];
 
         public HomePage()
         {
@@ -31,7 +32,7 @@ namespace Files_Tools.Pages
         private void DropZoneSurface_DragOver(object sender, DragEventArgs e)
         {
             e.AcceptedOperation = DataPackageOperation.Copy;
-            e.DragUIOverride.Caption = "Drop image, video, or audio to continue";
+            e.DragUIOverride.Caption = "Drop file to continue";
             e.DragUIOverride.IsCaptionVisible = true;
             e.DragUIOverride.IsGlyphVisible = true;
         }
@@ -64,6 +65,7 @@ namespace Files_Tools.Pages
             foreach (var extension in SupportedImageExtensions
                 .Concat(SupportedVideoExtensions)
                 .Concat(SupportedAudioExtensions)
+                .Concat(SupportedDocumentExtensions)
                 .Append(".gif"))
             {
                 if (!picker.FileTypeFilter.Contains(extension))
@@ -102,6 +104,12 @@ namespace Files_Tools.Pages
             if (IsSupportedAudioFile(file))
             {
                 NavigateToPage(typeof(AudioEditorPage), new FileNavigationRequest { File = file });
+                return;
+            }
+
+            if (IsSupportedDocumentFile(file))
+            {
+                NavigateToPage(typeof(DocumentEditorPage), new FileNavigationRequest { File = file });
             }
         }
 
@@ -109,7 +117,8 @@ namespace Files_Tools.Pages
         {
             return SupportedImageExtensions.Contains(file.FileType, StringComparer.OrdinalIgnoreCase) ||
                    IsSupportedVideoFile(file) ||
-                   IsSupportedAudioFile(file);
+                   IsSupportedAudioFile(file) ||
+                   IsSupportedDocumentFile(file);
         }
 
         private static bool IsSupportedVideoFile(StorageFile file)
@@ -121,6 +130,11 @@ namespace Files_Tools.Pages
         private static bool IsSupportedAudioFile(StorageFile file)
         {
             return SupportedAudioExtensions.Contains(file.FileType, StringComparer.OrdinalIgnoreCase);
+        }
+
+        private static bool IsSupportedDocumentFile(StorageFile file)
+        {
+            return SupportedDocumentExtensions.Contains(file.FileType, StringComparer.OrdinalIgnoreCase);
         }
 
         private static void NavigateToPage(Type pageType, object? parameter = null)
