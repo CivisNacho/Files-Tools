@@ -255,14 +255,14 @@ public static class StyledSubtitlePresets
             TextTransform = SubtitleTextTransform.Uppercase,
             FillColor = SubtitleColor.White,
             OutlineColor = SubtitleColor.Black,
-            ShadowColor = SubtitleColor.Black,
+            ShadowColor = new SubtitleColor(100, 0, 0, 0),
             UseBackgroundBox = false,
             PresentationAnimation = SubtitlePresentationAnimation.FadePop,
             EntryFadeMilliseconds = 120,
             ExitFadeMilliseconds = 120,
             IntroScale = 1.08d,
-            OutlineWidth = 5,
-            ShadowDepth = 0,
+            OutlineWidth = 6,
+            ShadowDepth = 1.5,
             Alignment = SubtitleVisualAlignment.BottomCenter,
             MarginLeft = 80,
             MarginRight = 80,
@@ -291,14 +291,14 @@ public static class StyledSubtitlePresets
             TextTransform = SubtitleTextTransform.None,
             FillColor = SubtitleColor.White,
             OutlineColor = SubtitleColor.Black,
-            ShadowColor = SubtitleColor.Black,
+            ShadowColor = new SubtitleColor(120, 0, 0, 0),
             UseBackgroundBox = false,
             PresentationAnimation = SubtitlePresentationAnimation.Fade,
             EntryFadeMilliseconds = 100,
             ExitFadeMilliseconds = 100,
             IntroScale = 1d,
-            OutlineWidth = 3.5,
-            ShadowDepth = 0.5,
+            OutlineWidth = 4,
+            ShadowDepth = 1,
             Alignment = SubtitleVisualAlignment.BottomCenter,
             MarginLeft = 80,
             MarginRight = 80,
@@ -327,14 +327,14 @@ public static class StyledSubtitlePresets
             TextTransform = SubtitleTextTransform.None,
             FillColor = SubtitleColor.White,
             OutlineColor = SubtitleColor.Black,
-            ShadowColor = new SubtitleColor(140, 0, 0, 0),
+            ShadowColor = new SubtitleColor(180, 0, 0, 0),
             UseBackgroundBox = true,
             PresentationAnimation = SubtitlePresentationAnimation.Fade,
             EntryFadeMilliseconds = 140,
             ExitFadeMilliseconds = 140,
             IntroScale = 1d,
-            OutlineWidth = 2,
-            ShadowDepth = 0,
+            OutlineWidth = 2.5,
+            ShadowDepth = 0.5,
             Alignment = SubtitleVisualAlignment.BottomCenter,
             MarginLeft = 88,
             MarginRight = 88,
@@ -363,14 +363,14 @@ public static class StyledSubtitlePresets
             TextTransform = SubtitleTextTransform.Uppercase,
             FillColor = SubtitleColor.White,
             OutlineColor = SubtitleColor.Black,
-            ShadowColor = new SubtitleColor(170, 16, 24, 40),
+            ShadowColor = new SubtitleColor(200, 24, 32, 56),
             UseBackgroundBox = true,
             PresentationAnimation = SubtitlePresentationAnimation.Pop,
             EntryFadeMilliseconds = 100,
             ExitFadeMilliseconds = 120,
             IntroScale = 1.1d,
-            OutlineWidth = 3,
-            ShadowDepth = 0,
+            OutlineWidth = 3.5,
+            ShadowDepth = 1,
             Alignment = SubtitleVisualAlignment.BottomLeft,
             MarginLeft = 96,
             MarginRight = 96,
@@ -409,15 +409,15 @@ public static class KaraokeSubtitlePresets
             TextTransform = SubtitleTextTransform.None,
             FillColor = SubtitleColor.White,
             OutlineColor = SubtitleColor.Black,
-            ShadowColor = new SubtitleColor(170, 0, 0, 0),
-            KaraokeHighlightColor = new SubtitleColor(0, 255, 214, 0),
+            ShadowColor = new SubtitleColor(180, 0, 0, 0),
+            KaraokeHighlightColor = new SubtitleColor(0, 255, 220, 20),
             UseBackgroundBox = false,
             PresentationAnimation = SubtitlePresentationAnimation.FadePop,
             EntryFadeMilliseconds = 80,
             ExitFadeMilliseconds = 80,
             IntroScale = 1.12d,
-            OutlineWidth = 6,
-            ShadowDepth = 0.6,
+            OutlineWidth = 7,
+            ShadowDepth = 1,
             Alignment = SubtitleVisualAlignment.BottomCenter,
             MarginLeft = 80,
             MarginRight = 80,
@@ -445,16 +445,16 @@ public static SubtitleStylePreset CreatePunch()
             Italic = false,
             TextTransform = SubtitleTextTransform.None,
             FillColor = SubtitleColor.White,
-            OutlineColor = new SubtitleColor(0, 50, 50, 50),
-            ShadowColor = SubtitleColor.Black,
-            KaraokeHighlightColor = new SubtitleColor(0, 255, 100, 0),
+            OutlineColor = new SubtitleColor(0, 64, 64, 64),
+            ShadowColor = new SubtitleColor(200, 0, 0, 0),
+            KaraokeHighlightColor = new SubtitleColor(0, 255, 130, 0),
             UseBackgroundBox = false,
             PresentationAnimation = SubtitlePresentationAnimation.None,
             EntryFadeMilliseconds = 0,
             ExitFadeMilliseconds = 0,
             IntroScale = 1d,
-            OutlineWidth = 10,
-            ShadowDepth = 1.5,
+            OutlineWidth = 12,
+            ShadowDepth = 2,
             Alignment = SubtitleVisualAlignment.BottomCenter,
             MarginLeft = 80,
             MarginRight = 80,
@@ -628,10 +628,11 @@ public sealed class SubtitlesService : ISubtitlesService
 
         var effectiveOptions = NormalizeOptions(options);
         var progressState = new ProgressState();
-        var detailedResult = await _audioTranscriptionService.TranscribeToDetailedResultAsync(inputPath, progress, cancellationToken).ConfigureAwait(false);
+        var segments = await _audioTranscriptionService.TranscribeToSegmentsAsync(inputPath, progress, cancellationToken).ConfigureAwait(false);
 
         Report(progress, progressState, AudioTranscriptionStage.WritingSubtitles, 0d, "Building karaoke subtitle file");
-        var cues = BuildKaraokeCues(detailedResult.Words, effectiveOptions);
+        var words = BuildWordsFromSegments(segments);
+        var cues = BuildKaraokeCues(words, effectiveOptions);
         var ass = BuildKaraokeAss(cues, CreateDefaultKaraokePreset(preset, placement));
         await File.WriteAllTextAsync(finalOutputPath, ass, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false), cancellationToken).ConfigureAwait(false);
 
@@ -774,7 +775,7 @@ public sealed class SubtitlesService : ISubtitlesService
         var segments = draft.Segments
             .Select(segment => new AudioTranscriptionSegment(segment.Start, segment.End, segment.Text))
             .ToArray();
-        var words = BuildAlignedWordsFromSegments(segments);
+        var words = BuildWordsFromSegments(segments);
         var cues = BuildKaraokeCues(words, effectiveOptions);
         return BuildKaraokeAss(cues, CreateDefaultKaraokePreset(preset, placement));
     }
@@ -900,8 +901,8 @@ public sealed class SubtitlesService : ISubtitlesService
             .Append(preset.StyleName).Append(',')
             .Append(preset.FontFamily).Append(',')
             .Append(preset.FontSize.ToString(System.Globalization.CultureInfo.InvariantCulture)).Append(',')
-            .Append(ToAssColor(preset.BaseColor)).Append(',')
             .Append(ToAssColor(preset.HighlightColor)).Append(',')
+            .Append(ToAssColor(preset.BaseColor)).Append(',')
             .Append(ToAssColor(preset.OutlineColor)).Append(',')
             .Append(ToAssColor(preset.ShadowColor)).Append(',')
             .Append(preset.Bold ? "-1" : "0").Append(',')
@@ -931,7 +932,7 @@ public sealed class SubtitlesService : ISubtitlesService
         return builder.ToString();
     }
 
-    private static IReadOnlyList<KaraokeCue> BuildKaraokeCues(IReadOnlyList<AudioTranscriptionAlignedWord> words, SubtitlePostprocessingOptions options)
+    private static IReadOnlyList<KaraokeCue> BuildKaraokeCues(IReadOnlyList<AudioTranscriptionWord> words, SubtitlePostprocessingOptions options)
     {
         var cues = BuildProvisionalKaraokeCues(words, options);
         RemoveInvalidKaraokeCues(cues);
@@ -1021,12 +1022,12 @@ public sealed class SubtitlesService : ISubtitlesService
         return output;
     }
 
-    private static List<KaraokeCue> BuildProvisionalKaraokeCues(IReadOnlyList<AudioTranscriptionAlignedWord> words, SubtitlePostprocessingOptions options)
+    private static List<KaraokeCue> BuildProvisionalKaraokeCues(IReadOnlyList<AudioTranscriptionWord> words, SubtitlePostprocessingOptions options)
     {
         var cues = new List<KaraokeCue>();
         KaraokeCue? currentCue = null;
 
-        foreach (var word in words.OrderBy(word => word.WordIndex))
+        foreach (var word in words)
         {
             var normalizedWord = NormalizeSegmentText(word.Text);
             if (normalizedWord.Length == 0)
@@ -1748,14 +1749,12 @@ public sealed class SubtitlesService : ISubtitlesService
         return provisionalCues;
     }
 
-    private static IReadOnlyList<AudioTranscriptionAlignedWord> BuildAlignedWordsFromSegments(IReadOnlyList<AudioTranscriptionSegment> segments)
+    private static IReadOnlyList<AudioTranscriptionWord> BuildWordsFromSegments(IReadOnlyList<AudioTranscriptionSegment> segments)
     {
-        var output = new List<AudioTranscriptionAlignedWord>();
-        var wordIndex = 0;
+        var output = new List<AudioTranscriptionWord>();
 
-        for (var segmentIndex = 0; segmentIndex < segments.Count; segmentIndex++)
+        foreach (var segment in segments)
         {
-            var segment = segments[segmentIndex];
             var tokens = SplitWords(segment.Text);
             if (tokens.Count == 0)
             {
@@ -1788,13 +1787,7 @@ public sealed class SubtitlesService : ISubtitlesService
                 }
 
                 var wordEnd = start + TimeSpan.FromTicks(wordEndTicks);
-                output.Add(new AudioTranscriptionAlignedWord(
-                    segmentIndex,
-                    wordIndex++,
-                    wordStart,
-                    wordEnd,
-                    token,
-                    AudioTranscriptionTimingSource.SegmentFallback));
+                output.Add(new AudioTranscriptionWord(wordStart, wordEnd, token));
 
                 consumedTicks = wordEndTicks;
             }

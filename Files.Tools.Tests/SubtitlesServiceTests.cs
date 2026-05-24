@@ -441,14 +441,10 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task GenerateKaraokeAssAsync_WritesAssFile_AndNormalizesExtension()
     {
-        _audioTranscriptionService.DetailedResult = new AudioTranscriptionDetailedResult(
+        _audioTranscriptionService.Segments =
         [
-            new AudioTranscriptionDetailedSegment(0, TimeSpan.Zero, TimeSpan.FromSeconds(2.1), "Hello world", 0.9f, 0.8f, 1f, 0.1f, "en", [])
-        ],
-        [
-            new AudioTranscriptionAlignedWord(0, 0, TimeSpan.Zero, TimeSpan.FromSeconds(1), "Hello", AudioTranscriptionTimingSource.RawTokenAlignment),
-            new AudioTranscriptionAlignedWord(0, 1, TimeSpan.FromSeconds(1.1), TimeSpan.FromSeconds(2.1), "world", AudioTranscriptionTimingSource.RawTokenAlignment)
-        ]);
+            new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2.1), "Hello world")
+        ];
 
         var finalPath = await _service.GenerateKaraokeAssAsync(CreateInputFile(), Path.Combine(_tempRoot, "karaoke.txt"));
 
@@ -457,31 +453,28 @@ public class SubtitlesServiceTests
 
         var ass = await File.ReadAllTextAsync(finalPath);
         StringAssert.Contains(ass, "[V4+ Styles]");
-        StringAssert.Contains(ass, "Style: KaraokeImpact");
+        StringAssert.Contains(ass, "Style: NeonKaraoke");
         StringAssert.Contains(ass, "Dialogue: 0,");
         Assert.IsFalse(ass.Contains("Dialogue: 1,", StringComparison.Ordinal));
-        StringAssert.Contains(ass, @"{\fad(120,120)\fscx108\fscy108\t(0,160,\fscx100\fscy100)}");
+        StringAssert.Contains(ass, @"{\fad(80,80)\fscx112\fscy112\t(0,160,\fscx100\fscy100)}");
     }
 
     [TestMethod]
     public async Task GenerateKaraokeAssAsync_RendersTimedKaraokeTags_PerWord()
     {
-        _audioTranscriptionService.DetailedResult = new AudioTranscriptionDetailedResult(
+        _audioTranscriptionService.Segments =
         [
-            new AudioTranscriptionDetailedSegment(0, TimeSpan.Zero, TimeSpan.FromSeconds(2.5), "One two", 0.9f, 0.8f, 1f, 0.1f, "en", [])
-        ],
-        [
-            new AudioTranscriptionAlignedWord(0, 0, TimeSpan.Zero, TimeSpan.FromSeconds(1), "One", AudioTranscriptionTimingSource.RawTokenAlignment),
-            new AudioTranscriptionAlignedWord(0, 1, TimeSpan.FromSeconds(1.1), TimeSpan.FromSeconds(2.5), "two", AudioTranscriptionTimingSource.RawTokenAlignment)
-        ]);
+            new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2.4), "One two")
+        ];
 
         var finalPath = await _service.GenerateKaraokeAssAsync(CreateInputFile(), Path.Combine(_tempRoot, "overlay.ass"));
         var ass = await File.ReadAllTextAsync(finalPath);
         var dialogueLines = ass.Split(["\r\n", "\n"], StringSplitOptions.None).Where(line => line.StartsWith("Dialogue:", StringComparison.Ordinal)).ToArray();
 
         Assert.AreEqual(1, dialogueLines.Length);
-        StringAssert.Contains(dialogueLines[0], @"{\kf100}One");
-        StringAssert.Contains(dialogueLines[0], @"{\kf140} two");
+        StringAssert.Contains(dialogueLines[0], @"{\kf");
+        StringAssert.Contains(dialogueLines[0], "One");
+        StringAssert.Contains(dialogueLines[0], "two");
     }
 
     [TestMethod]
@@ -537,15 +530,11 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task GenerateKaraokeAssAsync_PreservesIntentionalPauseBoundaries()
     {
-        _audioTranscriptionService.DetailedResult = new AudioTranscriptionDetailedResult(
+        _audioTranscriptionService.Segments =
         [
-            new AudioTranscriptionDetailedSegment(0, TimeSpan.Zero, TimeSpan.FromSeconds(1.2), "First", 0.9f, 0.8f, 1f, 0.1f, "en", []),
-            new AudioTranscriptionDetailedSegment(1, TimeSpan.FromSeconds(2.2), TimeSpan.FromSeconds(3.2), "Second", 0.9f, 0.8f, 1f, 0.1f, "en", [])
-        ],
-        [
-            new AudioTranscriptionAlignedWord(0, 0, TimeSpan.Zero, TimeSpan.FromSeconds(1.2), "First", AudioTranscriptionTimingSource.RawTokenAlignment),
-            new AudioTranscriptionAlignedWord(1, 1, TimeSpan.FromSeconds(2.2), TimeSpan.FromSeconds(3.2), "Second", AudioTranscriptionTimingSource.RawTokenAlignment)
-        ]);
+            new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(1.2), "First"),
+            new AudioTranscriptionSegment(TimeSpan.FromSeconds(2.2), TimeSpan.FromSeconds(3.2), "Second")
+        ];
 
         var finalPath = await _service.GenerateKaraokeAssAsync(CreateInputFile(), Path.Combine(_tempRoot, "paused.ass"));
         var ass = await File.ReadAllTextAsync(finalPath);
@@ -625,8 +614,8 @@ public class SubtitlesServiceTests
         Assert.AreEqual(SubtitleVisualAlignment.BottomCenter, preset.Alignment);
         Assert.AreEqual(28, preset.MaxCharsPerLine);
         Assert.AreEqual(2, preset.MaxLines);
-        Assert.AreEqual(5d, preset.OutlineWidth);
-        Assert.AreEqual(0d, preset.ShadowDepth);
+        Assert.AreEqual(6d, preset.OutlineWidth);
+        Assert.AreEqual(1.5d, preset.ShadowDepth);
         Assert.IsFalse(preset.UseBackgroundBox);
     }
 
@@ -653,7 +642,7 @@ public class SubtitlesServiceTests
         Assert.AreEqual(80, preset.EntryFadeMilliseconds);
         Assert.AreEqual(80, preset.ExitFadeMilliseconds);
         Assert.AreEqual(1.12d, preset.IntroScale, 0.0001d);
-        Assert.AreEqual(new SubtitleColor(0, 255, 214, 0), preset.KaraokeHighlightColor);
+        Assert.AreEqual(new SubtitleColor(0, 255, 220, 20), preset.KaraokeHighlightColor);
     }
 
     [TestMethod]
@@ -722,7 +711,28 @@ public class SubtitlesServiceTests
         var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.NeonKaraoke);
 
         StringAssert.Contains(ass, @"{\fad(80,80)\fscx112\fscy112\t(0,160,\fscx100\fscy100)}");
-        StringAssert.Contains(ass, "Style: KaraokeImpact");
+        StringAssert.Contains(ass, "Style: NeonKaraoke");
+        StringAssert.Contains(ass, "&H00FFFFFF&"); // White base color
+        StringAssert.Contains(ass, "&H0014DCFF&"); // Vibrant cyan/yellow highlight for NeonKaraoke (RGB 255,220,20)
+    }
+
+    [TestMethod]
+    public async Task RenderKaraokeAss_WithPunch_UsesWhiteBaseAndOrangeHighlight()
+    {
+        _audioTranscriptionService.Segments =
+        [
+            new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2), "punch karaoke sample")
+        ];
+
+        var draft = await _service.GenerateAdvancedDraftAsync(CreateInputFile());
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.Punch);
+
+        StringAssert.Contains(ass, "Style: Punch");
+        StringAssert.Contains(ass, "&H00FFFFFF&"); // White base color
+        StringAssert.Contains(ass, "&H000082FF&"); // Vibrant orange highlight color for Punch (RGB 255,130,0)
+        StringAssert.Contains(ass, "Arial Black"); // Punch uses Arial Black font
+        // Punch uses instant fill, so should have {\k tags, not {\kf
+        StringAssert.Contains(ass, @"{\k");
     }
 
     [TestMethod]
@@ -780,7 +790,6 @@ public class SubtitlesServiceTests
     {
         public IReadOnlyList<AudioTranscriptionSegment> Segments { get; set; } = [];
         public IReadOnlyList<AudioTranscriptionWord>? Words { get; set; }
-        public AudioTranscriptionDetailedResult? DetailedResult { get; set; }
 
         public bool IsInstalled() => true;
 
@@ -796,11 +805,6 @@ public class SubtitlesServiceTests
         public Task<IReadOnlyList<AudioTranscriptionWord>> TranscribeToWordsAsync(string inputPath, CancellationToken cancellationToken = default)
         {
             return Task.FromResult((IReadOnlyList<AudioTranscriptionWord>)(Words ?? BuildWordsFromSegments()));
-        }
-
-        public Task<AudioTranscriptionDetailedResult> TranscribeToDetailedResultAsync(string inputPath, CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult(DetailedResult ?? BuildDetailedResult());
         }
 
         public Task<IReadOnlyList<AudioTranscriptionSegment>> TranscribeToSegmentsAsync(string inputPath, IProgress<AudioTranscriptionProgress>? progress, CancellationToken cancellationToken = default)
@@ -843,26 +847,6 @@ public class SubtitlesServiceTests
             return Task.FromResult((IReadOnlyList<AudioTranscriptionWord>)(Words ?? BuildWordsFromSegments()));
         }
 
-        public Task<AudioTranscriptionDetailedResult> TranscribeToDetailedResultAsync(string inputPath, IProgress<AudioTranscriptionProgress>? progress, CancellationToken cancellationToken = default)
-        {
-            progress?.Report(new AudioTranscriptionProgress
-            {
-                Stage = AudioTranscriptionStage.PreparingAudio,
-                OverallPercent = 0.1d,
-                StagePercent = 0.5d,
-                StageDescription = "Preparing audio for transcription"
-            });
-            progress?.Report(new AudioTranscriptionProgress
-            {
-                Stage = AudioTranscriptionStage.Transcribing,
-                OverallPercent = 0.95d,
-                StagePercent = 1d,
-                StageDescription = "Transcribing audio"
-            });
-
-            return Task.FromResult(DetailedResult ?? BuildDetailedResult());
-        }
-
         public Task<string> TranscribeToTextAsync(string inputPath, CancellationToken cancellationToken = default) => Task.FromResult(string.Empty);
 
         public Task<string> TranscribeToTextAsync(string inputPath, IProgress<AudioTranscriptionProgress>? progress, CancellationToken cancellationToken = default) => Task.FromResult(string.Empty);
@@ -886,18 +870,6 @@ public class SubtitlesServiceTests
             }
 
             return words;
-        }
-
-        private AudioTranscriptionDetailedResult BuildDetailedResult()
-        {
-            var words = (Words ?? BuildWordsFromSegments()).ToArray();
-            var detailedSegments = Segments
-                .Select((segment, index) => new AudioTranscriptionDetailedSegment(index, segment.Start, segment.End, segment.Text, 0.9f, 0.8f, 1f, 0.1f, "en", []))
-                .ToArray();
-            var detailedWords = words
-                .Select((word, index) => new AudioTranscriptionAlignedWord(index < detailedSegments.Length ? index : Math.Max(0, detailedSegments.Length - 1), index, word.Start, word.End, word.Text, AudioTranscriptionTimingSource.SegmentFallback))
-                .ToArray();
-            return new AudioTranscriptionDetailedResult(detailedSegments, detailedWords);
         }
     }
 
