@@ -736,6 +736,35 @@ public class SubtitlesServiceTests
     }
 
     [TestMethod]
+    public async Task RenderKaraokeAss_WithBubbly_UsesDropInPerWordEvents()
+    {
+        _audioTranscriptionService.Segments =
+        [
+            new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2), "bubbly drop in test")
+        ];
+
+        var draft = await _service.GenerateAdvancedDraftAsync(CreateInputFile());
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.Bubbly);
+
+        // DropIn uses \kf karaoke tags with transparent SecondaryColour
+        StringAssert.Contains(ass, "Style: Bubbly");
+        StringAssert.Contains(ass, "Bahnschrift");
+        StringAssert.Contains(ass, @"{\kf");
+
+        // SecondaryColour should be fully transparent for DropIn
+        StringAssert.Contains(ass, "&HFF000000&");
+
+        // Should be a single Dialogue line per cue
+        var dialogueLines = ass.Split(["\r\n", "\n"], StringSplitOptions.None)
+            .Where(line => line.StartsWith("Dialogue:", StringComparison.Ordinal))
+            .ToArray();
+        Assert.AreEqual(1, dialogueLines.Length, $"Expected 1 Dialogue line for DropIn cue. ASS output:\n{ass}");
+
+        // Text should be lowercase (Bubbly uses Lowercase text transform)
+        StringAssert.Contains(ass, "bubbly");
+    }
+
+    [TestMethod]
     public async Task ApplyStylePreset_WithPlacement_UsesExactPositionOverrideMetadata()
     {
         _audioTranscriptionService.Segments =

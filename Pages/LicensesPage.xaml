@@ -18,6 +18,8 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <TextBlock FontSize="34" FontWeight="SemiBold" Text="Licenses" />
@@ -187,6 +189,60 @@
                             VerticalAlignment="Center"
                             Content="Show License"
                             Click="ShowLibreOfficeLicense_Click" />
+                    </Grid>
+                </Border>
+
+                <Border
+                    Grid.Row="8"
+                    Padding="16"
+                    CornerRadius="10"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Spacing="2">
+                            <TextBlock FontSize="20" FontWeight="SemiBold" Text="qpdf / QPdfNet" />
+                            <TextBlock Opacity="0.82" Text="License: Apache-2.0" />
+                            <TextBlock Opacity="0.82" Text="Usage: PDF merge, split, reorder, rotate, encrypt, metadata, repair, image and attachment extraction" />
+                        </StackPanel>
+
+                        <Button
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Content="Show License"
+                            Click="ShowQpdfLicense_Click" />
+                    </Grid>
+                </Border>
+
+                <Border
+                    Grid.Row="9"
+                    Padding="16"
+                    CornerRadius="10"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Spacing="2">
+                            <TextBlock FontSize="20" FontWeight="SemiBold" Text="Tesseract OCR" />
+                            <TextBlock Opacity="0.82" Text="License: Apache-2.0" />
+                            <TextBlock Opacity="0.82" Text="Usage: local OCR of PDF documents to produce searchable PDFs" />
+                        </StackPanel>
+
+                        <Button
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Content="Show License"
+                            Click="ShowTesseractLicense_Click" />
                     </Grid>
                 </Border>
             </Grid>

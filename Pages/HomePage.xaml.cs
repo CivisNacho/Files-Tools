@@ -16,7 +16,8 @@ namespace Files_Tools.Pages
         private static readonly string[] SupportedImageExtensions = [".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp"];
         private static readonly string[] SupportedVideoExtensions = [".mp4", ".mov", ".mkv", ".avi", ".wmv", ".webm", ".m4v"];
         private static readonly string[] SupportedAudioExtensions = [".mp3", ".aac", ".m4a", ".wav", ".flac", ".opus", ".ogg", ".ac3"];
-        private static readonly string[] SupportedDocumentExtensions = [".docx", ".doc", ".odt", ".pptx", ".ppt", ".odp", ".xlsx", ".xls", ".ods", ".csv", ".pdf"];
+        private static readonly string[] SupportedPdfExtensions = [".pdf"];
+        private static readonly string[] SupportedDocumentExtensions = [".docx", ".doc", ".odt", ".pptx", ".ppt", ".odp", ".xlsx", ".xls", ".ods", ".csv"];
 
         public HomePage()
         {
@@ -65,6 +66,7 @@ namespace Files_Tools.Pages
             foreach (var extension in SupportedImageExtensions
                 .Concat(SupportedVideoExtensions)
                 .Concat(SupportedAudioExtensions)
+                .Concat(SupportedPdfExtensions)
                 .Concat(SupportedDocumentExtensions)
                 .Append(".gif"))
             {
@@ -107,6 +109,12 @@ namespace Files_Tools.Pages
                 return;
             }
 
+            if (IsSupportedPdfFile(file))
+            {
+                NavigateToPage(typeof(PdfEditorPage), new FileNavigationRequest { File = file });
+                return;
+            }
+
             if (IsSupportedDocumentFile(file))
             {
                 NavigateToPage(typeof(DocumentEditorPage), new FileNavigationRequest { File = file });
@@ -118,6 +126,7 @@ namespace Files_Tools.Pages
             return SupportedImageExtensions.Contains(file.FileType, StringComparer.OrdinalIgnoreCase) ||
                    IsSupportedVideoFile(file) ||
                    IsSupportedAudioFile(file) ||
+                   IsSupportedPdfFile(file) ||
                    IsSupportedDocumentFile(file);
         }
 
@@ -130,6 +139,11 @@ namespace Files_Tools.Pages
         private static bool IsSupportedAudioFile(StorageFile file)
         {
             return SupportedAudioExtensions.Contains(file.FileType, StringComparer.OrdinalIgnoreCase);
+        }
+
+        private static bool IsSupportedPdfFile(StorageFile file)
+        {
+            return SupportedPdfExtensions.Contains(file.FileType, StringComparer.OrdinalIgnoreCase);
         }
 
         private static bool IsSupportedDocumentFile(StorageFile file)

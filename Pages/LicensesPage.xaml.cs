@@ -99,6 +99,56 @@ public sealed partial class LicensesPage : Page
         "uses the Document Editor. The download (~420 MB) is stored in the user's local " +
         "app data folder and is not bundled or redistributed with this application.";
 
+    private const string Apache2LicenseSummary =
+        "Apache License, Version 2.0\n\n" +
+        "Licensed under the Apache License, Version 2.0 (the \"License\"); you may not " +
+        "use this file except in compliance with the License. You may obtain a copy of " +
+        "the License at:\n\n" +
+        "    http://www.apache.org/licenses/LICENSE-2.0\n\n" +
+        "Unless required by applicable law or agreed to in writing, software distributed " +
+        "under the License is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR " +
+        "CONDITIONS OF ANY KIND, either express or implied. See the License for the " +
+        "specific language governing permissions and limitations under the License.\n\n" +
+        "Full license text: https://www.apache.org/licenses/LICENSE-2.0";
+
+    private const string QpdfLicenseText =
+        "Component: qpdf (via QPdfNet)\n" +
+        "Copyright: Copyright (c) 2005-2024 Jay Berkenbilt; 2022-2024 Manfred Nerurkar\n" +
+        "License: Apache-2.0\n\n" +
+        "qpdf project URL:\n" +
+        "https://github.com/qpdf/qpdf\n\n" +
+        "QPdfNet (.NET wrapper) project URL:\n" +
+        "https://github.com/Sicos1977/QPdfNet\n\n" +
+        "Package source:\n" +
+        "https://www.nuget.org/packages/QPdfNet\n\n" +
+        "Usage: PDF manipulation backbone — merge, split, reorder, rotate, encrypt, " +
+        "decrypt, change/remove password, update permissions, repair, update Info " +
+        "metadata, extract images and attachments. The native qpdf library and its " +
+        "Microsoft Visual C++ runtime dependencies are bundled in the QPdfNet NuGet " +
+        "package and redistributed with this application.\n\n" +
+        "Note: starting with qpdf 11, the project is licensed under Apache-2.0. Earlier " +
+        "versions were dual-licensed under Artistic 2.0 / Apache-2.0.\n\n" +
+        Apache2LicenseSummary;
+
+    private const string TesseractLicenseText =
+        "Component: Tesseract OCR (via TesseractOCR .NET wrapper)\n" +
+        "Copyright: Copyright (c) Google Inc. and contributors; (c) Sicos1977 for the .NET wrapper\n" +
+        "License: Apache-2.0\n\n" +
+        "Tesseract project URL:\n" +
+        "https://github.com/tesseract-ocr/tesseract\n\n" +
+        "TesseractOCR (.NET wrapper) project URL:\n" +
+        "https://github.com/Sicos1977/TesseractOCR\n\n" +
+        "Package source:\n" +
+        "https://www.nuget.org/packages/TesseractOCR\n\n" +
+        "Usage: optical character recognition on PDF pages to produce searchable PDFs. " +
+        "The native Tesseract and Leptonica libraries shipped with the TesseractOCR " +
+        "NuGet package are redistributed with this application.\n\n" +
+        "Trained language data files (tessdata) are not bundled — users supply their own " +
+        "*.traineddata files at the path configured via PdfOcrOptions.TessDataPath. " +
+        "Language data files distributed by the Tesseract project are themselves " +
+        "Apache-2.0 licensed.\n\n" +
+        Apache2LicenseSummary;
+
     private const string WhisperLicenseText =
         "Component: Whisper.net / whisper.cpp\n" +
         "License: MIT\n\n" +
@@ -142,6 +192,16 @@ public sealed partial class LicensesPage : Page
     private void ShowLibreOfficeLicense_Click(object sender, RoutedEventArgs e)
     {
         ShowLicenseDialog("LibreOffice License", LibreOfficeLicenseText);
+    }
+
+    private void ShowQpdfLicense_Click(object sender, RoutedEventArgs e)
+    {
+        ShowLicenseDialog("qpdf / QPdfNet License", QpdfLicenseText);
+    }
+
+    private void ShowTesseractLicense_Click(object sender, RoutedEventArgs e)
+    {
+        ShowLicenseDialog("Tesseract OCR License", TesseractLicenseText);
     }
 
     private void ShowLicenseDialog(string title, string licenseText)

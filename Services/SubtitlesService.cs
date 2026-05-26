@@ -113,7 +113,8 @@ public sealed class SubtitlePostprocessingOptions
 public enum SubtitleTextTransform
 {
     None,
-    Uppercase
+    Uppercase,
+    Lowercase
 }
 
 /// <summary>
@@ -220,7 +221,8 @@ public enum SubtitlePresentationAnimation
     None,
     Fade,
     Pop,
-    FadePop
+    FadePop,
+    DropIn
 }
 
 /// <summary>
@@ -461,6 +463,45 @@ public static SubtitleStylePreset CreatePunch()
             MarginVertical = 92,
             MaxLines = 2,
             MaxCharsPerLine = 28
+        };
+    }
+
+    public static SubtitleStylePreset Bubbly => CreateBubbly();
+
+    public static SubtitleStylePreset CreateBubbly()
+    {
+        return new SubtitleStylePreset
+        {
+            Name = "Bubbly",
+            AssStyleName = "Bubbly",
+            ScriptTitle = "Karaoke subtitles",
+            PlayResX = 1920,
+            PlayResY = 1080,
+            WrapStyle = 0,
+            ScaledBorderAndShadow = true,
+            PrimaryFontFamily = "Bahnschrift",
+            FontFamilyFallbacks = ["Bahnschrift", "Segoe UI", "Arial"],
+            FontSize = 68,
+            Bold = true,
+            Italic = false,
+            TextTransform = SubtitleTextTransform.Lowercase,
+            FillColor = new SubtitleColor(0, 255, 180, 200),
+            OutlineColor = SubtitleColor.White,
+            ShadowColor = new SubtitleColor(120, 0, 0, 0),
+            KaraokeHighlightColor = new SubtitleColor(0, 255, 230, 80),
+            UseBackgroundBox = false,
+            PresentationAnimation = SubtitlePresentationAnimation.DropIn,
+            EntryFadeMilliseconds = 400,
+            ExitFadeMilliseconds = 100,
+            IntroScale = 1d,
+            OutlineWidth = 12,
+            ShadowDepth = 0,
+            Alignment = SubtitleVisualAlignment.BottomLeft,
+            MarginLeft = 80,
+            MarginRight = 80,
+            MarginVertical = 92,
+            MaxLines = 2,
+            MaxCharsPerLine = 30
         };
     }
 }
@@ -885,6 +926,24 @@ public sealed class SubtitlesService : ISubtitlesService
         ArgumentNullException.ThrowIfNull(cues);
         ArgumentNullException.ThrowIfNull(preset);
 
+        if (preset.TextTransform != SubtitleTextTransform.None)
+        {
+            foreach (var cue in cues)
+            {
+                foreach (var word in cue.Words)
+                {
+                    word.Text = preset.TextTransform switch
+                    {
+                        SubtitleTextTransform.Uppercase => word.Text.ToUpperInvariant(),
+                        SubtitleTextTransform.Lowercase => word.Text.ToLowerInvariant(),
+                        _ => word.Text
+                    };
+                }
+            }
+        }
+
+        var isDropIn = preset.PresentationAnimation == SubtitlePresentationAnimation.DropIn;
+
         var builder = new StringBuilder();
         builder.AppendLine("[Script Info]");
         builder.Append("Title: ").AppendLine(preset.ScriptTitle);
@@ -901,8 +960,8 @@ public sealed class SubtitlesService : ISubtitlesService
             .Append(preset.StyleName).Append(',')
             .Append(preset.FontFamily).Append(',')
             .Append(preset.FontSize.ToString(System.Globalization.CultureInfo.InvariantCulture)).Append(',')
-            .Append(ToAssColor(preset.HighlightColor)).Append(',')
-            .Append(ToAssColor(preset.BaseColor)).Append(',')
+            .Append(ToAssColor(isDropIn ? preset.BaseColor : preset.HighlightColor)).Append(',')
+            .Append(isDropIn ? "&HFF000000&" : ToAssColor(preset.BaseColor)).Append(',')
             .Append(ToAssColor(preset.OutlineColor)).Append(',')
             .Append(ToAssColor(preset.ShadowColor)).Append(',')
             .Append(preset.Bold ? "-1" : "0").Append(',')
@@ -926,7 +985,14 @@ public sealed class SubtitlesService : ISubtitlesService
                 continue;
             }
 
-            builder.AppendLine(BuildAssDialogueLine(0, cue.Start, cue.End, preset.StyleName, BuildAssCueOverrides(preset, cue.Start, cue.End) + RenderKaraokeCueText(cue, preset)));
+            if (isDropIn)
+            {
+                RenderDropInKaraokeEvents(builder, cue, preset);
+            }
+            else
+            {
+                builder.AppendLine(BuildAssDialogueLine(0, cue.Start, cue.End, preset.StyleName, BuildAssCueOverrides(preset, cue.Start, cue.End) + RenderKaraokeCueText(cue, preset)));
+            }
         }
 
         return builder.ToString();
@@ -1515,6 +1581,7 @@ public sealed class SubtitlesService : ISubtitlesService
             EntryFadeMilliseconds = basePreset.EntryFadeMilliseconds,
             ExitFadeMilliseconds = basePreset.ExitFadeMilliseconds,
             IntroScale = basePreset.IntroScale,
+            TextTransform = basePreset.TextTransform,
             BaseColor = basePreset.FillColor,
             HighlightColor = basePreset.KaraokeHighlightColor,
             OutlineColor = basePreset.OutlineColor,
@@ -1556,6 +1623,44 @@ public sealed class SubtitlesService : ISubtitlesService
         }
 
         return builder.ToString();
+    }
+
+    private static void RenderDropInKaraokeEvents(StringBuilder builder, KaraokeCue cue, KaraokeRenderPreset preset)
+    {
+        // DropIn uses standard \kf karaoke tags with SecondaryColour set to fully transparent
+        // in the style definition. Words gradually fill from transparent to PrimaryColour as
+        // karaoke progresses, creating the "words appearing one by one" effect.
+        // Position and fade-out are handled by BuildAssCueOverrides (same as other karaoke modes).
+
+        // Build position override — reuse the same logic as normal karaoke.
+        var posOverride = BuildAssPositionOverride(preset.Alignment, preset.PositionX, preset.PositionY);
+
+        // Build exit fade only (no entry fade — \kf handles per-word appearance).
+        var exitFade = Math.Clamp(preset.ExitFadeMilliseconds, 0, 5000);
+        var overrideTags = new StringBuilder();
+        if (posOverride.Length > 0)
+            overrideTags.Append(posOverride);
+        if (exitFade > 0)
+            overrideTags.Append(FormattableString.Invariant($@"\fad(0,{exitFade})"));
+
+        var overridePrefix = overrideTags.Length > 0 ? $"{{{overrideTags}}}" : string.Empty;
+
+        // Build karaoke text with \kf tags (gradual fill per word).
+        var textBuilder = new StringBuilder();
+        for (var index = 0; index < cue.Words.Count; index++)
+        {
+            var word = cue.Words[index];
+            var durationCentiseconds = Math.Max(1, (int)Math.Round((word.End - word.Start).TotalMilliseconds / 10d, MidpointRounding.AwayFromZero));
+            var prefix = word.BreakBefore ? @"\N" : index > 0 ? " " : string.Empty;
+
+            textBuilder.Append(@"{\kf")
+                .Append(durationCentiseconds.ToString(System.Globalization.CultureInfo.InvariantCulture))
+                .Append('}');
+            textBuilder.Append(prefix);
+            textBuilder.Append(EscapeAssText(word.Text));
+        }
+
+        builder.AppendLine(BuildAssDialogueLine(0, cue.Start, cue.End, preset.StyleName, overridePrefix + textBuilder.ToString()));
     }
 
     private static string FormatAssTimestamp(TimeSpan value)
@@ -2292,6 +2397,7 @@ public sealed class SubtitlesService : ISubtitlesService
             cue.Text = preset.TextTransform switch
             {
                 SubtitleTextTransform.Uppercase => cue.Text.ToUpperInvariant(),
+                SubtitleTextTransform.Lowercase => cue.Text.ToLowerInvariant(),
                 _ => cue.Text
             };
         }
@@ -2879,6 +2985,8 @@ public sealed class SubtitlesService : ISubtitlesService
         public int ExitFadeMilliseconds { get; init; }
 
         public double IntroScale { get; init; } = 1d;
+
+        public SubtitleTextTransform TextTransform { get; init; }
 
         public required SubtitleColor BaseColor { get; init; }
 

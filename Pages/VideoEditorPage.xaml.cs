@@ -138,7 +138,8 @@ namespace Files_Tools.Pages
         private enum KaraokeSubtitleBasePreset
         {
             NeonKaraoke,
-            Punch
+            Punch,
+            Bubbly
         }
 
         private sealed class SubtitleEditableRow : INotifyPropertyChanged
@@ -189,7 +190,7 @@ namespace Files_Tools.Pages
 
             public bool Bold { get; set; } = true;
 
-            public bool Uppercase { get; set; } = true;
+            public SubtitleTextTransform TextTransform { get; set; } = SubtitleTextTransform.Uppercase;
 
             public double OutlineWidth { get; set; } = 5d;
 
@@ -1438,9 +1439,11 @@ namespace Files_Tools.Pages
             {
                 basePresetComboBox.Items.Add(new ComboBoxItem { Content = "NeonKaraoke" });
                 basePresetComboBox.Items.Add(new ComboBoxItem { Content = "Punch" });
+                basePresetComboBox.Items.Add(new ComboBoxItem { Content = "Bubbly" });
                 basePresetComboBox.SelectedIndex = _advancedSubtitlePresetConfiguration.KaraokePreset switch
                 {
                     KaraokeSubtitleBasePreset.Punch => 1,
+                    KaraokeSubtitleBasePreset.Bubbly => 2,
                     _ => 0
                 };
             }
@@ -1507,10 +1510,18 @@ namespace Files_Tools.Pages
                 IsChecked = _advancedSubtitlePresetConfiguration.Bold
             };
 
-            var uppercaseCheckBox = new CheckBox
+            var textTransformComboBox = new ComboBox
             {
-                Content = "Uppercase text",
-                IsChecked = _advancedSubtitlePresetConfiguration.Uppercase
+                Header = "Text transform"
+            };
+            textTransformComboBox.Items.Add(new ComboBoxItem { Content = "Original case" });
+            textTransformComboBox.Items.Add(new ComboBoxItem { Content = "UPPERCASE" });
+            textTransformComboBox.Items.Add(new ComboBoxItem { Content = "lowercase" });
+            textTransformComboBox.SelectedIndex = _advancedSubtitlePresetConfiguration.TextTransform switch
+            {
+                SubtitleTextTransform.Uppercase => 1,
+                SubtitleTextTransform.Lowercase => 2,
+                _ => 0
             };
 
             var karaokeAccentColorPicker = new ColorPicker
@@ -1523,6 +1534,41 @@ namespace Files_Tools.Pages
             {
                 Text = "Karaoke highlight color",
                 Visibility = isKaraokeMode ? Visibility.Visible : Visibility.Collapsed
+            };
+
+            basePresetComboBox.SelectionChanged += (_, _) =>
+            {
+                var defaultFont = GetDefaultFontFamilyForPreset(basePresetComboBox.SelectedIndex, isKaraokeMode);
+                if (_installedFontFamilies.Contains(defaultFont, StringComparer.OrdinalIgnoreCase))
+                {
+                    fontFamilyComboBox.SelectedItem = _installedFontFamilies.First(name => string.Equals(name, defaultFont, StringComparison.OrdinalIgnoreCase));
+                }
+
+                SubtitleStylePreset defaults = isKaraokeMode
+                    ? basePresetComboBox.SelectedIndex switch
+                    {
+                        1 => KaraokeSubtitlePresets.CreatePunch(),
+                        2 => KaraokeSubtitlePresets.CreateBubbly(),
+                        _ => KaraokeSubtitlePresets.CreateNeonKaraoke()
+                    }
+                    : basePresetComboBox.SelectedIndex switch
+                    {
+                        1 => StyledSubtitlePresets.CreateCleanSans(),
+                        2 => StyledSubtitlePresets.CreateCaptionBox(),
+                        3 => StyledSubtitlePresets.CreateBroadcastLowerThird(),
+                        _ => StyledSubtitlePresets.CreateSocialImpact()
+                    };
+
+                fontSizeNumberBox.Value = defaults.FontSize;
+                outlineNumberBox.Value = defaults.OutlineWidth;
+                marginVerticalNumberBox.Value = defaults.MarginVertical;
+                boldCheckBox.IsChecked = defaults.Bold;
+                textTransformComboBox.SelectedIndex = defaults.TextTransform switch
+                {
+                    SubtitleTextTransform.Uppercase => 1,
+                    SubtitleTextTransform.Lowercase => 2,
+                    _ => 0
+                };
             };
 
             var content = new StackPanel
@@ -1541,7 +1587,7 @@ namespace Files_Tools.Pages
             content.Children.Add(outlineNumberBox);
             content.Children.Add(marginVerticalNumberBox);
             content.Children.Add(boldCheckBox);
-            content.Children.Add(uppercaseCheckBox);
+            content.Children.Add(textTransformComboBox);
             content.Children.Add(karaokeAccentLabel);
             content.Children.Add(karaokeAccentColorPicker);
 
@@ -1583,7 +1629,12 @@ namespace Files_Tools.Pages
             newConfig.OutlineWidth = Math.Clamp(double.IsNaN(outlineNumberBox.Value) ? 5d : outlineNumberBox.Value, 0d, 20d);
             newConfig.MarginVertical = Math.Clamp(double.IsNaN(marginVerticalNumberBox.Value) ? 90 : (int)Math.Round(marginVerticalNumberBox.Value), 0, 400);
             newConfig.Bold = boldCheckBox.IsChecked == true;
-            newConfig.Uppercase = uppercaseCheckBox.IsChecked == true;
+            newConfig.TextTransform = textTransformComboBox.SelectedIndex switch
+            {
+                1 => SubtitleTextTransform.Uppercase,
+                2 => SubtitleTextTransform.Lowercase,
+                _ => SubtitleTextTransform.None
+            };
             newConfig.KaraokeHighlightColor = FromUiColor(karaokeAccentColorPicker.Color);
 
             if (isKaraokeMode)
@@ -1591,6 +1642,7 @@ namespace Files_Tools.Pages
                 newConfig.KaraokePreset = basePresetComboBox.SelectedIndex switch
                 {
                     1 => KaraokeSubtitleBasePreset.Punch,
+                    2 => KaraokeSubtitleBasePreset.Bubbly,
                     _ => KaraokeSubtitleBasePreset.NeonKaraoke
                 };
             }
@@ -1622,6 +1674,7 @@ namespace Files_Tools.Pages
                 ? (_advancedSubtitlePresetConfiguration.KaraokePreset.ToString(), _advancedSubtitlePresetConfiguration.KaraokePreset switch
                 {
                     KaraokeSubtitleBasePreset.Punch => "Punch karaoke",
+                    KaraokeSubtitleBasePreset.Bubbly => "Bubbly karaoke",
                     _ => "Neon karaoke"
                 })
                 : (_advancedSubtitlePresetConfiguration.StyledPreset.ToString(), _advancedSubtitlePresetConfiguration.StyledPreset switch
@@ -1631,7 +1684,12 @@ namespace Files_Tools.Pages
                     StyledSubtitleBasePreset.CleanSans => "Clean fade",
                     _ => "Impact pop"
                 });
-            var textTransform = _advancedSubtitlePresetConfiguration.Uppercase ? "Uppercase" : "Original case";
+            var textTransform = _advancedSubtitlePresetConfiguration.TextTransform switch
+            {
+                SubtitleTextTransform.Uppercase => "Uppercase",
+                SubtitleTextTransform.Lowercase => "Lowercase",
+                _ => "Original case"
+            };
             var fontWeight = _advancedSubtitlePresetConfiguration.Bold ? "Bold" : "Regular";
             AdvancedSubtitlePresetSummaryTextBlock.Text =
                 $"Preset: {presetName} ({presentation}) | {_advancedSubtitlePresetConfiguration.FontFamily} {_advancedSubtitlePresetConfiguration.FontSize:0.#} | {fontWeight} | {textTransform} | Outline {_advancedSubtitlePresetConfiguration.OutlineWidth:0.#}";
@@ -1644,6 +1702,7 @@ namespace Files_Tools.Pages
                 ? _advancedSubtitlePresetConfiguration.KaraokePreset switch
                 {
                     KaraokeSubtitleBasePreset.Punch => KaraokeSubtitlePresets.CreatePunch(),
+                    KaraokeSubtitleBasePreset.Bubbly => KaraokeSubtitlePresets.CreateBubbly(),
                     _ => KaraokeSubtitlePresets.CreateNeonKaraoke()
                 }
                 : _advancedSubtitlePresetConfiguration.StyledPreset switch
@@ -1668,7 +1727,7 @@ namespace Files_Tools.Pages
                 FontSize = _advancedSubtitlePresetConfiguration.FontSize,
                 Bold = _advancedSubtitlePresetConfiguration.Bold,
                 Italic = basePreset.Italic,
-                TextTransform = _advancedSubtitlePresetConfiguration.Uppercase ? SubtitleTextTransform.Uppercase : SubtitleTextTransform.None,
+                TextTransform = _advancedSubtitlePresetConfiguration.TextTransform,
                 FillColor = basePreset.FillColor,
                 OutlineColor = basePreset.OutlineColor,
                 ShadowColor = basePreset.ShadowColor,
@@ -1698,6 +1757,7 @@ namespace Files_Tools.Pages
                 return basePresetIndex switch
                 {
                     1 => "Arial Black",
+                    2 => "Bahnschrift",
                     _ => "Segoe UI Semibold"
                 };
             }

@@ -37,7 +37,8 @@ namespace Files_Tools
             var isImageEditorPage = RootFrame.Content is Pages.ImageEditorPage;
             var isVideoEditorPage = RootFrame.Content is Pages.VideoEditorPage;
             var isAudioEditorPage = RootFrame.Content is Pages.AudioEditorPage;
-            var showEditorRail = isImageEditorPage || isVideoEditorPage || isAudioEditorPage;
+            var isPdfEditorPage = RootFrame.Content is Pages.PdfEditorPage;
+            var showEditorRail = isImageEditorPage || isVideoEditorPage || isAudioEditorPage || isPdfEditorPage;
             UpdateNavigationRailWidth(showEditorRail);
 
             ImageEditorOptionsNavigationView.Visibility = showEditorRail ? Visibility.Visible : Visibility.Collapsed;
@@ -49,11 +50,12 @@ namespace Files_Tools
             SetImageEditorNavigationVisibility(isImageEditorPage);
             SetVideoEditorNavigationVisibility(isVideoEditorPage);
             SetAudioEditorNavigationVisibility(isAudioEditorPage);
+            SetPdfEditorNavigationVisibility(isPdfEditorPage);
         }
 
         private void MainWindow_SizeChanged(object sender, WindowSizeChangedEventArgs args)
         {
-            var showEditorRail = RootFrame.Content is Pages.ImageEditorPage or Pages.VideoEditorPage or Pages.AudioEditorPage;
+            var showEditorRail = RootFrame.Content is Pages.ImageEditorPage or Pages.VideoEditorPage or Pages.AudioEditorPage or Pages.PdfEditorPage;
             UpdateNavigationRailWidth(showEditorRail);
             ImageEditorNavColumn.Width = showEditorRail
                 ? new GridLength(ImageEditorOptionsNavigationView.OpenPaneLength)
@@ -213,6 +215,10 @@ namespace Files_Tools
             {
                 audioEditorPage.ApplyOptionSelection(tag);
             }
+            else if (RootFrame.Content is Pages.PdfEditorPage pdfEditorPage)
+            {
+                pdfEditorPage.HandleNavigationViewSelection(tag);
+            }
         }
 
         private void SetImageEditorNavigationVisibility(bool isVisible)
@@ -239,5 +245,16 @@ namespace Files_Tools
             AudioAdjustNavigationItem.Visibility = visibility;
             AudioTranscriptionNavigationItem.Visibility = visibility;
         }
+
+        private void SetPdfEditorNavigationVisibility(bool isVisible)
+        {
+            var visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+            PdfOrganizationNavigationItem.Visibility = visibility;
+            PdfTransformNavigationItem.Visibility = visibility;
+            PdfSecurityNavigationItem.Visibility = visibility;
+            PdfContentNavigationItem.Visibility = visibility;
+            PdfRepairNavigationItem.Visibility = visibility;
+        }
+
     }
 }

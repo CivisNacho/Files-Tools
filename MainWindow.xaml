@@ -221,6 +221,89 @@
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
+                <NavigationViewItem x:Name="PdfOrganizationNavigationItem" Visibility="Collapsed" Content="Organization" Tag="Organization">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Folder" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="PdfOrganizationMergeNavigationItem" Content="Merge" Tag="Organization:Merge">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Add" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="PdfOrganizationSplitNavigationItem" Content="Split" Tag="Organization:Split">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Cut" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="PdfOrganizationReorderNavigationItem" Content="Reorder" Tag="Organization:Reorder">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="List" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="PdfOrganizationExtractNavigationItem" Content="Extract" Tag="Organization:Extract">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Download" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="PdfTransformNavigationItem" Visibility="Collapsed" Content="Transform" Tag="Transform">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Rotate" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="PdfTransformRotateNavigationItem" Content="Rotate" Tag="Transform:Rotate">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Rotate" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="PdfSecurityNavigationItem" Visibility="Collapsed" Content="Security" Tag="Security">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Permissions" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="PdfSecurityEncryptNavigationItem" Content="Encrypt" Tag="Security:Encrypt">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Permissions" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="PdfSecurityPasswordNavigationItem" Content="Password" Tag="Security:Password">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Setting" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="PdfSecurityPermissionsNavigationItem" Content="Permissions" Tag="Security:Permissions">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Permissions" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="PdfContentNavigationItem" Visibility="Collapsed" Content="Content" Tag="Content">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Document" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="PdfContentOcrNavigationItem" Content="OCR" Tag="Content:OCR">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Find" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="PdfContentMetadataNavigationItem" Content="Metadata" Tag="Content:Metadata">
+                            <NavigationViewItem.Icon>
+                                <SymbolIcon Symbol="Tag" />
+                            </NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="PdfRepairNavigationItem" Visibility="Collapsed" Content="Repair" Tag="Repair:Run">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Repair" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
         </NavigationView>
 

@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Files_Tools.Pages.PdfEditorPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <Page.Resources>
+        <SolidColorBrush x:Key="PdfAccentBrush" Color="#FFF59E3B" />
+        <SolidColorBrush x:Key="PdfAccentDarkBrush" Color="#FFD97706" />
+        <LinearGradientBrush x:Key="PdfHintBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#FFFFF8E7" Offset="0" />
+            <GradientStop Color="#FFFEF3C7" Offset="1" />
+        </LinearGradientBrush>
+        <Style x:Key="SettingsCardStyle" TargetType="Border">
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="Background" Value="{ThemeResource LayerFillColorDefaultBrush}" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid
+            x:Name="PageRoot"
+            Padding="32,24,32,28"
+            SizeChanged="PageRoot_SizeChanged">
+            <Grid
+                x:Name="ContentRoot"
+                HorizontalAlignment="Center"
+                MaxWidth="1440"
+                RowSpacing="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel MaxWidth="880" Spacing="6">
+                    <TextBlock FontSize="38" FontWeight="SemiBold" Text="PDF Editor" />
+                    <TextBlock
+                        Opacity="0.78"
+                        Text="Import a PDF, organize pages, add security, and apply edits with a layout that keeps preview and options easy to follow."
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <Grid
+                    x:Name="EditorGrid"
+                    Grid.Row="1"
+                    ColumnSpacing="20"
+                    RowSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition x:Name="LeftColumn" Width="9*" />
+                        <ColumnDefinition x:Name="RightColumn" Width="3*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Border
+                        x:Name="PreviewSection"
+                        Grid.Column="0"
+                        VerticalAlignment="Top"
+                        Padding="20"
+                        CornerRadius="16"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                        <Grid RowSpacing="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Spacing="4">
+                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="Preview" />
+                                <TextBlock
+                                    Opacity="0.72"
+                                    Text="Drop a PDF or click the preview surface to start. Organization, security, and content edits stay available from the options panel."
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <Border
+                                x:Name="UploadSurface"
+                                Grid.Row="1"
+                                AllowDrop="True"
+                                MinHeight="280"
+                                MaxHeight="800"
+                                Padding="16"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Top"
+                                CornerRadius="14"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                DragOver="UploadSurface_DragOver"
+                                Drop="UploadSurface_Drop"
+                                PointerPressed="UploadSurface_PointerPressed">
+                                <Grid RowSpacing="12">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel
+                                        x:Name="ZoomControlPanel"
+                                        Visibility="Collapsed"
+                                        Orientation="Horizontal"
+                                        Spacing="8"
+                                        Padding="0,0,0,8">
+                                        <Button
+                                            x:Name="ZoomOutButton"
+                                            Width="40"
+                                            Height="40"
+                                            Padding="0"
+                                            Click="ZoomOut_Click"
+                                            ToolTipService.ToolTip="Zoom out">
+                                            <FontIcon FontSize="16" Glyph="&#xE71E;" />
+                                        </Button>
+                                        <Slider
+                                            x:Name="ZoomSlider"
+                                            Width="150"
+                                            Minimum="50"
+                                            Maximum="200"
+                                            Value="100"
+                                            StepFrequency="10"
+                                            ValueChanged="ZoomSlider_ValueChanged"
+                                            VerticalAlignment="Center" />
+                                        <TextBlock
+                                            x:Name="ZoomLevelTextBlock"
+                                            VerticalAlignment="Center"
+                                            Width="50"
+                                            Text="100%" />
+                                        <Button
+                                            x:Name="ZoomInButton"
+                                            Width="40"
+                                            Height="40"
+                                            Padding="0"
+                                            Click="ZoomIn_Click"
+                                            ToolTipService.ToolTip="Zoom in">
+                                            <FontIcon FontSize="16" Glyph="&#xE71F;" />
+                                        </Button>
+                                        <Button
+                                            x:Name="FitToPageButton"
+                                            Content="Fit page"
+                                            Click="FitToPage_Click" />
+                                    </StackPanel>
+
+                                    <ScrollViewer
+                                        x:Name="PreviewScrollViewer"
+                                        Grid.Row="1"
+                                        HorizontalScrollBarVisibility="Auto"
+                                        VerticalScrollBarVisibility="Auto"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"
+                                        PointerWheelChanged="PreviewScrollViewer_PointerWheelChanged">
+                                        <Grid
+                                            x:Name="PreviewHost"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Top"
+                                            Background="Transparent">
+                                            <Image
+                                                x:Name="PdfPageImage"
+                                                Stretch="None"
+                                                Visibility="Collapsed"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Top"
+                                                RenderTransformOrigin="0.5,0.5">
+                                                <Image.RenderTransform>
+                                                    <ScaleTransform x:Name="ImageScaleTransform" ScaleX="1" ScaleY="1" />
+                                                </Image.RenderTransform>
+                                            </Image>
+
+                                            <StackPanel
+                                                x:Name="DropHintPanel"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                MaxWidth="360"
+                                                Spacing="12">
+                                                <Border
+                                                    HorizontalAlignment="Center"
+                                                    Padding="18"
+                                                    CornerRadius="999"
+                                                    Background="{StaticResource PdfHintBackgroundBrush}">
+                                                    <FontIcon
+                                                        HorizontalAlignment="Center"
+                                                        FontSize="52"
+                                                        Foreground="{StaticResource PdfAccentDarkBrush}"
+                                                        Glyph="&#xE7C3;" />
+                                                </Border>
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    FontSize="24"
+                                                    FontWeight="SemiBold"
+                                                    Text="Drop a PDF here"
+                                                    TextAlignment="Center" />
+                                                <TextBlock
+                                                    HorizontalAlignment="Center"
+                                                    Opacity="0.76"
+                                                    Text="You can also click this surface to browse for a file. Merge, split, encrypt, and content options stay available from the options panel."
+                                                    TextAlignment="Center"
+                                                    TextWrapping="Wrap" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </ScrollViewer>
+
+                                    <StackPanel
+                                        x:Name="PdfNavigationPanel"
+                                        Grid.Row="2"
+                                        Visibility="Collapsed"
+                                        Orientation="Horizontal"
+                                        HorizontalAlignment="Center"
+                                        Spacing="12">
+                                        <Button
+                                            x:Name="PreviousPageButton"
+                                            MinWidth="100"
+                                            Content="← Previous"
+                                            Click="PreviousPage_Click" />
+                                        <TextBlock
+                                            x:Name="PageCountTextBlock"
+                                            VerticalAlignment="Center"
+                                            Text="Page 1 of 1" />
+                                        <Button
+                                            x:Name="NextPageButton"
+                                            MinWidth="100"
+                                            Content="Next →"
+                                            Click="NextPage_Click" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Grid Grid.Row="2" ColumnSpacing="16" RowSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    x:Name="LoadedPdfInfoTextBlock"
+                                    VerticalAlignment="Center"
+                                    Opacity="0.76"
+                                    Text="No PDF loaded yet."
+                                    TextWrapping="Wrap" />
+                                <Button
+                                    x:Name="ApplyButton"
+                                    Grid.Column="1"
+                                    MinWidth="180"
+                                    Height="44"
+                                    HorizontalAlignment="Right"
+                                    Content="Apply changes"
+                                    Background="{StaticResource PdfAccentBrush}"
+                                    BorderBrush="{StaticResource PdfAccentBrush}"
+                                    Foreground="Black"
+                                    Click="ApplyButton_Click" />
+                            </Grid>
+
+                            <StackPanel
+                                x:Name="ProcessingStatusPanel"
+                                Grid.Row="3"
+                                Visibility="Collapsed"
+                                Spacing="8">
+                                <Grid ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock
+                                        x:Name="ProcessingStatusTextBlock"
+                                        FontWeight="SemiBold"
+                                        Text="Processing PDF..." />
+                                    <TextBlock
+                                        x:Name="ProcessingEtaTextBlock"
+                                        Grid.Column="1"
+                                        Opacity="0.76"
+                                        Text="ETA calculating..." />
+                                </Grid>
+
+                                <ProgressBar
+                                    x:Name="ProcessingProgressBar"
+                                    Height="6"
+                                    Minimum="0"
+                                    Maximum="1"
+                                    Value="0" />
+
+                                <TextBlock
+                                    x:Name="ProcessingDetailTextBlock"
+                                    Opacity="0.76"
+                                    Text="Preparing PDF service..." />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Border
+                        x:Name="OptionsPanel"
+                        Grid.Column="1"
+                        Grid.RowSpan="2"
+                        MinWidth="360"
+                        Padding="20"
+                        CornerRadius="16"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                        <Grid RowSpacing="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <StackPanel Spacing="2">
+                                    <TextBlock x:Name="SelectedOptionHeaderTextBlock" Margin="0,0,0,12" FontSize="16" FontWeight="SemiBold" Text="Select a category from the left" />
+
+                                    <!-- Organization Panel -->
+                                    <StackPanel x:Name="OrganizationPanel" Visibility="Collapsed" Spacing="12">
+
+                                        <StackPanel x:Name="MergePanel" Visibility="Visible">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Merge" />
+                                                    <TextBlock Opacity="0.76" Text="Combine multiple PDFs into a single document." TextWrapping="Wrap" />
+                                                    <Button HorizontalAlignment="Left" Content="Add PDF to merge" Click="AddPdfToMergeButton_Click" />
+                                                    <ScrollViewer MinHeight="0" MaxHeight="200" VerticalScrollBarVisibility="Auto">
+                                                        <StackPanel x:Name="MergeFilesList" Spacing="8" />
+                                                    </ScrollViewer>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel x:Name="SplitPanel" Visibility="Collapsed">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Split" />
+                                                    <ComboBox x:Name="SplitModeComboBox" Header="Split mode" SelectionChanged="SplitModeComboBox_SelectionChanged">
+                                                        <ComboBoxItem Content="One page per file" />
+                                                        <ComboBoxItem Content="By page ranges" />
+                                                    </ComboBox>
+                                                    <StackPanel x:Name="SplitRangesPanel" Visibility="Collapsed" Spacing="8">
+                                                        <TextBox x:Name="SplitRangesTextBox" Header="Page ranges" PlaceholderText="Example: 1-3, 5, 7-9" TextChanged="AnyOptionChanged_TextChanged" />
+                                                        <TextBlock Opacity="0.76" Text="Specify ranges like 1-3 for pages 1 to 3, or single pages like 5." TextWrapping="Wrap" />
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel x:Name="ReorderPanel" Visibility="Collapsed">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Reorder" />
+                                                    <TextBlock Opacity="0.76" Text="Rearrange pages by specifying the new order." TextWrapping="Wrap" />
+                                                    <TextBox x:Name="ReorderSequenceTextBox" Header="Page order" PlaceholderText="Example: 3, 1, 2, 5, 4" TextChanged="AnyOptionChanged_TextChanged" />
+                                                    <TextBlock Opacity="0.76" Text="List page numbers in the desired order, separated by commas." TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel x:Name="ExtractPanel" Visibility="Collapsed">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Extract" />
+                                                    <CheckBox x:Name="ExtractImagesCheckBox" Content="Extract images" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <CheckBox x:Name="ExtractAttachmentsCheckBox" Content="Extract attachments" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <TextBlock Opacity="0.76" Text="Extracted files will be saved to separate folders." TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <TextBlock x:Name="OrganizationValidationTextBlock" Foreground="Tomato" TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <!-- Transform Panel -->
+                                    <StackPanel x:Name="TransformPanel" Visibility="Collapsed" Spacing="12">
+
+                                        <StackPanel x:Name="RotatePanel" Visibility="Visible">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Rotate" />
+                                                    <ComboBox x:Name="RotationComboBox" Header="Rotation" SelectionChanged="AnyOptionChanged_SelectionChanged">
+                                                        <ComboBoxItem Content="0 degrees" />
+                                                        <ComboBoxItem Content="90 degrees clockwise" />
+                                                        <ComboBoxItem Content="180 degrees" />
+                                                        <ComboBoxItem Content="270 degrees clockwise" />
+                                                    </ComboBox>
+                                                    <ComboBox x:Name="RotationScopeComboBox" Header="Apply to" SelectionChanged="AnyOptionChanged_SelectionChanged">
+                                                        <ComboBoxItem Content="All pages" />
+                                                        <ComboBoxItem Content="Current page" />
+                                                        <ComboBoxItem Content="Selected pages" />
+                                                    </ComboBox>
+                                                    <StackPanel x:Name="RotationPagesPanel" Visibility="Collapsed" Spacing="4">
+                                                        <TextBox x:Name="RotationPagesTextBox" Header="Page numbers" PlaceholderText="Example: 1, 3-5, 7" TextChanged="AnyOptionChanged_TextChanged" />
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <TextBlock x:Name="TransformValidationTextBlock" Foreground="Tomato" TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <!-- Security Panel -->
+                                    <StackPanel x:Name="SecurityPanel" Visibility="Collapsed" Spacing="12">
+
+                                        <StackPanel x:Name="EncryptPanel" Visibility="Visible">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Encrypt" />
+                                                    <PasswordBox x:Name="EncryptPasswordBox" Header="Password" PasswordChanged="AnyOptionChanged_PasswordChanged" />
+                                                    <PasswordBox x:Name="EncryptConfirmPasswordBox" Header="Confirm password" PasswordChanged="AnyOptionChanged_PasswordChanged" />
+                                                    <CheckBox x:Name="EncryptOwnerPasswordCheckBox" Content="Set owner password" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <StackPanel x:Name="EncryptOwnerPasswordPanel" Visibility="Collapsed" Spacing="4">
+                                                        <PasswordBox x:Name="EncryptOwnerPasswordBox" Header="Owner password" PasswordChanged="AnyOptionChanged_PasswordChanged" />
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel x:Name="PasswordManagementPanel" Visibility="Collapsed">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Password" />
+                                                    <ComboBox x:Name="PasswordActionComboBox" Header="Action" SelectionChanged="PasswordActionComboBox_SelectionChanged">
+                                                        <ComboBoxItem Content="Remove password" />
+                                                        <ComboBoxItem Content="Change password" />
+                                                    </ComboBox>
+                                                    <StackPanel x:Name="RemovePasswordPanel" Visibility="Visible" Spacing="4">
+                                                        <PasswordBox x:Name="CurrentPasswordBox" Header="Current password" PasswordChanged="AnyOptionChanged_PasswordChanged" />
+                                                        <TextBlock Opacity="0.76" Text="Enter the PDF's current password to remove protection." TextWrapping="Wrap" />
+                                                    </StackPanel>
+                                                    <StackPanel x:Name="ChangePasswordPanel" Visibility="Collapsed" Spacing="4">
+                                                        <PasswordBox x:Name="OldPasswordBox" Header="Current password" PasswordChanged="AnyOptionChanged_PasswordChanged" />
+                                                        <PasswordBox x:Name="NewPasswordBox" Header="New password" PasswordChanged="AnyOptionChanged_PasswordChanged" />
+                                                        <PasswordBox x:Name="ConfirmNewPasswordBox" Header="Confirm new password" PasswordChanged="AnyOptionChanged_PasswordChanged" />
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel x:Name="PermissionsPanel" Visibility="Collapsed">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Permissions" />
+                                                    <TextBlock Opacity="0.76" Text="Control what users can do with the PDF." TextWrapping="Wrap" />
+                                                    <CheckBox x:Name="AllowPrintingCheckBox" Content="Allow printing" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <CheckBox x:Name="AllowCopyingCheckBox" Content="Allow copying text and images" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <CheckBox x:Name="AllowEditingCheckBox" Content="Allow editing" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <CheckBox x:Name="AllowAnnotationsCheckBox" Content="Allow annotations" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <TextBlock x:Name="SecurityValidationTextBlock" Foreground="Tomato" TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <!-- Content Panel -->
+                                    <StackPanel x:Name="ContentPanel" Visibility="Collapsed" Spacing="12">
+
+                                        <StackPanel x:Name="OcrPanel" Visibility="Visible">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="OCR" />
+                                                    <TextBlock Opacity="0.76" Text="Make scanned PDFs searchable by recognizing text." TextWrapping="Wrap" />
+                                                    <ComboBox x:Name="OcrLanguageComboBox" Header="Language" SelectionChanged="AnyOptionChanged_SelectionChanged">
+                                                        <ComboBoxItem Content="English" />
+                                                        <ComboBoxItem Content="Spanish" />
+                                                        <ComboBoxItem Content="French" />
+                                                        <ComboBoxItem Content="German" />
+                                                        <ComboBoxItem Content="Chinese" />
+                                                        <ComboBoxItem Content="Japanese" />
+                                                        <ComboBoxItem Content="Auto-detect" />
+                                                    </ComboBox>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel x:Name="MetadataPanel" Visibility="Collapsed">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Metadata" />
+                                                    <TextBox x:Name="MetadataTitleTextBox" Header="Title" PlaceholderText="Document title" TextChanged="AnyOptionChanged_TextChanged" />
+                                                    <TextBox x:Name="MetadataAuthorTextBox" Header="Author" PlaceholderText="Author name" TextChanged="AnyOptionChanged_TextChanged" />
+                                                    <TextBox x:Name="MetadataSubjectTextBox" Header="Subject" PlaceholderText="Document subject" TextChanged="AnyOptionChanged_TextChanged" />
+                                                    <TextBox x:Name="MetadataKeywordsTextBox" Header="Keywords" PlaceholderText="Comma-separated keywords" TextChanged="AnyOptionChanged_TextChanged" />
+                                                    <TextBox x:Name="MetadataCreatorTextBox" Header="Creator" PlaceholderText="Creator application" IsReadOnly="True" />
+                                                    <TextBox x:Name="MetadataProducerTextBox" Header="Producer" PlaceholderText="Producer application" IsReadOnly="True" />
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <TextBlock x:Name="ContentValidationTextBlock" Foreground="Tomato" TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <!-- Repair Panel -->
+                                    <StackPanel x:Name="RepairPanel" Visibility="Collapsed" Spacing="12">
+
+                                        <StackPanel x:Name="RepairOptionsPanel" Visibility="Visible">
+                                            <Border Style="{StaticResource SettingsCardStyle}">
+                                                <StackPanel Spacing="12">
+                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Repair" />
+                                                    <TextBlock Opacity="0.76" Text="Fix corrupted or damaged PDF files." TextWrapping="Wrap" />
+                                                    <Button HorizontalAlignment="Left" Content="Repair PDF" Click="RepairButton_Click" />
+                                                    <TextBlock x:Name="RepairStatusTextBlock" Opacity="0.76" Text="Ready to repair." TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <TextBlock x:Name="RepairValidationTextBlock" Foreground="Tomato" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</Page>
