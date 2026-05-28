@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Animation;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
@@ -27,13 +28,23 @@ namespace Files_Tools.Pages
 
         private async void DropZoneSurface_PointerPressed(object sender, PointerRoutedEventArgs e)
         {
+            await PickAndRouteFilesAsync();
+        }
+
+        private async void SingleFileButton_Click(object sender, RoutedEventArgs e)
+        {
             await PickAndRouteFileAsync();
+        }
+
+        private async void BatchFilesButton_Click(object sender, RoutedEventArgs e)
+        {
+            await PickAndRouteFilesAsync(forceMultiple: true);
         }
 
         private void DropZoneSurface_DragOver(object sender, DragEventArgs e)
         {
             e.AcceptedOperation = DataPackageOperation.Copy;
-            e.DragUIOverride.Caption = "Drop file to continue";
+            e.DragUIOverride.Caption = "Drop to continue";
             e.DragUIOverride.IsCaptionVisible = true;
             e.DragUIOverride.IsGlyphVisible = true;
         }
@@ -46,13 +57,13 @@ namespace Files_Tools.Pages
             }
 
             var items = await e.DataView.GetStorageItemsAsync();
-            var file = items.OfType<StorageFile>().FirstOrDefault(IsSupportedLandingFile);
-            if (file is null)
+            var files = items.OfType<StorageFile>().Where(IsSupportedLandingFile).ToList();
+            if (files.Count == 0)
             {
                 return;
             }
 
-            RouteFile(file);
+            RouteFiles(files);
         }
 
         private async Task PickAndRouteFileAsync()
@@ -86,6 +97,63 @@ namespace Files_Tools.Pages
             }
 
             RouteFile(selectedFile);
+        }
+
+        private async Task PickAndRouteFilesAsync(bool forceMultiple = false)
+        {
+            if (App.MainWindow is null)
+            {
+                return;
+            }
+
+            var picker = new FileOpenPicker();
+            foreach (var extension in SupportedImageExtensions
+                .Concat(SupportedVideoExtensions)
+                .Concat(SupportedAudioExtensions)
+                .Concat(SupportedPdfExtensions)
+                .Concat(SupportedDocumentExtensions)
+                .Append(".gif"))
+            {
+                if (!picker.FileTypeFilter.Contains(extension))
+                {
+                    picker.FileTypeFilter.Add(extension);
+                }
+            }
+
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+
+            var selectedFiles = await picker.PickMultipleFilesAsync();
+            if (selectedFiles is null || selectedFiles.Count == 0)
+            {
+                return;
+            }
+
+            var supported = selectedFiles.Where(IsSupportedLandingFile).ToList();
+            if (supported.Count == 0)
+            {
+                return;
+            }
+
+            if (forceMultiple || supported.Count > 1)
+            {
+                NavigateToPage(typeof(BatchEditorPage), new BatchNavigationRequest { Files = supported });
+            }
+            else
+            {
+                RouteFile(supported[0]);
+            }
+        }
+
+        private void RouteFiles(IReadOnlyList<StorageFile> files)
+        {
+            if (files.Count == 1)
+            {
+                RouteFile(files[0]);
+                return;
+            }
+
+            NavigateToPage(typeof(BatchEditorPage), new BatchNavigationRequest { Files = files });
         }
 
         private void RouteFile(StorageFile file)

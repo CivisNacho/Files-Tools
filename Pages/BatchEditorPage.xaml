@@ -1,0 +1,891 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Files_Tools.Pages.BatchEditorPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Files_Tools.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <SolidColorBrush x:Key="BatchAccentBrush" Color="#FF8B5CF6" />
+        <SolidColorBrush x:Key="BatchAccentDarkBrush" Color="#FF7C3AED" />
+        <LinearGradientBrush x:Key="BatchHintBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#FFF5F0FF" Offset="0" />
+            <GradientStop Color="#FFE9D5FF" Offset="1" />
+        </LinearGradientBrush>
+
+        <Style x:Key="SettingsCardStyle" TargetType="Border">
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="Background" Value="{ThemeResource LayerFillColorDefaultBrush}" />
+            <Setter Property="Margin" Value="0,0,0,10" />
+        </Style>
+
+        <DataTemplate x:Key="FileItemTemplate" x:DataType="local:BatchFileItem">
+            <Grid Padding="4,8" ColumnSpacing="12" MinHeight="52">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Border
+                    Width="44"
+                    Height="28"
+                    CornerRadius="5"
+                    Background="{x:Bind TypeBadgeBackground}">
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="10"
+                        FontWeight="SemiBold"
+                        Foreground="White"
+                        Text="{x:Bind TypeBadgeText}" />
+                </Border>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock
+                        FontSize="14"
+                        FontWeight="Medium"
+                        Text="{x:Bind FileName}"
+                        TextTrimming="CharacterEllipsis" />
+                    <TextBlock
+                        FontSize="12"
+                        Opacity="0.68"
+                        Text="{x:Bind StatusText, Mode=OneWay}"
+                        TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+
+                <Grid Grid.Column="2" VerticalAlignment="Center" Width="20" Height="20">
+                    <ProgressRing
+                        Width="18"
+                        Height="18"
+                        IsActive="True"
+                        Visibility="{x:Bind ProcessingVisibility, Mode=OneWay}" />
+                    <FontIcon
+                        FontSize="16"
+                        Glyph="{x:Bind StatusGlyph, Mode=OneWay}"
+                        Foreground="{x:Bind StatusForeground, Mode=OneWay}"
+                        Visibility="{x:Bind IconVisibility, Mode=OneWay}" />
+                </Grid>
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid
+            x:Name="PageRoot"
+            Padding="32,24,32,28"
+            SizeChanged="PageRoot_SizeChanged">
+            <Grid
+                x:Name="ContentRoot"
+                HorizontalAlignment="Center"
+                MaxWidth="1440"
+                RowSpacing="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel MaxWidth="880" Spacing="6">
+                    <TextBlock FontSize="38" FontWeight="SemiBold" Text="Batch Processor" />
+                    <TextBlock
+                        Opacity="0.78"
+                        Text="Drop multiple files — audio, video, documents, PDFs, images — and apply a curated operation to each type group in a single run."
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <Grid
+                    x:Name="EditorGrid"
+                    Grid.Row="1"
+                    ColumnSpacing="20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition x:Name="LeftColumn" Width="7*" />
+                        <ColumnDefinition x:Name="RightColumn" Width="3*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- ── Left: file list ────────────────────────────────── -->
+                    <Border
+                        x:Name="FilePanel"
+                        Grid.Column="0"
+                        VerticalAlignment="Top"
+                        Padding="20"
+                        CornerRadius="16"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                        <Grid RowSpacing="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <!-- Header -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Spacing="2">
+                                    <TextBlock FontSize="24" FontWeight="SemiBold" Text="Files" />
+                                    <TextBlock
+                                        x:Name="FileCountTextBlock"
+                                        Opacity="0.72"
+                                        Text="Drop files below or click Add to get started."
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                                <Button
+                                    x:Name="AddFilesButton"
+                                    Grid.Column="1"
+                                    Margin="12,0,0,0"
+                                    VerticalAlignment="Top"
+                                    Content="Add files"
+                                    IsEnabled="True"
+                                    Click="AddFilesButton_Click" />
+                                <Button
+                                    x:Name="ClearFilesButton"
+                                    Grid.Column="2"
+                                    Margin="8,0,0,0"
+                                    VerticalAlignment="Top"
+                                    Content="Clear all"
+                                    Visibility="Collapsed"
+                                    Click="ClearFilesButton_Click" />
+                            </Grid>
+
+                            <!-- Drop surface + file list -->
+                            <Border
+                                Grid.Row="1"
+                                AllowDrop="True"
+                                MinHeight="220"
+                                MaxHeight="500"
+                                CornerRadius="14"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                DragOver="FileDropSurface_DragOver"
+                                Drop="FileDropSurface_Drop">
+                                <Grid>
+                                    <StackPanel
+                                        x:Name="DropHintPanel"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        MaxWidth="420"
+                                        Padding="24"
+                                        Spacing="12">
+                                        <Border
+                                            HorizontalAlignment="Center"
+                                            Padding="18"
+                                            CornerRadius="999"
+                                            Background="{StaticResource BatchHintBackgroundBrush}">
+                                            <FontIcon
+                                                HorizontalAlignment="Center"
+                                                FontSize="48"
+                                                Foreground="{StaticResource BatchAccentDarkBrush}"
+                                                Glyph="&#xE8B5;" />
+                                        </Border>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            FontSize="20"
+                                            FontWeight="SemiBold"
+                                            Text="Drop files here"
+                                            TextAlignment="Center" />
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            Opacity="0.74"
+                                            Text="Mix types freely. Audio, video, documents, PDFs, and images are all supported — each group gets its own operation."
+                                            TextAlignment="Center"
+                                            TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <ListView
+                                        x:Name="FileListView"
+                                        Visibility="Collapsed"
+                                        Padding="8,4"
+                                        ItemTemplate="{StaticResource FileItemTemplate}"
+                                        SelectionMode="None"
+                                        IsItemClickEnabled="False" />
+                                </Grid>
+                            </Border>
+
+                            <!-- Unknown files warning -->
+                            <Border
+                                x:Name="UnknownFilesWarning"
+                                Grid.Row="2"
+                                Visibility="Collapsed"
+                                Padding="12"
+                                CornerRadius="8"
+                                BorderThickness="1"
+                                BorderBrush="#FFFBBF24"
+                                Background="#18FBBF24">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <FontIcon FontSize="15" Glyph="&#xE7BA;" Foreground="#FFF59E0B" VerticalAlignment="Center" />
+                                    <TextBlock
+                                        x:Name="UnknownFilesWarningText"
+                                        VerticalAlignment="Center"
+                                        Opacity="0.88"
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Bottom action bar -->
+                            <Grid Grid.Row="3" ColumnSpacing="16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel VerticalAlignment="Center" Spacing="6">
+
+                                    <!-- Shown while batch is running -->
+                                    <StackPanel x:Name="ProcessingProgressPanel" Visibility="Collapsed" Spacing="6">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock
+                                                x:Name="ProcessProgressLabel"
+                                                FontWeight="SemiBold"
+                                                TextTrimming="CharacterEllipsis"
+                                                Text="Preparing…" />
+                                            <TextBlock
+                                                x:Name="ProcessProgressPercentTextBlock"
+                                                Grid.Column="1"
+                                                Margin="12,0,0,0"
+                                                FontWeight="SemiBold"
+                                                Foreground="{StaticResource BatchAccentDarkBrush}"
+                                                Text="0%" />
+                                        </Grid>
+                                        <ProgressBar
+                                            x:Name="ProcessProgressBar"
+                                            Height="8"
+                                            CornerRadius="4"
+                                            Foreground="{StaticResource BatchAccentBrush}"
+                                            Minimum="0"
+                                            Maximum="1"
+                                            Value="0" />
+                                        <TextBlock
+                                            x:Name="ProcessCurrentFileTextBlock"
+                                            FontSize="12"
+                                            Opacity="0.68"
+                                            TextTrimming="CharacterEllipsis" />
+                                        <ProgressBar
+                                            x:Name="ProcessFileProgressBar"
+                                            Height="3"
+                                            CornerRadius="2"
+                                            Opacity="0.7"
+                                            Minimum="0"
+                                            Maximum="1"
+                                            Visibility="Collapsed" />
+                                        <Grid Margin="0,2,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock
+                                                x:Name="ProcessElapsedTextBlock"
+                                                FontSize="12"
+                                                Opacity="0.55" />
+                                            <TextBlock
+                                                x:Name="ProcessEtaTextBlock"
+                                                Grid.Column="1"
+                                                FontSize="12"
+                                                Opacity="0.55" />
+                                        </Grid>
+                                    </StackPanel>
+
+                                    <!-- Shown at idle, on completion, and on error -->
+                                    <TextBlock
+                                        x:Name="ProcessStatusTextBlock"
+                                        Opacity="0.72"
+                                        Text="No files loaded yet."
+                                        TextWrapping="Wrap" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                    <Button
+                                        x:Name="OpenOutputFolderButton"
+                                        Visibility="Collapsed"
+                                        Content="Show in folder"
+                                        Click="OpenOutputFolderButton_Click" />
+                                    <Button
+                                        x:Name="CancelButton"
+                                        Visibility="Collapsed"
+                                        Content="Cancel"
+                                        Click="CancelButton_Click" />
+                                    <Button
+                                        x:Name="ProcessButton"
+                                        MinWidth="180"
+                                        Height="44"
+                                        IsEnabled="False"
+                                        Content="Process batch"
+                                        Background="{StaticResource BatchAccentBrush}"
+                                        BorderBrush="{StaticResource BatchAccentBrush}"
+                                        Foreground="White"
+                                        Click="ProcessButton_Click" />
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <!-- ── Right: per-operation config (driven by the sidebar NavView) ── -->
+                    <Border
+                        x:Name="OptionsPanel"
+                        Grid.Column="1"
+                        VerticalAlignment="Top"
+                        MinWidth="320"
+                        Padding="20"
+                        CornerRadius="16"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                        <Grid RowSpacing="12">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Spacing="2">
+                                <TextBlock x:Name="SelectedOperationHeaderTextBlock" FontSize="22" FontWeight="SemiBold" Text="Select an operation" />
+                                <TextBlock x:Name="SelectedOperationSubtitleTextBlock" FontSize="13" Opacity="0.68" Text="" TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <StackPanel Spacing="2">
+
+                                    <!-- No-selection hint -->
+                                    <StackPanel
+                                        x:Name="NoSelectionHint"
+                                        Margin="0,24,0,8"
+                                        HorizontalAlignment="Center"
+                                        Spacing="10">
+                                        <FontIcon HorizontalAlignment="Center" FontSize="36" Opacity="0.35" Glyph="&#xE8B5;" />
+                                        <TextBlock HorizontalAlignment="Center" Opacity="0.52" Text="Select an operation from the sidebar to configure it. Enable as many as you like — they run as a pipeline on each file." TextAlignment="Center" TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <!-- ── Output settings ──────────────────────── -->
+                                    <StackPanel x:Name="BatchOutputPanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <TextBlock FontSize="16" FontWeight="SemiBold" Text="Output settings" />
+                                                <TextBox
+                                                    x:Name="OutputSuffixTextBox"
+                                                    Header="Filename suffix"
+                                                    Text="_processed"
+                                                    PlaceholderText="_processed" />
+                                                <NumberBox
+                                                    x:Name="MaxParallelismNumberBox"
+                                                    Header="Files in parallel"
+                                                    Minimum="1"
+                                                    Maximum="8"
+                                                    SmallChange="1"
+                                                    SpinButtonPlacementMode="Compact"
+                                                    Value="1" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- ── Audio: Format ────────────────────────── -->
+                                    <StackPanel x:Name="BatchAudioFormatPanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <CheckBox x:Name="EnableAudioFormatCheckBox" Content="Convert audio format" />
+                                                <ComboBox x:Name="AudioConvertFormatComboBox" Header="Output format" HorizontalAlignment="Stretch" SelectedIndex="0"
+                                                          IsEnabled="{x:Bind IsCheckedToBool(EnableAudioFormatCheckBox.IsChecked), Mode=OneWay}">
+                                                    <ComboBoxItem Tag=".mp3" Content="MP3" />
+                                                    <ComboBoxItem Tag=".m4a" Content="M4A / AAC" />
+                                                    <ComboBoxItem Tag=".opus" Content="Opus" />
+                                                    <ComboBoxItem Tag=".flac" Content="FLAC (lossless)" />
+                                                    <ComboBoxItem Tag=".wav" Content="WAV (PCM)" />
+                                                    <ComboBoxItem Tag=".ogg" Content="OGG Vorbis" />
+                                                </ComboBox>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- ── Audio: Compress ──────────────────────── -->
+                                    <StackPanel x:Name="BatchAudioCompressPanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <CheckBox x:Name="EnableAudioCompressCheckBox" Content="Compress audio" />
+                                                <ComboBox x:Name="AudioCompressModeComboBox" Header="Compression mode" HorizontalAlignment="Stretch" SelectedIndex="0"
+                                                          IsEnabled="{x:Bind IsCheckedToBool(EnableAudioCompressCheckBox.IsChecked), Mode=OneWay}">
+                                                    <ComboBoxItem Content="Lossy (smaller file)" />
+                                                    <ComboBoxItem Content="Lossless" />
+                                                </ComboBox>
+                                                <NumberBox
+                                                    x:Name="AudioCompressBitrateNumberBox"
+                                                    Header="Target bitrate (kbps)"
+                                                    Minimum="32"
+                                                    Maximum="320"
+                                                    SmallChange="8"
+                                                    SpinButtonPlacementMode="Compact"
+                                                    Value="128"
+                                                    IsEnabled="{x:Bind IsCheckedToBool(EnableAudioCompressCheckBox.IsChecked), Mode=OneWay}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- ── Audio: Normalize ─────────────────────── -->
+                                    <StackPanel x:Name="BatchAudioNormalizePanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <CheckBox x:Name="EnableAudioNormalizeCheckBox" Content="Normalize loudness" />
+                                                <ComboBox x:Name="AudioNormalizeModeComboBox" Header="Mode" HorizontalAlignment="Stretch" SelectedIndex="0"
+                                                          IsEnabled="{x:Bind IsCheckedToBool(EnableAudioNormalizeCheckBox.IsChecked), Mode=OneWay}">
+                                                    <ComboBoxItem Content="LUFS (broadcast)" />
+                                                    <ComboBoxItem Content="Peak" />
+                                                </ComboBox>
+                                                <NumberBox
+                                                    x:Name="AudioNormalizeTargetNumberBox"
+                                                    Header="Target level (dB / LUFS)"
+                                                    Minimum="-70"
+                                                    Maximum="0"
+                                                    SmallChange="0.5"
+                                                    SpinButtonPlacementMode="Compact"
+                                                    Value="-14"
+                                                    IsEnabled="{x:Bind IsCheckedToBool(EnableAudioNormalizeCheckBox.IsChecked), Mode=OneWay}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- ── Video: Container ─────────────────────── -->
+                                    <StackPanel x:Name="BatchVideoContainerPanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <CheckBox x:Name="EnableVideoContainerCheckBox" Content="Change container" />
+                                                <ComboBox x:Name="VideoContainerComboBox" Header="Target container" HorizontalAlignment="Stretch" SelectedIndex="0"
+                                                          IsEnabled="{x:Bind IsCheckedToBool(EnableVideoContainerCheckBox.IsChecked), Mode=OneWay}">
+                                                    <ComboBoxItem Content="MP4" />
+                                                    <ComboBoxItem Content="MKV" />
+                                                    <ComboBoxItem Content="MOV" />
+                                                    <ComboBoxItem Content="AVI" />
+                                                    <ComboBoxItem Content="WebM" />
+                                                </ComboBox>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- ── Video: Codec ─────────────────────────── -->
+                                    <StackPanel x:Name="BatchVideoCodecPanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <CheckBox x:Name="EnableVideoCodecCheckBox" Content="Change codec" />
+                                                <ComboBox x:Name="VideoCodecComboBox" Header="Video codec" HorizontalAlignment="Stretch" SelectedIndex="0"
+                                                          IsEnabled="{x:Bind IsCheckedToBool(EnableVideoCodecCheckBox.IsChecked), Mode=OneWay}">
+                                                    <ComboBoxItem Content="H.264" />
+                                                    <ComboBoxItem Content="H.265 / HEVC" />
+                                                    <ComboBoxItem Content="AV1" />
+                                                    <ComboBoxItem Content="VP9" />
+                                                </ComboBox>
+                                                <ComboBox x:Name="VideoAudioCodecComboBox" Header="Audio codec" HorizontalAlignment="Stretch" SelectedIndex="0"
+                                                          IsEnabled="{x:Bind IsCheckedToBool(EnableVideoCodecCheckBox.IsChecked), Mode=OneWay}">
+                                                    <ComboBoxItem Content="AAC" />
+                                                    <ComboBoxItem Content="Opus" />
+                                                    <ComboBoxItem Content="MP3" />
+                                                    <ComboBoxItem Content="FLAC" />
+                                                </ComboBox>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- ── Video: Compress ──────────────────────── -->
+                                    <StackPanel x:Name="BatchVideoCompressPanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <CheckBox x:Name="EnableVideoCompressCheckBox" Content="Compress video" />
+                                                <ComboBox x:Name="VideoCompressPresetComboBox" Header="Quality preset" HorizontalAlignment="Stretch" SelectedIndex="1"
+                                                          IsEnabled="{x:Bind IsCheckedToBool(EnableVideoCompressCheckBox.IsChecked), Mode=OneWay}">
+                                                    <ComboBoxItem Content="Very high quality" />
+                                                    <ComboBoxItem Content="High quality" />
+                                                    <ComboBoxItem Content="Balanced" />
+                                                    <ComboBoxItem Content="Small size" />
+                                                </ComboBox>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- ── Video: Resize ────────────────────────── -->
+                                    <StackPanel x:Name="BatchVideoResizePanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <CheckBox x:Name="EnableVideoResizeCheckBox" Content="Resize video" />
+                                                <Grid ColumnSpacing="10">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <NumberBox x:Name="VideoResizeWidthNumberBox" Header="Width" Minimum="1" Maximum="7680" SmallChange="1" SpinButtonPlacementMode="Compact" Value="1920"
+                                                               IsEnabled="{x:Bind IsCheckedToBool(EnableVideoResizeCheckBox.IsChecked), Mode=OneWay}" />
+                                                    <NumberBox x:Name="VideoResizeHeightNumberBox" Grid.Column="1" Header="Height" Minimum="1" Maximum="4320" SmallChange="1" SpinButtonPlacementMode="Compact" Value="1080"
+                                                               IsEnabled="{x:Bind IsCheckedToBool(EnableVideoResizeCheckBox.IsChecked), Mode=OneWay}" />
+                                                </Grid>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- ── Video: Extract audio ─────────────────── -->
+                                    <StackPanel x:Name="BatchVideoExtractPanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <CheckBox x:Name="EnableVideoExtractCheckBox" Content="Extract audio track" />
+                                                <ComboBox x:Name="VideoExtractAudioFormatComboBox" Header="Output audio format" HorizontalAlignment="Stretch" SelectedIndex="0"
+                                                          IsEnabled="{x:Bind IsCheckedToBool(EnableVideoExtractCheckBox.IsChecked), Mode=OneWay}">
+                                                    <ComboBoxItem Tag=".mp3" Content="MP3" />
+                                                    <ComboBoxItem Tag=".aac" Content="AAC" />
+                                                    <ComboBoxItem Tag=".flac" Content="FLAC" />
+                                                    <ComboBoxItem Tag=".wav" Content="WAV" />
+                                                </ComboBox>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- ── Video: Subtitles ────────────────────── -->
+                                    <StackPanel x:Name="BatchVideoSubtitlesPanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <CheckBox x:Name="EnableVideoSubtitlesCheckBox" Content="Generate and mux subtitles" />
+                                                <Border
+                                                    Padding="12"
+                                                    CornerRadius="10"
+                                                    BorderThickness="1"
+                                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                    Background="{ThemeResource LayerFillColorDefaultBrush}">
+                                                    <StackPanel Spacing="10">
+                                                        <TextBlock FontWeight="SemiBold" Text="Transcription" />
+                                                        <TextBlock
+                                                            Opacity="0.76"
+                                                            Text="Uses Whisper to transcribe each video. Basic mode writes an SRT file; Advanced mode produces styled ASS subtitles."
+                                                            TextWrapping="Wrap" />
+                                                        <Button
+                                                            x:Name="BatchDownloadTranscriptionButton"
+                                                            MinWidth="200"
+                                                            Height="40"
+                                                            HorizontalAlignment="Left"
+                                                            Content="Download transcription feature"
+                                                            Click="BatchDownloadTranscriptionButton_Click"
+                                                            IsEnabled="{x:Bind IsCheckedToBool(EnableVideoSubtitlesCheckBox.IsChecked), Mode=OneWay}" />
+                                                        <ProgressBar
+                                                            x:Name="BatchTranscriptionDownloadProgressBar"
+                                                            Height="6"
+                                                            Minimum="0"
+                                                            Maximum="1"
+                                                            Value="0"
+                                                            Visibility="Collapsed" />
+                                                        <TextBlock
+                                                            x:Name="BatchTranscriptionDownloadStatusTextBlock"
+                                                            Opacity="0.76"
+                                                            Text="Transcription feature not downloaded yet."
+                                                            TextWrapping="Wrap" />
+                                                        <ComboBox
+                                                            x:Name="BatchSubtitleGenerationModeComboBox"
+                                                            Header="Subtitle generation mode"
+                                                            HorizontalAlignment="Stretch"
+                                                            SelectedIndex="0"
+                                                            SelectionChanged="BatchSubtitleGenerationModeComboBox_SelectionChanged"
+                                                            IsEnabled="{x:Bind IsCheckedToBool(EnableVideoSubtitlesCheckBox.IsChecked), Mode=OneWay}">
+                                                            <ComboBoxItem Content="Basic (SRT)" />
+                                                            <ComboBoxItem Content="Advanced (ASS)" />
+                                                        </ComboBox>
+                                                        <StackPanel x:Name="BatchAdvancedSubtitleOptionsPanel" Spacing="8" Visibility="Collapsed">
+                                                            <ComboBox
+                                                                x:Name="BatchAdvancedSubtitleTypeComboBox"
+                                                                Header="Advanced output type"
+                                                                HorizontalAlignment="Stretch"
+                                                                SelectedIndex="0"
+                                                                SelectionChanged="BatchAdvancedSubtitleTypeComboBox_SelectionChanged"
+                                                                IsEnabled="{x:Bind IsCheckedToBool(EnableVideoSubtitlesCheckBox.IsChecked), Mode=OneWay}">
+                                                                <ComboBoxItem Content="Styled ASS" />
+                                                                <ComboBoxItem Content="Karaoke ASS" />
+                                                            </ComboBox>
+                                                            <Button
+                                                                x:Name="BatchConfigureAdvancedSubtitlesButton"
+                                                                HorizontalAlignment="Left"
+                                                                Content="Configure advanced subtitles"
+                                                                Click="BatchConfigureAdvancedSubtitlesButton_Click"
+                                                                IsEnabled="{x:Bind IsCheckedToBool(EnableVideoSubtitlesCheckBox.IsChecked), Mode=OneWay}" />
+                                                            <TextBlock
+                                                                x:Name="BatchAdvancedSubtitlePresetSummaryTextBlock"
+                                                                Opacity="0.76"
+                                                                Text="Preset: SocialImpact (default)"
+                                                                TextWrapping="Wrap" />
+                                                            <TextBlock x:Name="BatchSubtitleSectionDurationTextBlock" Text="Section length: 6.5 s max" />
+                                                            <Grid ColumnSpacing="12">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*" />
+                                                                    <ColumnDefinition Width="120" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <Slider
+                                                                    x:Name="BatchSubtitleSectionDurationSlider"
+                                                                    Minimum="2"
+                                                                    Maximum="12"
+                                                                    StepFrequency="0.5"
+                                                                    SmallChange="0.5"
+                                                                    LargeChange="1"
+                                                                    Value="6.5"
+                                                                    ValueChanged="BatchSubtitleSectionDurationSlider_ValueChanged"
+                                                                    IsEnabled="{x:Bind IsCheckedToBool(EnableVideoSubtitlesCheckBox.IsChecked), Mode=OneWay}" />
+                                                                <NumberBox
+                                                                    x:Name="BatchSubtitleSectionDurationNumberBox"
+                                                                    Grid.Column="1"
+                                                                    Header="Seconds max"
+                                                                    Minimum="2"
+                                                                    Maximum="12"
+                                                                    SmallChange="0.5"
+                                                                    SpinButtonPlacementMode="Compact"
+                                                                    Value="6.5"
+                                                                    ValueChanged="BatchSubtitleSectionDurationNumberBox_ValueChanged"
+                                                                    IsEnabled="{x:Bind IsCheckedToBool(EnableVideoSubtitlesCheckBox.IsChecked), Mode=OneWay}" />
+                                                            </Grid>
+                                                            <Grid ColumnSpacing="12">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="120" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <CheckBox
+                                                                    x:Name="BatchEnableSubtitleWordCapCheckBox"
+                                                                    Content="Limit words per section"
+                                                                    VerticalAlignment="Center"
+                                                                    Checked="BatchEnableSubtitleWordCapCheckBox_CheckChanged"
+                                                                    Unchecked="BatchEnableSubtitleWordCapCheckBox_CheckChanged"
+                                                                    IsEnabled="{x:Bind IsCheckedToBool(EnableVideoSubtitlesCheckBox.IsChecked), Mode=OneWay}" />
+                                                                <NumberBox
+                                                                    x:Name="BatchSubtitleWordCapNumberBox"
+                                                                    Grid.Column="1"
+                                                                    Header="Words max"
+                                                                    Minimum="1"
+                                                                    SmallChange="1"
+                                                                    SpinButtonPlacementMode="Compact"
+                                                                    IsEnabled="False"
+                                                                    Value="3" />
+                                                            </Grid>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Border>
+                                                <TextBlock FontWeight="SemiBold" Text="Subtitle mux" />
+                                                <ComboBox
+                                                    x:Name="BatchSubtitleMuxModeComboBox"
+                                                    Header="Mux mode"
+                                                    HorizontalAlignment="Stretch"
+                                                    SelectedIndex="0"
+                                                    IsEnabled="{x:Bind IsCheckedToBool(EnableVideoSubtitlesCheckBox.IsChecked), Mode=OneWay}">
+                                                    <ComboBoxItem Content="SoftMux (embedded track)" />
+                                                    <ComboBoxItem Content="BurnIn (baked into picture)" />
+                                                </ComboBox>
+                                                <Border
+                                                    Padding="12"
+                                                    CornerRadius="10"
+                                                    BorderThickness="1"
+                                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                    Background="{ThemeResource LayerFillColorDefaultBrush}">
+                                                    <StackPanel Spacing="10">
+                                                        <TextBlock FontWeight="SemiBold" Text="Placement" />
+                                                        <TextBlock
+                                                            Opacity="0.76"
+                                                            Text="Fine-tune where subtitles appear as a percentage of the video frame."
+                                                            TextWrapping="Wrap" />
+                                                        <Grid ColumnSpacing="12">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="*" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <NumberBox
+                                                                x:Name="BatchSubtitlePlacementXNumberBox"
+                                                                Header="Horizontal (%)"
+                                                                Minimum="0"
+                                                                Maximum="100"
+                                                                SmallChange="1"
+                                                                SpinButtonPlacementMode="Compact"
+                                                                Value="50"
+                                                                IsEnabled="{x:Bind IsCheckedToBool(EnableVideoSubtitlesCheckBox.IsChecked), Mode=OneWay}" />
+                                                            <NumberBox
+                                                                x:Name="BatchSubtitlePlacementYNumberBox"
+                                                                Grid.Column="1"
+                                                                Header="Vertical (%)"
+                                                                Minimum="0"
+                                                                Maximum="100"
+                                                                SmallChange="1"
+                                                                SpinButtonPlacementMode="Compact"
+                                                                Value="88"
+                                                                IsEnabled="{x:Bind IsCheckedToBool(EnableVideoSubtitlesCheckBox.IsChecked), Mode=OneWay}" />
+                                                        </Grid>
+                                                        <Button
+                                                            x:Name="BatchResetSubtitlePlacementButton"
+                                                            HorizontalAlignment="Left"
+                                                            Content="Reset placement"
+                                                            Click="BatchResetSubtitlePlacementButton_Click"
+                                                            IsEnabled="{x:Bind IsCheckedToBool(EnableVideoSubtitlesCheckBox.IsChecked), Mode=OneWay}" />
+                                                    </StackPanel>
+                                                </Border>
+                                                <TextBox
+                                                    x:Name="BatchSubtitleLanguageTextBox"
+                                                    Header="Language tag"
+                                                    PlaceholderText="Example: en"
+                                                    IsEnabled="{x:Bind IsCheckedToBool(EnableVideoSubtitlesCheckBox.IsChecked), Mode=OneWay}" />
+                                                <TextBox
+                                                    x:Name="BatchSubtitleTitleTextBox"
+                                                    Header="Subtitle title"
+                                                    PlaceholderText="Example: English"
+                                                    IsEnabled="{x:Bind IsCheckedToBool(EnableVideoSubtitlesCheckBox.IsChecked), Mode=OneWay}" />
+                                                <CheckBox x:Name="BatchSetDefaultSubtitleCheckBox" Content="Set as default subtitle"
+                                                          IsEnabled="{x:Bind IsCheckedToBool(EnableVideoSubtitlesCheckBox.IsChecked), Mode=OneWay}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- ── Document: Convert to PDF ────────────── -->
+                                    <StackPanel x:Name="BatchDocumentConvertPanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <CheckBox x:Name="EnableDocumentConvertCheckBox" Content="Convert to PDF" />
+                                                <TextBlock Opacity="0.72" Text="Uses LibreOffice to convert each document." TextWrapping="Wrap" />
+                                                <ComboBox x:Name="DocumentPdfVariantComboBox" Header="PDF variant" HorizontalAlignment="Stretch" SelectedIndex="0"
+                                                          IsEnabled="{x:Bind IsCheckedToBool(EnableDocumentConvertCheckBox.IsChecked), Mode=OneWay}">
+                                                    <ComboBoxItem Content="Standard PDF" />
+                                                    <ComboBoxItem Content="PDF/A-1b (archival)" />
+                                                    <ComboBoxItem Content="PDF/A-2b" />
+                                                    <ComboBoxItem Content="PDF/A-3b" />
+                                                </ComboBox>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- ── PDF: Compress ────────────────────────── -->
+                                    <StackPanel x:Name="BatchPdfCompressPanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <CheckBox x:Name="EnablePdfCompressCheckBox" Content="Compress / optimize PDF" />
+                                                <TextBlock Opacity="0.72" Text="Linearizes and rebuilds the file to reduce size (uses qpdf)." TextWrapping="Wrap" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- ── PDF: Repair ──────────────────────────── -->
+                                    <StackPanel x:Name="BatchPdfRepairPanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <CheckBox x:Name="EnablePdfRepairCheckBox" Content="Repair PDF" />
+                                                <TextBlock Opacity="0.72" Text="Rebuilds the document structure to fix corruption (uses qpdf)." TextWrapping="Wrap" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- ── PDF: OCR ──────────────────────────────── -->
+                                    <StackPanel x:Name="BatchPdfOcrPanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <CheckBox x:Name="EnablePdfOcrCheckBox" Content="Add OCR text layer" />
+                                                <TextBox
+                                                    x:Name="PdfOcrTessDataTextBox"
+                                                    Header="Tessdata directory path"
+                                                    PlaceholderText="C:\path\to\tessdata"
+                                                    IsSpellCheckEnabled="False"
+                                                    IsEnabled="{x:Bind IsCheckedToBool(EnablePdfOcrCheckBox.IsChecked), Mode=OneWay}" />
+                                                <TextBox
+                                                    x:Name="PdfOcrLanguagesTextBox"
+                                                    Header="Languages (Tesseract codes)"
+                                                    Text="eng"
+                                                    PlaceholderText="eng"
+                                                    IsEnabled="{x:Bind IsCheckedToBool(EnablePdfOcrCheckBox.IsChecked), Mode=OneWay}" />
+                                                <NumberBox
+                                                    x:Name="PdfOcrDpiNumberBox"
+                                                    Header="Rasterization DPI"
+                                                    Minimum="72"
+                                                    Maximum="600"
+                                                    SmallChange="50"
+                                                    SpinButtonPlacementMode="Compact"
+                                                    Value="300"
+                                                    IsEnabled="{x:Bind IsCheckedToBool(EnablePdfOcrCheckBox.IsChecked), Mode=OneWay}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- ── PDF: Merge ────────────────────────────── -->
+                                    <StackPanel x:Name="BatchPdfMergePanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <CheckBox x:Name="EnablePdfMergeCheckBox" Content="Merge all PDFs into one file" />
+                                                <TextBlock Opacity="0.72" Text="Cannot be combined with other PDF operations." TextWrapping="Wrap" />
+                                                <TextBox
+                                                    x:Name="PdfMergeFilenameTextBox"
+                                                    Header="Output filename"
+                                                    Text="merged.pdf"
+                                                    PlaceholderText="merged.pdf"
+                                                    IsEnabled="{x:Bind IsCheckedToBool(EnablePdfMergeCheckBox.IsChecked), Mode=OneWay}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- ── Image: Format ────────────────────────── -->
+                                    <StackPanel x:Name="BatchImageFormatPanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <CheckBox x:Name="EnableImageFormatCheckBox" Content="Convert image format" />
+                                                <ComboBox x:Name="ImageConvertFormatComboBox" Header="Target format" HorizontalAlignment="Stretch" SelectedIndex="2"
+                                                          IsEnabled="{x:Bind IsCheckedToBool(EnableImageFormatCheckBox.IsChecked), Mode=OneWay}">
+                                                    <ComboBoxItem Content="JPEG" />
+                                                    <ComboBoxItem Content="PNG" />
+                                                    <ComboBoxItem Content="WebP" />
+                                                    <ComboBoxItem Content="AVIF" />
+                                                    <ComboBoxItem Content="TIFF" />
+                                                    <ComboBoxItem Content="HEIF" />
+                                                    <ComboBoxItem Content="GIF" />
+                                                </ComboBox>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- ── Image: Compress ──────────────────────── -->
+                                    <StackPanel x:Name="BatchImageCompressPanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <CheckBox x:Name="EnableImageCompressCheckBox" Content="Compress images" />
+                                                <TextBlock x:Name="ImageQualityTextBlock" Text="Quality: 85%" />
+                                                <Slider
+                                                    x:Name="ImageQualitySlider"
+                                                    Minimum="1"
+                                                    Maximum="100"
+                                                    StepFrequency="1"
+                                                    Value="85"
+                                                    ValueChanged="ImageQualitySlider_ValueChanged"
+                                                    IsEnabled="{x:Bind IsCheckedToBool(EnableImageCompressCheckBox.IsChecked), Mode=OneWay}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- ── Image: Resize ────────────────────────── -->
+                                    <StackPanel x:Name="BatchImageResizePanel" Visibility="Collapsed" Spacing="12">
+                                        <Border Style="{StaticResource SettingsCardStyle}">
+                                            <StackPanel Spacing="12">
+                                                <CheckBox x:Name="EnableImageResizeCheckBox" Content="Resize images" />
+                                                <Grid ColumnSpacing="10">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <NumberBox x:Name="ImageResizeWidthNumberBox" Header="Width" Minimum="1" Maximum="32768" SmallChange="1" SpinButtonPlacementMode="Compact" Value="1920"
+                                                               IsEnabled="{x:Bind IsCheckedToBool(EnableImageResizeCheckBox.IsChecked), Mode=OneWay}" />
+                                                    <NumberBox x:Name="ImageResizeHeightNumberBox" Grid.Column="1" Header="Height" Minimum="1" Maximum="32768" SmallChange="1" SpinButtonPlacementMode="Compact" Value="1080"
+                                                               IsEnabled="{x:Bind IsCheckedToBool(EnableImageResizeCheckBox.IsChecked), Mode=OneWay}" />
+                                                </Grid>
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+
+                </Grid>
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</Page>

@@ -304,6 +304,82 @@
                         <SymbolIcon Symbol="Repair" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+
+                <!--  Batch editor items  -->
+                <NavigationViewItem x:Name="BatchAudioNavigationItem" Visibility="Collapsed" Content="Audio" Tag="BatchAudio">
+                    <NavigationViewItem.Icon><SymbolIcon Symbol="Audio" /></NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="BatchAudioFormatNavigationItem" Content="Format" Tag="BatchAudio:Format">
+                            <NavigationViewItem.Icon><SymbolIcon Symbol="Document" /></NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="BatchAudioCompressNavigationItem" Content="Compress" Tag="BatchAudio:Compress">
+                            <NavigationViewItem.Icon><SymbolIcon Symbol="Cut" /></NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="BatchAudioNormalizeNavigationItem" Content="Normalize" Tag="BatchAudio:Normalize">
+                            <NavigationViewItem.Icon><SymbolIcon Symbol="Switch" /></NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="BatchVideoNavigationItem" Visibility="Collapsed" Content="Video" Tag="BatchVideo">
+                    <NavigationViewItem.Icon><SymbolIcon Symbol="Video" /></NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="BatchVideoContainerNavigationItem" Content="Container" Tag="BatchVideo:Container">
+                            <NavigationViewItem.Icon><SymbolIcon Symbol="Document" /></NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="BatchVideoCodecNavigationItem" Content="Codec" Tag="BatchVideo:Codec">
+                            <NavigationViewItem.Icon><SymbolIcon Symbol="Setting" /></NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="BatchVideoCompressNavigationItem" Content="Compress" Tag="BatchVideo:Compress">
+                            <NavigationViewItem.Icon><SymbolIcon Symbol="Cut" /></NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="BatchVideoResizeNavigationItem" Content="Resize" Tag="BatchVideo:Resize">
+                            <NavigationViewItem.Icon><SymbolIcon Symbol="Switch" /></NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="BatchVideoExtractNavigationItem" Content="Extract audio" Tag="BatchVideo:Extract">
+                            <NavigationViewItem.Icon><SymbolIcon Symbol="Audio" /></NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="BatchVideoSubtitlesNavigationItem" Content="Subtitles" Tag="BatchVideo:Subtitles">
+                            <NavigationViewItem.Icon><SymbolIcon Symbol="Comment" /></NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="BatchDocumentNavigationItem" Visibility="Collapsed" Content="Documents" Tag="BatchDocument:Convert">
+                    <NavigationViewItem.Icon><SymbolIcon Symbol="Document" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="BatchPdfNavigationItem" Visibility="Collapsed" Content="PDF" Tag="BatchPdf">
+                    <NavigationViewItem.Icon><SymbolIcon Symbol="OpenFile" /></NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="BatchPdfCompressNavigationItem" Content="Compress" Tag="BatchPdf:Compress">
+                            <NavigationViewItem.Icon><SymbolIcon Symbol="Cut" /></NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="BatchPdfRepairNavigationItem" Content="Repair" Tag="BatchPdf:Repair">
+                            <NavigationViewItem.Icon><SymbolIcon Symbol="Repair" /></NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="BatchPdfOcrNavigationItem" Content="OCR" Tag="BatchPdf:OCR">
+                            <NavigationViewItem.Icon><SymbolIcon Symbol="Find" /></NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="BatchPdfMergeNavigationItem" Content="Merge" Tag="BatchPdf:Merge">
+                            <NavigationViewItem.Icon><SymbolIcon Symbol="Add" /></NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="BatchImageNavigationItem" Visibility="Collapsed" Content="Images" Tag="BatchImage">
+                    <NavigationViewItem.Icon><SymbolIcon Symbol="Pictures" /></NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="BatchImageFormatNavigationItem" Content="Format" Tag="BatchImage:Format">
+                            <NavigationViewItem.Icon><SymbolIcon Symbol="Document" /></NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="BatchImageCompressNavigationItem" Content="Compress" Tag="BatchImage:Compress">
+                            <NavigationViewItem.Icon><SymbolIcon Symbol="Cut" /></NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                        <NavigationViewItem x:Name="BatchImageResizeNavigationItem" Content="Resize" Tag="BatchImage:Resize">
+                            <NavigationViewItem.Icon><SymbolIcon Symbol="Switch" /></NavigationViewItem.Icon>
+                        </NavigationViewItem>
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="BatchOutputNavigationItem" Visibility="Collapsed" Content="Output" Tag="Batch:Output">
+                    <NavigationViewItem.Icon><SymbolIcon Symbol="Save" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
         </NavigationView>
 
@@ -314,6 +390,16 @@
             Title="Media Tools"
             IsBackButtonVisible="False"
             BackRequested="AppTitleBar_BackRequested" />
+
+        <Button
+            x:Name="BatchButton"
+            Grid.Row="0"
+            Grid.Column="1"
+            Margin="0,4,236,4"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Content="Batch"
+            Click="BatchButton_Click" />
 
         <Button
             x:Name="LicensesButton"

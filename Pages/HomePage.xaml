@@ -50,7 +50,7 @@
                         HorizontalAlignment="Center"
                         FontSize="44"
                         FontWeight="SemiBold"
-                        Text="Drop a file to get started"
+                        Text="Drop files to get started"
                         TextAlignment="Center"
                         TextWrapping="Wrap" />
 
@@ -59,7 +59,7 @@
                         HorizontalAlignment="Center"
                         FontSize="18"
                         Opacity="0.82"
-                        Text="Drop a file anywhere on this screen and the app will open the correct editor with it already loaded. You can also click anywhere on this surface to browse from Explorer."
+                        Text="Drop a single file to open the right editor, or drop multiple files of the same type to batch-process them all at once. You can also browse using the buttons below."
                         TextAlignment="Center"
                         TextWrapping="Wrap" />
 
@@ -67,9 +67,39 @@
                         HorizontalAlignment="Center"
                         FontSize="15"
                         Opacity="0.68"
-                        Text="Images: PNG, JPG, JPEG, BMP, GIF, WebP   •   Video: MP4, MOV, MKV, AVI, WMV, WebM, M4V, GIF   •   Audio: MP3, AAC, M4A, WAV, FLAC, OPUS, OGG, AC3   •   Documents: DOCX, DOC, PPTX, XLSX, PDF, and more"
+                        Text="Images: PNG, JPG, WebP, AVIF   •   Video: MP4, MKV, MOV, AVI, WebM   •   Audio: MP3, M4A, FLAC, WAV, OPUS   •   Documents: DOCX, PPTX, XLSX, PDF, and more"
                         TextAlignment="Center"
                         TextWrapping="Wrap" />
+
+                    <Grid Margin="0,4,0,0" ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Height="1" VerticalAlignment="Center" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                        <TextBlock Grid.Column="1" Text="or browse" Opacity="0.50" />
+                        <Border Grid.Column="2" Height="1" VerticalAlignment="Center" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                    </Grid>
+
+                    <StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Spacing="12">
+                        <Button
+                            x:Name="SingleFileButton"
+                            Click="SingleFileButton_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon FontSize="15" Glyph="&#xE8A5;" />
+                                <TextBlock Text="Single file" />
+                            </StackPanel>
+                        </Button>
+                        <Button
+                            x:Name="BatchFilesButton"
+                            Click="BatchFilesButton_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon FontSize="15" Glyph="&#xE8B5;" />
+                                <TextBlock Text="Multiple files for batch" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
                 </StackPanel>
             </Grid>
         </Border>

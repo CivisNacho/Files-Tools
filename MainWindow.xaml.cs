@@ -6,6 +6,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI;
 using Windows.UI;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -37,8 +38,9 @@ namespace Files_Tools
             var isImageEditorPage = RootFrame.Content is Pages.ImageEditorPage;
             var isVideoEditorPage = RootFrame.Content is Pages.VideoEditorPage;
             var isAudioEditorPage = RootFrame.Content is Pages.AudioEditorPage;
-            var isPdfEditorPage = RootFrame.Content is Pages.PdfEditorPage;
-            var showEditorRail = isImageEditorPage || isVideoEditorPage || isAudioEditorPage || isPdfEditorPage;
+            var isPdfEditorPage   = RootFrame.Content is Pages.PdfEditorPage;
+            var isBatchEditorPage = RootFrame.Content is Pages.BatchEditorPage;
+            var showEditorRail    = isImageEditorPage || isVideoEditorPage || isAudioEditorPage || isPdfEditorPage || isBatchEditorPage;
             UpdateNavigationRailWidth(showEditorRail);
 
             ImageEditorOptionsNavigationView.Visibility = showEditorRail ? Visibility.Visible : Visibility.Collapsed;
@@ -51,11 +53,12 @@ namespace Files_Tools
             SetVideoEditorNavigationVisibility(isVideoEditorPage);
             SetAudioEditorNavigationVisibility(isAudioEditorPage);
             SetPdfEditorNavigationVisibility(isPdfEditorPage);
+            SetBatchEditorNavigationVisibility(isBatchEditorPage);
         }
 
         private void MainWindow_SizeChanged(object sender, WindowSizeChangedEventArgs args)
         {
-            var showEditorRail = RootFrame.Content is Pages.ImageEditorPage or Pages.VideoEditorPage or Pages.AudioEditorPage or Pages.PdfEditorPage;
+            var showEditorRail = RootFrame.Content is Pages.ImageEditorPage or Pages.VideoEditorPage or Pages.AudioEditorPage or Pages.PdfEditorPage or Pages.BatchEditorPage;
             UpdateNavigationRailWidth(showEditorRail);
             ImageEditorNavColumn.Width = showEditorRail
                 ? new GridLength(ImageEditorOptionsNavigationView.OpenPaneLength)
@@ -76,41 +79,51 @@ namespace Files_Tools
 
         private static double MeasureRequiredNavigationPaneWidth(NavigationView navigationView)
         {
+            // iconAndPadding covers: icon box (~40px) + left margin (~16px) + right padding (~16px)
+            // + expand chevron on parent items (~32px) = 104px.
             const double iconAndPadding = 104d;
             const double minPane = 160d;
 
             var maxHeaderWidth = 0d;
-            MeasureNavigationItems(navigationView.MenuItems, ref maxHeaderWidth);
+            MeasureNavigationItems(navigationView.MenuItems, ref maxHeaderWidth, depth: 0);
             var required = maxHeaderWidth + iconAndPadding;
             return Math.Max(minPane, Math.Ceiling(required));
         }
 
-        private static void MeasureNavigationItems(System.Collections.Generic.IEnumerable<object> items, ref double maxHeaderWidth)
+        /// <param name="depth">
+        /// Nesting depth of the current item set (0 = top-level, 1 = direct children, …).
+        /// Each depth level adds <c>perLevelIndent</c> pixels to the measured text width so that
+        /// indented child items (e.g. "Extract audio" inside "Video") are accounted for correctly.
+        /// </param>
+        private static void MeasureNavigationItems(
+            IEnumerable<object> items,
+            ref double maxHeaderWidth,
+            int depth)
         {
+            // NavigationView indents each nesting level by roughly 40 px in Left-pane mode.
+            const double perLevelIndent = 40d;
+
             foreach (var item in items)
             {
                 if (item is not NavigationViewItem nvi)
-                {
                     continue;
-                }
 
                 var headerText = nvi.Content?.ToString();
                 if (!string.IsNullOrWhiteSpace(headerText))
                 {
                     var probe = new TextBlock
                     {
-                        Text = headerText,
-                        FontSize = 14,
+                        Text       = headerText,
+                        FontSize   = 14,
                         FontWeight = FontWeights.Normal
                     };
                     probe.Measure(new Windows.Foundation.Size(double.PositiveInfinity, double.PositiveInfinity));
-                    maxHeaderWidth = Math.Max(maxHeaderWidth, probe.DesiredSize.Width);
+                    maxHeaderWidth = Math.Max(maxHeaderWidth,
+                        probe.DesiredSize.Width + depth * perLevelIndent);
                 }
 
                 if (nvi.MenuItems.Count > 0)
-                {
-                    MeasureNavigationItems(nvi.MenuItems, ref maxHeaderWidth);
-                }
+                    MeasureNavigationItems(nvi.MenuItems, ref maxHeaderWidth, depth + 1);
             }
         }
 
@@ -126,6 +139,11 @@ namespace Files_Tools
             {
                 RootFrame.GoBack();
             }
+        }
+
+        private void BatchButton_Click(object sender, RoutedEventArgs e)
+        {
+            RootFrame.Navigate(typeof(Pages.BatchEditorPage));
         }
 
         private void LicensesButton_Click(object sender, RoutedEventArgs e)
@@ -219,6 +237,10 @@ namespace Files_Tools
             {
                 pdfEditorPage.HandleNavigationViewSelection(tag);
             }
+            else if (RootFrame.Content is Pages.BatchEditorPage batchEditorPage)
+            {
+                batchEditorPage.ApplyOptionSelection(tag);
+            }
         }
 
         private void SetImageEditorNavigationVisibility(bool isVisible)
@@ -254,6 +276,36 @@ namespace Files_Tools
             PdfSecurityNavigationItem.Visibility = visibility;
             PdfContentNavigationItem.Visibility = visibility;
             PdfRepairNavigationItem.Visibility = visibility;
+        }
+
+        private void SetBatchEditorNavigationVisibility(bool isVisible)
+        {
+            // Output item is always shown when the batch page is active.
+            BatchOutputNavigationItem.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+
+            // Type-group items are shown dynamically via UpdateBatchNavigationVisibility when
+            // files are loaded. When leaving the page, collapse them all.
+            if (!isVisible)
+            {
+                BatchAudioNavigationItem.Visibility    = Visibility.Collapsed;
+                BatchVideoNavigationItem.Visibility    = Visibility.Collapsed;
+                BatchDocumentNavigationItem.Visibility = Visibility.Collapsed;
+                BatchPdfNavigationItem.Visibility      = Visibility.Collapsed;
+                BatchImageNavigationItem.Visibility    = Visibility.Collapsed;
+            }
+        }
+
+        /// <summary>
+        /// Called by <see cref="Pages.BatchEditorPage"/> whenever its file list changes so the
+        /// sidebar reflects which file-type groups are actually loaded.
+        /// </summary>
+        public void UpdateBatchNavigationVisibility(IReadOnlyList<Services.BatchFileType> activeTypes)
+        {
+            BatchAudioNavigationItem.Visibility    = activeTypes.Contains(Services.BatchFileType.Audio)    ? Visibility.Visible : Visibility.Collapsed;
+            BatchVideoNavigationItem.Visibility    = activeTypes.Contains(Services.BatchFileType.Video)    ? Visibility.Visible : Visibility.Collapsed;
+            BatchDocumentNavigationItem.Visibility = activeTypes.Contains(Services.BatchFileType.Document) ? Visibility.Visible : Visibility.Collapsed;
+            BatchPdfNavigationItem.Visibility      = activeTypes.Contains(Services.BatchFileType.Pdf)      ? Visibility.Visible : Visibility.Collapsed;
+            BatchImageNavigationItem.Visibility    = activeTypes.Contains(Services.BatchFileType.Image)    ? Visibility.Visible : Visibility.Collapsed;
         }
 
     }
