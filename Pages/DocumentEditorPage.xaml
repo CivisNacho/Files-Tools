@@ -31,8 +31,7 @@
             SizeChanged="PageRoot_SizeChanged">
             <Grid
                 x:Name="ContentRoot"
-                HorizontalAlignment="Center"
-                MaxWidth="1440"
+                HorizontalAlignment="Stretch"
                 RowSpacing="20">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -165,8 +164,7 @@
                                 x:Name="UploadSurface"
                                 Grid.Row="1"
                                 AllowDrop="True"
-                                MinHeight="240"
-                                MaxHeight="560"
+                                MinHeight="200"
                                 Padding="16"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Top"
@@ -244,8 +242,7 @@
                         x:Name="OptionsPanel"
                         Grid.Column="1"
                         Grid.RowSpan="3"
-                        MinWidth="360"
-                        MinHeight="420"
+                        MinWidth="280"
                         Padding="20"
                         CornerRadius="16"
                         BorderThickness="1"

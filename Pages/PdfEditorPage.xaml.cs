@@ -177,8 +177,8 @@ namespace Files_Tools.Pages
                 Grid.SetRow(OptionsPanel, 1);
                 Grid.SetColumn(OptionsPanel, 0);
                 Grid.SetRowSpan(OptionsPanel, 1);
-                OptionsPanel.MinWidth = 280;
-                UploadSurface.MaxHeight = 600;
+                OptionsPanel.MinWidth = 260;
+                UploadSurface.MaxHeight = double.PositiveInfinity;
             }
             else
             {
@@ -188,8 +188,8 @@ namespace Files_Tools.Pages
                 Grid.SetRow(OptionsPanel, 0);
                 Grid.SetColumn(OptionsPanel, 1);
                 Grid.SetRowSpan(OptionsPanel, 2);
-                OptionsPanel.MinWidth = 320;
-                UploadSurface.MaxHeight = 800;
+                OptionsPanel.MinWidth = 280;
+                UploadSurface.MaxHeight = double.PositiveInfinity;
             }
         }
 

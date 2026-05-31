@@ -83,8 +83,7 @@
             SizeChanged="PageRoot_SizeChanged">
             <Grid
                 x:Name="ContentRoot"
-                HorizontalAlignment="Center"
-                MaxWidth="1440"
+                HorizontalAlignment="Stretch"
                 RowSpacing="20">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -163,8 +162,7 @@
                             <Border
                                 Grid.Row="1"
                                 AllowDrop="True"
-                                MinHeight="220"
-                                MaxHeight="500"
+                                MinHeight="200"
                                 CornerRadius="14"
                                 BorderThickness="1"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -340,7 +338,7 @@
                         x:Name="OptionsPanel"
                         Grid.Column="1"
                         VerticalAlignment="Top"
-                        MinWidth="320"
+                        MinWidth="280"
                         Padding="20"
                         CornerRadius="16"
                         BorderThickness="1"

@@ -26,7 +26,7 @@ namespace Files_Tools.Pages
     {
         private const double MinimumTwoColumnBreakpoint = 980;
         private const double OptionsColumnRatio = 0.3;
-        private const double OptionsPanelMinimumWidth = 320;
+        private const double OptionsPanelMinimumWidth = 280;
 
         private enum StyledSubtitleBasePreset { SocialImpact, CleanSans, CaptionBox, BroadcastLowerThird }
         private enum KaraokeSubtitleBasePreset { NeonKaraoke, Punch, Bubbly }
@@ -103,7 +103,7 @@ namespace Files_Tools.Pages
         {
             if (width <= 0) return;
 
-            var effectiveWidth = Math.Min(width, 1440);
+            var effectiveWidth = width;
             var availableForColumns = effectiveWidth - 64;
 
             if (availableForColumns < MinimumTwoColumnBreakpoint)

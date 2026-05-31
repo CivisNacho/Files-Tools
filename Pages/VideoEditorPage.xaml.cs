@@ -29,11 +29,10 @@ namespace Files_Tools.Pages
     public sealed partial class VideoEditorPage : Page
     {
         private const double MinimumTwoColumnBreakpoint = 980;
-        private const double ContentMaxWidth = 1440;
         private const double OuterHorizontalPadding = 64;
         private const double WideColumnSpacing = 18;
         private const double OptionsColumnRatio = 0.3;
-        private const double OptionsPanelMinimumWidth = 360;
+        private const double OptionsPanelMinimumWidth = 280;
         private const double TrimHandleWidth = 16;
         private const double TrimRailTop = 15;
         private const double TrimHandleTop = 6;
@@ -307,7 +306,7 @@ namespace Files_Tools.Pages
                 return true;
             }
 
-            var contentWidth = Math.Min(ContentMaxWidth, Math.Max(0, width - OuterHorizontalPadding));
+            var contentWidth = Math.Max(0, width - OuterHorizontalPadding);
             var availableOptionsWidth = Math.Max(0, (contentWidth * OptionsColumnRatio) - WideColumnSpacing);
             return availableOptionsWidth < OptionsPanelMinimumWidth;
         }

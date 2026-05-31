@@ -27,7 +27,7 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Grid x:Name="PageRoot" Padding="32,24,32,28" SizeChanged="PageRoot_SizeChanged">
-            <Grid x:Name="ContentRoot" HorizontalAlignment="Center" MaxWidth="1440" RowSpacing="20">
+            <Grid x:Name="ContentRoot" HorizontalAlignment="Stretch" RowSpacing="20">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
@@ -63,7 +63,7 @@
                                 <TextBlock Opacity="0.72" Text="Drop an audio file or click the surface to pick one. Processing status appears below when running." TextWrapping="Wrap" />
                             </StackPanel>
 
-                            <Border x:Name="UploadSurface" Grid.Row="1" AllowDrop="True" MinHeight="240" MaxHeight="560" Padding="16" HorizontalAlignment="Stretch" VerticalAlignment="Top" CornerRadius="14" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource LayerFillColorDefaultBrush}" DragOver="UploadSurface_DragOver" Drop="UploadSurface_Drop" PointerPressed="UploadSurface_PointerPressed">
+                            <Border x:Name="UploadSurface" Grid.Row="1" AllowDrop="True" MinHeight="200" Padding="16" HorizontalAlignment="Stretch" VerticalAlignment="Top" CornerRadius="14" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource LayerFillColorDefaultBrush}" DragOver="UploadSurface_DragOver" Drop="UploadSurface_Drop" PointerPressed="UploadSurface_PointerPressed">
                                 <Grid RowSpacing="12">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="*" />
@@ -197,7 +197,7 @@
                         </Grid>
                     </Border>
 
-                    <Border x:Name="OptionsPanel" Grid.Column="1" Grid.RowSpan="3" MinWidth="360" MinHeight="420" Padding="20" CornerRadius="16" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <Border x:Name="OptionsPanel" Grid.Column="1" Grid.RowSpan="3" MinWidth="280" Padding="20" CornerRadius="16" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                         <Grid RowSpacing="16">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
