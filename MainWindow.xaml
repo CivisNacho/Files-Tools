@@ -18,7 +18,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition x:Name="ImageEditorNavColumn" Width="0" />
+            <ColumnDefinition x:Name="ImageEditorNavColumn" Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
@@ -26,13 +26,14 @@
             x:Name="ImageEditorOptionsNavigationView"
             Grid.RowSpan="2"
             Grid.Column="0"
+            Width="Auto"
             Visibility="Collapsed"
             IsBackButtonVisible="Collapsed"
             IsPaneToggleButtonVisible="False"
             IsPaneOpen="True"
             IsSettingsVisible="False"
             CompactPaneLength="56"
-            OpenPaneLength="180"
+            OpenPaneLength="90"
             PaneDisplayMode="Left"
             SelectionChanged="ImageEditorOptionsNavigationView_SelectionChanged">
             <NavigationView.MenuItems>
@@ -390,16 +391,6 @@
             Title="Media Tools"
             IsBackButtonVisible="False"
             BackRequested="AppTitleBar_BackRequested" />
-
-        <Button
-            x:Name="BatchButton"
-            Grid.Row="0"
-            Grid.Column="1"
-            Margin="0,4,236,4"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Center"
-            Content="Batch"
-            Click="BatchButton_Click" />
 
         <Button
             x:Name="LicensesButton"

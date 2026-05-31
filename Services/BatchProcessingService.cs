@@ -995,12 +995,12 @@ public sealed class BatchProcessingService : IBatchProcessingService
             AudioCompressBatchOperation op  => await ProcessAudioCompressAsync(inputPath, outputPath, op, subProgressCallback, cancellationToken).ConfigureAwait(false),
             AudioNormalizeBatchOperation op => await ProcessAudioNormalizeAsync(inputPath, outputPath, op, subProgressCallback, cancellationToken).ConfigureAwait(false),
 
-            VideoChangeContainerBatchOperation op => await ProcessVideoChangeContainerAsync(inputPath, outputPath, op, cancellationToken).ConfigureAwait(false),
-            VideoChangeCodecBatchOperation op     => await ProcessVideoChangeCodecAsync(inputPath, outputPath, op, cancellationToken).ConfigureAwait(false),
-            VideoCompressBatchOperation op        => await ProcessVideoCompressAsync(inputPath, outputPath, op, cancellationToken).ConfigureAwait(false),
-            VideoResizeBatchOperation op          => await ProcessVideoResizeAsync(inputPath, outputPath, op, cancellationToken).ConfigureAwait(false),
-            VideoExtractAudioBatchOperation op    => await ProcessVideoExtractAudioAsync(inputPath, outputPath, op, cancellationToken).ConfigureAwait(false),
-            VideoSubtitlesBatchOperation op       => await ProcessVideoSubtitlesAsync(inputPath, outputPath, op, cancellationToken).ConfigureAwait(false),
+            VideoChangeContainerBatchOperation op => await ProcessVideoChangeContainerAsync(inputPath, outputPath, op, subProgressCallback, cancellationToken).ConfigureAwait(false),
+            VideoChangeCodecBatchOperation op     => await ProcessVideoChangeCodecAsync(inputPath, outputPath, op, subProgressCallback, cancellationToken).ConfigureAwait(false),
+            VideoCompressBatchOperation op        => await ProcessVideoCompressAsync(inputPath, outputPath, op, subProgressCallback, cancellationToken).ConfigureAwait(false),
+            VideoResizeBatchOperation op          => await ProcessVideoResizeAsync(inputPath, outputPath, op, subProgressCallback, cancellationToken).ConfigureAwait(false),
+            VideoExtractAudioBatchOperation op    => await ProcessVideoExtractAudioAsync(inputPath, outputPath, op, subProgressCallback, cancellationToken).ConfigureAwait(false),
+            VideoSubtitlesBatchOperation op       => await ProcessVideoSubtitlesAsync(inputPath, outputPath, op, subProgressCallback, cancellationToken).ConfigureAwait(false),
 
             DocumentConvertToPdfBatchOperation op => await ProcessDocumentConvertAsync(inputPath, outputPath, op, cancellationToken).ConfigureAwait(false),
 
@@ -1051,42 +1051,67 @@ public sealed class BatchProcessingService : IBatchProcessingService
     // ── Video dispatch ────────────────────────────────────────────────────────
 
     private async Task<(string, IReadOnlyList<string>)> ProcessVideoChangeContainerAsync(
-        string input, string output, VideoChangeContainerBatchOperation op, CancellationToken ct)
+        string input, string output, VideoChangeContainerBatchOperation op,
+        Action<double>? subProgress, CancellationToken ct)
     {
-        await _video.ChangeContainerAsync(input, output, op.TargetContainer, ct).ConfigureAwait(false);
+        var options = new ProcessVideoOptions
+        {
+            Output = new VideoOutputOptions { Format = op.TargetContainer }
+        };
+        await _video.ProcessVideoAsync(input, output, options, CreateVideoProgress(subProgress), ct).ConfigureAwait(false);
         return (output, Array.Empty<string>());
     }
 
     private async Task<(string, IReadOnlyList<string>)> ProcessVideoChangeCodecAsync(
-        string input, string output, VideoChangeCodecBatchOperation op, CancellationToken ct)
+        string input, string output, VideoChangeCodecBatchOperation op,
+        Action<double>? subProgress, CancellationToken ct)
     {
-        await _video.ChangeCodecAsync(input, output, op.Options, null, ct).ConfigureAwait(false);
+        var options = new ProcessVideoOptions
+        {
+            CodecChange = op.Options,
+            Output      = new VideoOutputOptions()
+        };
+        await _video.ProcessVideoAsync(input, output, options, CreateVideoProgress(subProgress), ct).ConfigureAwait(false);
         return (output, Array.Empty<string>());
     }
 
     private async Task<(string, IReadOnlyList<string>)> ProcessVideoCompressAsync(
-        string input, string output, VideoCompressBatchOperation op, CancellationToken ct)
+        string input, string output, VideoCompressBatchOperation op,
+        Action<double>? subProgress, CancellationToken ct)
     {
-        await _video.CompressAsync(input, output, op.Options, null, ct).ConfigureAwait(false);
+        var options = new ProcessVideoOptions
+        {
+            Compression = op.Options,
+            Output      = new VideoOutputOptions()
+        };
+        await _video.ProcessVideoAsync(input, output, options, CreateVideoProgress(subProgress), ct).ConfigureAwait(false);
         return (output, Array.Empty<string>());
     }
 
     private async Task<(string, IReadOnlyList<string>)> ProcessVideoResizeAsync(
-        string input, string output, VideoResizeBatchOperation op, CancellationToken ct)
+        string input, string output, VideoResizeBatchOperation op,
+        Action<double>? subProgress, CancellationToken ct)
     {
-        await _video.ResizeAsync(input, output, op.Options, null, ct).ConfigureAwait(false);
+        var options = new ProcessVideoOptions
+        {
+            Resize = op.Options,
+            Output = new VideoOutputOptions()
+        };
+        await _video.ProcessVideoAsync(input, output, options, CreateVideoProgress(subProgress), ct).ConfigureAwait(false);
         return (output, Array.Empty<string>());
     }
 
     private async Task<(string, IReadOnlyList<string>)> ProcessVideoExtractAudioAsync(
-        string input, string output, VideoExtractAudioBatchOperation op, CancellationToken ct)
+        string input, string output, VideoExtractAudioBatchOperation op,
+        Action<double>? subProgress, CancellationToken ct)
     {
-        await _video.ExtractAudioAsync(input, output, ct).ConfigureAwait(false);
+        await _video.ExtractAudioAsync(input, output, ct, CreateVideoProgress(subProgress)).ConfigureAwait(false);
         return (output, Array.Empty<string>());
     }
 
     private async Task<(string, IReadOnlyList<string>)> ProcessVideoSubtitlesAsync(
-        string input, string output, VideoSubtitlesBatchOperation op, CancellationToken ct)
+        string input, string output, VideoSubtitlesBatchOperation op,
+        Action<double>? subProgress, CancellationToken ct)
     {
         // Write the subtitle file next to the output video in a temp path.
         var subtitleExt    = op.UseAdvancedAss ? ".ass" : ".srt";
@@ -1124,7 +1149,18 @@ public sealed class BatchProcessingService : IBatchProcessingService
             Placement    = op.Placement
         };
 
-        await _video.CombineWithSubtitlesAsync(input, output, muxOptions, cancellationToken: ct).ConfigureAwait(false);
+        // Transcription is roughly the slowest stage — treat the mux step as the last 15%.
+        subProgress?.Invoke(0.85);
+
+        var muxProcessOptions = new ProcessVideoOptions
+        {
+            SubtitleMux = muxOptions,
+            Output      = new VideoOutputOptions()
+        };
+        await _video.ProcessVideoAsync(
+            input, output, muxProcessOptions,
+            CreateVideoProgress(f => subProgress?.Invoke(0.85 + 0.15 * f)),
+            ct).ConfigureAwait(false);
 
         return (output, Array.Empty<string>());
     }
@@ -1183,6 +1219,12 @@ public sealed class BatchProcessingService : IBatchProcessingService
     {
         if (callback is null) return null;
         return new DelegateProgress<AudioProcessProgress>(p => callback(p.OverallPercent));
+    }
+
+    private static IProgress<VideoProcessingProgress> CreateVideoProgress(Action<double>? callback)
+    {
+        if (callback is null) return new DelegateProgress<VideoProcessingProgress>(_ => { });
+        return new DelegateProgress<VideoProcessingProgress>(p => callback(Math.Clamp(p.FractionComplete, 0.0, 1.0)));
     }
 
     // ── Result builder ────────────────────────────────────────────────────────

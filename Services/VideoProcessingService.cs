@@ -86,7 +86,7 @@ public interface IVideoProcessingService
     /// <summary>
     /// Extracts the primary audio stream from a video into a standalone audio file inferred from the output extension.
     /// </summary>
-    Task ExtractAudioAsync(string inputPath, string outputPath, CancellationToken cancellationToken = default);
+    Task ExtractAudioAsync(string inputPath, string outputPath, CancellationToken cancellationToken = default, IProgress<VideoProcessingProgress>? progress = null);
 }
 
 /// <summary>
@@ -850,7 +850,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
     }
 
     /// <inheritdoc />
-    public async Task ExtractAudioAsync(string inputPath, string outputPath, CancellationToken cancellationToken = default)
+    public async Task ExtractAudioAsync(string inputPath, string outputPath, CancellationToken cancellationToken = default, IProgress<VideoProcessingProgress>? progress = null)
     {
         ValidateInputPath(inputPath);
         ValidateOutputPath(outputPath);
@@ -869,6 +869,9 @@ public sealed class VideoProcessingService : IVideoProcessingService
         {
             "-y",
             "-hide_banner",
+            "-progress",
+            "pipe:2",
+            "-nostats",
             "-i",
             Path.GetFullPath(inputPath),
             "-vn",
@@ -888,7 +891,9 @@ public sealed class VideoProcessingService : IVideoProcessingService
         }
 
         args.Add(Path.GetFullPath(outputPath));
-        await RunProcessWithFallbackAsync(ffmpegCandidates, args, cancellationToken, probeJson).ConfigureAwait(false);
+
+        var progressObserver = CreateProgressObserver(inputInfo.Duration ?? TimeSpan.Zero, progress);
+        await RunProcessWithFallbackAsync(ffmpegCandidates, args, cancellationToken, probeJson, progressObserver).ConfigureAwait(false);
     }
 
     private static async Task ProcessVideoCoreAsync(string inputPath, string outputPath, ProcessVideoOptions options, CancellationToken cancellationToken, IProgress<VideoProcessingProgress>? progress = null)

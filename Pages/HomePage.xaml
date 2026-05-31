@@ -67,7 +67,7 @@
                         HorizontalAlignment="Center"
                         FontSize="15"
                         Opacity="0.68"
-                        Text="Images: PNG, JPG, WebP, AVIF   •   Video: MP4, MKV, MOV, AVI, WebM   •   Audio: MP3, M4A, FLAC, WAV, OPUS   •   Documents: DOCX, PPTX, XLSX, PDF, and more"
+                        Text="Images: PNG, JPG, WebP, AVIF   •   Video: MP4, MKV, MOV, AVI, WebM   •   Audio: MP3, M4A, FLAC, WAV, OPUS   •   Documents: DOCX, PPTX, XLSX, PDF"
                         TextAlignment="Center"
                         TextWrapping="Wrap" />
 

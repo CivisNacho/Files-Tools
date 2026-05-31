@@ -41,12 +41,7 @@ namespace Files_Tools
             var isPdfEditorPage   = RootFrame.Content is Pages.PdfEditorPage;
             var isBatchEditorPage = RootFrame.Content is Pages.BatchEditorPage;
             var showEditorRail    = isImageEditorPage || isVideoEditorPage || isAudioEditorPage || isPdfEditorPage || isBatchEditorPage;
-            UpdateNavigationRailWidth(showEditorRail);
-
             ImageEditorOptionsNavigationView.Visibility = showEditorRail ? Visibility.Visible : Visibility.Collapsed;
-            ImageEditorNavColumn.Width = showEditorRail
-                ? new GridLength(ImageEditorOptionsNavigationView.OpenPaneLength)
-                : new GridLength(0);
             ImageEditorOptionsNavigationView.SelectedItem = null;
 
             SetImageEditorNavigationVisibility(isImageEditorPage);
@@ -54,6 +49,12 @@ namespace Files_Tools
             SetAudioEditorNavigationVisibility(isAudioEditorPage);
             SetPdfEditorNavigationVisibility(isPdfEditorPage);
             SetBatchEditorNavigationVisibility(isBatchEditorPage);
+
+            // Measure after per-mode visibility is applied so the pane fits the widest *visible* item.
+            UpdateNavigationRailWidth(showEditorRail);
+            ImageEditorNavColumn.Width = showEditorRail
+                ? new GridLength(ImageEditorOptionsNavigationView.OpenPaneLength)
+                : new GridLength(0);
         }
 
         private void MainWindow_SizeChanged(object sender, WindowSizeChangedEventArgs args)
@@ -72,9 +73,8 @@ namespace Files_Tools
                 return;
             }
 
-            var responsivePaneLength = AppTitleBar.ActualWidth * 0.18d;
-            var requiredContentWidth = MeasureRequiredNavigationPaneWidth(ImageEditorOptionsNavigationView);
-            ImageEditorOptionsNavigationView.OpenPaneLength = Math.Max(responsivePaneLength, requiredContentWidth);
+            ImageEditorOptionsNavigationView.OpenPaneLength =
+                MeasureRequiredNavigationPaneWidth(ImageEditorOptionsNavigationView);
         }
 
         private static double MeasureRequiredNavigationPaneWidth(NavigationView navigationView)
@@ -106,6 +106,10 @@ namespace Files_Tools
             foreach (var item in items)
             {
                 if (item is not NavigationViewItem nvi)
+                    continue;
+
+                // Only items visible in the current editor mode should drive the pane width.
+                if (nvi.Visibility != Visibility.Visible)
                     continue;
 
                 var headerText = nvi.Content?.ToString();
