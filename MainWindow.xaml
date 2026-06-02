@@ -6,13 +6,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="Media Tools">
+    Title="Files Tools">
 
-    <Window.SystemBackdrop>
-        <MicaBackdrop />
-    </Window.SystemBackdrop>
-
-    <Grid>
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
             <RowDefinition Height="*" />
@@ -32,353 +28,354 @@
             IsPaneToggleButtonVisible="False"
             IsPaneOpen="True"
             IsSettingsVisible="False"
+            Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
             CompactPaneLength="56"
             OpenPaneLength="90"
             PaneDisplayMode="Left"
             SelectionChanged="ImageEditorOptionsNavigationView_SelectionChanged">
             <NavigationView.MenuItems>
-                <NavigationViewItem x:Name="TitleMediaNavigationItem" Content="Media" Tag="Media">
+                <NavigationViewItem x:Name="TitleMediaNavigationItem" x:Uid="NavMedia" Content="Media" Tag="Media">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Pictures" />
                     </NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem x:Name="TitleMediaFormatNavigationItem" Content="Format" Tag="Media:Format">
+                        <NavigationViewItem x:Name="TitleMediaFormatNavigationItem" x:Uid="NavFormat" Content="Format" Tag="Media:Format">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Document" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="TitleTransformNavigationItem" Content="Transform" Tag="Transform">
+                <NavigationViewItem x:Name="TitleTransformNavigationItem" x:Uid="NavTransform" Content="Transform" Tag="Transform">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Rotate" />
                     </NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem x:Name="TitleTransformCropNavigationItem" Content="Crop" Tag="Transform:Crop">
+                        <NavigationViewItem x:Name="TitleTransformCropNavigationItem" x:Uid="NavCrop" Content="Crop" Tag="Transform:Crop">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Crop" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="TitleTransformResizeNavigationItem" Content="Resize" Tag="Transform:Resize">
+                        <NavigationViewItem x:Name="TitleTransformResizeNavigationItem" x:Uid="NavResize" Content="Resize" Tag="Transform:Resize">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Switch" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="TitleTransformUpscaleNavigationItem" Content="Upscale" Tag="Transform:Upscale">
+                        <NavigationViewItem x:Name="TitleTransformUpscaleNavigationItem" x:Uid="NavUpscale" Content="Upscale" Tag="Transform:Upscale">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="ZoomIn" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="TitleTransformRotateNavigationItem" Content="Rotate" Tag="Transform:Rotate">
+                        <NavigationViewItem x:Name="TitleTransformRotateNavigationItem" x:Uid="NavRotate" Content="Rotate" Tag="Transform:Rotate">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Rotate" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="TitleAdjustNavigationItem" Content="Adjust" Tag="Adjust">
+                <NavigationViewItem x:Name="TitleAdjustNavigationItem" x:Uid="NavAdjust" Content="Adjust" Tag="Adjust">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="AllApps" />
                     </NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem x:Name="TitleAdjustColorNavigationItem" Content="Color" Tag="Adjust:Color">
+                        <NavigationViewItem x:Name="TitleAdjustColorNavigationItem" x:Uid="NavColor" Content="Color" Tag="Adjust:Color">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Highlight" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="VideoMediaNavigationItem" Visibility="Collapsed" Content="Media" Tag="Media">
+                <NavigationViewItem x:Name="VideoMediaNavigationItem" Visibility="Collapsed" x:Uid="NavMedia" Content="Media" Tag="Media">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Video" />
                     </NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem x:Name="VideoMediaFormatNavigationItem" Content="Format" Tag="Media:Format">
+                        <NavigationViewItem x:Name="VideoMediaFormatNavigationItem" x:Uid="NavFormat" Content="Format" Tag="Media:Format">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Document" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="VideoMediaAudioNavigationItem" Content="Audio" Tag="Media:Audio">
+                        <NavigationViewItem x:Name="VideoMediaAudioNavigationItem" x:Uid="NavAudio" Content="Audio" Tag="Media:Audio">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Audio" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="VideoMediaSubtitlesNavigationItem" Content="Subtitles" Tag="Media:Subtitles">
+                        <NavigationViewItem x:Name="VideoMediaSubtitlesNavigationItem" x:Uid="NavSubtitles" Content="Subtitles" Tag="Media:Subtitles">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Comment" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="VideoTransformNavigationItem" Visibility="Collapsed" Content="Transform" Tag="Transform">
+                <NavigationViewItem x:Name="VideoTransformNavigationItem" Visibility="Collapsed" x:Uid="NavTransform" Content="Transform" Tag="Transform">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Rotate" />
                     </NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem x:Name="VideoTransformResizeNavigationItem" Content="Resize" Tag="Transform:Resize">
+                        <NavigationViewItem x:Name="VideoTransformResizeNavigationItem" x:Uid="NavResize" Content="Resize" Tag="Transform:Resize">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Switch" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="VideoTransformTrimNavigationItem" Content="Trim" Tag="Transform:Trim">
+                        <NavigationViewItem x:Name="VideoTransformTrimNavigationItem" x:Uid="NavTrim" Content="Trim" Tag="Transform:Trim">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Cut" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="VideoTransformRotateNavigationItem" Content="Rotate" Tag="Transform:Rotate">
+                        <NavigationViewItem x:Name="VideoTransformRotateNavigationItem" x:Uid="NavRotate" Content="Rotate" Tag="Transform:Rotate">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Rotate" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="VideoAdvancedNavigationItem" Visibility="Collapsed" Content="Advanced" Tag="Advanced">
+                <NavigationViewItem x:Name="VideoAdvancedNavigationItem" Visibility="Collapsed" x:Uid="NavAdvanced" Content="Advanced" Tag="Advanced">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Setting" />
                     </NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem x:Name="VideoAdvancedMetadataNavigationItem" Content="Metadata" Tag="Advanced:Metadata">
+                        <NavigationViewItem x:Name="VideoAdvancedMetadataNavigationItem" x:Uid="NavMetadata" Content="Metadata" Tag="Advanced:Metadata">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Tag" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="VideoAdvancedRepairNavigationItem" Content="Repair" Tag="Advanced:Repair">
+                        <NavigationViewItem x:Name="VideoAdvancedRepairNavigationItem" x:Uid="NavRepair" Content="Repair" Tag="Advanced:Repair">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Repair" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="AudioMediaNavigationItem" Visibility="Collapsed" Content="Media" Tag="Media">
+                <NavigationViewItem x:Name="AudioMediaNavigationItem" Visibility="Collapsed" x:Uid="NavMedia" Content="Media" Tag="Media">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Audio" />
                     </NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem x:Name="AudioMediaFormatNavigationItem" Content="Format" Tag="Media:Format">
+                        <NavigationViewItem x:Name="AudioMediaFormatNavigationItem" x:Uid="NavFormat" Content="Format" Tag="Media:Format">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Document" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="AudioMediaMetadataNavigationItem" Content="Metadata" Tag="Media:Metadata">
+                        <NavigationViewItem x:Name="AudioMediaMetadataNavigationItem" x:Uid="NavMetadata" Content="Metadata" Tag="Media:Metadata">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Tag" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="AudioMediaPodcastNavigationItem" Content="Podcast" Tag="Media:Podcast">
+                        <NavigationViewItem x:Name="AudioMediaPodcastNavigationItem" x:Uid="NavPodcast" Content="Podcast" Tag="Media:Podcast">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Microphone" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="AudioTransformNavigationItem" Visibility="Collapsed" Content="Transform" Tag="Transform">
+                <NavigationViewItem x:Name="AudioTransformNavigationItem" Visibility="Collapsed" x:Uid="NavTransform" Content="Transform" Tag="Transform">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Cut" />
                     </NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem x:Name="AudioTransformTrimNavigationItem" Content="Trim" Tag="Transform:Trim">
+                        <NavigationViewItem x:Name="AudioTransformTrimNavigationItem" x:Uid="NavTrim" Content="Trim" Tag="Transform:Trim">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Cut" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="AudioTransformSilenceNavigationItem" Content="Silence" Tag="Transform:Silence">
+                        <NavigationViewItem x:Name="AudioTransformSilenceNavigationItem" x:Uid="NavSilence" Content="Silence" Tag="Transform:Silence">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Setting" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="AudioAdjustNavigationItem" Visibility="Collapsed" Content="Adjust" Tag="Adjust">
+                <NavigationViewItem x:Name="AudioAdjustNavigationItem" Visibility="Collapsed" x:Uid="NavAdjust" Content="Adjust" Tag="Adjust">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="AllApps" />
                     </NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem x:Name="AudioAdjustNormalizeNavigationItem" Content="Normalize" Tag="Adjust:Normalize">
+                        <NavigationViewItem x:Name="AudioAdjustNormalizeNavigationItem" x:Uid="NavNormalize" Content="Normalize" Tag="Adjust:Normalize">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Switch" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="AudioAdjustEqNavigationItem" Content="EQ" Tag="Adjust:EQ">
+                        <NavigationViewItem x:Name="AudioAdjustEqNavigationItem" x:Uid="NavEQ" Content="EQ" Tag="Adjust:EQ">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="AllApps" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="AudioAdjustDenoiseNavigationItem" Content="Denoise" Tag="Adjust:Denoise">
+                        <NavigationViewItem x:Name="AudioAdjustDenoiseNavigationItem" x:Uid="NavDenoise" Content="Denoise" Tag="Adjust:Denoise">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Audio" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="AudioTranscriptionNavigationItem" Visibility="Collapsed" Content="Transcription" Tag="Transcription">
+                <NavigationViewItem x:Name="AudioTranscriptionNavigationItem" Visibility="Collapsed" x:Uid="NavTranscription" Content="Transcription" Tag="Transcription">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Comment" />
                     </NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem x:Name="AudioTranscriptionGenerateNavigationItem" Content="Generate" Tag="Transcription:Generate">
+                        <NavigationViewItem x:Name="AudioTranscriptionGenerateNavigationItem" x:Uid="NavGenerate" Content="Generate" Tag="Transcription:Generate">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Edit" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="PdfOrganizationNavigationItem" Visibility="Collapsed" Content="Organization" Tag="Organization">
+                <NavigationViewItem x:Name="PdfOrganizationNavigationItem" Visibility="Collapsed" x:Uid="NavOrganization" Content="Organization" Tag="Organization">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Folder" />
                     </NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem x:Name="PdfOrganizationMergeNavigationItem" Content="Merge" Tag="Organization:Merge">
+                        <NavigationViewItem x:Name="PdfOrganizationMergeNavigationItem" x:Uid="NavMerge" Content="Merge" Tag="Organization:Merge">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Add" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="PdfOrganizationSplitNavigationItem" Content="Split" Tag="Organization:Split">
+                        <NavigationViewItem x:Name="PdfOrganizationSplitNavigationItem" x:Uid="NavSplit" Content="Split" Tag="Organization:Split">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Cut" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="PdfOrganizationReorderNavigationItem" Content="Reorder" Tag="Organization:Reorder">
+                        <NavigationViewItem x:Name="PdfOrganizationReorderNavigationItem" x:Uid="NavReorder" Content="Reorder" Tag="Organization:Reorder">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="List" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="PdfOrganizationExtractNavigationItem" Content="Extract" Tag="Organization:Extract">
+                        <NavigationViewItem x:Name="PdfOrganizationExtractNavigationItem" x:Uid="NavExtract" Content="Extract" Tag="Organization:Extract">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Download" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="PdfTransformNavigationItem" Visibility="Collapsed" Content="Transform" Tag="Transform">
+                <NavigationViewItem x:Name="PdfTransformNavigationItem" Visibility="Collapsed" x:Uid="NavTransform" Content="Transform" Tag="Transform">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Rotate" />
                     </NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem x:Name="PdfTransformRotateNavigationItem" Content="Rotate" Tag="Transform:Rotate">
+                        <NavigationViewItem x:Name="PdfTransformRotateNavigationItem" x:Uid="NavRotate" Content="Rotate" Tag="Transform:Rotate">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Rotate" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="PdfSecurityNavigationItem" Visibility="Collapsed" Content="Security" Tag="Security">
+                <NavigationViewItem x:Name="PdfSecurityNavigationItem" Visibility="Collapsed" x:Uid="NavSecurity" Content="Security" Tag="Security">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Permissions" />
                     </NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem x:Name="PdfSecurityEncryptNavigationItem" Content="Encrypt" Tag="Security:Encrypt">
+                        <NavigationViewItem x:Name="PdfSecurityEncryptNavigationItem" x:Uid="NavEncrypt" Content="Encrypt" Tag="Security:Encrypt">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Permissions" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="PdfSecurityPasswordNavigationItem" Content="Password" Tag="Security:Password">
+                        <NavigationViewItem x:Name="PdfSecurityPasswordNavigationItem" x:Uid="NavPassword" Content="Password" Tag="Security:Password">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Setting" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="PdfSecurityPermissionsNavigationItem" Content="Permissions" Tag="Security:Permissions">
+                        <NavigationViewItem x:Name="PdfSecurityPermissionsNavigationItem" x:Uid="NavPermissions" Content="Permissions" Tag="Security:Permissions">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Permissions" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="PdfContentNavigationItem" Visibility="Collapsed" Content="Content" Tag="Content">
+                <NavigationViewItem x:Name="PdfContentNavigationItem" Visibility="Collapsed" x:Uid="NavContent" Content="Content" Tag="Content">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Document" />
                     </NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem x:Name="PdfContentOcrNavigationItem" Content="OCR" Tag="Content:OCR">
+                        <NavigationViewItem x:Name="PdfContentOcrNavigationItem" x:Uid="NavOCR" Content="OCR" Tag="Content:OCR">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Find" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="PdfContentMetadataNavigationItem" Content="Metadata" Tag="Content:Metadata">
+                        <NavigationViewItem x:Name="PdfContentMetadataNavigationItem" x:Uid="NavMetadata" Content="Metadata" Tag="Content:Metadata">
                             <NavigationViewItem.Icon>
                                 <SymbolIcon Symbol="Tag" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="PdfRepairNavigationItem" Visibility="Collapsed" Content="Repair" Tag="Repair:Run">
+                <NavigationViewItem x:Name="PdfRepairNavigationItem" Visibility="Collapsed" x:Uid="NavRepair" Content="Repair" Tag="Repair:Run">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Repair" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
 
                 <!--  Batch editor items  -->
-                <NavigationViewItem x:Name="BatchAudioNavigationItem" Visibility="Collapsed" Content="Audio" Tag="BatchAudio">
+                <NavigationViewItem x:Name="BatchAudioNavigationItem" Visibility="Collapsed" x:Uid="NavAudio" Content="Audio" Tag="BatchAudio">
                     <NavigationViewItem.Icon><SymbolIcon Symbol="Audio" /></NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem x:Name="BatchAudioFormatNavigationItem" Content="Format" Tag="BatchAudio:Format">
+                        <NavigationViewItem x:Name="BatchAudioFormatNavigationItem" x:Uid="NavFormat" Content="Format" Tag="BatchAudio:Format">
                             <NavigationViewItem.Icon><SymbolIcon Symbol="Document" /></NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="BatchAudioCompressNavigationItem" Content="Compress" Tag="BatchAudio:Compress">
+                        <NavigationViewItem x:Name="BatchAudioCompressNavigationItem" x:Uid="NavCompress" Content="Compress" Tag="BatchAudio:Compress">
                             <NavigationViewItem.Icon><SymbolIcon Symbol="Cut" /></NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="BatchAudioNormalizeNavigationItem" Content="Normalize" Tag="BatchAudio:Normalize">
+                        <NavigationViewItem x:Name="BatchAudioNormalizeNavigationItem" x:Uid="NavNormalize" Content="Normalize" Tag="BatchAudio:Normalize">
                             <NavigationViewItem.Icon><SymbolIcon Symbol="Switch" /></NavigationViewItem.Icon>
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="BatchVideoNavigationItem" Visibility="Collapsed" Content="Video" Tag="BatchVideo">
+                <NavigationViewItem x:Name="BatchVideoNavigationItem" Visibility="Collapsed" x:Uid="NavVideo" Content="Video" Tag="BatchVideo">
                     <NavigationViewItem.Icon><SymbolIcon Symbol="Video" /></NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem x:Name="BatchVideoContainerNavigationItem" Content="Container" Tag="BatchVideo:Container">
+                        <NavigationViewItem x:Name="BatchVideoContainerNavigationItem" x:Uid="NavContainer" Content="Container" Tag="BatchVideo:Container">
                             <NavigationViewItem.Icon><SymbolIcon Symbol="Document" /></NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="BatchVideoCodecNavigationItem" Content="Codec" Tag="BatchVideo:Codec">
+                        <NavigationViewItem x:Name="BatchVideoCodecNavigationItem" x:Uid="NavCodec" Content="Codec" Tag="BatchVideo:Codec">
                             <NavigationViewItem.Icon><SymbolIcon Symbol="Setting" /></NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="BatchVideoCompressNavigationItem" Content="Compress" Tag="BatchVideo:Compress">
+                        <NavigationViewItem x:Name="BatchVideoCompressNavigationItem" x:Uid="NavCompress" Content="Compress" Tag="BatchVideo:Compress">
                             <NavigationViewItem.Icon><SymbolIcon Symbol="Cut" /></NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="BatchVideoResizeNavigationItem" Content="Resize" Tag="BatchVideo:Resize">
+                        <NavigationViewItem x:Name="BatchVideoResizeNavigationItem" x:Uid="NavResize" Content="Resize" Tag="BatchVideo:Resize">
                             <NavigationViewItem.Icon><SymbolIcon Symbol="Switch" /></NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="BatchVideoExtractNavigationItem" Content="Extract audio" Tag="BatchVideo:Extract">
+                        <NavigationViewItem x:Name="BatchVideoExtractNavigationItem" x:Uid="NavExtractAudio" Content="Extract audio" Tag="BatchVideo:Extract">
                             <NavigationViewItem.Icon><SymbolIcon Symbol="Audio" /></NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="BatchVideoSubtitlesNavigationItem" Content="Subtitles" Tag="BatchVideo:Subtitles">
+                        <NavigationViewItem x:Name="BatchVideoSubtitlesNavigationItem" x:Uid="NavSubtitles" Content="Subtitles" Tag="BatchVideo:Subtitles">
                             <NavigationViewItem.Icon><SymbolIcon Symbol="Comment" /></NavigationViewItem.Icon>
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="BatchDocumentNavigationItem" Visibility="Collapsed" Content="Documents" Tag="BatchDocument:Convert">
+                <NavigationViewItem x:Name="BatchDocumentNavigationItem" Visibility="Collapsed" x:Uid="NavDocuments" Content="Documents" Tag="BatchDocument:Convert">
                     <NavigationViewItem.Icon><SymbolIcon Symbol="Document" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="BatchPdfNavigationItem" Visibility="Collapsed" Content="PDF" Tag="BatchPdf">
+                <NavigationViewItem x:Name="BatchPdfNavigationItem" Visibility="Collapsed" x:Uid="NavPDF" Content="PDF" Tag="BatchPdf">
                     <NavigationViewItem.Icon><SymbolIcon Symbol="OpenFile" /></NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem x:Name="BatchPdfCompressNavigationItem" Content="Compress" Tag="BatchPdf:Compress">
+                        <NavigationViewItem x:Name="BatchPdfCompressNavigationItem" x:Uid="NavCompress" Content="Compress" Tag="BatchPdf:Compress">
                             <NavigationViewItem.Icon><SymbolIcon Symbol="Cut" /></NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="BatchPdfRepairNavigationItem" Content="Repair" Tag="BatchPdf:Repair">
+                        <NavigationViewItem x:Name="BatchPdfRepairNavigationItem" x:Uid="NavRepair" Content="Repair" Tag="BatchPdf:Repair">
                             <NavigationViewItem.Icon><SymbolIcon Symbol="Repair" /></NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="BatchPdfOcrNavigationItem" Content="OCR" Tag="BatchPdf:OCR">
+                        <NavigationViewItem x:Name="BatchPdfOcrNavigationItem" x:Uid="NavOCR" Content="OCR" Tag="BatchPdf:OCR">
                             <NavigationViewItem.Icon><SymbolIcon Symbol="Find" /></NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="BatchPdfMergeNavigationItem" Content="Merge" Tag="BatchPdf:Merge">
+                        <NavigationViewItem x:Name="BatchPdfMergeNavigationItem" x:Uid="NavMerge" Content="Merge" Tag="BatchPdf:Merge">
                             <NavigationViewItem.Icon><SymbolIcon Symbol="Add" /></NavigationViewItem.Icon>
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="BatchImageNavigationItem" Visibility="Collapsed" Content="Images" Tag="BatchImage">
+                <NavigationViewItem x:Name="BatchImageNavigationItem" Visibility="Collapsed" x:Uid="NavImages" Content="Images" Tag="BatchImage">
                     <NavigationViewItem.Icon><SymbolIcon Symbol="Pictures" /></NavigationViewItem.Icon>
                     <NavigationViewItem.MenuItems>
-                        <NavigationViewItem x:Name="BatchImageFormatNavigationItem" Content="Format" Tag="BatchImage:Format">
+                        <NavigationViewItem x:Name="BatchImageFormatNavigationItem" x:Uid="NavFormat" Content="Format" Tag="BatchImage:Format">
                             <NavigationViewItem.Icon><SymbolIcon Symbol="Document" /></NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="BatchImageCompressNavigationItem" Content="Compress" Tag="BatchImage:Compress">
+                        <NavigationViewItem x:Name="BatchImageCompressNavigationItem" x:Uid="NavCompress" Content="Compress" Tag="BatchImage:Compress">
                             <NavigationViewItem.Icon><SymbolIcon Symbol="Cut" /></NavigationViewItem.Icon>
                         </NavigationViewItem>
-                        <NavigationViewItem x:Name="BatchImageResizeNavigationItem" Content="Resize" Tag="BatchImage:Resize">
+                        <NavigationViewItem x:Name="BatchImageResizeNavigationItem" x:Uid="NavResize" Content="Resize" Tag="BatchImage:Resize">
                             <NavigationViewItem.Icon><SymbolIcon Symbol="Switch" /></NavigationViewItem.Icon>
                         </NavigationViewItem>
                     </NavigationViewItem.MenuItems>
                 </NavigationViewItem>
-                <NavigationViewItem x:Name="BatchOutputNavigationItem" Visibility="Collapsed" Content="Output" Tag="Batch:Output">
+                <NavigationViewItem x:Name="BatchOutputNavigationItem" Visibility="Collapsed" x:Uid="NavOutput" Content="Output" Tag="Batch:Output">
                     <NavigationViewItem.Icon><SymbolIcon Symbol="Save" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
@@ -386,14 +383,16 @@
 
         <TitleBar
             x:Name="AppTitleBar"
+            x:Uid="AppTitleBar"
             Grid.Row="0"
             Grid.Column="1"
-            Title="Media Tools"
+            Title="Files Tools"
             IsBackButtonVisible="False"
             BackRequested="AppTitleBar_BackRequested" />
 
         <Button
             x:Name="LicensesButton"
+            x:Uid="LicensesButton"
             Grid.Row="0"
             Grid.Column="1"
             Margin="0,4,140,4"
@@ -402,7 +401,7 @@
             Content="Licenses"
             Background="{ThemeResource AccentFillColorDefaultBrush}"
             BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
-            Foreground="White"
+            Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
             Click="LicensesButton_Click" />
 
         <Frame

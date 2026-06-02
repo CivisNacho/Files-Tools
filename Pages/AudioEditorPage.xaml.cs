@@ -52,7 +52,6 @@ namespace Files_Tools.Pages
         private readonly Stopwatch _progressUiThrottleStopwatch = Stopwatch.StartNew();
         private long _lastProgressUiUpdateTick;
 
-        private CheckBox _enableFormatCheckBox = null!;
         private ComboBox _outputFormatComboBox = null!;
         private ComboBox _outputCodecComboBox = null!;
         private NumberBox _bitrateNumberBox = null!;
@@ -193,7 +192,6 @@ namespace Files_Tools.Pages
         {
             MediaPanel.Children.Clear();
             var formatCard = CreateCard("Format, codec, and compression");
-            _enableFormatCheckBox = CreateCheckBox("Enable format/codec conversion");
             _outputFormatComboBox = CreateComboBox("Output format", "Keep original", "MP3", "AAC", "M4A", "WAV", "FLAC", "OPUS", "OGG");
             _outputCodecComboBox = CreateComboBox("Codec", "Auto", "libmp3lame", "aac", "flac", "pcm_s16le", "libopus", "libvorbis");
             _bitrateNumberBox = CreateNumberBox("Bitrate (kbps)", 1);
@@ -207,7 +205,6 @@ namespace Files_Tools.Pages
             _compressionSampleRateNumberBox = CreateNumberBox("Target sample rate (Hz)", 8000);
             _compressionChannelsComboBox = CreateComboBox("Channels", "Keep source", "Mono", "Stereo");
 
-            formatCard.Children.Add(_enableFormatCheckBox);
             formatCard.Children.Add(_outputFormatComboBox);
             formatCard.Children.Add(_outputCodecComboBox);
             formatCard.Children.Add(_bitrateNumberBox);
@@ -481,13 +478,6 @@ namespace Files_Tools.Pages
             return box;
         }
 
-        private TextBox CreateTextBox(string header)
-        {
-            var tb = new TextBox { Header = header };
-            tb.TextChanged += OnTextChanged;
-            return tb;
-        }
-
         private static TextBlock CreateValidationTextBlock()
         {
             var brush = TryGetThemeWarningBrush() ?? new SolidColorBrush(Color.FromArgb(255, 255, 99, 71));
@@ -705,7 +695,6 @@ namespace Files_Tools.Pages
 
         private void OnControlChanged(object sender, object e) => RefreshValidationAndState();
         private void OnNumberChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) => RefreshValidationAndState();
-        private void OnTextChanged(object sender, TextChangedEventArgs e) => RefreshValidationAndState();
 
         private void DenoiseStrengthSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
@@ -1063,20 +1052,6 @@ namespace Files_Tools.Pages
             return new AudioEqualizerOptions { Preset = preset, CustomBands = bands, PreventClipping = _eqPreventClipCheckBox.IsChecked ?? true };
         }
 
-        private AudioPodcastProcessingOptions BuildPodcastOptions()
-        {
-            return new AudioPodcastProcessingOptions
-            {
-                EnableDtlnDenoise = false,
-                HighPassFrequencyHz = 80,
-                EnableDeEsser = true,
-                EnableCompressor = true,
-                TargetLufs = -16,
-                LimiterLimit = 0.97,
-                PreserveMetadata = true
-            };
-        }
-
         private async Task<AudioPodcastProcessingOptions> BuildPodcastOptionsAsync(string inputPath, List<string> warnings, CancellationToken cancellationToken)
         {
             var enableDenoise = _enableDenoiseCheckBox?.IsChecked ?? false;
@@ -1123,7 +1098,7 @@ namespace Files_Tools.Pages
         private List<AudioPipelineStep> BuildPipelineSteps()
         {
             var steps = new List<AudioPipelineStep>();
-            if (_enableFormatCheckBox?.IsChecked ?? false) steps.Add(AudioPipelineStep.Convert);
+            steps.Add(AudioPipelineStep.Convert);
             if (_enableCompressionCheckBox?.IsChecked ?? false) steps.Add(AudioPipelineStep.Compress);
             if (_enableNormalizeCheckBox?.IsChecked ?? false) steps.Add(AudioPipelineStep.Normalize);
             if (_enableTrimCheckBox?.IsChecked ?? false) steps.Add(AudioPipelineStep.Trim);
@@ -1230,11 +1205,11 @@ namespace Files_Tools.Pages
 
         private void UpdateOptionUiState()
         {
-            SetDependentOptionsState(_outputFormatComboBox, _enableFormatCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_outputCodecComboBox, _enableFormatCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_bitrateNumberBox, _enableFormatCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_sampleRateNumberBox, _enableFormatCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_channelComboBox, _enableFormatCheckBox?.IsChecked ?? false);
+            SetDependentOptionsState(_outputFormatComboBox, true);
+            SetDependentOptionsState(_outputCodecComboBox, true);
+            SetDependentOptionsState(_bitrateNumberBox, true);
+            SetDependentOptionsState(_sampleRateNumberBox, true);
+            SetDependentOptionsState(_channelComboBox, true);
 
             SetDependentOptionsState(_compressionModeComboBox, _enableCompressionCheckBox?.IsChecked ?? false);
             SetDependentOptionsState(_compressionCodecComboBox, _enableCompressionCheckBox?.IsChecked ?? false);
@@ -1572,7 +1547,6 @@ namespace Files_Tools.Pages
         private static int? ParseOptionalInt(NumberBox box) => double.IsNaN(box.Value) ? null : (int)Math.Round(box.Value);
         private static double? ParseOptionalDouble(NumberBox box) => double.IsNaN(box.Value) ? null : box.Value;
         private static double ParseNumberValue(NumberBox box, double fallback) => double.IsNaN(box.Value) ? fallback : box.Value;
-        private static TimeSpan? ParseOptionalTimeSpan(string text) => string.IsNullOrWhiteSpace(text) ? null : TimeSpan.TryParse(text, CultureInfo.InvariantCulture, out var ts) ? ts : null;
 
         private async Task<string?> PickOutputPathAsync(StorageFile sourceFile)
         {

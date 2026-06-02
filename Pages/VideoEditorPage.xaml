@@ -8,14 +8,8 @@
     xmlns:Primitives="using:Microsoft.UI.Xaml.Controls.Primitives"
     mc:Ignorable="d">
     <Page.Resources>
-        <SolidColorBrush x:Key="ImageAccentBrush" Color="#FF3B82F6" />
-        <SolidColorBrush x:Key="ImageAccentDarkBrush" Color="#FF2563EB" />
-        <SolidColorBrush x:Key="VideoAccentBrush" Color="#FF14B8A6" />
-        <SolidColorBrush x:Key="VideoAccentDarkBrush" Color="#FF0F766E" />
-        <LinearGradientBrush x:Key="VideoHintBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#FFE8FFFB" Offset="0" />
-            <GradientStop Color="#FFCFFBF4" Offset="1" />
-        </LinearGradientBrush>
+        <!--  Accent/hint brushes (Image*/Video* accent + VideoHintBackgroundBrush) are defined
+              app-wide and theme-aware in Themes/AppTheme.xaml.  -->
         <Style x:Key="SettingsCardStyle" TargetType="Border">
             <Setter Property="Padding" Value="16" />
             <Setter Property="CornerRadius" Value="12" />
@@ -41,8 +35,9 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel MaxWidth="880" Spacing="6">
-                    <TextBlock FontSize="38" FontWeight="SemiBold" Text="Video Editor" />
+                    <TextBlock x:Uid="VideoPage_Title" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="38" FontWeight="SemiBold" Text="Video Editor" />
                     <TextBlock
+                        x:Uid="VideoPage_Subtitle"
                         Opacity="0.78"
                         Text="Import a video, tune processing options, and run FFmpeg-backed edits with a layout that keeps preview and decisions easy to follow."
                         TextWrapping="Wrap" />
@@ -81,8 +76,9 @@
                             </Grid.RowDefinitions>
 
                             <StackPanel Spacing="4">
-                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="Preview" />
+                                <TextBlock x:Uid="PreviewTitle" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="24" FontWeight="SemiBold" Text="Preview" />
                                 <TextBlock
+                                    x:Uid="VideoPage_PreviewHint"
                                     Opacity="0.72"
                                     Text="Drop a video or click the preview surface to start. Playback and edit options stay centered around this working area."
                                     TextWrapping="Wrap" />
@@ -136,11 +132,13 @@
                                                             Background="{ThemeResource ControlFillColorSecondaryBrush}">
                                                             <StackPanel Spacing="4">
                                                                 <TextBlock
+                                                                    x:Uid="VideoPage_SubtitlePosition"
                                                                     Foreground="White"
                                                                     FontWeight="SemiBold"
                                                                     Text="Subtitle position" />
                                                                 <TextBlock
                                                                     x:Name="SubtitlePlacementPreviewTextBlock"
+                                                                    x:Uid="VideoPage_DragToPlace"
                                                                     Foreground="White"
                                                                     Opacity="0.82"
                                                                     Text="Drag to place subtitles"
@@ -242,12 +240,15 @@
                                                 Glyph="&#xE714;" />
                                         </Border>
                                         <TextBlock
+                                            x:Uid="VideoPage_DropHintTitle"
                                             HorizontalAlignment="Center"
+                                            FontFamily="{ThemeResource AppDisplayFontFamily}"
                                             FontSize="24"
                                             FontWeight="SemiBold"
                                             Text="Drop a video here"
                                             TextAlignment="Center" />
                                         <TextBlock
+                                            x:Uid="VideoPage_DropHintSubtitle"
                                             HorizontalAlignment="Center"
                                             Opacity="0.76"
                                             Text="You can also click this surface to browse for a file. Trim, resize, repair, and container options stay available from the options panel."
@@ -264,12 +265,14 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock
                                     x:Name="LoadedVideoInfoTextBlock"
+                                    x:Uid="VideoPage_NoVideoLoaded"
                                     VerticalAlignment="Center"
                                     Opacity="0.76"
                                     Text="No video loaded yet."
                                     TextWrapping="Wrap" />
                                 <Button
                                     x:Name="ApplyButton"
+                                    x:Uid="ApplyChanges"
                                     Grid.Column="1"
                                     MinWidth="180"
                                     Height="44"
@@ -291,8 +294,8 @@
                                 Background="{ThemeResource LayerFillColorDefaultBrush}"
                                 Visibility="Collapsed">
                                 <StackPanel Spacing="10">
-                                    <TextBlock FontWeight="SemiBold" Text="Transcription review" />
-                                    <TextBlock Opacity="0.76" Text="Review each Whisper segment here before the app generates the final ASS subtitles for export. Your edits are applied automatically when you process the video." TextWrapping="Wrap" />
+                                    <TextBlock x:Uid="VideoPage_TranscriptionReview" FontWeight="SemiBold" Text="Transcription review" />
+                                    <TextBlock x:Uid="VideoPage_TranscriptionReviewHint" Opacity="0.76" Text="Review each Whisper segment here before the app generates the final ASS subtitles for export. Your edits are applied automatically when you process the video." TextWrapping="Wrap" />
                                     <ScrollViewer
                                         MinHeight="180"
                                         MaxHeight="320"
@@ -302,7 +305,7 @@
                                             x:Name="SubtitleEditorItemsPanel"
                                             Spacing="8" />
                                     </ScrollViewer>
-                                    <TextBlock x:Name="SubtitleEditorStatusTextBlock" Opacity="0.76" Text="Generate or choose a subtitle file to edit." TextWrapping="Wrap" />
+                                    <TextBlock x:Name="SubtitleEditorStatusTextBlock" x:Uid="VideoPage_SubtitleEditorStatus" Opacity="0.76" Text="Generate or choose a subtitle file to edit." TextWrapping="Wrap" />
                                 </StackPanel>
                             </Border>
 
@@ -318,10 +321,12 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock
                                         x:Name="ProcessingStatusTextBlock"
+                                        x:Uid="VideoPage_Processing"
                                         FontWeight="SemiBold"
                                         Text="Processing video..." />
                                     <TextBlock
                                         x:Name="ProcessingEtaTextBlock"
+                                        x:Uid="EtaCalculating"
                                         Grid.Column="1"
                                         Opacity="0.76"
                                         Text="ETA calculating..." />
@@ -336,6 +341,7 @@
 
                                 <TextBlock
                                     x:Name="ProcessingDetailTextBlock"
+                                    x:Uid="VideoPage_PreparingFFmpeg"
                                     Opacity="0.76"
                                     Text="Preparing FFmpeg..." />
                             </StackPanel>
@@ -360,16 +366,16 @@
 
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                 <StackPanel Spacing="2">
-                                    <TextBlock x:Name="SelectedOptionHeaderTextBlock" Margin="0,0,0,12" FontSize="20" FontWeight="SemiBold" Text="Select an option" />
+                                    <TextBlock x:Name="SelectedOptionHeaderTextBlock" x:Uid="SelectOptionHeader" Margin="0,0,0,12" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="Select an option" />
 
                                     <StackPanel x:Name="MediaPanel" Visibility="Collapsed" Spacing="12">
 
                                         <StackPanel x:Name="MediaFormatPanel" Visibility="Visible">
                                             <Border Style="{StaticResource SettingsCardStyle}">
                                                 <StackPanel Spacing="12">
-                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Format and codecs" />
-                                                    <ComboBox x:Name="OutputContainerComboBox" Header="Output format" SelectionChanged="OutputContainerComboBox_SelectionChanged">
-                                                        <ComboBoxItem Content="Keep original" />
+                                                    <TextBlock x:Uid="VideoPage_FormatAndCodecs" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Format and codecs" />
+                                                    <ComboBox x:Name="OutputContainerComboBox" x:Uid="VideoPage_OutputFormat" Header="Output format" SelectionChanged="OutputContainerComboBox_SelectionChanged">
+                                                        <ComboBoxItem x:Uid="VideoPage_KeepOriginal" Content="Keep original" />
                                                         <ComboBoxItem Content="MP4" />
                                                         <ComboBoxItem Content="MKV" />
                                                         <ComboBoxItem Content="WebM" />
@@ -377,8 +383,8 @@
                                                         <ComboBoxItem Content="AVI" />
                                                         <ComboBoxItem Content="GIF" />
                                                     </ComboBox>
-                                                    <ComboBox x:Name="VideoCodecComboBox" Header="Video codec" PlaceholderText="Video codec" SelectionChanged="AnyOptionChanged_SelectionChanged">
-                                                        <ComboBoxItem Content="Keep original" />
+                                                    <ComboBox x:Name="VideoCodecComboBox" x:Uid="VideoPage_VideoCodec" Header="Video codec" PlaceholderText="Video codec" SelectionChanged="AnyOptionChanged_SelectionChanged">
+                                                        <ComboBoxItem x:Uid="VideoPage_KeepOriginal" Content="Keep original" />
                                                         <ComboBoxItem Content="H264" />
                                                         <ComboBoxItem Content="H265" />
                                                         <ComboBoxItem Content="AV1" />
@@ -386,8 +392,8 @@
                                                         <ComboBoxItem Content="VP8" />
                                                         <ComboBoxItem Content="MPEG4" />
                                                     </ComboBox>
-                                                    <ComboBox x:Name="AudioCodecComboBox" Header="Audio codec" PlaceholderText="Audio codec" SelectionChanged="AnyOptionChanged_SelectionChanged">
-                                                        <ComboBoxItem Content="Keep original" />
+                                                    <ComboBox x:Name="AudioCodecComboBox" x:Uid="VideoPage_AudioCodec" Header="Audio codec" PlaceholderText="Audio codec" SelectionChanged="AnyOptionChanged_SelectionChanged">
+                                                        <ComboBoxItem x:Uid="VideoPage_KeepOriginal" Content="Keep original" />
                                                         <ComboBoxItem Content="AAC" />
                                                         <ComboBoxItem Content="Opus" />
                                                         <ComboBoxItem Content="Vorbis" />
@@ -395,7 +401,7 @@
                                                         <ComboBoxItem Content="AC3" />
                                                         <ComboBoxItem Content="FLAC" />
                                                         <ComboBoxItem Content="PCM_S16LE" />
-                                                        <ComboBoxItem Content="Remove audio" />
+                                                        <ComboBoxItem x:Uid="VideoPage_RemoveAudio" Content="Remove audio" />
                                                     </ComboBox>
                                                 </StackPanel>
                                             </Border>
@@ -404,10 +410,10 @@
                                         <StackPanel x:Name="MediaCompressionPanel" Visibility="Collapsed">
                                             <Border Style="{StaticResource SettingsCardStyle}">
                                                 <StackPanel Spacing="12">
-                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Compression" />
-                                                    <CheckBox x:Name="EnableCompressionCheckBox" Content="Enable compression preset" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <TextBlock x:Uid="VideoPage_Compression" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Compression" />
+                                                    <CheckBox x:Name="EnableCompressionCheckBox" x:Uid="VideoPage_EnableCompression" Content="Enable compression preset" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
                                                     <ContentControl x:Name="CompressionOptionsPanel">
-                                                        <ComboBox x:Name="CompressionPresetComboBox" Header="Compression preset" SelectionChanged="AnyOptionChanged_SelectionChanged">
+                                                        <ComboBox x:Name="CompressionPresetComboBox" x:Uid="VideoPage_CompressionPreset" Header="Compression preset" SelectionChanged="AnyOptionChanged_SelectionChanged">
                                                             <ComboBoxItem Content="VeryHigh" />
                                                             <ComboBoxItem Content="High" />
                                                             <ComboBoxItem Content="Balanced" />
@@ -421,13 +427,14 @@
                                         <StackPanel x:Name="MediaAudioPanel" Visibility="Collapsed">
                                             <Border Style="{StaticResource SettingsCardStyle}">
                                                 <StackPanel Spacing="12">
-                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Audio and volume" />
+                                                    <TextBlock x:Uid="VideoPage_AudioAndVolume" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Audio and volume" />
                                                     <Button
                                                         x:Name="ExtractAudioButton"
+                                                        x:Uid="VideoPage_ExtractAudio"
                                                         HorizontalAlignment="Left"
                                                         Content="Extract audio"
                                                         Click="ExtractAudioButton_Click" />
-                                                    <CheckBox x:Name="EnableAudioVolumeCheckBox" Content="Adjust output volume" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <CheckBox x:Name="EnableAudioVolumeCheckBox" x:Uid="VideoPage_AdjustVolume" Content="Adjust output volume" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
                                                     <StackPanel x:Name="AudioVolumePanel" Spacing="4">
                                                         <TextBlock x:Name="AudioVolumeTextBlock" Text="Volume: 100%" />
                                                         <Slider
@@ -439,21 +446,23 @@
                                                             ValueChanged="AudioVolumeSlider_ValueChanged" />
                                                     </StackPanel>
                                                     <TextBlock
+                                                        x:Uid="VideoPage_VolumeHint"
                                                         Opacity="0.76"
                                                         Text="This slider changes the final exported audio level, including replacement audio when muxing is enabled."
                                                         TextWrapping="Wrap" />
-                                                    <CheckBox x:Name="EnableNormalizeAudioCheckBox" Content="Normalize audio" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <CheckBox x:Name="EnableNormalizeAudioCheckBox" x:Uid="VideoPage_NormalizeAudio" Content="Normalize audio" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
                                                     <StackPanel x:Name="NormalizeAudioPanel" Spacing="4">
                                                         <TextBlock
+                                                            x:Uid="VideoPage_NormalizeHint"
                                                             Opacity="0.76"
                                                             Text="Applies a simple loudness normalization pass to the final output audio."
                                                             TextWrapping="Wrap" />
                                                     </StackPanel>
-                                                    <CheckBox x:Name="EnableAudioSyncCheckBox" Content="Fix audio sync" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <CheckBox x:Name="EnableAudioSyncCheckBox" x:Uid="VideoPage_FixAudioSync" Content="Fix audio sync" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
                                                     <StackPanel x:Name="AudioSyncPanel" Spacing="8">
-                                                        <ComboBox x:Name="AudioSyncDirectionComboBox" Header="Move audio" SelectionChanged="AudioSyncDirectionComboBox_SelectionChanged">
-                                                            <ComboBoxItem Content="Earlier" />
-                                                            <ComboBoxItem Content="Later" />
+                                                        <ComboBox x:Name="AudioSyncDirectionComboBox" x:Uid="VideoPage_MoveAudio" Header="Move audio" SelectionChanged="AudioSyncDirectionComboBox_SelectionChanged">
+                                                            <ComboBoxItem x:Uid="VideoPage_Earlier" Content="Earlier" />
+                                                            <ComboBoxItem x:Uid="VideoPage_Later" Content="Later" />
                                                         </ComboBox>
                                                         <StackPanel Spacing="4">
                                                             <TextBlock x:Name="AudioSyncOffsetTextBlock" Text="Audio offset: 0 ms earlier" />
@@ -466,11 +475,11 @@
                                                                 ValueChanged="AudioSyncOffsetSlider_ValueChanged" />
                                                         </StackPanel>
                                                     </StackPanel>
-                                                    <CheckBox x:Name="EnableAudioDenoiseCheckBox" Content="Apply audio denoise" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <CheckBox x:Name="EnableAudioDenoiseCheckBox" x:Uid="VideoPage_ApplyDenoise" Content="Apply audio denoise" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
                                                     <StackPanel x:Name="AudioDenoisePanel" Spacing="8">
-                                                        <ComboBox x:Name="AudioDenoiseModeComboBox" Header="Denoise mode" SelectionChanged="AudioDenoiseModeComboBox_SelectionChanged">
-                                                            <ComboBoxItem Content="Mono" />
-                                                            <ComboBoxItem Content="Stereo" />
+                                                        <ComboBox x:Name="AudioDenoiseModeComboBox" x:Uid="VideoPage_DenoiseMode" Header="Denoise mode" SelectionChanged="AudioDenoiseModeComboBox_SelectionChanged">
+                                                            <ComboBoxItem x:Uid="VideoPage_DenoiseMono" Content="Mono" />
+                                                            <ComboBoxItem x:Uid="VideoPage_DenoiseStereo" Content="Stereo" />
                                                         </ComboBox>
                                                         <StackPanel x:Name="AudioDenoiseStrengthPanel" Spacing="4">
                                                             <TextBlock x:Name="AudioDenoiseStrengthTextBlock" Text="Strength: 50%" />
@@ -483,14 +492,14 @@
                                                                 ValueChanged="AudioDenoiseStrengthSlider_ValueChanged" />
                                                         </StackPanel>
                                                     </StackPanel>
-                                                    <CheckBox x:Name="EnableAudioMuxCheckBox" Content="Add or replace audio track" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <CheckBox x:Name="EnableAudioMuxCheckBox" x:Uid="VideoPage_AddReplaceAudio" Content="Add or replace audio track" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
                                                     <ContentControl x:Name="AudioMuxOptionsPanel">
                                                         <StackPanel Spacing="12">
-                                                            <TextBox x:Name="AudioMuxPathTextBox" Header="Audio file" PlaceholderText="Choose an audio source" TextChanged="AnyOptionChanged_TextChanged" />
-                                                            <Button HorizontalAlignment="Left" Content="Browse audio file" Click="BrowseAudioMuxButton_Click" />
-                                                            <CheckBox x:Name="ReplaceAudioCheckBox" Content="Replace existing audio" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
-                                                            <CheckBox x:Name="UseShortestCheckBox" Content="Use shortest duration" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
-                                                            <CheckBox x:Name="SetDefaultAudioCheckBox" Content="Set as default audio" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                            <TextBox x:Name="AudioMuxPathTextBox" x:Uid="VideoPage_AudioFile" Header="Audio file" PlaceholderText="Choose an audio source" TextChanged="AnyOptionChanged_TextChanged" />
+                                                            <Button x:Uid="VideoPage_BrowseAudio" HorizontalAlignment="Left" Content="Browse audio file" Click="BrowseAudioMuxButton_Click" />
+                                                            <CheckBox x:Name="ReplaceAudioCheckBox" x:Uid="VideoPage_ReplaceAudio" Content="Replace existing audio" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                            <CheckBox x:Name="UseShortestCheckBox" x:Uid="VideoPage_UseShortest" Content="Use shortest duration" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                            <CheckBox x:Name="SetDefaultAudioCheckBox" x:Uid="VideoPage_SetDefaultAudio" Content="Set as default audio" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
                                                         </StackPanel>
                                                     </ContentControl>
                                                 </StackPanel>
@@ -500,7 +509,7 @@
                                         <StackPanel x:Name="MediaSubtitlesPanel" Visibility="Collapsed">
                                             <Border Style="{StaticResource SettingsCardStyle}">
                                                 <StackPanel Spacing="12">
-                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Subtitles" />
+                                                    <TextBlock x:Uid="VideoPage_Subtitles" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Subtitles" />
                                                     <Border
                                                         Padding="12"
                                                         CornerRadius="10"
@@ -508,13 +517,15 @@
                                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                                         Background="{ThemeResource LayerFillColorDefaultBrush}">
                                                         <StackPanel Spacing="10">
-                                                            <TextBlock FontWeight="SemiBold" Text="Transcription" />
+                                                            <TextBlock x:Uid="VideoPage_TranscriptionHeader" FontWeight="SemiBold" Text="Transcription" />
                                                             <TextBlock
+                                                                x:Uid="VideoPage_TranscriptionHint"
                                                                 Opacity="0.76"
                                                                 Text="Choose basic SRT or advanced styled ASS subtitles generation."
                                                                 TextWrapping="Wrap" />
                                                             <Button
                                                                 x:Name="DownloadTranscriptionFeatureButton"
+                                                                x:Uid="VideoPage_DownloadTranscription"
                                                                 MinWidth="200"
                                                                 Height="40"
                                                                 HorizontalAlignment="Left"
@@ -528,22 +539,24 @@
                                                                 Value="0" />
                                                             <TextBlock
                                                                 x:Name="TranscriptionDownloadStatusTextBlock"
+                                                                x:Uid="VideoPage_TranscriptionNotDownloaded"
                                                                 Opacity="0.76"
                                                                 Text="Transcription feature not downloaded yet."
                                                                 TextWrapping="Wrap" />
 
-                                                            <ComboBox x:Name="SubtitleGenerationModeComboBox" Header="Subtitle generation mode" SelectionChanged="SubtitleGenerationModeComboBox_SelectionChanged">
-                                                                <ComboBoxItem Content="Basic (SRT)" />
-                                                                <ComboBoxItem Content="Advanced (ASS)" />
+                                                            <ComboBox x:Name="SubtitleGenerationModeComboBox" x:Uid="VideoPage_SubtitleGenMode" Header="Subtitle generation mode" SelectionChanged="SubtitleGenerationModeComboBox_SelectionChanged">
+                                                                <ComboBoxItem x:Uid="VideoPage_BasicSRT" Content="Basic (SRT)" />
+                                                                <ComboBoxItem x:Uid="VideoPage_AdvancedASS" Content="Advanced (ASS)" />
                                                             </ComboBox>
 
                                                             <StackPanel x:Name="AdvancedSubtitleOptionsPanel" Spacing="8" Visibility="Collapsed">
-                                                                <ComboBox x:Name="AdvancedSubtitleTypeComboBox" Header="Advanced output type" SelectionChanged="AdvancedSubtitleTypeComboBox_SelectionChanged">
-                                                                    <ComboBoxItem Content="Styled ASS" />
-                                                                    <ComboBoxItem Content="Karaoke ASS" />
+                                                                <ComboBox x:Name="AdvancedSubtitleTypeComboBox" x:Uid="VideoPage_AdvancedOutputType" Header="Advanced output type" SelectionChanged="AdvancedSubtitleTypeComboBox_SelectionChanged">
+                                                                    <ComboBoxItem x:Uid="VideoPage_StyledASS" Content="Styled ASS" />
+                                                                    <ComboBoxItem x:Uid="VideoPage_KaraokeASS" Content="Karaoke ASS" />
                                                                 </ComboBox>
                                                                 <Button
                                                                     x:Name="ConfigureAdvancedSubtitlesButton"
+                                                                    x:Uid="VideoPage_ConfigureAdvanced"
                                                                     HorizontalAlignment="Left"
                                                                     Content="Configure advanced subtitles"
                                                                     Click="ConfigureAdvancedSubtitlesButton_Click" />
@@ -570,6 +583,7 @@
                                                                             ValueChanged="SubtitleSectionDurationSlider_ValueChanged" />
                                                                         <NumberBox
                                                                             x:Name="SubtitleSectionDurationNumberBox"
+                                                                            x:Uid="VideoPage_SecondsMax"
                                                                             Grid.Column="1"
                                                                             Header="Seconds max"
                                                                             Minimum="2"
@@ -586,12 +600,14 @@
                                                                         </Grid.ColumnDefinitions>
                                                                         <CheckBox
                                                                             x:Name="EnableSubtitleSectionWordCapCheckBox"
+                                                                            x:Uid="VideoPage_LimitWords"
                                                                             Content="Limit words per section"
                                                                             VerticalAlignment="Center"
                                                                             Checked="AnyOptionChanged_CheckChanged"
                                                                             Unchecked="AnyOptionChanged_CheckChanged" />
                                                                         <NumberBox
                                                                             x:Name="SubtitleSectionWordCapNumberBox"
+                                                                            x:Uid="VideoPage_WordsMax"
                                                                             Grid.Column="1"
                                                                             Header="Words max"
                                                                             Minimum="1"
@@ -608,6 +624,7 @@
                                                                         </Grid.ColumnDefinitions>
                                                                     </Grid>
                                                                     <TextBlock
+                                                                        x:Uid="VideoPage_SectionHint"
                                                                         Opacity="0.76"
                                                                         Text="Seconds limits how long a section can stay on screen. Words max limits how many words can stay in one section when enabled."
                                                                         TextWrapping="Wrap" />
@@ -616,6 +633,7 @@
 
                                                             <Button
                                                                 x:Name="GenerateSubtitlesButton"
+                                                                x:Uid="VideoPage_GenerateSubtitles"
                                                                 HorizontalAlignment="Left"
                                                                 Content="Generate subtitles from video"
                                                                 Click="GenerateSubtitlesButton_Click" />
@@ -628,26 +646,28 @@
                                                                 Visibility="Collapsed" />
                                                             <TextBlock
                                                                 x:Name="TranscriptionEtaTextBlock"
+                                                                x:Uid="EtaCalculating"
                                                                 Opacity="0.76"
                                                                 Text="ETA calculating..."
                                                                 TextWrapping="Wrap"
                                                                 Visibility="Collapsed" />
                                                             <TextBlock
                                                                 x:Name="TranscriptionReadyStatusTextBlock"
+                                                                x:Uid="VideoPage_SubtitlesNotGenerated"
                                                                 Opacity="0.76"
                                                                 Text="Subtitles not generated yet."
                                                                 TextWrapping="Wrap" />
                                                         </StackPanel>
                                                     </Border>
 
-                                                    <CheckBox x:Name="EnableSubtitleMuxCheckBox" Content="Add subtitles" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <CheckBox x:Name="EnableSubtitleMuxCheckBox" x:Uid="VideoPage_AddSubtitles" Content="Add subtitles" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
                                                     <ContentControl x:Name="SubtitleMuxOptionsPanel">
                                                         <StackPanel Spacing="12">
-                                                            <TextBox x:Name="SubtitlePathTextBox" Header="Subtitle file" PlaceholderText="Choose a subtitle source" TextChanged="AnyOptionChanged_TextChanged" />
-                                                            <Button HorizontalAlignment="Left" Content="Browse subtitle file" Click="BrowseSubtitleMuxButton_Click" />
-                                                            <ComboBox x:Name="SubtitleModeComboBox" Header="Subtitle mode" SelectionChanged="AnyOptionChanged_SelectionChanged">
-                                                                <ComboBoxItem Content="SoftMux" />
-                                                                <ComboBoxItem Content="BurnIn" />
+                                                            <TextBox x:Name="SubtitlePathTextBox" x:Uid="VideoPage_SubtitleFile" Header="Subtitle file" PlaceholderText="Choose a subtitle source" TextChanged="AnyOptionChanged_TextChanged" />
+                                                            <Button x:Uid="VideoPage_BrowseSubtitle" HorizontalAlignment="Left" Content="Browse subtitle file" Click="BrowseSubtitleMuxButton_Click" />
+                                                            <ComboBox x:Name="SubtitleModeComboBox" x:Uid="VideoPage_SubtitleMode" Header="Subtitle mode" SelectionChanged="AnyOptionChanged_SelectionChanged">
+                                                                <ComboBoxItem x:Uid="VideoPage_SoftMux" Content="SoftMux" />
+                                                                <ComboBoxItem x:Uid="VideoPage_BurnIn" Content="BurnIn" />
                                                             </ComboBox>
                                                             <Border
                                                                 Padding="12"
@@ -656,8 +676,9 @@
                                                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                                                 Background="{ThemeResource LayerFillColorDefaultBrush}">
                                                                 <StackPanel Spacing="10">
-                                                                    <TextBlock FontWeight="SemiBold" Text="Placement" />
+                                                                    <TextBlock x:Uid="VideoPage_Placement" FontWeight="SemiBold" Text="Placement" />
                                                                     <TextBlock
+                                                                        x:Uid="VideoPage_PlacementHint"
                                                                         Opacity="0.76"
                                                                         Text="Drag the subtitle badge on the preview or fine-tune the placement here."
                                                                         TextWrapping="Wrap" />
@@ -668,6 +689,7 @@
                                                                         </Grid.ColumnDefinitions>
                                                                         <NumberBox
                                                                             x:Name="SubtitlePlacementXNumberBox"
+                                                                            x:Uid="VideoPage_Horizontal"
                                                                             Header="Horizontal (%)"
                                                                             Minimum="0"
                                                                             Maximum="100"
@@ -677,6 +699,7 @@
                                                                             ValueChanged="SubtitlePlacementXNumberBox_ValueChanged" />
                                                                         <NumberBox
                                                                             x:Name="SubtitlePlacementYNumberBox"
+                                                                            x:Uid="VideoPage_Vertical"
                                                                             Grid.Column="1"
                                                                             Header="Vertical (%)"
                                                                             Minimum="0"
@@ -688,26 +711,28 @@
                                                                     </Grid>
                                                                     <Button
                                                                         x:Name="ResetSubtitlePlacementButton"
+                                                                        x:Uid="VideoPage_ResetPlacement"
                                                                         HorizontalAlignment="Left"
                                                                         Content="Reset placement"
                                                                         Click="ResetSubtitlePlacementButton_Click" />
                                                                     <TextBlock
                                                                         x:Name="SubtitlePlacementStatusTextBlock"
+                                                                        x:Uid="VideoPage_PlacementStatus"
                                                                         Opacity="0.76"
                                                                         Text="Placement is rendered exactly for generated ASS subtitles and approximated for burn-in text subtitles, including boxed and animated presentation presets."
                                                                         TextWrapping="Wrap" />
                                                                 </StackPanel>
                                                             </Border>
-                                                            <TextBox x:Name="SubtitleLanguageTextBox" Header="Language tag" PlaceholderText="Example: en" TextChanged="AnyOptionChanged_TextChanged" />
-                                                            <TextBox x:Name="SubtitleTitleTextBox" Header="Subtitle title" PlaceholderText="Example: English" TextChanged="AnyOptionChanged_TextChanged" />
-                                                            <CheckBox x:Name="SetDefaultSubtitleCheckBox" Content="Set as default subtitle" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                            <TextBox x:Name="SubtitleLanguageTextBox" x:Uid="VideoPage_LanguageTag" Header="Language tag" PlaceholderText="Example: en" TextChanged="AnyOptionChanged_TextChanged" />
+                                                            <TextBox x:Name="SubtitleTitleTextBox" x:Uid="VideoPage_SubtitleTitle" Header="Subtitle title" PlaceholderText="Example: English" TextChanged="AnyOptionChanged_TextChanged" />
+                                                            <CheckBox x:Name="SetDefaultSubtitleCheckBox" x:Uid="VideoPage_SetDefaultSubtitle" Content="Set as default subtitle" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
                                                         </StackPanel>
                                                     </ContentControl>
                                                 </StackPanel>
                                             </Border>
                                         </StackPanel>
 
-                                        <TextBlock x:Name="MediaValidationTextBlock" Foreground="Tomato" TextWrapping="Wrap" />
+                                        <TextBlock x:Name="MediaValidationTextBlock" Foreground="{ThemeResource SystemFillColorCriticalBrush}" TextWrapping="Wrap" />
                                     </StackPanel>
 
                                     <StackPanel x:Name="TransformPanel" Visibility="Collapsed" Spacing="12">
@@ -715,8 +740,8 @@
                                         <StackPanel x:Name="TransformResizePanel" Visibility="Visible">
                                             <Border Style="{StaticResource SettingsCardStyle}">
                                                 <StackPanel Spacing="12">
-                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Resize" />
-                                                    <CheckBox x:Name="EnableResizeCheckBox" Content="Enable resize" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <TextBlock x:Uid="VideoPage_Resize" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Resize" />
+                                                    <CheckBox x:Name="EnableResizeCheckBox" x:Uid="VideoPage_EnableResize" Content="Enable resize" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
                                                     <ContentControl x:Name="ResizeOptionsPanel">
                                                         <StackPanel Spacing="12">
                                                             <Grid ColumnSpacing="12">
@@ -724,15 +749,15 @@
                                                                     <ColumnDefinition Width="*" />
                                                                     <ColumnDefinition Width="*" />
                                                                 </Grid.ColumnDefinitions>
-                                                                <NumberBox x:Name="ResizeWidthNumberBox" Header="Width" Minimum="1" Value="1920" SpinButtonPlacementMode="Compact" ValueChanged="AnyOptionChanged_NumberChanged" />
-                                                                <NumberBox x:Name="ResizeHeightNumberBox" Grid.Column="1" Header="Height" Minimum="1" Value="1080" SpinButtonPlacementMode="Compact" ValueChanged="AnyOptionChanged_NumberChanged" />
+                                                                <NumberBox x:Name="ResizeWidthNumberBox" x:Uid="VideoPage_Width" Header="Width" Minimum="1" Value="1920" SpinButtonPlacementMode="Compact" ValueChanged="AnyOptionChanged_NumberChanged" />
+                                                                <NumberBox x:Name="ResizeHeightNumberBox" x:Uid="VideoPage_Height" Grid.Column="1" Header="Height" Minimum="1" Value="1080" SpinButtonPlacementMode="Compact" ValueChanged="AnyOptionChanged_NumberChanged" />
                                                             </Grid>
-                                                            <ComboBox x:Name="ResizeModeComboBox" Header="Resize mode" SelectionChanged="AnyOptionChanged_SelectionChanged">
-                                                                <ComboBoxItem Content="PadToFit" />
-                                                                <ComboBoxItem Content="CropToFill" />
-                                                                <ComboBoxItem Content="Stretch" />
+                                                            <ComboBox x:Name="ResizeModeComboBox" x:Uid="VideoPage_ResizeMode" Header="Resize mode" SelectionChanged="AnyOptionChanged_SelectionChanged">
+                                                                <ComboBoxItem x:Uid="VideoPage_PadToFit" Content="PadToFit" />
+                                                                <ComboBoxItem x:Uid="VideoPage_CropToFill" Content="CropToFill" />
+                                                                <ComboBoxItem x:Uid="VideoPage_Stretch" Content="Stretch" />
                                                             </ComboBox>
-                                                            <TextBox x:Name="PadColorTextBox" Header="Padding color" PlaceholderText="For example black or #000000" Text="black" TextChanged="AnyOptionChanged_TextChanged" />
+                                                            <TextBox x:Name="PadColorTextBox" x:Uid="VideoPage_PaddingColor" Header="Padding color" PlaceholderText="For example black or #000000" Text="black" TextChanged="AnyOptionChanged_TextChanged" />
                                                         </StackPanel>
                                                     </ContentControl>
                                                 </StackPanel>
@@ -742,9 +767,10 @@
                                         <StackPanel x:Name="TransformTrimPanel" Visibility="Collapsed">
                                             <Border Style="{StaticResource SettingsCardStyle}">
                                                 <StackPanel Spacing="12">
-                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Trim" />
-                                                    <CheckBox x:Name="EnableTrimCheckBox" Content="Enable trim" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <TextBlock x:Uid="VideoPage_Trim" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Trim" />
+                                                    <CheckBox x:Name="EnableTrimCheckBox" x:Uid="VideoPage_EnableTrim" Content="Enable trim" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
                                                     <TextBlock
+                                                        x:Uid="VideoPage_TrimHint"
                                                         Opacity="0.76"
                                                         Text="Drag the trim handles under the preview to choose the start and end points."
                                                         TextWrapping="Wrap" />
@@ -755,20 +781,20 @@
                                         <StackPanel x:Name="TransformRotatePanel" Visibility="Collapsed">
                                             <Border Style="{StaticResource SettingsCardStyle}">
                                                 <StackPanel Spacing="12">
-                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Rotate and mirror" />
-                                                    <ComboBox x:Name="RotationComboBox" Header="Rotation" SelectionChanged="AnyOptionChanged_SelectionChanged">
+                                                    <TextBlock x:Uid="VideoPage_RotateAndMirror" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Rotate and mirror" />
+                                                    <ComboBox x:Name="RotationComboBox" x:Uid="VideoPage_Rotation" Header="Rotation" SelectionChanged="AnyOptionChanged_SelectionChanged">
                                                         <ComboBoxItem Content="0" />
                                                         <ComboBoxItem Content="90" />
                                                         <ComboBoxItem Content="180" />
                                                         <ComboBoxItem Content="270" />
                                                     </ComboBox>
-                                                    <CheckBox x:Name="MirrorHorizontalCheckBox" Content="Mirror horizontally" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
-                                                    <CheckBox x:Name="MirrorVerticalCheckBox" Content="Mirror vertically" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <CheckBox x:Name="MirrorHorizontalCheckBox" x:Uid="VideoPage_MirrorHorizontally" Content="Mirror horizontally" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <CheckBox x:Name="MirrorVerticalCheckBox" x:Uid="VideoPage_MirrorVertically" Content="Mirror vertically" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
                                                 </StackPanel>
                                             </Border>
                                         </StackPanel>
 
-                                        <TextBlock x:Name="TransformValidationTextBlock" Foreground="Tomato" TextWrapping="Wrap" />
+                                        <TextBlock x:Name="TransformValidationTextBlock" Foreground="{ThemeResource SystemFillColorCriticalBrush}" TextWrapping="Wrap" />
                                     </StackPanel>
 
                                     <StackPanel x:Name="AdvancedPanel" Visibility="Collapsed" Spacing="12">
@@ -776,8 +802,8 @@
                                         <StackPanel x:Name="AdvancedMetadataPanel" Visibility="Visible">
                                             <Border Style="{StaticResource SettingsCardStyle}">
                                                 <StackPanel Spacing="12">
-                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Metadata" />
-                                                    <CheckBox x:Name="RemoveMetadataCheckBox" Content="Remove metadata" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <TextBlock x:Uid="VideoPage_Metadata" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Metadata" />
+                                                    <CheckBox x:Name="RemoveMetadataCheckBox" x:Uid="VideoPage_RemoveMetadata" Content="Remove metadata" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
                                                 </StackPanel>
                                             </Border>
                                         </StackPanel>
@@ -785,25 +811,25 @@
                                         <StackPanel x:Name="AdvancedRepairPanel" Visibility="Collapsed">
                                             <Border Style="{StaticResource SettingsCardStyle}">
                                                 <StackPanel Spacing="12">
-                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Repair" />
-                                                    <CheckBox x:Name="EnableRepairCheckBox" Content="Enable repair mode" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <TextBlock x:Uid="VideoPage_Repair" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Repair" />
+                                                    <CheckBox x:Name="EnableRepairCheckBox" x:Uid="VideoPage_EnableRepair" Content="Enable repair mode" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
                                                     <ContentControl x:Name="RepairOptionsPanel">
                                                         <StackPanel Spacing="12">
-                                                            <ComboBox x:Name="RepairModeComboBox" Header="Repair mode" SelectionChanged="AnyOptionChanged_SelectionChanged">
-                                                                <ComboBoxItem Content="Remux" />
-                                                                <ComboBoxItem Content="Reencode" />
+                                                            <ComboBox x:Name="RepairModeComboBox" x:Uid="VideoPage_RepairMode" Header="Repair mode" SelectionChanged="AnyOptionChanged_SelectionChanged">
+                                                                <ComboBoxItem x:Uid="VideoPage_Remux" Content="Remux" />
+                                                                <ComboBoxItem x:Uid="VideoPage_Reencode" Content="Reencode" />
                                                             </ComboBox>
-                                                            <CheckBox x:Name="RegeneratePtsCheckBox" Content="Regenerate timestamps" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
-                                                            <CheckBox x:Name="IgnoreRecoverableErrorsCheckBox" Content="Ignore recoverable errors" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
-                                                            <CheckBox x:Name="DropNonEssentialStreamsCheckBox" Content="Drop non-essential streams" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
-                                                            <CheckBox x:Name="RepairRemoveMetadataCheckBox" Content="Remove metadata during repair" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                            <CheckBox x:Name="RegeneratePtsCheckBox" x:Uid="VideoPage_RegenerateTimestamps" Content="Regenerate timestamps" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                            <CheckBox x:Name="IgnoreRecoverableErrorsCheckBox" x:Uid="VideoPage_IgnoreErrors" Content="Ignore recoverable errors" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                            <CheckBox x:Name="DropNonEssentialStreamsCheckBox" x:Uid="VideoPage_DropNonEssential" Content="Drop non-essential streams" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                            <CheckBox x:Name="RepairRemoveMetadataCheckBox" x:Uid="VideoPage_RemoveMetadataRepair" Content="Remove metadata during repair" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
                                                         </StackPanel>
                                                     </ContentControl>
                                                 </StackPanel>
                                             </Border>
                                         </StackPanel>
 
-                                        <TextBlock x:Name="AdvancedValidationTextBlock" Foreground="Tomato" TextWrapping="Wrap" />
+                                        <TextBlock x:Name="AdvancedValidationTextBlock" Foreground="{ThemeResource SystemFillColorCriticalBrush}" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </StackPanel>
                             </ScrollViewer>

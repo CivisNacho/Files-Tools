@@ -47,7 +47,9 @@
 
                     <TextBlock
                         x:Name="HeaderText"
+                        x:Uid="HomePage_Header"
                         HorizontalAlignment="Center"
+                        FontFamily="{ThemeResource AppDisplayFontFamily}"
                         FontSize="44"
                         FontWeight="SemiBold"
                         Text="Drop files to get started"
@@ -56,6 +58,7 @@
 
                     <TextBlock
                         x:Name="SubtitleText"
+                        x:Uid="HomePage_Subtitle"
                         HorizontalAlignment="Center"
                         FontSize="18"
                         Opacity="0.82"
@@ -64,6 +67,7 @@
                         TextWrapping="Wrap" />
 
                     <TextBlock
+                        x:Uid="HomePage_Formats"
                         HorizontalAlignment="Center"
                         FontSize="15"
                         Opacity="0.68"
@@ -78,7 +82,7 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Border Grid.Column="0" Height="1" VerticalAlignment="Center" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
-                        <TextBlock Grid.Column="1" Text="or browse" Opacity="0.50" />
+                        <TextBlock x:Uid="HomePage_OrBrowse" Grid.Column="1" Text="or browse" Opacity="0.50" />
                         <Border Grid.Column="2" Height="1" VerticalAlignment="Center" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
                     </Grid>
 
@@ -88,7 +92,7 @@
                             Click="SingleFileButton_Click">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon FontSize="15" Glyph="&#xE8A5;" />
-                                <TextBlock Text="Single file" />
+                                <TextBlock x:Uid="HomePage_SingleFile" Text="Single file" />
                             </StackPanel>
                         </Button>
                         <Button
@@ -96,7 +100,7 @@
                             Click="BatchFilesButton_Click">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon FontSize="15" Glyph="&#xE8B5;" />
-                                <TextBlock Text="Multiple files for batch" />
+                                <TextBlock x:Uid="HomePage_BatchFiles" Text="Multiple files for batch" />
                             </StackPanel>
                         </Button>
                     </StackPanel>

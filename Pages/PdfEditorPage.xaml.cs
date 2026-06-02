@@ -26,6 +26,8 @@ namespace Files_Tools.Pages
         private int _currentPageIndex;
         private bool _isProcessing;
         private double _currentZoom = 1.0;
+        private double _naturalPageWidth;
+        private double _naturalPageHeight;
 
         public PdfEditorPage()
         {
@@ -213,8 +215,11 @@ namespace Files_Tools.Pages
 
         private async void UploadSurface_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
+            if (App.MainWindow is null || _currentPdf != null) return;
             var picker = new FileOpenPicker();
             picker.FileTypeFilter.Add(".pdf");
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
             var file = await picker.PickSingleFileAsync();
             if (file != null)
             {
@@ -244,12 +249,12 @@ namespace Files_Tools.Pages
                 if (ZoomControlPanel != null)
                 {
                     ZoomControlPanel.Visibility = Visibility.Visible;
-                    if (ZoomSlider != null)
-                    {
-                        ZoomSlider.Value = 100;
-                    }
                     _currentZoom = 1.0;
-                    SetZoomLevel(100);
+                    DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+                    {
+                        if (!FitPageToWidth() && ZoomSlider != null)
+                            ZoomSlider.Value = 100;
+                    });
                 }
 
                 UpdateNavigationButtons();
@@ -282,6 +287,11 @@ namespace Files_Tools.Pages
                     var bitmap = new BitmapImage();
                     await bitmap.SetSourceAsync(stream);
                     PdfPageImage.Source = bitmap;
+
+                    _naturalPageWidth = bitmap.PixelWidth > 0 ? bitmap.PixelWidth : 595;
+                    _naturalPageHeight = bitmap.PixelHeight > 0 ? bitmap.PixelHeight : 842;
+                    PdfPageImage.Width = _naturalPageWidth * _currentZoom;
+                    PdfPageImage.Height = _naturalPageHeight * _currentZoom;
 
                     _currentPageIndex = pageIndex;
                     PageCountTextBlock.Text = $"Page {pageIndex + 1} of {_currentPdf.PageCount}";
@@ -344,10 +354,20 @@ namespace Files_Tools.Pages
 
         private void FitToPage_Click(object sender, RoutedEventArgs e)
         {
-            if (ZoomSlider != null)
-            {
-                ZoomSlider.Value = 100;
-            }
+            FitPageToWidth();
+        }
+
+        private bool FitPageToWidth()
+        {
+            if (_naturalPageWidth <= 0 || ZoomSlider == null) return false;
+
+            double available = PreviewScrollViewer.ActualWidth - 32;
+            if (available <= 0) return false;
+
+            double fitZoom = (available / _naturalPageWidth) * 100.0;
+            fitZoom = Math.Max(ZoomSlider.Minimum, Math.Min(ZoomSlider.Maximum, fitZoom));
+            ZoomSlider.Value = fitZoom;
+            return true;
         }
 
         private void PreviewScrollViewer_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
@@ -377,14 +397,12 @@ namespace Files_Tools.Pages
             _currentZoom = zoomPercentage / 100.0;
 
             if (ZoomLevelTextBlock != null)
-            {
                 ZoomLevelTextBlock.Text = $"{zoomPercentage:F0}%";
-            }
 
-            if (PdfPageImage?.RenderTransform is Microsoft.UI.Xaml.Media.ScaleTransform scaleTransform)
+            if (_naturalPageWidth > 0 && PdfPageImage != null)
             {
-                scaleTransform.ScaleX = _currentZoom;
-                scaleTransform.ScaleY = _currentZoom;
+                PdfPageImage.Width = _naturalPageWidth * _currentZoom;
+                PdfPageImage.Height = _naturalPageHeight * _currentZoom;
             }
         }
 
@@ -412,19 +430,6 @@ namespace Files_Tools.Pages
             {
                 RemovePasswordPanel.Visibility = Visibility.Collapsed;
                 ChangePasswordPanel.Visibility = Visibility.Visible;
-            }
-            AnyOptionChanged_SelectionChanged(sender, e);
-        }
-
-        private void RotationScopeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (RotationScopeComboBox.SelectedIndex == 2)
-            {
-                RotationPagesPanel.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                RotationPagesPanel.Visibility = Visibility.Collapsed;
             }
             AnyOptionChanged_SelectionChanged(sender, e);
         }
@@ -764,8 +769,20 @@ namespace Files_Tools.Pages
 
         private async void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentPdfFile == null || _isProcessing)
+            if (_currentPdfFile == null || _isProcessing || App.MainWindow is null)
                 return;
+
+            var picker = new FileSavePicker
+            {
+                SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+                SuggestedFileName = $"{Path.GetFileNameWithoutExtension(_currentPdfFile.Name)}_processed"
+            };
+            picker.FileTypeChoices.Add("PDF document", new List<string> { ".pdf" });
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+
+            var saveFile = await picker.PickSaveFileAsync();
+            if (saveFile is null) return;
 
             _isProcessing = true;
             ApplyButton.IsEnabled = false;
@@ -773,9 +790,9 @@ namespace Files_Tools.Pages
 
             try
             {
-                await ProcessPdfOperations();
+                await ProcessPdfOperations(saveFile.Path);
                 ProcessingStatusTextBlock.Text = "PDF processed successfully!";
-                ProcessingDetailTextBlock.Text = "All operations completed.";
+                ProcessingDetailTextBlock.Text = $"Saved to: {saveFile.Name}";
             }
             catch (Exception ex)
             {
@@ -789,7 +806,7 @@ namespace Files_Tools.Pages
             }
         }
 
-        private async Task ProcessPdfOperations()
+        private async Task ProcessPdfOperations(string finalOutputPath)
         {
             ProcessingStatusTextBlock.Text = "Processing PDF...";
             ProcessingDetailTextBlock.Text = "Preparing operations...";
@@ -936,8 +953,14 @@ namespace Files_Tools.Pages
                             AllowAnnotate = AllowAnnotationsCheckBox.IsChecked == true
                         };
 
-                        // For permissions, we need an owner password - for now just apply them
-                        ProcessingDetailTextBlock.Text = "Permissions configured";
+                        // Owner password is optional — leave blank to apply restrictions without
+                        // any password. The service uses an empty owner password in that case.
+                        outputPath = Path.Combine(outputDir, "permissions_updated.pdf");
+                        await _pdfService.UpdatePermissionsAsync(
+                            workingPath, outputPath, PermissionsOwnerPasswordBox.Password,
+                            permissions, PdfEncryptionStrength.Aes_256);
+                        workingPath = outputPath;
+                        ProcessingDetailTextBlock.Text = "Permissions updated";
                     }
                 }
 
@@ -981,16 +1004,9 @@ namespace Files_Tools.Pages
                     ProcessingDetailTextBlock.Text = "PDF repaired";
                 }
 
-                // Copy final output to a user-friendly location
-                if (workingPath != inputPath)
-                {
-                    var finalOutput = Path.Combine(
-                        Path.GetDirectoryName(_currentPdfFile.Path),
-                        $"{Path.GetFileNameWithoutExtension(_currentPdfFile.Name)}_processed.pdf");
-
-                    File.Copy(workingPath, finalOutput, overwrite: true);
-                    ProcessingDetailTextBlock.Text = $"Saved to: {finalOutput}";
-                }
+                // Copy final output to the user's chosen location
+                if (workingPath != inputPath && File.Exists(workingPath))
+                    File.Copy(workingPath, finalOutputPath, overwrite: true);
 
                 ProcessingStatusTextBlock.Text = "PDF processed successfully!";
             }

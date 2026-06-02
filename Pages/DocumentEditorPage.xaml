@@ -8,12 +8,8 @@
     KeyDown="Page_KeyDown"
     mc:Ignorable="d">
     <Page.Resources>
-        <SolidColorBrush x:Key="DocumentAccentBrush" Color="#FFEB8C00" />
-        <SolidColorBrush x:Key="DocumentAccentDarkBrush" Color="#FFD67600" />
-        <LinearGradientBrush x:Key="DocumentHintBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#FFFEF3E6" Offset="0" />
-            <GradientStop Color="#FFFCE5D1" Offset="1" />
-        </LinearGradientBrush>
+        <!--  Accent/hint brushes (DocumentAccentBrush, DocumentAccentDarkBrush,
+              DocumentHintBackgroundBrush) are defined app-wide and theme-aware in Themes/AppTheme.xaml.  -->
         <Style x:Key="SettingsCardStyle" TargetType="Border">
             <Setter Property="Padding" Value="16" />
             <Setter Property="CornerRadius" Value="12" />
@@ -40,8 +36,9 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel MaxWidth="880" Spacing="6">
-                    <TextBlock FontSize="38" FontWeight="SemiBold" Text="Document Processing" />
+                    <TextBlock x:Uid="DocPage_Title" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="38" FontWeight="SemiBold" Text="Document Processing" />
                     <TextBlock
+                        x:Uid="DocPage_Subtitle"
                         Opacity="0.78"
                         Text="Convert documents to PDF, repair corrupted files, or extract embedded images. Select an operation from the panel and drop or browse for your document."
                         TextWrapping="Wrap" />
@@ -79,6 +76,7 @@
                                         Foreground="{ThemeResource SystemFillColorCautionBrush}"
                                         Glyph="&#xE8A5;" />
                                     <TextBlock
+                                        x:Uid="DocPage_LibreOfficeRequired"
                                         FontSize="17"
                                         FontWeight="SemiBold"
                                         Text="LibreOffice required"
@@ -86,6 +84,7 @@
                                 </StackPanel>
                                 <TextBlock
                                     x:Name="LibreOfficeSetupStatusText"
+                                    x:Uid="DocPage_LibreOfficeStatus"
                                     Opacity="0.78"
                                     TextWrapping="Wrap"
                                     Text="Document processing requires LibreOffice, which needs to be downloaded (~420 MB). This is a one-time download that stays on your machine." />
@@ -98,12 +97,14 @@
                                 Spacing="8">
                                 <Button
                                     x:Name="DownloadLibreOfficeButton"
+                                    x:Uid="DocPage_DownloadLibreOffice"
                                     MinWidth="200"
                                     Height="40"
                                     Content="Download LibreOffice"
                                     Click="DownloadLibreOfficeButton_Click" />
                                 <Button
                                     x:Name="CancelLibreOfficeButton"
+                                    x:Uid="DocPage_Cancel"
                                     Height="40"
                                     Content="Cancel"
                                     Visibility="Collapsed"
@@ -153,8 +154,9 @@
                             </Grid.RowDefinitions>
 
                             <StackPanel Spacing="4">
-                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="Document" />
+                                <TextBlock x:Uid="DocPage_DocumentSection" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="24" FontWeight="SemiBold" Text="Document" />
                                 <TextBlock
+                                    x:Uid="DocPage_DocumentSectionHint"
                                     Opacity="0.72"
                                     Text="Drop a document or click the surface to browse. The selected operation will be applied when you click the action button."
                                     TextWrapping="Wrap" />
@@ -203,8 +205,8 @@
                                                 Foreground="{StaticResource DocumentAccentDarkBrush}"
                                                 Glyph="&#xE8A5;" />
                                         </Border>
-                                        <TextBlock HorizontalAlignment="Center" FontSize="24" FontWeight="SemiBold" Text="Drop a document here" TextAlignment="Center" />
-                                        <TextBlock HorizontalAlignment="Center" Opacity="0.76" Text="You can also click this surface to browse for a file. Supported formats include DOCX, PDF, PPTX, XLSX, and more." TextAlignment="Center" TextWrapping="Wrap" />
+                                        <TextBlock x:Uid="DocPage_DropHintTitle" HorizontalAlignment="Center" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="24" FontWeight="SemiBold" Text="Drop a document here" TextAlignment="Center" />
+                                        <TextBlock x:Uid="DocPage_DropHintSubtitle" HorizontalAlignment="Center" Opacity="0.76" Text="You can also click this surface to browse for a file. Supported formats include DOCX, PDF, PPTX, XLSX, and more." TextAlignment="Center" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -217,6 +219,7 @@
 
                                 <TextBlock
                                     x:Name="LoadedDocumentInfoTextBlock"
+                                    x:Uid="DocPage_NoDocumentLoaded"
                                     VerticalAlignment="Center"
                                     Opacity="0.76"
                                     Text="No document loaded yet."
@@ -224,6 +227,7 @@
 
                                 <Button
                                     x:Name="ApplyButton"
+                                    x:Uid="DocPage_ProcessDocument"
                                     Grid.Column="1"
                                     MinWidth="180"
                                     Height="44"
@@ -256,28 +260,28 @@
 
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                 <StackPanel Spacing="2">
-                                    <TextBlock x:Name="SelectedOptionHeaderTextBlock" Margin="0,0,0,12" FontSize="22" FontWeight="SemiBold" Text="Select an operation" />
+                                    <TextBlock x:Name="SelectedOptionHeaderTextBlock" x:Uid="DocPage_SelectOperation" Margin="0,0,0,12" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="22" FontWeight="SemiBold" Text="Select an operation" />
 
                                     <StackPanel x:Name="ConvertToPdfPanel" Visibility="Collapsed" Spacing="12">
                                         <Border Style="{StaticResource SettingsCardStyle}">
                                             <StackPanel Spacing="12">
-                                                <TextBlock FontSize="18" FontWeight="SemiBold" Text="PDF Variant" />
-                                                <ComboBox x:Name="PdfVariantComboBox" Header="Output standard" SelectedIndex="0" SelectionChanged="OptionsSelectionChanged">
-                                                    <ComboBoxItem Tag="0" Content="Standard PDF 1.4" />
-                                                    <ComboBoxItem Tag="1" Content="PDF/A-1b (Long-term archival)" />
-                                                    <ComboBoxItem Tag="2" Content="PDF/A-2b (Extended archival)" />
-                                                    <ComboBoxItem Tag="3" Content="PDF/A-3b (With attachments)" />
+                                                <TextBlock x:Uid="DocPage_PdfVariant" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="PDF Variant" />
+                                                <ComboBox x:Name="PdfVariantComboBox" x:Uid="DocPage_OutputStandard" Header="Output standard" SelectedIndex="0" SelectionChanged="OptionsSelectionChanged">
+                                                    <ComboBoxItem x:Uid="DocPage_StandardPdf" Tag="0" Content="Standard PDF 1.4" />
+                                                    <ComboBoxItem x:Uid="DocPage_PdfA1b" Tag="1" Content="PDF/A-1b (Long-term archival)" />
+                                                    <ComboBoxItem x:Uid="DocPage_PdfA2b" Tag="2" Content="PDF/A-2b (Extended archival)" />
+                                                    <ComboBoxItem x:Uid="DocPage_PdfA3b" Tag="3" Content="PDF/A-3b (With attachments)" />
                                                 </ComboBox>
                                             </StackPanel>
                                         </Border>
 
                                         <Border Style="{StaticResource SettingsCardStyle}">
                                             <StackPanel Spacing="12">
-                                                <TextBlock FontSize="18" FontWeight="SemiBold" Text="Image Compression" />
-                                                <ComboBox x:Name="ImageCompressionComboBox" Header="Compression method" SelectedIndex="0" SelectionChanged="OptionsSelectionChanged">
-                                                    <ComboBoxItem Tag="0" Content="Default compression" />
-                                                    <ComboBoxItem Tag="1" Content="Lossless (no quality loss)" />
-                                                    <ComboBoxItem Tag="2" Content="JPEG (smaller file size)" />
+                                                <TextBlock x:Uid="DocPage_ImageCompression" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Image Compression" />
+                                                <ComboBox x:Name="ImageCompressionComboBox" x:Uid="DocPage_CompressionMethod" Header="Compression method" SelectedIndex="0" SelectionChanged="OptionsSelectionChanged">
+                                                    <ComboBoxItem x:Uid="DocPage_DefaultCompression" Tag="0" Content="Default compression" />
+                                                    <ComboBoxItem x:Uid="DocPage_Lossless" Tag="1" Content="Lossless (no quality loss)" />
+                                                    <ComboBoxItem x:Uid="DocPage_JpegCompression" Tag="2" Content="JPEG (smaller file size)" />
                                                 </ComboBox>
 
                                                 <StackPanel x:Name="JpegQualityPanel" Spacing="4" Visibility="Collapsed">
@@ -295,18 +299,20 @@
 
                                         <Border Style="{StaticResource SettingsCardStyle}">
                                             <StackPanel Spacing="12">
-                                                <TextBlock FontSize="18" FontWeight="SemiBold" Text="Page Range (optional)" />
+                                                <TextBlock x:Uid="DocPage_PageRange" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Page Range (optional)" />
                                                 <TextBox
                                                     x:Name="PageRangeTextBox"
+                                                    x:Uid="DocPage_PagesToInclude"
                                                     Header="Pages to include"
                                                     PlaceholderText="Leave empty for all pages. Example: 1-3,5,8-10"
                                                     TextChanged="PageRangeTextBox_TextChanged" />
                                                 <TextBlock
                                                     x:Name="PageRangeValidationTextBlock"
-                                                    Foreground="Tomato"
+                                                    Foreground="{ThemeResource SystemFillColorCriticalBrush}"
                                                     TextWrapping="Wrap"
                                                     Visibility="Collapsed" />
                                                 <TextBlock
+                                                    x:Uid="DocPage_PageRangeHint"
                                                     Opacity="0.76"
                                                     Text="Comma-separated list of pages or ranges. For presentations, use slide numbers. For spreadsheets, use sheet indices."
                                                     TextWrapping="Wrap" />
@@ -317,17 +323,18 @@
                                     <StackPanel x:Name="RepairPanel" Visibility="Collapsed" Spacing="12">
                                         <Border Style="{StaticResource SettingsCardStyle}">
                                             <StackPanel Spacing="12">
-                                                <TextBlock FontSize="18" FontWeight="SemiBold" Text="Output Format" />
-                                                <ComboBox x:Name="RepairOutputFormatComboBox" Header="Save as" SelectedIndex="0" SelectionChanged="OptionsSelectionChanged">
-                                                    <ComboBoxItem Content="Keep original format" />
-                                                    <ComboBoxItem Content="DOCX (Word)" />
-                                                    <ComboBoxItem Content="PPTX (PowerPoint)" />
-                                                    <ComboBoxItem Content="XLSX (Excel)" />
-                                                    <ComboBoxItem Content="ODT (OpenDocument Text)" />
-                                                    <ComboBoxItem Content="ODP (OpenDocument Presentation)" />
-                                                    <ComboBoxItem Content="ODS (OpenDocument Spreadsheet)" />
+                                                <TextBlock x:Uid="DocPage_RepairOutputFormat" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Output Format" />
+                                                <ComboBox x:Name="RepairOutputFormatComboBox" x:Uid="DocPage_SaveAs" Header="Save as" SelectedIndex="0" SelectionChanged="OptionsSelectionChanged">
+                                                    <ComboBoxItem x:Uid="DocPage_KeepOriginalFormat" Content="Keep original format" />
+                                                    <ComboBoxItem x:Uid="DocPage_Docx" Content="DOCX (Word)" />
+                                                    <ComboBoxItem x:Uid="DocPage_Pptx" Content="PPTX (PowerPoint)" />
+                                                    <ComboBoxItem x:Uid="DocPage_Xlsx" Content="XLSX (Excel)" />
+                                                    <ComboBoxItem x:Uid="DocPage_Odt" Content="ODT (OpenDocument Text)" />
+                                                    <ComboBoxItem x:Uid="DocPage_Odp" Content="ODP (OpenDocument Presentation)" />
+                                                    <ComboBoxItem x:Uid="DocPage_Ods" Content="ODS (OpenDocument Spreadsheet)" />
                                                 </ComboBox>
                                                 <TextBlock
+                                                    x:Uid="DocPage_RepairHint"
                                                     Opacity="0.76"
                                                     Text="The repair process will fix corrupted structures. You can optionally convert to a different format during repair."
                                                     TextWrapping="Wrap" />
@@ -338,8 +345,9 @@
                                     <StackPanel x:Name="ExtractImagesPanel" Visibility="Collapsed" Spacing="12">
                                         <Border Style="{StaticResource SettingsCardStyle}">
                                             <StackPanel Spacing="12">
-                                                <TextBlock FontSize="18" FontWeight="SemiBold" Text="Extract Settings" />
+                                                <TextBlock x:Uid="DocPage_ExtractSettings" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Extract Settings" />
                                                 <TextBlock
+                                                    x:Uid="DocPage_ExtractHint"
                                                     Opacity="0.76"
                                                     Text="All embedded images will be extracted and packed into a ZIP archive. The archive will be created at your chosen location."
                                                     TextWrapping="Wrap" />

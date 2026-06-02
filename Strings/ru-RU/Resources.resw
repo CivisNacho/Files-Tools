@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Главное окно
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="AppTitleBar.Title" xml:space="preserve"><value>Files Tools</value></data>
+  <data name="LicensesButton.Content" xml:space="preserve"><value>Лицензии</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Элементы навигации  (используются во всех меню редакторов)
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="NavMedia.Content" xml:space="preserve"><value>Медиа</value></data>
+  <data name="NavTransform.Content" xml:space="preserve"><value>Преобразование</value></data>
+  <data name="NavAdjust.Content" xml:space="preserve"><value>Настройка</value></data>
+  <data name="NavAdvanced.Content" xml:space="preserve"><value>Дополнительно</value></data>
+  <data name="NavFormat.Content" xml:space="preserve"><value>Формат</value></data>
+  <data name="NavAudio.Content" xml:space="preserve"><value>Аудио</value></data>
+  <data name="NavSubtitles.Content" xml:space="preserve"><value>Субтитры</value></data>
+  <data name="NavResize.Content" xml:space="preserve"><value>Размер</value></data>
+  <data name="NavTrim.Content" xml:space="preserve"><value>Обрезка</value></data>
+  <data name="NavRotate.Content" xml:space="preserve"><value>Поворот</value></data>
+  <data name="NavMetadata.Content" xml:space="preserve"><value>Метаданные</value></data>
+  <data name="NavRepair.Content" xml:space="preserve"><value>Восстановление</value></data>
+  <data name="NavCrop.Content" xml:space="preserve"><value>Кадрирование</value></data>
+  <data name="NavUpscale.Content" xml:space="preserve"><value>Увеличение</value></data>
+  <data name="NavColor.Content" xml:space="preserve"><value>Цвет</value></data>
+  <data name="NavSilence.Content" xml:space="preserve"><value>Тишина</value></data>
+  <data name="NavNormalize.Content" xml:space="preserve"><value>Нормализация</value></data>
+  <data name="NavEQ.Content" xml:space="preserve"><value>Эквалайзер</value></data>
+  <data name="NavDenoise.Content" xml:space="preserve"><value>Шумоподавление</value></data>
+  <data name="NavTranscription.Content" xml:space="preserve"><value>Транскрипция</value></data>
+  <data name="NavGenerate.Content" xml:space="preserve"><value>Создание</value></data>
+  <data name="NavOrganization.Content" xml:space="preserve"><value>Организация</value></data>
+  <data name="NavMerge.Content" xml:space="preserve"><value>Объединение</value></data>
+  <data name="NavSplit.Content" xml:space="preserve"><value>Разделение</value></data>
+  <data name="NavReorder.Content" xml:space="preserve"><value>Перестановка</value></data>
+  <data name="NavExtract.Content" xml:space="preserve"><value>Извлечение</value></data>
+  <data name="NavExtractAudio.Content" xml:space="preserve"><value>Извлечь аудио</value></data>
+  <data name="NavSecurity.Content" xml:space="preserve"><value>Безопасность</value></data>
+  <data name="NavEncrypt.Content" xml:space="preserve"><value>Шифрование</value></data>
+  <data name="NavPassword.Content" xml:space="preserve"><value>Пароль</value></data>
+  <data name="NavPermissions.Content" xml:space="preserve"><value>Разрешения</value></data>
+  <data name="NavContent.Content" xml:space="preserve"><value>Содержимое</value></data>
+  <data name="NavOCR.Content" xml:space="preserve"><value>OCR</value></data>
+  <data name="NavPodcast.Content" xml:space="preserve"><value>Подкаст</value></data>
+  <data name="NavVideo.Content" xml:space="preserve"><value>Видео</value></data>
+  <data name="NavContainer.Content" xml:space="preserve"><value>Контейнер</value></data>
+  <data name="NavCodec.Content" xml:space="preserve"><value>Кодек</value></data>
+  <data name="NavCompress.Content" xml:space="preserve"><value>Сжатие</value></data>
+  <data name="NavDocuments.Content" xml:space="preserve"><value>Документы</value></data>
+  <data name="NavPDF.Content" xml:space="preserve"><value>PDF</value></data>
+  <data name="NavImages.Content" xml:space="preserve"><value>Изображения</value></data>
+  <data name="NavOutput.Content" xml:space="preserve"><value>Вывод</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Общие строки редактора  (используются на нескольких страницах)
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="PreviewTitle.Text" xml:space="preserve"><value>Предпросмотр</value></data>
+  <data name="ApplyChanges.Content" xml:space="preserve"><value>Применить изменения</value></data>
+  <data name="SelectOptionHeader.Text" xml:space="preserve"><value>Выберите параметр</value></data>
+  <data name="EtaCalculating.Text" xml:space="preserve"><value>Расчёт времени...</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Главная страница
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="HomePage_Header.Text" xml:space="preserve"><value>Перетащите файлы для начала работы</value></data>
+  <data name="HomePage_Subtitle.Text" xml:space="preserve"><value>Перетащите один файл, чтобы открыть подходящий редактор, или несколько файлов одного типа для пакетной обработки. Также можно выбрать файлы с помощью кнопок ниже.</value></data>
+  <data name="HomePage_Formats.Text" xml:space="preserve"><value>Изображения: PNG, JPG, WebP, AVIF   •   Видео: MP4, MKV, MOV, AVI, WebM   •   Аудио: MP3, M4A, FLAC, WAV, OPUS   •   Документы: DOCX, PPTX, XLSX, PDF</value></data>
+  <data name="HomePage_OrBrowse.Text" xml:space="preserve"><value>или выберите файл</value></data>
+  <data name="HomePage_SingleFile.Text" xml:space="preserve"><value>Один файл</value></data>
+  <data name="HomePage_BatchFiles.Text" xml:space="preserve"><value>Несколько файлов для пакетной обработки</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Страница редактора аудио
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="AudioPage_Title.Text" xml:space="preserve"><value>Редактор аудио</value></data>
+  <data name="AudioPage_Subtitle.Text" xml:space="preserve"><value>Загрузите аудиофайл, настройте цепочку обработки и примените все выбранные операции за один проход.</value></data>
+  <data name="AudioPage_PreviewHint.Text" xml:space="preserve"><value>Перетащите аудиофайл или щёлкните по области, чтобы выбрать его. Статус обработки отображается ниже во время выполнения.</value></data>
+  <data name="AudioPage_AudioDetails.Text" xml:space="preserve"><value>Сведения об аудио</value></data>
+  <data name="AudioPage_NoAudioLoaded.Text" xml:space="preserve"><value>Аудио не загружено.</value></data>
+  <data name="AudioPage_DropHintTitle.Text" xml:space="preserve"><value>Перетащите аудио сюда</value></data>
+  <data name="AudioPage_DropHintSubtitle.Text" xml:space="preserve"><value>Щёлкните для выбора файла. Инструменты формата, нормализации, обрезки, эквалайзера, шумоподавления и метаданных доступны в панели параметров.</value></data>
+  <data name="AudioPage_Processing.Text" xml:space="preserve"><value>Обработка аудио...</value></data>
+  <data name="AudioPage_PreparingPipeline.Text" xml:space="preserve"><value>Подготовка конвейера...</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Страница редактора изображений
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="ImagePage_Title.Text" xml:space="preserve"><value>Редактор изображений</value></data>
+  <data name="ImagePage_Subtitle.Text" xml:space="preserve"><value>Импортируйте изображение, настройте правки и примените их за один проход — удобный макет с предпросмотром и панелью управления.</value></data>
+  <data name="ImagePage_PreviewHint.Text" xml:space="preserve"><value>Перетащите изображение или щёлкните по области предпросмотра. Маркеры кадрирования и визуальные правки центрируются относительно этой рабочей области.</value></data>
+  <data name="ImagePage_NoImageLoaded.Text" xml:space="preserve"><value>Изображение не загружено.</value></data>
+  <data name="ImagePage_DropHintTitle.Text" xml:space="preserve"><value>Перетащите изображение сюда</value></data>
+  <data name="ImagePage_DropHintSubtitle.Text" xml:space="preserve"><value>Также можно щёлкнуть по этой области для выбора файла. Кадрирование, изменение размера, увеличение, поворот, отражение и настройка RGB доступны в панели параметров.</value></data>
+  <data name="ImagePage_FormatSection.Text" xml:space="preserve"><value>Формат и качество</value></data>
+  <data name="ImagePage_OutputFormat.Header" xml:space="preserve"><value>Выходной формат</value></data>
+  <data name="ImagePage_KeepOriginalFormat.Content" xml:space="preserve"><value>Сохранить исходный формат</value></data>
+  <data name="ImagePage_PreserveQuality.Content" xml:space="preserve"><value>Сохранить исходное качество</value></data>
+  <data name="ImagePage_Crop.Text" xml:space="preserve"><value>Кадрирование</value></data>
+  <data name="ImagePage_EnableCrop.Content" xml:space="preserve"><value>Включить кадрирование</value></data>
+  <data name="ImagePage_ApplyCrop.Content" xml:space="preserve"><value>Применить кадрирование</value></data>
+  <data name="ImagePage_CropDisabled.Text" xml:space="preserve"><value>Кадрирование отключено</value></data>
+  <data name="ImagePage_Resize.Text" xml:space="preserve"><value>Изменение размера</value></data>
+  <data name="ImagePage_EnableResize.Content" xml:space="preserve"><value>Включить изменение размера</value></data>
+  <data name="ImagePage_Width.Header" xml:space="preserve"><value>Ширина</value></data>
+  <data name="ImagePage_Height.Header" xml:space="preserve"><value>Высота</value></data>
+  <data name="ImagePage_PreserveAspectRatio.Content" xml:space="preserve"><value>Сохранить пропорции</value></data>
+  <data name="ImagePage_Upscale.Text" xml:space="preserve"><value>Увеличение</value></data>
+  <data name="ImagePage_EnableUpscale.Content" xml:space="preserve"><value>Включить увеличение</value></data>
+  <data name="ImagePage_TargetWidth.Header" xml:space="preserve"><value>Целевая ширина</value></data>
+  <data name="ImagePage_TargetHeight.Header" xml:space="preserve"><value>Целевая высота</value></data>
+  <data name="ImagePage_RotateAndMirror.Text" xml:space="preserve"><value>Поворот и отражение</value></data>
+  <data name="ImagePage_Rotation.Header" xml:space="preserve"><value>Поворот</value></data>
+  <data name="ImagePage_FlipHorizontally.Content" xml:space="preserve"><value>Отразить по горизонтали</value></data>
+  <data name="ImagePage_FlipVertically.Content" xml:space="preserve"><value>Отразить по вертикали</value></data>
+  <data name="ImagePage_RGBAdjustments.Text" xml:space="preserve"><value>Настройка RGB</value></data>
+  <data name="ImagePage_EnableRGB.Content" xml:space="preserve"><value>Включить настройку RGB</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Страница редактора видео
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="VideoPage_Title.Text" xml:space="preserve"><value>Редактор видео</value></data>
+  <data name="VideoPage_Subtitle.Text" xml:space="preserve"><value>Импортируйте видео, настройте параметры обработки и запустите редактирование на основе FFmpeg — удобный макет с предпросмотром и панелью управления.</value></data>
+  <data name="VideoPage_PreviewHint.Text" xml:space="preserve"><value>Перетащите видео или щёлкните по области предпросмотра. Воспроизведение и параметры редактирования сосредоточены в этой рабочей области.</value></data>
+  <data name="VideoPage_NoVideoLoaded.Text" xml:space="preserve"><value>Видео не загружено.</value></data>
+  <data name="VideoPage_DropHintTitle.Text" xml:space="preserve"><value>Перетащите видео сюда</value></data>
+  <data name="VideoPage_DropHintSubtitle.Text" xml:space="preserve"><value>Также можно щёлкнуть по этой области для выбора файла. Обрезка, изменение размера, восстановление и параметры контейнера доступны в панели параметров.</value></data>
+  <data name="VideoPage_SubtitlePosition.Text" xml:space="preserve"><value>Положение субтитров</value></data>
+  <data name="VideoPage_DragToPlace.Text" xml:space="preserve"><value>Перетащите для размещения субтитров</value></data>
+  <data name="VideoPage_Processing.Text" xml:space="preserve"><value>Обработка видео...</value></data>
+  <data name="VideoPage_PreparingFFmpeg.Text" xml:space="preserve"><value>Подготовка FFmpeg...</value></data>
+  <data name="VideoPage_FormatAndCodecs.Text" xml:space="preserve"><value>Формат и кодеки</value></data>
+  <data name="VideoPage_OutputFormat.Header" xml:space="preserve"><value>Выходной формат</value></data>
+  <data name="VideoPage_KeepOriginal.Content" xml:space="preserve"><value>Сохранить оригинал</value></data>
+  <data name="VideoPage_VideoCodec.Header" xml:space="preserve"><value>Видеокодек</value></data>
+  <data name="VideoPage_VideoCodecPlaceholder.PlaceholderText" xml:space="preserve"><value>Видеокодек</value></data>
+  <data name="VideoPage_AudioCodec.Header" xml:space="preserve"><value>Аудиокодек</value></data>
+  <data name="VideoPage_AudioCodecPlaceholder.PlaceholderText" xml:space="preserve"><value>Аудиокодек</value></data>
+  <data name="VideoPage_RemoveAudio.Content" xml:space="preserve"><value>Удалить аудио</value></data>
+  <data name="VideoPage_Compression.Text" xml:space="preserve"><value>Сжатие</value></data>
+  <data name="VideoPage_EnableCompression.Content" xml:space="preserve"><value>Включить пресет сжатия</value></data>
+  <data name="VideoPage_CompressionPreset.Header" xml:space="preserve"><value>Пресет сжатия</value></data>
+  <data name="VideoPage_AudioAndVolume.Text" xml:space="preserve"><value>Аудио и громкость</value></data>
+  <data name="VideoPage_ExtractAudio.Content" xml:space="preserve"><value>Извлечь аудио</value></data>
+  <data name="VideoPage_AdjustVolume.Content" xml:space="preserve"><value>Настроить громкость на выходе</value></data>
+  <data name="VideoPage_VolumeHint.Text" xml:space="preserve"><value>Этот ползунок изменяет уровень аудио в готовом экспорте, включая замену аудио при включённом мультиплексировании.</value></data>
+  <data name="VideoPage_NormalizeAudio.Content" xml:space="preserve"><value>Нормализовать аудио</value></data>
+  <data name="VideoPage_NormalizeHint.Text" xml:space="preserve"><value>Выполняет простую нормализацию громкости для итогового выходного аудио.</value></data>
+  <data name="VideoPage_FixAudioSync.Content" xml:space="preserve"><value>Исправить синхронизацию аудио</value></data>
+  <data name="VideoPage_MoveAudio.Header" xml:space="preserve"><value>Сдвинуть аудио</value></data>
+  <data name="VideoPage_Earlier.Content" xml:space="preserve"><value>Раньше</value></data>
+  <data name="VideoPage_Later.Content" xml:space="preserve"><value>Позже</value></data>
+  <data name="VideoPage_ApplyDenoise.Content" xml:space="preserve"><value>Применить шумоподавление аудио</value></data>
+  <data name="VideoPage_DenoiseMode.Header" xml:space="preserve"><value>Режим шумоподавления</value></data>
+  <data name="VideoPage_DenoiseMono.Content" xml:space="preserve"><value>Моно</value></data>
+  <data name="VideoPage_DenoiseStereo.Content" xml:space="preserve"><value>Стерео</value></data>
+  <data name="VideoPage_AddReplaceAudio.Content" xml:space="preserve"><value>Добавить или заменить аудиодорожку</value></data>
+  <data name="VideoPage_AudioFile.Header" xml:space="preserve"><value>Аудиофайл</value></data>
+  <data name="VideoPage_AudioFile.PlaceholderText" xml:space="preserve"><value>Выберите источник аудио</value></data>
+  <data name="VideoPage_BrowseAudio.Content" xml:space="preserve"><value>Выбрать аудиофайл</value></data>
+  <data name="VideoPage_ReplaceAudio.Content" xml:space="preserve"><value>Заменить существующее аудио</value></data>
+  <data name="VideoPage_UseShortest.Content" xml:space="preserve"><value>Использовать наименьшую длительность</value></data>
+  <data name="VideoPage_SetDefaultAudio.Content" xml:space="preserve"><value>Установить как аудио по умолчанию</value></data>
+  <data name="VideoPage_Subtitles.Text" xml:space="preserve"><value>Субтитры</value></data>
+  <data name="VideoPage_TranscriptionHeader.Text" xml:space="preserve"><value>Транскрипция</value></data>
+  <data name="VideoPage_TranscriptionHint.Text" xml:space="preserve"><value>Выберите создание базовых субтитров SRT или расширенных стилизованных субтитров ASS.</value></data>
+  <data name="VideoPage_DownloadTranscription.Content" xml:space="preserve"><value>Загрузить функцию транскрипции</value></data>
+  <data name="VideoPage_TranscriptionNotDownloaded.Text" xml:space="preserve"><value>Функция транскрипции ещё не загружена.</value></data>
+  <data name="VideoPage_SubtitleGenMode.Header" xml:space="preserve"><value>Режим создания субтитров</value></data>
+  <data name="VideoPage_BasicSRT.Content" xml:space="preserve"><value>Базовый (SRT)</value></data>
+  <data name="VideoPage_AdvancedASS.Content" xml:space="preserve"><value>Расширенный (ASS)</value></data>
+  <data name="VideoPage_AdvancedOutputType.Header" xml:space="preserve"><value>Тип расширенного вывода</value></data>
+  <data name="VideoPage_StyledASS.Content" xml:space="preserve"><value>Стилизованный ASS</value></data>
+  <data name="VideoPage_KaraokeASS.Content" xml:space="preserve"><value>Karaoke ASS</value></data>
+  <data name="VideoPage_ConfigureAdvanced.Content" xml:space="preserve"><value>Настроить расширенные субтитры</value></data>
+  <data name="VideoPage_SecondsMax.Header" xml:space="preserve"><value>Макс. секунд</value></data>
+  <data name="VideoPage_LimitWords.Content" xml:space="preserve"><value>Ограничить слова в секции</value></data>
+  <data name="VideoPage_WordsMax.Header" xml:space="preserve"><value>Макс. слов</value></data>
+  <data name="VideoPage_SectionHint.Text" xml:space="preserve"><value>Параметр «Секунды» ограничивает время отображения секции. Параметр «Слова» ограничивает количество слов в одной секции при включённой опции.</value></data>
+  <data name="VideoPage_GenerateSubtitles.Content" xml:space="preserve"><value>Создать субтитры из видео</value></data>
+  <data name="VideoPage_SubtitlesNotGenerated.Text" xml:space="preserve"><value>Субтитры ещё не созданы.</value></data>
+  <data name="VideoPage_AddSubtitles.Content" xml:space="preserve"><value>Добавить субтитры</value></data>
+  <data name="VideoPage_SubtitleFile.Header" xml:space="preserve"><value>Файл субтитров</value></data>
+  <data name="VideoPage_SubtitleFile.PlaceholderText" xml:space="preserve"><value>Выберите источник субтитров</value></data>
+  <data name="VideoPage_BrowseSubtitle.Content" xml:space="preserve"><value>Выбрать файл субтитров</value></data>
+  <data name="VideoPage_SubtitleMode.Header" xml:space="preserve"><value>Режим субтитров</value></data>
+  <data name="VideoPage_SoftMux.Content" xml:space="preserve"><value>SoftMux</value></data>
+  <data name="VideoPage_BurnIn.Content" xml:space="preserve"><value>BurnIn</value></data>
+  <data name="VideoPage_Placement.Text" xml:space="preserve"><value>Расположение</value></data>
+  <data name="VideoPage_PlacementHint.Text" xml:space="preserve"><value>Перетащите значок субтитров в области предпросмотра или точно настройте расположение здесь.</value></data>
+  <data name="VideoPage_Horizontal.Header" xml:space="preserve"><value>Горизонталь (%)</value></data>
+  <data name="VideoPage_Vertical.Header" xml:space="preserve"><value>Вертикаль (%)</value></data>
+  <data name="VideoPage_ResetPlacement.Content" xml:space="preserve"><value>Сбросить расположение</value></data>
+  <data name="VideoPage_PlacementStatus.Text" xml:space="preserve"><value>Расположение отображается точно для сгенерированных субтитров ASS и приближённо для субтитров, встраиваемых в изображение, включая пресеты с рамкой и анимацией.</value></data>
+  <data name="VideoPage_LanguageTag.Header" xml:space="preserve"><value>Языковой тег</value></data>
+  <data name="VideoPage_LanguageTag.PlaceholderText" xml:space="preserve"><value>Пример: ru</value></data>
+  <data name="VideoPage_SubtitleTitle.Header" xml:space="preserve"><value>Название субтитров</value></data>
+  <data name="VideoPage_SubtitleTitle.PlaceholderText" xml:space="preserve"><value>Пример: Русский</value></data>
+  <data name="VideoPage_SetDefaultSubtitle.Content" xml:space="preserve"><value>Установить как субтитры по умолчанию</value></data>
+  <data name="VideoPage_Resize.Text" xml:space="preserve"><value>Изменение размера</value></data>
+  <data name="VideoPage_EnableResize.Content" xml:space="preserve"><value>Включить изменение размера</value></data>
+  <data name="VideoPage_Width.Header" xml:space="preserve"><value>Ширина</value></data>
+  <data name="VideoPage_Height.Header" xml:space="preserve"><value>Высота</value></data>
+  <data name="VideoPage_ResizeMode.Header" xml:space="preserve"><value>Режим изменения размера</value></data>
+  <data name="VideoPage_PadToFit.Content" xml:space="preserve"><value>Вписать с заливкой</value></data>
+  <data name="VideoPage_CropToFill.Content" xml:space="preserve"><value>Обрезать для заполнения</value></data>
+  <data name="VideoPage_Stretch.Content" xml:space="preserve"><value>Растянуть</value></data>
+  <data name="VideoPage_PaddingColor.Header" xml:space="preserve"><value>Цвет отступа</value></data>
+  <data name="VideoPage_PaddingColor.PlaceholderText" xml:space="preserve"><value>Например: black или #000000</value></data>
+  <data name="VideoPage_Trim.Text" xml:space="preserve"><value>Обрезка</value></data>
+  <data name="VideoPage_EnableTrim.Content" xml:space="preserve"><value>Включить обрезку</value></data>
+  <data name="VideoPage_TrimHint.Text" xml:space="preserve"><value>Перетащите маркеры обрезки под областью предпросмотра, чтобы задать начальную и конечную точки.</value></data>
+  <data name="VideoPage_RotateAndMirror.Text" xml:space="preserve"><value>Поворот и отражение</value></data>
+  <data name="VideoPage_Rotation.Header" xml:space="preserve"><value>Поворот</value></data>
+  <data name="VideoPage_MirrorHorizontally.Content" xml:space="preserve"><value>Отразить по горизонтали</value></data>
+  <data name="VideoPage_MirrorVertically.Content" xml:space="preserve"><value>Отразить по вертикали</value></data>
+  <data name="VideoPage_Metadata.Text" xml:space="preserve"><value>Метаданные</value></data>
+  <data name="VideoPage_RemoveMetadata.Content" xml:space="preserve"><value>Удалить метаданные</value></data>
+  <data name="VideoPage_Repair.Text" xml:space="preserve"><value>Восстановление</value></data>
+  <data name="VideoPage_EnableRepair.Content" xml:space="preserve"><value>Включить режим восстановления</value></data>
+  <data name="VideoPage_RepairMode.Header" xml:space="preserve"><value>Режим восстановления</value></data>
+  <data name="VideoPage_Remux.Content" xml:space="preserve"><value>Remux</value></data>
+  <data name="VideoPage_Reencode.Content" xml:space="preserve"><value>Перекодировать</value></data>
+  <data name="VideoPage_RegenerateTimestamps.Content" xml:space="preserve"><value>Пересоздать временные метки</value></data>
+  <data name="VideoPage_IgnoreErrors.Content" xml:space="preserve"><value>Игнорировать исправимые ошибки</value></data>
+  <data name="VideoPage_DropNonEssential.Content" xml:space="preserve"><value>Удалить второстепенные потоки</value></data>
+  <data name="VideoPage_RemoveMetadataRepair.Content" xml:space="preserve"><value>Удалить метаданные при восстановлении</value></data>
+  <data name="VideoPage_TranscriptionReview.Text" xml:space="preserve"><value>Проверка транскрипции</value></data>
+  <data name="VideoPage_TranscriptionReviewHint.Text" xml:space="preserve"><value>Просмотрите каждый сегмент Whisper перед созданием итоговых субтитров ASS для экспорта. Ваши правки применяются автоматически при обработке видео.</value></data>
+  <data name="VideoPage_SubtitleEditorStatus.Text" xml:space="preserve"><value>Создайте или выберите файл субтитров для редактирования.</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Страница редактора PDF
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="PdfPage_Title.Text" xml:space="preserve"><value>Редактор PDF</value></data>
+  <data name="PdfPage_Subtitle.Text" xml:space="preserve"><value>Импортируйте PDF, организуйте страницы, добавьте защиту и применяйте правки — удобный макет с предпросмотром и панелью параметров.</value></data>
+  <data name="PdfPage_PreviewHint.Text" xml:space="preserve"><value>Перетащите PDF или щёлкните по области предпросмотра. Организация, защита и редактирование содержимого доступны в панели параметров.</value></data>
+  <data name="PdfPage_NoPdfLoaded.Text" xml:space="preserve"><value>PDF не загружен.</value></data>
+  <data name="PdfPage_DropHintTitle.Text" xml:space="preserve"><value>Перетащите PDF сюда</value></data>
+  <data name="PdfPage_DropHintSubtitle.Text" xml:space="preserve"><value>Также можно щёлкнуть по этой области для выбора файла. Объединение, разделение, шифрование и работа с содержимым доступны в панели параметров.</value></data>
+  <data name="PdfPage_FitPage.Content" xml:space="preserve"><value>По странице</value></data>
+  <data name="PdfPage_Previous.Content" xml:space="preserve"><value>← Назад</value></data>
+  <data name="PdfPage_Next.Content" xml:space="preserve"><value>Вперёд →</value></data>
+  <data name="PdfPage_SelectCategory.Text" xml:space="preserve"><value>Выберите категорию слева</value></data>
+  <data name="PdfPage_Processing.Text" xml:space="preserve"><value>Обработка PDF...</value></data>
+  <data name="PdfPage_PreparingService.Text" xml:space="preserve"><value>Подготовка службы PDF...</value></data>
+  <data name="PdfPage_Merge.Text" xml:space="preserve"><value>Объединение</value></data>
+  <data name="PdfPage_MergeHint.Text" xml:space="preserve"><value>Объединение нескольких PDF в один документ.</value></data>
+  <data name="PdfPage_AddPdf.Content" xml:space="preserve"><value>Добавить PDF для объединения</value></data>
+  <data name="PdfPage_Split.Text" xml:space="preserve"><value>Разделение</value></data>
+  <data name="PdfPage_SplitMode.Header" xml:space="preserve"><value>Режим разделения</value></data>
+  <data name="PdfPage_OnePagePerFile.Content" xml:space="preserve"><value>По одной странице на файл</value></data>
+  <data name="PdfPage_ByPageRanges.Content" xml:space="preserve"><value>По диапазонам страниц</value></data>
+  <data name="PdfPage_PageRanges.Header" xml:space="preserve"><value>Диапазоны страниц</value></data>
+  <data name="PdfPage_PageRanges.PlaceholderText" xml:space="preserve"><value>Пример: 1-3, 5, 7-9</value></data>
+  <data name="PdfPage_PageRangesHint.Text" xml:space="preserve"><value>Укажите диапазоны, например 1-3 для страниц с 1 по 3, или отдельные страницы, например 5.</value></data>
+  <data name="PdfPage_Reorder.Text" xml:space="preserve"><value>Перестановка</value></data>
+  <data name="PdfPage_ReorderHint.Text" xml:space="preserve"><value>Измените порядок страниц, задав новый порядок.</value></data>
+  <data name="PdfPage_PageOrder.Header" xml:space="preserve"><value>Порядок страниц</value></data>
+  <data name="PdfPage_PageOrder.PlaceholderText" xml:space="preserve"><value>Пример: 3, 1, 2, 5, 4</value></data>
+  <data name="PdfPage_PageOrderHint.Text" xml:space="preserve"><value>Перечислите номера страниц в нужном порядке через запятую.</value></data>
+  <data name="PdfPage_Extract.Text" xml:space="preserve"><value>Извлечение</value></data>
+  <data name="PdfPage_ExtractImages.Content" xml:space="preserve"><value>Извлечь изображения</value></data>
+  <data name="PdfPage_ExtractAttachments.Content" xml:space="preserve"><value>Извлечь вложения</value></data>
+  <data name="PdfPage_ExtractHint.Text" xml:space="preserve"><value>Извлечённые файлы будут сохранены в отдельные папки.</value></data>
+  <data name="PdfPage_Rotate.Text" xml:space="preserve"><value>Поворот</value></data>
+  <data name="PdfPage_Rotation.Header" xml:space="preserve"><value>Поворот</value></data>
+  <data name="PdfPage_0Degrees.Content" xml:space="preserve"><value>0 градусов</value></data>
+  <data name="PdfPage_90CW.Content" xml:space="preserve"><value>90 градусов по часовой стрелке</value></data>
+  <data name="PdfPage_180Degrees.Content" xml:space="preserve"><value>180 градусов</value></data>
+  <data name="PdfPage_270CW.Content" xml:space="preserve"><value>270 градусов по часовой стрелке</value></data>
+  <data name="PdfPage_ApplyTo.Header" xml:space="preserve"><value>Применить к</value></data>
+  <data name="PdfPage_AllPages.Content" xml:space="preserve"><value>Всем страницам</value></data>
+  <data name="PdfPage_CurrentPage.Content" xml:space="preserve"><value>Текущей странице</value></data>
+  <data name="PdfPage_SelectedPages.Content" xml:space="preserve"><value>Выбранным страницам</value></data>
+  <data name="PdfPage_PageNumbers.Header" xml:space="preserve"><value>Номера страниц</value></data>
+  <data name="PdfPage_PageNumbers.PlaceholderText" xml:space="preserve"><value>Пример: 1, 3-5, 7</value></data>
+  <data name="PdfPage_Encrypt.Text" xml:space="preserve"><value>Шифрование</value></data>
+  <data name="PdfPage_Password.Header" xml:space="preserve"><value>Пароль</value></data>
+  <data name="PdfPage_ConfirmPassword.Header" xml:space="preserve"><value>Подтвердите пароль</value></data>
+  <data name="PdfPage_SetOwnerPassword.Content" xml:space="preserve"><value>Установить пароль владельца</value></data>
+  <data name="PdfPage_OwnerPassword.Header" xml:space="preserve"><value>Пароль владельца</value></data>
+  <data name="PdfPage_PasswordSection.Text" xml:space="preserve"><value>Пароль</value></data>
+  <data name="PdfPage_PasswordAction.Header" xml:space="preserve"><value>Действие</value></data>
+  <data name="PdfPage_RemovePassword.Content" xml:space="preserve"><value>Удалить пароль</value></data>
+  <data name="PdfPage_ChangePassword.Content" xml:space="preserve"><value>Изменить пароль</value></data>
+  <data name="PdfPage_CurrentPassword.Header" xml:space="preserve"><value>Текущий пароль</value></data>
+  <data name="PdfPage_RemovePasswordHint.Text" xml:space="preserve"><value>Введите текущий пароль PDF, чтобы снять защиту.</value></data>
+  <data name="PdfPage_NewPassword.Header" xml:space="preserve"><value>Новый пароль</value></data>
+  <data name="PdfPage_ConfirmNewPassword.Header" xml:space="preserve"><value>Подтвердите новый пароль</value></data>
+  <data name="PdfPage_PermissionsSection.Text" xml:space="preserve"><value>Разрешения</value></data>
+  <data name="PdfPage_PermissionsHint.Text" xml:space="preserve"><value>Управляйте тем, что пользователи могут делать с PDF.</value></data>
+  <data name="PdfPage_AllowPrinting.Content" xml:space="preserve"><value>Разрешить печать</value></data>
+  <data name="PdfPage_AllowCopying.Content" xml:space="preserve"><value>Разрешить копирование текста и изображений</value></data>
+  <data name="PdfPage_AllowEditing.Content" xml:space="preserve"><value>Разрешить редактирование</value></data>
+  <data name="PdfPage_AllowAnnotations.Content" xml:space="preserve"><value>Разрешить аннотации</value></data>
+  <data name="PdfPage_OCR.Text" xml:space="preserve"><value>OCR</value></data>
+  <data name="PdfPage_OcrHint.Text" xml:space="preserve"><value>Сделайте отсканированные PDF доступными для поиска путём распознавания текста.</value></data>
+  <data name="PdfPage_OcrLanguage.Header" xml:space="preserve"><value>Язык</value></data>
+  <data name="PdfPage_OcrAutoDetect.Content" xml:space="preserve"><value>Автоопределение</value></data>
+  <data name="PdfPage_Metadata.Text" xml:space="preserve"><value>Метаданные</value></data>
+  <data name="PdfPage_MetadataTitle.Header" xml:space="preserve"><value>Заголовок</value></data>
+  <data name="PdfPage_MetadataTitle.PlaceholderText" xml:space="preserve"><value>Заголовок документа</value></data>
+  <data name="PdfPage_MetadataAuthor.Header" xml:space="preserve"><value>Автор</value></data>
+  <data name="PdfPage_MetadataAuthor.PlaceholderText" xml:space="preserve"><value>Имя автора</value></data>
+  <data name="PdfPage_MetadataSubject.Header" xml:space="preserve"><value>Тема</value></data>
+  <data name="PdfPage_MetadataSubject.PlaceholderText" xml:space="preserve"><value>Тема документа</value></data>
+  <data name="PdfPage_MetadataKeywords.Header" xml:space="preserve"><value>Ключевые слова</value></data>
+  <data name="PdfPage_MetadataKeywords.PlaceholderText" xml:space="preserve"><value>Ключевые слова через запятую</value></data>
+  <data name="PdfPage_MetadataCreator.Header" xml:space="preserve"><value>Создатель</value></data>
+  <data name="PdfPage_MetadataCreator.PlaceholderText" xml:space="preserve"><value>Приложение-создатель</value></data>
+  <data name="PdfPage_MetadataProducer.Header" xml:space="preserve"><value>Производитель</value></data>
+  <data name="PdfPage_MetadataProducer.PlaceholderText" xml:space="preserve"><value>Приложение-производитель</value></data>
+  <data name="PdfPage_Repair.Text" xml:space="preserve"><value>Восстановление</value></data>
+  <data name="PdfPage_RepairHint.Text" xml:space="preserve"><value>Исправление повреждённых или испорченных PDF-файлов.</value></data>
+  <data name="PdfPage_RepairButton.Content" xml:space="preserve"><value>Восстановить PDF</value></data>
+  <data name="PdfPage_RepairReady.Text" xml:space="preserve"><value>Готово к восстановлению.</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Страница редактора документов
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="DocPage_Title.Text" xml:space="preserve"><value>Обработка документов</value></data>
+  <data name="DocPage_Subtitle.Text" xml:space="preserve"><value>Конвертируйте документы в PDF, восстанавливайте повреждённые файлы или извлекайте встроенные изображения. Выберите операцию на панели и перетащите или выберите документ.</value></data>
+  <data name="DocPage_LibreOfficeRequired.Text" xml:space="preserve"><value>Требуется LibreOffice</value></data>
+  <data name="DocPage_LibreOfficeStatus.Text" xml:space="preserve"><value>Обработка документов требует LibreOffice, который необходимо загрузить (~420 МБ). Это однократная загрузка, которая остаётся на вашем компьютере.</value></data>
+  <data name="DocPage_DownloadLibreOffice.Content" xml:space="preserve"><value>Загрузить LibreOffice</value></data>
+  <data name="DocPage_Cancel.Content" xml:space="preserve"><value>Отмена</value></data>
+  <data name="DocPage_DocumentSection.Text" xml:space="preserve"><value>Документ</value></data>
+  <data name="DocPage_DocumentSectionHint.Text" xml:space="preserve"><value>Перетащите документ или щёлкните по области для выбора. Выбранная операция будет применена при нажатии кнопки действия.</value></data>
+  <data name="DocPage_NoDocumentLoaded.Text" xml:space="preserve"><value>Документ не загружен.</value></data>
+  <data name="DocPage_DropHintTitle.Text" xml:space="preserve"><value>Перетащите документ сюда</value></data>
+  <data name="DocPage_DropHintSubtitle.Text" xml:space="preserve"><value>Также можно щёлкнуть по этой области для выбора файла. Поддерживаемые форматы: DOCX, PDF, PPTX, XLSX и другие.</value></data>
+  <data name="DocPage_ProcessDocument.Content" xml:space="preserve"><value>Обработать документ</value></data>
+  <data name="DocPage_SelectOperation.Text" xml:space="preserve"><value>Выберите операцию</value></data>
+  <data name="DocPage_PdfVariant.Text" xml:space="preserve"><value>Вариант PDF</value></data>
+  <data name="DocPage_OutputStandard.Header" xml:space="preserve"><value>Стандарт вывода</value></data>
+  <data name="DocPage_StandardPdf.Content" xml:space="preserve"><value>Стандартный PDF 1.4</value></data>
+  <data name="DocPage_PdfA1b.Content" xml:space="preserve"><value>PDF/A-1b (Долгосрочное архивирование)</value></data>
+  <data name="DocPage_PdfA2b.Content" xml:space="preserve"><value>PDF/A-2b (Расширенное архивирование)</value></data>
+  <data name="DocPage_PdfA3b.Content" xml:space="preserve"><value>PDF/A-3b (С вложениями)</value></data>
+  <data name="DocPage_ImageCompression.Text" xml:space="preserve"><value>Сжатие изображений</value></data>
+  <data name="DocPage_CompressionMethod.Header" xml:space="preserve"><value>Метод сжатия</value></data>
+  <data name="DocPage_DefaultCompression.Content" xml:space="preserve"><value>Сжатие по умолчанию</value></data>
+  <data name="DocPage_Lossless.Content" xml:space="preserve"><value>Без потерь (без снижения качества)</value></data>
+  <data name="DocPage_JpegCompression.Content" xml:space="preserve"><value>JPEG (меньший размер файла)</value></data>
+  <data name="DocPage_PageRange.Text" xml:space="preserve"><value>Диапазон страниц (необязательно)</value></data>
+  <data name="DocPage_PagesToInclude.Header" xml:space="preserve"><value>Включаемые страницы</value></data>
+  <data name="DocPage_PagesToInclude.PlaceholderText" xml:space="preserve"><value>Оставьте пустым для всех страниц. Пример: 1-3,5,8-10</value></data>
+  <data name="DocPage_PageRangeHint.Text" xml:space="preserve"><value>Список страниц или диапазонов через запятую. Для презентаций используйте номера слайдов, для таблиц — индексы листов.</value></data>
+  <data name="DocPage_RepairOutputFormat.Text" xml:space="preserve"><value>Формат вывода</value></data>
+  <data name="DocPage_SaveAs.Header" xml:space="preserve"><value>Сохранить как</value></data>
+  <data name="DocPage_KeepOriginalFormat.Content" xml:space="preserve"><value>Сохранить исходный формат</value></data>
+  <data name="DocPage_Docx.Content" xml:space="preserve"><value>DOCX (Word)</value></data>
+  <data name="DocPage_Pptx.Content" xml:space="preserve"><value>PPTX (PowerPoint)</value></data>
+  <data name="DocPage_Xlsx.Content" xml:space="preserve"><value>XLSX (Excel)</value></data>
+  <data name="DocPage_Odt.Content" xml:space="preserve"><value>ODT (OpenDocument Text)</value></data>
+  <data name="DocPage_Odp.Content" xml:space="preserve"><value>ODP (OpenDocument Presentation)</value></data>
+  <data name="DocPage_Ods.Content" xml:space="preserve"><value>ODS (OpenDocument Spreadsheet)</value></data>
+  <data name="DocPage_RepairHint.Text" xml:space="preserve"><value>Процесс восстановления исправит повреждённые структуры. При необходимости можно конвертировать в другой формат во время восстановления.</value></data>
+  <data name="DocPage_ExtractSettings.Text" xml:space="preserve"><value>Параметры извлечения</value></data>
+  <data name="DocPage_ExtractHint.Text" xml:space="preserve"><value>Все встроенные изображения будут извлечены и упакованы в ZIP-архив. Архив будет создан в выбранном вами месте.</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Страница пакетного редактора
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="BatchPage_Title.Text" xml:space="preserve"><value>Пакетная обработка</value></data>
+  <data name="BatchPage_Subtitle.Text" xml:space="preserve"><value>Перетащите несколько файлов — аудио, видео, документы, PDF, изображения — и применяйте выбранную операцию к каждой группе типов за один запуск.</value></data>
+  <data name="BatchPage_FilesSection.Text" xml:space="preserve"><value>Файлы</value></data>
+  <data name="BatchPage_FileCountDefault.Text" xml:space="preserve"><value>Перетащите файлы сюда или нажмите «Добавить» для начала работы.</value></data>
+  <data name="BatchPage_AddFiles.Content" xml:space="preserve"><value>Добавить файлы</value></data>
+  <data name="BatchPage_ClearAll.Content" xml:space="preserve"><value>Очистить всё</value></data>
+  <data name="BatchPage_DropHintTitle.Text" xml:space="preserve"><value>Перетащите файлы сюда</value></data>
+  <data name="BatchPage_DropHintSubtitle.Text" xml:space="preserve"><value>Смешивайте типы файлов свободно. Поддерживаются аудио, видео, документы, PDF и изображения — для каждой группы назначается своя операция.</value></data>
+  <data name="BatchPage_Preparing.Text" xml:space="preserve"><value>Подготовка…</value></data>
+  <data name="BatchPage_NoFilesLoaded.Text" xml:space="preserve"><value>Файлы не загружены.</value></data>
+  <data name="BatchPage_ShowInFolder.Content" xml:space="preserve"><value>Показать в папке</value></data>
+  <data name="BatchPage_Cancel.Content" xml:space="preserve"><value>Отмена</value></data>
+  <data name="BatchPage_ProcessBatch.Content" xml:space="preserve"><value>Запустить пакетную обработку</value></data>
+  <data name="BatchPage_SelectOperationHeader.Text" xml:space="preserve"><value>Выберите операцию</value></data>
+  <data name="BatchPage_NoSelectionHint.Text" xml:space="preserve"><value>Выберите операцию на боковой панели для настройки. Включите столько, сколько нужно — они применяются как конвейер к каждому файлу.</value></data>
+  <data name="BatchPage_OutputSettings.Text" xml:space="preserve"><value>Параметры вывода</value></data>
+  <data name="BatchPage_FilenameSuffix.Header" xml:space="preserve"><value>Суффикс имени файла</value></data>
+  <data name="BatchPage_FilesInParallel.Header" xml:space="preserve"><value>Файлов параллельно</value></data>
+  <data name="BatchPage_ConvertAudioFormat.Content" xml:space="preserve"><value>Конвертировать формат аудио</value></data>
+  <data name="BatchPage_AudioOutputFormat.Header" xml:space="preserve"><value>Выходной формат</value></data>
+  <data name="BatchPage_FlacLossless.Content" xml:space="preserve"><value>FLAC (без потерь)</value></data>
+  <data name="BatchPage_WavPcm.Content" xml:space="preserve"><value>WAV (PCM)</value></data>
+  <data name="BatchPage_OggVorbis.Content" xml:space="preserve"><value>OGG Vorbis</value></data>
+  <data name="BatchPage_CompressAudio.Content" xml:space="preserve"><value>Сжать аудио</value></data>
+  <data name="BatchPage_CompressionMode.Header" xml:space="preserve"><value>Режим сжатия</value></data>
+  <data name="BatchPage_LossySmaller.Content" xml:space="preserve"><value>С потерями (меньший файл)</value></data>
+  <data name="BatchPage_Lossless.Content" xml:space="preserve"><value>Без потерь</value></data>
+  <data name="BatchPage_TargetBitrate.Header" xml:space="preserve"><value>Целевой битрейт (кбит/с)</value></data>
+  <data name="BatchPage_NormalizeLoudness.Content" xml:space="preserve"><value>Нормализовать громкость</value></data>
+  <data name="BatchPage_NormalizeMode.Header" xml:space="preserve"><value>Режим</value></data>
+  <data name="BatchPage_LUFS.Content" xml:space="preserve"><value>LUFS (вещание)</value></data>
+  <data name="BatchPage_Peak.Content" xml:space="preserve"><value>Пик</value></data>
+  <data name="BatchPage_TargetLevel.Header" xml:space="preserve"><value>Целевой уровень (дБ / LUFS)</value></data>
+  <data name="BatchPage_ChangeContainer.Content" xml:space="preserve"><value>Изменить контейнер</value></data>
+  <data name="BatchPage_TargetContainer.Header" xml:space="preserve"><value>Целевой контейнер</value></data>
+  <data name="BatchPage_ChangeCodec.Content" xml:space="preserve"><value>Изменить кодек</value></data>
+  <data name="BatchPage_VideoCodec.Header" xml:space="preserve"><value>Видеокодек</value></data>
+  <data name="BatchPage_AudioCodec.Header" xml:space="preserve"><value>Аудиокодек</value></data>
+  <data name="BatchPage_H264.Content" xml:space="preserve"><value>H.264</value></data>
+  <data name="BatchPage_H265.Content" xml:space="preserve"><value>H.265 / HEVC</value></data>
+  <data name="BatchPage_CompressVideo.Content" xml:space="preserve"><value>Сжать видео</value></data>
+  <data name="BatchPage_VideoQualityPreset.Header" xml:space="preserve"><value>Пресет качества</value></data>
+  <data name="BatchPage_VeryHighQuality.Content" xml:space="preserve"><value>Очень высокое качество</value></data>
+  <data name="BatchPage_HighQuality.Content" xml:space="preserve"><value>Высокое качество</value></data>
+  <data name="BatchPage_Balanced.Content" xml:space="preserve"><value>Сбалансированное</value></data>
+  <data name="BatchPage_SmallSize.Content" xml:space="preserve"><value>Малый размер</value></data>
+  <data name="BatchPage_ResizeVideo.Content" xml:space="preserve"><value>Изменить размер видео</value></data>
+  <data name="BatchPage_VideoWidth.Header" xml:space="preserve"><value>Ширина</value></data>
+  <data name="BatchPage_VideoHeight.Header" xml:space="preserve"><value>Высота</value></data>
+  <data name="BatchPage_ExtractAudioTrack.Content" xml:space="preserve"><value>Извлечь аудиодорожку</value></data>
+  <data name="BatchPage_OutputAudioFormat.Header" xml:space="preserve"><value>Выходной формат аудио</value></data>
+  <data name="BatchPage_GenerateMuxSubtitles.Content" xml:space="preserve"><value>Создать и вмонтировать субтитры</value></data>
+  <data name="BatchPage_TranscriptionSection.Text" xml:space="preserve"><value>Транскрипция</value></data>
+  <data name="BatchPage_TranscriptionHint.Text" xml:space="preserve"><value>Использует Whisper для транскрипции каждого видео. Базовый режим создаёт SRT-файл, расширенный режим формирует стилизованные субтитры ASS.</value></data>
+  <data name="BatchPage_DownloadTranscription.Content" xml:space="preserve"><value>Загрузить функцию транскрипции</value></data>
+  <data name="BatchPage_TranscriptionNotDownloaded.Text" xml:space="preserve"><value>Функция транскрипции ещё не загружена.</value></data>
+  <data name="BatchPage_SubtitleGenMode.Header" xml:space="preserve"><value>Режим создания субтитров</value></data>
+  <data name="BatchPage_BasicSRT.Content" xml:space="preserve"><value>Базовый (SRT)</value></data>
+  <data name="BatchPage_AdvancedASS.Content" xml:space="preserve"><value>Расширенный (ASS)</value></data>
+  <data name="BatchPage_AdvancedOutputType.Header" xml:space="preserve"><value>Тип расширенного вывода</value></data>
+  <data name="BatchPage_StyledASS.Content" xml:space="preserve"><value>Стилизованный ASS</value></data>
+  <data name="BatchPage_KaraokeASS.Content" xml:space="preserve"><value>Karaoke ASS</value></data>
+  <data name="BatchPage_ConfigureAdvanced.Content" xml:space="preserve"><value>Настроить расширенные субтитры</value></data>
+  <data name="BatchPage_SecondsMax.Header" xml:space="preserve"><value>Макс. секунд</value></data>
+  <data name="BatchPage_LimitWords.Content" xml:space="preserve"><value>Ограничить слова в секции</value></data>
+  <data name="BatchPage_WordsMax.Header" xml:space="preserve"><value>Макс. слов</value></data>
+  <data name="BatchPage_SubtitleMux.Text" xml:space="preserve"><value>Мультиплексирование субтитров</value></data>
+  <data name="BatchPage_MuxMode.Header" xml:space="preserve"><value>Режим мультиплексирования</value></data>
+  <data name="BatchPage_SoftMux.Content" xml:space="preserve"><value>SoftMux (встроенная дорожка)</value></data>
+  <data name="BatchPage_BurnIn.Content" xml:space="preserve"><value>BurnIn (встроено в изображение)</value></data>
+  <data name="BatchPage_PlacementSection.Text" xml:space="preserve"><value>Расположение</value></data>
+  <data name="BatchPage_PlacementHint.Text" xml:space="preserve"><value>Точно задайте положение субтитров в процентах от размера кадра видео.</value></data>
+  <data name="BatchPage_Horizontal.Header" xml:space="preserve"><value>Горизонталь (%)</value></data>
+  <data name="BatchPage_Vertical.Header" xml:space="preserve"><value>Вертикаль (%)</value></data>
+  <data name="BatchPage_ResetPlacement.Content" xml:space="preserve"><value>Сбросить расположение</value></data>
+  <data name="BatchPage_LanguageTag.Header" xml:space="preserve"><value>Языковой тег</value></data>
+  <data name="BatchPage_LanguageTag.PlaceholderText" xml:space="preserve"><value>Пример: ru</value></data>
+  <data name="BatchPage_SubtitleTitle.Header" xml:space="preserve"><value>Название субтитров</value></data>
+  <data name="BatchPage_SubtitleTitle.PlaceholderText" xml:space="preserve"><value>Пример: Русский</value></data>
+  <data name="BatchPage_SetDefaultSubtitle.Content" xml:space="preserve"><value>Установить как субтитры по умолчанию</value></data>
+  <data name="BatchPage_ConvertToPdf.Content" xml:space="preserve"><value>Конвертировать в PDF</value></data>
+  <data name="BatchPage_LibreOfficeHint.Text" xml:space="preserve"><value>Использует LibreOffice для конвертации каждого документа.</value></data>
+  <data name="BatchPage_PdfVariant.Header" xml:space="preserve"><value>Вариант PDF</value></data>
+  <data name="BatchPage_StandardPdf.Content" xml:space="preserve"><value>Стандартный PDF</value></data>
+  <data name="BatchPage_PdfA1b.Content" xml:space="preserve"><value>PDF/A-1b (архивный)</value></data>
+  <data name="BatchPage_PdfA2b.Content" xml:space="preserve"><value>PDF/A-2b</value></data>
+  <data name="BatchPage_PdfA3b.Content" xml:space="preserve"><value>PDF/A-3b</value></data>
+  <data name="BatchPage_CompressOptimizePdf.Content" xml:space="preserve"><value>Сжать / оптимизировать PDF</value></data>
+  <data name="BatchPage_CompressPdfHint.Text" xml:space="preserve"><value>Линеаризует и пересобирает файл для уменьшения размера (использует qpdf).</value></data>
+  <data name="BatchPage_RepairPdf.Content" xml:space="preserve"><value>Восстановить PDF</value></data>
+  <data name="BatchPage_RepairPdfHint.Text" xml:space="preserve"><value>Пересобирает структуру документа для исправления повреждений (использует qpdf).</value></data>
+  <data name="BatchPage_AddOcrLayer.Content" xml:space="preserve"><value>Добавить текстовый слой OCR</value></data>
+  <data name="BatchPage_TessdataPath.Header" xml:space="preserve"><value>Путь к каталогу tessdata</value></data>
+  <data name="BatchPage_TessdataPath.PlaceholderText" xml:space="preserve"><value>C:\путь\к\tessdata</value></data>
+  <data name="BatchPage_OcrLanguages.Header" xml:space="preserve"><value>Языки (коды Tesseract)</value></data>
+  <data name="BatchPage_RasterizationDpi.Header" xml:space="preserve"><value>DPI растеризации</value></data>
+  <data name="BatchPage_MergeAllPdfs.Content" xml:space="preserve"><value>Объединить все PDF в один файл</value></data>
+  <data name="BatchPage_MergeHint.Text" xml:space="preserve"><value>Нельзя сочетать с другими операциями с PDF.</value></data>
+  <data name="BatchPage_MergeFilename.Header" xml:space="preserve"><value>Имя выходного файла</value></data>
+  <data name="BatchPage_ConvertImageFormat.Content" xml:space="preserve"><value>Конвертировать формат изображений</value></data>
+  <data name="BatchPage_ImageTargetFormat.Header" xml:space="preserve"><value>Целевой формат</value></data>
+  <data name="BatchPage_CompressImages.Content" xml:space="preserve"><value>Сжать изображения</value></data>
+  <data name="BatchPage_ResizeImages.Content" xml:space="preserve"><value>Изменить размер изображений</value></data>
+  <data name="BatchPage_ImageWidth.Header" xml:space="preserve"><value>Ширина</value></data>
+  <data name="BatchPage_ImageHeight.Header" xml:space="preserve"><value>Высота</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Страница лицензий
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="LicensesPage_Title.Text" xml:space="preserve"><value>Лицензии</value></data>
+  <data name="LicensesPage_Subtitle1.Text" xml:space="preserve"><value>Сторонние компоненты, используемые этим приложением, сведения об авторах и их лицензии.</value></data>
+  <data name="LicensesPage_Subtitle2.Text" xml:space="preserve"><value>Все перечисленные лицензии допускают коммерческое использование в соответствии с их условиями и обязательствами по распространению.</value></data>
+  <data name="LicensesPage_ShowLicense.Content" xml:space="preserve"><value>Показать лицензию</value></data>
+
+</root>

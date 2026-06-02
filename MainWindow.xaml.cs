@@ -145,11 +145,6 @@ namespace Files_Tools
             }
         }
 
-        private void BatchButton_Click(object sender, RoutedEventArgs e)
-        {
-            RootFrame.Navigate(typeof(Pages.BatchEditorPage));
-        }
-
         private void LicensesButton_Click(object sender, RoutedEventArgs e)
         {
             RootFrame.Navigate(typeof(Pages.LicensesPage));
@@ -186,33 +181,48 @@ namespace Files_Tools
             var titleBar = _appWindow.TitleBar;
             var isDark = theme == ElementTheme.Dark;
 
-            var transparent = Colors.Transparent;
-            titleBar.BackgroundColor = transparent;
-            titleBar.InactiveBackgroundColor = transparent;
-            titleBar.ButtonBackgroundColor = transparent;
-            titleBar.ButtonInactiveBackgroundColor = transparent;
-
+            // Solid brand background (Mica was dropped) — title bar matches the window background
+            // token, foreground uses the primary-text token. Keep subtle white/black-alpha overlays
+            // for the caption-button hover/pressed states.
             if (isDark)
             {
-                titleBar.ForegroundColor = Colors.White;
-                titleBar.InactiveForegroundColor = Color.FromArgb(255, 180, 180, 180);
-                titleBar.ButtonForegroundColor = Colors.White;
-                titleBar.ButtonHoverBackgroundColor = Color.FromArgb(80, 255, 255, 255);
-                titleBar.ButtonHoverForegroundColor = Colors.White;
-                titleBar.ButtonPressedBackgroundColor = Color.FromArgb(120, 255, 255, 255);
-                titleBar.ButtonPressedForegroundColor = Colors.White;
-                titleBar.ButtonInactiveForegroundColor = Color.FromArgb(255, 180, 180, 180);
+                var background = Color.FromArgb(255, 0x2B, 0x27, 0x24);   // #2B2724 window bg
+                var foreground = Color.FromArgb(255, 0xEE, 0xE9, 0xDF);   // #EEE9DF primary text
+                var inactiveFg = Color.FromArgb(255, 0x8C, 0x85, 0x7D);   // #8C857D tertiary text
+
+                titleBar.BackgroundColor = background;
+                titleBar.InactiveBackgroundColor = background;
+                titleBar.ButtonBackgroundColor = background;
+                titleBar.ButtonInactiveBackgroundColor = background;
+
+                titleBar.ForegroundColor = foreground;
+                titleBar.InactiveForegroundColor = inactiveFg;
+                titleBar.ButtonForegroundColor = foreground;
+                titleBar.ButtonHoverBackgroundColor = Color.FromArgb(38, 255, 255, 255);
+                titleBar.ButtonHoverForegroundColor = foreground;
+                titleBar.ButtonPressedBackgroundColor = Color.FromArgb(64, 255, 255, 255);
+                titleBar.ButtonPressedForegroundColor = foreground;
+                titleBar.ButtonInactiveForegroundColor = inactiveFg;
             }
             else
             {
-                titleBar.ForegroundColor = Colors.Black;
-                titleBar.InactiveForegroundColor = Color.FromArgb(255, 110, 110, 110);
-                titleBar.ButtonForegroundColor = Colors.Black;
-                titleBar.ButtonHoverBackgroundColor = Color.FromArgb(48, 0, 0, 0);
-                titleBar.ButtonHoverForegroundColor = Colors.Black;
-                titleBar.ButtonPressedBackgroundColor = Color.FromArgb(76, 0, 0, 0);
-                titleBar.ButtonPressedForegroundColor = Colors.Black;
-                titleBar.ButtonInactiveForegroundColor = Color.FromArgb(255, 110, 110, 110);
+                var background = Color.FromArgb(255, 0xEE, 0xE9, 0xDF);   // #EEE9DF window bg
+                var foreground = Color.FromArgb(255, 0x3B, 0x35, 0x31);   // #3B3531 primary text
+                var inactiveFg = Color.FromArgb(255, 0x9A, 0x91, 0x89);   // #9A9189 tertiary text
+
+                titleBar.BackgroundColor = background;
+                titleBar.InactiveBackgroundColor = background;
+                titleBar.ButtonBackgroundColor = background;
+                titleBar.ButtonInactiveBackgroundColor = background;
+
+                titleBar.ForegroundColor = foreground;
+                titleBar.InactiveForegroundColor = inactiveFg;
+                titleBar.ButtonForegroundColor = foreground;
+                titleBar.ButtonHoverBackgroundColor = Color.FromArgb(38, 0, 0, 0);
+                titleBar.ButtonHoverForegroundColor = foreground;
+                titleBar.ButtonPressedBackgroundColor = Color.FromArgb(64, 0, 0, 0);
+                titleBar.ButtonPressedForegroundColor = foreground;
+                titleBar.ButtonInactiveForegroundColor = inactiveFg;
             }
         }
 

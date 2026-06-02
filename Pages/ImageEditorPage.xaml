@@ -8,12 +8,8 @@
     KeyDown="Page_KeyDown"
     mc:Ignorable="d">
     <Page.Resources>
-        <SolidColorBrush x:Key="ImageAccentBrush" Color="#FF3B82F6" />
-        <SolidColorBrush x:Key="ImageAccentDarkBrush" Color="#FF2563EB" />
-        <LinearGradientBrush x:Key="ImageHintBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#FFEAF2FF" Offset="0" />
-            <GradientStop Color="#FFD8E8FF" Offset="1" />
-        </LinearGradientBrush>
+        <!--  Accent/hint brushes (ImageAccentBrush, ImageAccentDarkBrush, ImageHintBackgroundBrush)
+              are defined app-wide and theme-aware in Themes/AppTheme.xaml.  -->
         <Style x:Key="SettingsCardStyle" TargetType="Border">
             <Setter Property="Padding" Value="16" />
             <Setter Property="CornerRadius" Value="12" />
@@ -39,8 +35,9 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel MaxWidth="880" Spacing="6">
-                    <TextBlock FontSize="38" FontWeight="SemiBold" Text="Image Editor" />
+                    <TextBlock x:Uid="ImagePage_Title" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="38" FontWeight="SemiBold" Text="Image Editor" />
                     <TextBlock
+                        x:Uid="ImagePage_Subtitle"
                         Opacity="0.78"
                         Text="Import an image, line up your edits, and apply them in one run with a layout that keeps preview and controls easy to scan."
                         TextWrapping="Wrap" />
@@ -78,8 +75,9 @@
                             </Grid.RowDefinitions>
 
                             <StackPanel Spacing="4">
-                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="Preview" />
+                                <TextBlock x:Uid="PreviewTitle" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="24" FontWeight="SemiBold" Text="Preview" />
                                 <TextBlock
+                                    x:Uid="ImagePage_PreviewHint"
                                     Opacity="0.72"
                                     Text="Drop an image or click the preview surface to start. Crop handles and visual edits stay centered around this working area."
                                     TextWrapping="Wrap" />
@@ -152,8 +150,8 @@
                                                 Foreground="{StaticResource ImageAccentDarkBrush}"
                                                 Glyph="&#xE898;" />
                                         </Border>
-                                        <TextBlock HorizontalAlignment="Center" FontSize="24" FontWeight="SemiBold" Text="Drop an image here" TextAlignment="Center" />
-                                        <TextBlock HorizontalAlignment="Center" Opacity="0.76" Text="You can also click this surface to browse for a file. Crop, resize, upscale, rotate, mirror, and tune RGB levels from the options panel." TextAlignment="Center" TextWrapping="Wrap" />
+                                        <TextBlock x:Uid="ImagePage_DropHintTitle" HorizontalAlignment="Center" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="24" FontWeight="SemiBold" Text="Drop an image here" TextAlignment="Center" />
+                                        <TextBlock x:Uid="ImagePage_DropHintSubtitle" HorizontalAlignment="Center" Opacity="0.76" Text="You can also click this surface to browse for a file. Crop, resize, upscale, rotate, mirror, and tune RGB levels from the options panel." TextAlignment="Center" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -166,6 +164,7 @@
 
                                 <TextBlock
                                     x:Name="LoadedImageInfoTextBlock"
+                                    x:Uid="ImagePage_NoImageLoaded"
                                     VerticalAlignment="Center"
                                     Opacity="0.76"
                                     Text="No image loaded yet."
@@ -173,6 +172,7 @@
 
                                 <Button
                                     x:Name="ApplyButton"
+                                    x:Uid="ApplyChanges"
                                     Grid.Column="1"
                                     MinWidth="180"
                                     Height="44"
@@ -204,15 +204,15 @@
 
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                 <StackPanel Spacing="2">
-                                    <TextBlock x:Name="SelectedOptionHeaderTextBlock" Margin="0,0,0,12" FontSize="22" FontWeight="SemiBold" Text="Select an option" />
+                                    <TextBlock x:Name="SelectedOptionHeaderTextBlock" x:Uid="SelectOptionHeader" Margin="0,0,0,12" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="22" FontWeight="SemiBold" Text="Select an option" />
 
                                     <StackPanel x:Name="MediaPanel" Visibility="Collapsed" Spacing="12">
                                         <StackPanel x:Name="MediaFormatPanel" Visibility="Visible">
                                             <Border Style="{StaticResource SettingsCardStyle}">
                                                 <StackPanel Spacing="12">
-                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Format and quality" />
-                                                    <ComboBox x:Name="OutputFormatComboBox" Header="Output format" SelectedIndex="0" SelectionChanged="OptionsSelectionChanged">
-                                                        <ComboBoxItem Content="Keep original format" />
+                                                    <TextBlock x:Uid="ImagePage_FormatSection" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Format and quality" />
+                                                    <ComboBox x:Name="OutputFormatComboBox" x:Uid="ImagePage_OutputFormat" Header="Output format" SelectedIndex="0" SelectionChanged="OptionsSelectionChanged">
+                                                        <ComboBoxItem x:Uid="ImagePage_KeepOriginalFormat" Content="Keep original format" />
                                                         <ComboBoxItem Content="JPEG" />
                                                         <ComboBoxItem Content="PNG" />
                                                         <ComboBoxItem Content="WebP" />
@@ -224,6 +224,7 @@
 
                                                     <CheckBox
                                                         x:Name="PreserveOriginalQualityCheckBox"
+                                                        x:Uid="ImagePage_PreserveQuality"
                                                         IsChecked="True"
                                                         Checked="PreserveQualityCheckBox_Changed"
                                                         Unchecked="PreserveQualityCheckBox_Changed"
@@ -251,14 +252,16 @@
                                         <StackPanel x:Name="TransformCropPanel" Visibility="Visible">
                                             <Border Style="{StaticResource SettingsCardStyle}">
                                                 <StackPanel Spacing="12">
-                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Crop" />
+                                                    <TextBlock x:Uid="ImagePage_Crop" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Crop" />
                                                     <CheckBox
                                                         x:Name="EnableCropCheckBox"
+                                                        x:Uid="ImagePage_EnableCrop"
                                                         Checked="CropCheckBox_Changed"
                                                         Unchecked="CropCheckBox_Changed"
                                                         Content="Enable crop" />
                                                     <Button
                                                         x:Name="ApplyCropButton"
+                                                        x:Uid="ImagePage_ApplyCrop"
                                                         HorizontalAlignment="Left"
                                                         Background="{StaticResource ImageAccentBrush}"
                                                         BorderBrush="{StaticResource ImageAccentBrush}"
@@ -267,12 +270,13 @@
                                                         Content="Apply crop" />
                                                     <TextBlock
                                                         x:Name="CropInfoTextBlock"
+                                                        x:Uid="ImagePage_CropDisabled"
                                                         Opacity="0.76"
                                                         Text="Crop disabled"
                                                         TextWrapping="Wrap" />
                                                     <TextBlock
                                                         x:Name="CropValidationTextBlock"
-                                                        Foreground="Tomato"
+                                                        Foreground="{ThemeResource SystemFillColorCriticalBrush}"
                                                         TextWrapping="Wrap" />
                                                 </StackPanel>
                                             </Border>
@@ -281,9 +285,10 @@
                                         <StackPanel x:Name="TransformResizePanel" Visibility="Collapsed">
                                             <Border Style="{StaticResource SettingsCardStyle}">
                                                 <StackPanel Spacing="12">
-                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Resize" />
+                                                    <TextBlock x:Uid="ImagePage_Resize" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Resize" />
                                                     <CheckBox
                                                         x:Name="EnableResizeCheckBox"
+                                                        x:Uid="ImagePage_EnableResize"
                                                         Checked="OptionsCheckBox_Changed"
                                                         Unchecked="OptionsCheckBox_Changed"
                                                         Content="Enable resize" />
@@ -295,6 +300,7 @@
                                                         </Grid.ColumnDefinitions>
                                                         <NumberBox
                                                             x:Name="ResizeWidthNumberBox"
+                                                            x:Uid="ImagePage_Width"
                                                             Header="Width"
                                                             Minimum="1"
                                                             SmallChange="1"
@@ -303,6 +309,7 @@
                                                             ValueChanged="ResizeDimensionNumberBox_ValueChanged" />
                                                         <NumberBox
                                                             x:Name="ResizeHeightNumberBox"
+                                                            x:Uid="ImagePage_Height"
                                                             Grid.Column="1"
                                                             Header="Height"
                                                             Minimum="1"
@@ -314,6 +321,7 @@
 
                                                     <CheckBox
                                                         x:Name="PreserveAspectRatioCheckBox"
+                                                        x:Uid="ImagePage_PreserveAspectRatio"
                                                         IsChecked="True"
                                                         Checked="OptionsCheckBox_Changed"
                                                         Unchecked="OptionsCheckBox_Changed"
@@ -325,9 +333,10 @@
                                         <StackPanel x:Name="TransformUpscalePanel" Visibility="Collapsed">
                                             <Border Style="{StaticResource SettingsCardStyle}">
                                                 <StackPanel Spacing="12">
-                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Upscale" />
+                                                    <TextBlock x:Uid="ImagePage_Upscale" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Upscale" />
                                                     <CheckBox
                                                         x:Name="EnableUpscaleCheckBox"
+                                                        x:Uid="ImagePage_EnableUpscale"
                                                         Checked="OptionsCheckBox_Changed"
                                                         Unchecked="OptionsCheckBox_Changed"
                                                         Content="Enable upscale" />
@@ -339,6 +348,7 @@
                                                         </Grid.ColumnDefinitions>
                                                         <NumberBox
                                                             x:Name="UpscaleWidthNumberBox"
+                                                            x:Uid="ImagePage_TargetWidth"
                                                             Header="Target width"
                                                             Minimum="1"
                                                             SmallChange="1"
@@ -347,6 +357,7 @@
                                                             ValueChanged="UpscaleDimensionNumberBox_ValueChanged" />
                                                         <NumberBox
                                                             x:Name="UpscaleHeightNumberBox"
+                                                            x:Uid="ImagePage_TargetHeight"
                                                             Grid.Column="1"
                                                             Header="Target height"
                                                             Minimum="1"
@@ -358,6 +369,7 @@
 
                                                     <CheckBox
                                                         x:Name="PreserveUpscaleAspectRatioCheckBox"
+                                                        x:Uid="ImagePage_PreserveAspectRatio"
                                                         IsChecked="True"
                                                         Checked="OptionsCheckBox_Changed"
                                                         Unchecked="OptionsCheckBox_Changed"
@@ -365,7 +377,7 @@
 
                                                     <TextBlock
                                                         x:Name="UpscaleValidationTextBlock"
-                                                        Foreground="Tomato"
+                                                        Foreground="{ThemeResource SystemFillColorCriticalBrush}"
                                                         TextWrapping="Wrap" />
                                                 </StackPanel>
                                             </Border>
@@ -374,8 +386,8 @@
                                         <StackPanel x:Name="TransformRotatePanel" Visibility="Collapsed">
                                             <Border Style="{StaticResource SettingsCardStyle}">
                                                 <StackPanel Spacing="12">
-                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Rotate and mirror" />
-                                                    <ComboBox x:Name="RotationComboBox" Header="Rotation" SelectedIndex="0" SelectionChanged="OptionsSelectionChanged">
+                                                    <TextBlock x:Uid="ImagePage_RotateAndMirror" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Rotate and mirror" />
+                                                    <ComboBox x:Name="RotationComboBox" x:Uid="ImagePage_Rotation" Header="Rotation" SelectedIndex="0" SelectionChanged="OptionsSelectionChanged">
                                                         <ComboBoxItem Tag="0" Content="0 deg" />
                                                         <ComboBoxItem Tag="90" Content="90 deg" />
                                                         <ComboBoxItem Tag="180" Content="180 deg" />
@@ -384,11 +396,13 @@
 
                                                     <CheckBox
                                                         x:Name="MirrorHorizontalCheckBox"
+                                                        x:Uid="ImagePage_FlipHorizontally"
                                                         Checked="OptionsCheckBox_Changed"
                                                         Unchecked="OptionsCheckBox_Changed"
                                                         Content="Flip horizontally" />
                                                     <CheckBox
                                                         x:Name="MirrorVerticalCheckBox"
+                                                        x:Uid="ImagePage_FlipVertically"
                                                         Checked="OptionsCheckBox_Changed"
                                                         Unchecked="OptionsCheckBox_Changed"
                                                         Content="Flip vertically" />
@@ -401,9 +415,10 @@
                                         <StackPanel x:Name="AdjustColorPanel" Visibility="Visible">
                                             <Border Style="{StaticResource SettingsCardStyle}">
                                                 <StackPanel Spacing="12">
-                                                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="RGB adjustments" />
+                                                    <TextBlock x:Uid="ImagePage_RGBAdjustments" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="RGB adjustments" />
                                                     <CheckBox
                                                         x:Name="EnableRgbAdjustmentCheckBox"
+                                                        x:Uid="ImagePage_EnableRGB"
                                                         Checked="OptionsCheckBox_Changed"
                                                         Unchecked="OptionsCheckBox_Changed"
                                                         Content="Enable RGB adjustments" />

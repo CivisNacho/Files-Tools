@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Main Window
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="AppTitleBar.Title" xml:space="preserve"><value>Files Tools</value></data>
+  <data name="LicensesButton.Content" xml:space="preserve"><value>लाइसेंस</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Navigation items  (reused across all editor nav menus)
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="NavMedia.Content" xml:space="preserve"><value>मीडिया</value></data>
+  <data name="NavTransform.Content" xml:space="preserve"><value>ट्रांसफ़ॉर्म</value></data>
+  <data name="NavAdjust.Content" xml:space="preserve"><value>समायोजन</value></data>
+  <data name="NavAdvanced.Content" xml:space="preserve"><value>उन्नत</value></data>
+  <data name="NavFormat.Content" xml:space="preserve"><value>फ़ॉर्मेट</value></data>
+  <data name="NavAudio.Content" xml:space="preserve"><value>ऑडियो</value></data>
+  <data name="NavSubtitles.Content" xml:space="preserve"><value>सबटाइटल</value></data>
+  <data name="NavResize.Content" xml:space="preserve"><value>आकार बदलें</value></data>
+  <data name="NavTrim.Content" xml:space="preserve"><value>ट्रिम</value></data>
+  <data name="NavRotate.Content" xml:space="preserve"><value>घुमाएँ</value></data>
+  <data name="NavMetadata.Content" xml:space="preserve"><value>मेटाडेटा</value></data>
+  <data name="NavRepair.Content" xml:space="preserve"><value>मरम्मत</value></data>
+  <data name="NavCrop.Content" xml:space="preserve"><value>क्रॉप</value></data>
+  <data name="NavUpscale.Content" xml:space="preserve"><value>अपस्केल</value></data>
+  <data name="NavColor.Content" xml:space="preserve"><value>रंग</value></data>
+  <data name="NavSilence.Content" xml:space="preserve"><value>मौन</value></data>
+  <data name="NavNormalize.Content" xml:space="preserve"><value>नॉर्मलाइज़</value></data>
+  <data name="NavEQ.Content" xml:space="preserve"><value>EQ</value></data>
+  <data name="NavDenoise.Content" xml:space="preserve"><value>डिनॉइज़</value></data>
+  <data name="NavTranscription.Content" xml:space="preserve"><value>ट्रांसक्रिप्शन</value></data>
+  <data name="NavGenerate.Content" xml:space="preserve"><value>जनरेट</value></data>
+  <data name="NavOrganization.Content" xml:space="preserve"><value>व्यवस्थित करें</value></data>
+  <data name="NavMerge.Content" xml:space="preserve"><value>मर्ज</value></data>
+  <data name="NavSplit.Content" xml:space="preserve"><value>विभाजित करें</value></data>
+  <data name="NavReorder.Content" xml:space="preserve"><value>क्रम बदलें</value></data>
+  <data name="NavExtract.Content" xml:space="preserve"><value>निकालें</value></data>
+  <data name="NavExtractAudio.Content" xml:space="preserve"><value>ऑडियो निकालें</value></data>
+  <data name="NavSecurity.Content" xml:space="preserve"><value>सुरक्षा</value></data>
+  <data name="NavEncrypt.Content" xml:space="preserve"><value>एन्क्रिप्ट</value></data>
+  <data name="NavPassword.Content" xml:space="preserve"><value>पासवर्ड</value></data>
+  <data name="NavPermissions.Content" xml:space="preserve"><value>अनुमतियाँ</value></data>
+  <data name="NavContent.Content" xml:space="preserve"><value>सामग्री</value></data>
+  <data name="NavOCR.Content" xml:space="preserve"><value>OCR</value></data>
+  <data name="NavPodcast.Content" xml:space="preserve"><value>पॉडकास्ट</value></data>
+  <data name="NavVideo.Content" xml:space="preserve"><value>वीडियो</value></data>
+  <data name="NavContainer.Content" xml:space="preserve"><value>कंटेनर</value></data>
+  <data name="NavCodec.Content" xml:space="preserve"><value>कोडेक</value></data>
+  <data name="NavCompress.Content" xml:space="preserve"><value>कंप्रेस</value></data>
+  <data name="NavDocuments.Content" xml:space="preserve"><value>दस्तावेज़</value></data>
+  <data name="NavPDF.Content" xml:space="preserve"><value>PDF</value></data>
+  <data name="NavImages.Content" xml:space="preserve"><value>इमेज</value></data>
+  <data name="NavOutput.Content" xml:space="preserve"><value>आउटपुट</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Shared editor strings  (reused across multiple pages)
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="PreviewTitle.Text" xml:space="preserve"><value>प्रीव्यू</value></data>
+  <data name="ApplyChanges.Content" xml:space="preserve"><value>बदलाव लागू करें</value></data>
+  <data name="SelectOptionHeader.Text" xml:space="preserve"><value>एक विकल्प चुनें</value></data>
+  <data name="EtaCalculating.Text" xml:space="preserve"><value>ETA की गणना हो रही है...</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Home page
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="HomePage_Header.Text" xml:space="preserve"><value>शुरू करने के लिए फ़ाइलें यहाँ छोड़ें</value></data>
+  <data name="HomePage_Subtitle.Text" xml:space="preserve"><value>सही एडिटर खोलने के लिए एक फ़ाइल छोड़ें, या एक ही प्रकार की कई फ़ाइलें एक साथ बैच-प्रोसेस करने के लिए छोड़ें। आप नीचे दिए बटनों से भी ब्राउज़ कर सकते हैं।</value></data>
+  <data name="HomePage_Formats.Text" xml:space="preserve"><value>इमेज: PNG, JPG, WebP, AVIF   •   वीडियो: MP4, MKV, MOV, AVI, WebM   •   ऑडियो: MP3, M4A, FLAC, WAV, OPUS   •   दस्तावेज़: DOCX, PPTX, XLSX, PDF</value></data>
+  <data name="HomePage_OrBrowse.Text" xml:space="preserve"><value>या ब्राउज़ करें</value></data>
+  <data name="HomePage_SingleFile.Text" xml:space="preserve"><value>एकल फ़ाइल</value></data>
+  <data name="HomePage_BatchFiles.Text" xml:space="preserve"><value>बैच के लिए कई फ़ाइलें</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Audio editor page
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="AudioPage_Title.Text" xml:space="preserve"><value>ऑडियो एडिटर</value></data>
+  <data name="AudioPage_Subtitle.Text" xml:space="preserve"><value>एक ऑडियो फ़ाइल लोड करें, प्रोसेसिंग चेन बनाएँ, और सभी चुने गए ऑपरेशन एक बार में लागू करें।</value></data>
+  <data name="AudioPage_PreviewHint.Text" xml:space="preserve"><value>एक ऑडियो फ़ाइल छोड़ें या सरफ़ेस पर क्लिक करके चुनें। प्रोसेसिंग की स्थिति चलने पर नीचे दिखाई देगी।</value></data>
+  <data name="AudioPage_AudioDetails.Text" xml:space="preserve"><value>ऑडियो विवरण</value></data>
+  <data name="AudioPage_NoAudioLoaded.Text" xml:space="preserve"><value>अभी तक कोई ऑडियो लोड नहीं हुआ।</value></data>
+  <data name="AudioPage_DropHintTitle.Text" xml:space="preserve"><value>ऑडियो यहाँ छोड़ें</value></data>
+  <data name="AudioPage_DropHintSubtitle.Text" xml:space="preserve"><value>ट्रैक ब्राउज़ करने के लिए क्लिक करें। फ़ॉर्मेट, नॉर्मलाइज़ेशन, ट्रिम, EQ, डिनॉइज़, और मेटाडेटा टूल विकल्प पैनल में हैं।</value></data>
+  <data name="AudioPage_Processing.Text" xml:space="preserve"><value>ऑडियो प्रोसेस हो रहा है...</value></data>
+  <data name="AudioPage_PreparingPipeline.Text" xml:space="preserve"><value>पाइपलाइन तैयार हो रही है...</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Image editor page
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="ImagePage_Title.Text" xml:space="preserve"><value>इमेज एडिटर</value></data>
+  <data name="ImagePage_Subtitle.Text" xml:space="preserve"><value>एक इमेज इंपोर्ट करें, अपने एडिट तैयार करें, और उन्हें एक बार में लागू करें — प्रीव्यू और कंट्रोल दोनों आसानी से देखें।</value></data>
+  <data name="ImagePage_PreviewHint.Text" xml:space="preserve"><value>शुरू करने के लिए इमेज छोड़ें या प्रीव्यू सरफ़ेस पर क्लिक करें। क्रॉप हैंडल और विज़ुअल एडिट इस कार्यक्षेत्र के चारों ओर केंद्रित रहते हैं।</value></data>
+  <data name="ImagePage_NoImageLoaded.Text" xml:space="preserve"><value>अभी तक कोई इमेज लोड नहीं हुई।</value></data>
+  <data name="ImagePage_DropHintTitle.Text" xml:space="preserve"><value>इमेज यहाँ छोड़ें</value></data>
+  <data name="ImagePage_DropHintSubtitle.Text" xml:space="preserve"><value>फ़ाइल ब्राउज़ करने के लिए इस सरफ़ेस पर क्लिक भी कर सकते हैं। विकल्प पैनल से क्रॉप, आकार बदलें, अपस्केल, घुमाएँ, मिरर, और RGB स्तर ट्यून करें।</value></data>
+  <data name="ImagePage_FormatSection.Text" xml:space="preserve"><value>फ़ॉर्मेट और गुणवत्ता</value></data>
+  <data name="ImagePage_OutputFormat.Header" xml:space="preserve"><value>आउटपुट फ़ॉर्मेट</value></data>
+  <data name="ImagePage_KeepOriginalFormat.Content" xml:space="preserve"><value>मूल फ़ॉर्मेट रखें</value></data>
+  <data name="ImagePage_PreserveQuality.Content" xml:space="preserve"><value>मूल गुणवत्ता बनाए रखें</value></data>
+  <data name="ImagePage_Crop.Text" xml:space="preserve"><value>क्रॉप</value></data>
+  <data name="ImagePage_EnableCrop.Content" xml:space="preserve"><value>क्रॉप सक्षम करें</value></data>
+  <data name="ImagePage_ApplyCrop.Content" xml:space="preserve"><value>क्रॉप लागू करें</value></data>
+  <data name="ImagePage_CropDisabled.Text" xml:space="preserve"><value>क्रॉप अक्षम है</value></data>
+  <data name="ImagePage_Resize.Text" xml:space="preserve"><value>आकार बदलें</value></data>
+  <data name="ImagePage_EnableResize.Content" xml:space="preserve"><value>आकार बदलना सक्षम करें</value></data>
+  <data name="ImagePage_Width.Header" xml:space="preserve"><value>चौड़ाई</value></data>
+  <data name="ImagePage_Height.Header" xml:space="preserve"><value>ऊँचाई</value></data>
+  <data name="ImagePage_PreserveAspectRatio.Content" xml:space="preserve"><value>आस्पेक्ट रेशियो बनाए रखें</value></data>
+  <data name="ImagePage_Upscale.Text" xml:space="preserve"><value>अपस्केल</value></data>
+  <data name="ImagePage_EnableUpscale.Content" xml:space="preserve"><value>अपस्केल सक्षम करें</value></data>
+  <data name="ImagePage_TargetWidth.Header" xml:space="preserve"><value>लक्ष्य चौड़ाई</value></data>
+  <data name="ImagePage_TargetHeight.Header" xml:space="preserve"><value>लक्ष्य ऊँचाई</value></data>
+  <data name="ImagePage_RotateAndMirror.Text" xml:space="preserve"><value>घुमाएँ और मिरर करें</value></data>
+  <data name="ImagePage_Rotation.Header" xml:space="preserve"><value>रोटेशन</value></data>
+  <data name="ImagePage_FlipHorizontally.Content" xml:space="preserve"><value>क्षैतिज रूप से पलटें</value></data>
+  <data name="ImagePage_FlipVertically.Content" xml:space="preserve"><value>लंबवत रूप से पलटें</value></data>
+  <data name="ImagePage_RGBAdjustments.Text" xml:space="preserve"><value>RGB समायोजन</value></data>
+  <data name="ImagePage_EnableRGB.Content" xml:space="preserve"><value>RGB समायोजन सक्षम करें</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Video editor page
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="VideoPage_Title.Text" xml:space="preserve"><value>वीडियो एडिटर</value></data>
+  <data name="VideoPage_Subtitle.Text" xml:space="preserve"><value>एक वीडियो इंपोर्ट करें, प्रोसेसिंग विकल्प ट्यून करें, और FFmpeg-समर्थित एडिट चलाएँ — प्रीव्यू और निर्णय आसानी से देखें।</value></data>
+  <data name="VideoPage_PreviewHint.Text" xml:space="preserve"><value>शुरू करने के लिए वीडियो छोड़ें या प्रीव्यू सरफ़ेस पर क्लिक करें। प्लेबैक और एडिट विकल्प इस कार्यक्षेत्र के चारों ओर केंद्रित रहते हैं।</value></data>
+  <data name="VideoPage_NoVideoLoaded.Text" xml:space="preserve"><value>अभी तक कोई वीडियो लोड नहीं हुआ।</value></data>
+  <data name="VideoPage_DropHintTitle.Text" xml:space="preserve"><value>वीडियो यहाँ छोड़ें</value></data>
+  <data name="VideoPage_DropHintSubtitle.Text" xml:space="preserve"><value>फ़ाइल ब्राउज़ करने के लिए इस सरफ़ेस पर क्लिक भी कर सकते हैं। ट्रिम, आकार बदलें, मरम्मत, और कंटेनर विकल्प पैनल से उपलब्ध रहते हैं।</value></data>
+  <data name="VideoPage_SubtitlePosition.Text" xml:space="preserve"><value>सबटाइटल स्थिति</value></data>
+  <data name="VideoPage_DragToPlace.Text" xml:space="preserve"><value>सबटाइटल रखने के लिए खींचें</value></data>
+  <data name="VideoPage_Processing.Text" xml:space="preserve"><value>वीडियो प्रोसेस हो रहा है...</value></data>
+  <data name="VideoPage_PreparingFFmpeg.Text" xml:space="preserve"><value>FFmpeg तैयार हो रहा है...</value></data>
+  <data name="VideoPage_FormatAndCodecs.Text" xml:space="preserve"><value>फ़ॉर्मेट और कोडेक</value></data>
+  <data name="VideoPage_OutputFormat.Header" xml:space="preserve"><value>आउटपुट फ़ॉर्मेट</value></data>
+  <data name="VideoPage_KeepOriginal.Content" xml:space="preserve"><value>मूल रखें</value></data>
+  <data name="VideoPage_VideoCodec.Header" xml:space="preserve"><value>वीडियो कोडेक</value></data>
+  <data name="VideoPage_VideoCodecPlaceholder.PlaceholderText" xml:space="preserve"><value>वीडियो कोडेक</value></data>
+  <data name="VideoPage_AudioCodec.Header" xml:space="preserve"><value>ऑडियो कोडेक</value></data>
+  <data name="VideoPage_AudioCodecPlaceholder.PlaceholderText" xml:space="preserve"><value>ऑडियो कोडेक</value></data>
+  <data name="VideoPage_RemoveAudio.Content" xml:space="preserve"><value>ऑडियो हटाएँ</value></data>
+  <data name="VideoPage_Compression.Text" xml:space="preserve"><value>कंप्रेशन</value></data>
+  <data name="VideoPage_EnableCompression.Content" xml:space="preserve"><value>कंप्रेशन प्रीसेट सक्षम करें</value></data>
+  <data name="VideoPage_CompressionPreset.Header" xml:space="preserve"><value>कंप्रेशन प्रीसेट</value></data>
+  <data name="VideoPage_AudioAndVolume.Text" xml:space="preserve"><value>ऑडियो और वॉल्यूम</value></data>
+  <data name="VideoPage_ExtractAudio.Content" xml:space="preserve"><value>ऑडियो निकालें</value></data>
+  <data name="VideoPage_AdjustVolume.Content" xml:space="preserve"><value>आउटपुट वॉल्यूम समायोजित करें</value></data>
+  <data name="VideoPage_VolumeHint.Text" xml:space="preserve"><value>यह स्लाइडर अंतिम निर्यात किए गए ऑडियो स्तर को बदलता है, जिसमें मक्सिंग सक्षम होने पर रिप्लेसमेंट ऑडियो भी शामिल है।</value></data>
+  <data name="VideoPage_NormalizeAudio.Content" xml:space="preserve"><value>ऑडियो नॉर्मलाइज़ करें</value></data>
+  <data name="VideoPage_NormalizeHint.Text" xml:space="preserve"><value>अंतिम आउटपुट ऑडियो पर एक सरल लाउडनेस नॉर्मलाइज़ेशन पास लागू करता है।</value></data>
+  <data name="VideoPage_FixAudioSync.Content" xml:space="preserve"><value>ऑडियो सिंक ठीक करें</value></data>
+  <data name="VideoPage_MoveAudio.Header" xml:space="preserve"><value>ऑडियो ले जाएँ</value></data>
+  <data name="VideoPage_Earlier.Content" xml:space="preserve"><value>पहले</value></data>
+  <data name="VideoPage_Later.Content" xml:space="preserve"><value>बाद में</value></data>
+  <data name="VideoPage_ApplyDenoise.Content" xml:space="preserve"><value>ऑडियो डिनॉइज़ लागू करें</value></data>
+  <data name="VideoPage_DenoiseMode.Header" xml:space="preserve"><value>डिनॉइज़ मोड</value></data>
+  <data name="VideoPage_DenoiseMono.Content" xml:space="preserve"><value>मोनो</value></data>
+  <data name="VideoPage_DenoiseStereo.Content" xml:space="preserve"><value>स्टीरियो</value></data>
+  <data name="VideoPage_AddReplaceAudio.Content" xml:space="preserve"><value>ऑडियो ट्रैक जोड़ें या बदलें</value></data>
+  <data name="VideoPage_AudioFile.Header" xml:space="preserve"><value>ऑडियो फ़ाइल</value></data>
+  <data name="VideoPage_AudioFile.PlaceholderText" xml:space="preserve"><value>ऑडियो स्रोत चुनें</value></data>
+  <data name="VideoPage_BrowseAudio.Content" xml:space="preserve"><value>ऑडियो फ़ाइल ब्राउज़ करें</value></data>
+  <data name="VideoPage_ReplaceAudio.Content" xml:space="preserve"><value>मौजूदा ऑडियो बदलें</value></data>
+  <data name="VideoPage_UseShortest.Content" xml:space="preserve"><value>सबसे छोटी अवधि उपयोग करें</value></data>
+  <data name="VideoPage_SetDefaultAudio.Content" xml:space="preserve"><value>डिफ़ॉल्ट ऑडियो के रूप में सेट करें</value></data>
+  <data name="VideoPage_Subtitles.Text" xml:space="preserve"><value>सबटाइटल</value></data>
+  <data name="VideoPage_TranscriptionHeader.Text" xml:space="preserve"><value>ट्रांसक्रिप्शन</value></data>
+  <data name="VideoPage_TranscriptionHint.Text" xml:space="preserve"><value>बेसिक SRT या उन्नत स्टाइल्ड ASS सबटाइटल जनरेशन चुनें।</value></data>
+  <data name="VideoPage_DownloadTranscription.Content" xml:space="preserve"><value>ट्रांसक्रिप्शन फ़ीचर डाउनलोड करें</value></data>
+  <data name="VideoPage_TranscriptionNotDownloaded.Text" xml:space="preserve"><value>ट्रांसक्रिप्शन फ़ीचर अभी तक डाउनलोड नहीं हुआ।</value></data>
+  <data name="VideoPage_SubtitleGenMode.Header" xml:space="preserve"><value>सबटाइटल जनरेशन मोड</value></data>
+  <data name="VideoPage_BasicSRT.Content" xml:space="preserve"><value>बेसिक (SRT)</value></data>
+  <data name="VideoPage_AdvancedASS.Content" xml:space="preserve"><value>उन्नत (ASS)</value></data>
+  <data name="VideoPage_AdvancedOutputType.Header" xml:space="preserve"><value>उन्नत आउटपुट प्रकार</value></data>
+  <data name="VideoPage_StyledASS.Content" xml:space="preserve"><value>स्टाइल्ड ASS</value></data>
+  <data name="VideoPage_KaraokeASS.Content" xml:space="preserve"><value>कराओके ASS</value></data>
+  <data name="VideoPage_ConfigureAdvanced.Content" xml:space="preserve"><value>उन्नत सबटाइटल कॉन्फ़िगर करें</value></data>
+  <data name="VideoPage_SecondsMax.Header" xml:space="preserve"><value>अधिकतम सेकंड</value></data>
+  <data name="VideoPage_LimitWords.Content" xml:space="preserve"><value>प्रति सेक्शन शब्द सीमित करें</value></data>
+  <data name="VideoPage_WordsMax.Header" xml:space="preserve"><value>अधिकतम शब्द</value></data>
+  <data name="VideoPage_SectionHint.Text" xml:space="preserve"><value>सेकंड से तय होता है कि एक सेक्शन स्क्रीन पर कितनी देर रह सकता है। शब्द अधिकतम से तय होता है कि सक्षम होने पर एक सेक्शन में कितने शब्द हो सकते हैं।</value></data>
+  <data name="VideoPage_GenerateSubtitles.Content" xml:space="preserve"><value>वीडियो से सबटाइटल जनरेट करें</value></data>
+  <data name="VideoPage_SubtitlesNotGenerated.Text" xml:space="preserve"><value>सबटाइटल अभी तक जनरेट नहीं हुए।</value></data>
+  <data name="VideoPage_AddSubtitles.Content" xml:space="preserve"><value>सबटाइटल जोड़ें</value></data>
+  <data name="VideoPage_SubtitleFile.Header" xml:space="preserve"><value>सबटाइटल फ़ाइल</value></data>
+  <data name="VideoPage_SubtitleFile.PlaceholderText" xml:space="preserve"><value>सबटाइटल स्रोत चुनें</value></data>
+  <data name="VideoPage_BrowseSubtitle.Content" xml:space="preserve"><value>सबटाइटल फ़ाइल ब्राउज़ करें</value></data>
+  <data name="VideoPage_SubtitleMode.Header" xml:space="preserve"><value>सबटाइटल मोड</value></data>
+  <data name="VideoPage_SoftMux.Content" xml:space="preserve"><value>SoftMux</value></data>
+  <data name="VideoPage_BurnIn.Content" xml:space="preserve"><value>BurnIn</value></data>
+  <data name="VideoPage_Placement.Text" xml:space="preserve"><value>स्थान</value></data>
+  <data name="VideoPage_PlacementHint.Text" xml:space="preserve"><value>प्रीव्यू पर सबटाइटल बैज खींचें या यहाँ स्थान को बारीकी से ट्यून करें।</value></data>
+  <data name="VideoPage_Horizontal.Header" xml:space="preserve"><value>क्षैतिज (%)</value></data>
+  <data name="VideoPage_Vertical.Header" xml:space="preserve"><value>लंबवत (%)</value></data>
+  <data name="VideoPage_ResetPlacement.Content" xml:space="preserve"><value>स्थान रीसेट करें</value></data>
+  <data name="VideoPage_PlacementStatus.Text" xml:space="preserve"><value>जनरेट किए गए ASS सबटाइटल के लिए स्थान बिल्कुल सटीक रेंडर होता है और बर्न-इन टेक्स्ट सबटाइटल के लिए अनुमानित होता है, जिसमें बॉक्सड और एनिमेटेड प्रेज़ेंटेशन प्रीसेट शामिल हैं।</value></data>
+  <data name="VideoPage_LanguageTag.Header" xml:space="preserve"><value>भाषा टैग</value></data>
+  <data name="VideoPage_LanguageTag.PlaceholderText" xml:space="preserve"><value>उदाहरण: hi</value></data>
+  <data name="VideoPage_SubtitleTitle.Header" xml:space="preserve"><value>सबटाइटल शीर्षक</value></data>
+  <data name="VideoPage_SubtitleTitle.PlaceholderText" xml:space="preserve"><value>उदाहरण: हिंदी</value></data>
+  <data name="VideoPage_SetDefaultSubtitle.Content" xml:space="preserve"><value>डिफ़ॉल्ट सबटाइटल के रूप में सेट करें</value></data>
+  <data name="VideoPage_Resize.Text" xml:space="preserve"><value>आकार बदलें</value></data>
+  <data name="VideoPage_EnableResize.Content" xml:space="preserve"><value>आकार बदलना सक्षम करें</value></data>
+  <data name="VideoPage_Width.Header" xml:space="preserve"><value>चौड़ाई</value></data>
+  <data name="VideoPage_Height.Header" xml:space="preserve"><value>ऊँचाई</value></data>
+  <data name="VideoPage_ResizeMode.Header" xml:space="preserve"><value>आकार बदलने का मोड</value></data>
+  <data name="VideoPage_PadToFit.Content" xml:space="preserve"><value>पैडिंग के साथ फिट करें</value></data>
+  <data name="VideoPage_CropToFill.Content" xml:space="preserve"><value>भरने के लिए क्रॉप करें</value></data>
+  <data name="VideoPage_Stretch.Content" xml:space="preserve"><value>फैलाएं</value></data>
+  <data name="VideoPage_PaddingColor.Header" xml:space="preserve"><value>पैडिंग रंग</value></data>
+  <data name="VideoPage_PaddingColor.PlaceholderText" xml:space="preserve"><value>उदाहरण black या #000000</value></data>
+  <data name="VideoPage_Trim.Text" xml:space="preserve"><value>ट्रिम</value></data>
+  <data name="VideoPage_EnableTrim.Content" xml:space="preserve"><value>ट्रिम सक्षम करें</value></data>
+  <data name="VideoPage_TrimHint.Text" xml:space="preserve"><value>प्रारंभ और अंत बिंदु चुनने के लिए प्रीव्यू के नीचे ट्रिम हैंडल खींचें।</value></data>
+  <data name="VideoPage_RotateAndMirror.Text" xml:space="preserve"><value>घुमाएँ और मिरर करें</value></data>
+  <data name="VideoPage_Rotation.Header" xml:space="preserve"><value>रोटेशन</value></data>
+  <data name="VideoPage_MirrorHorizontally.Content" xml:space="preserve"><value>क्षैतिज रूप से मिरर करें</value></data>
+  <data name="VideoPage_MirrorVertically.Content" xml:space="preserve"><value>लंबवत रूप से मिरर करें</value></data>
+  <data name="VideoPage_Metadata.Text" xml:space="preserve"><value>मेटाडेटा</value></data>
+  <data name="VideoPage_RemoveMetadata.Content" xml:space="preserve"><value>मेटाडेटा हटाएँ</value></data>
+  <data name="VideoPage_Repair.Text" xml:space="preserve"><value>मरम्मत</value></data>
+  <data name="VideoPage_EnableRepair.Content" xml:space="preserve"><value>मरम्मत मोड सक्षम करें</value></data>
+  <data name="VideoPage_RepairMode.Header" xml:space="preserve"><value>मरम्मत मोड</value></data>
+  <data name="VideoPage_Remux.Content" xml:space="preserve"><value>Remux</value></data>
+  <data name="VideoPage_Reencode.Content" xml:space="preserve"><value>Reencode</value></data>
+  <data name="VideoPage_RegenerateTimestamps.Content" xml:space="preserve"><value>टाइमस्टैम्प पुनर्जनित करें</value></data>
+  <data name="VideoPage_IgnoreErrors.Content" xml:space="preserve"><value>सुधारी जा सकने वाली त्रुटियाँ अनदेखी करें</value></data>
+  <data name="VideoPage_DropNonEssential.Content" xml:space="preserve"><value>गैर-जरूरी स्ट्रीम हटाएँ</value></data>
+  <data name="VideoPage_RemoveMetadataRepair.Content" xml:space="preserve"><value>मरम्मत के दौरान मेटाडेटा हटाएँ</value></data>
+  <data name="VideoPage_TranscriptionReview.Text" xml:space="preserve"><value>ट्रांसक्रिप्शन समीक्षा</value></data>
+  <data name="VideoPage_TranscriptionReviewHint.Text" xml:space="preserve"><value>ऐप द्वारा निर्यात के लिए अंतिम ASS सबटाइटल जनरेट करने से पहले यहाँ प्रत्येक Whisper सेगमेंट की समीक्षा करें। वीडियो प्रोसेस करने पर आपके बदलाव स्वतः लागू हो जाते हैं।</value></data>
+  <data name="VideoPage_SubtitleEditorStatus.Text" xml:space="preserve"><value>संपादन के लिए सबटाइटल जनरेट करें या फ़ाइल चुनें।</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       PDF editor page
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="PdfPage_Title.Text" xml:space="preserve"><value>PDF एडिटर</value></data>
+  <data name="PdfPage_Subtitle.Text" xml:space="preserve"><value>PDF इंपोर्ट करें, पृष्ठ व्यवस्थित करें, सुरक्षा जोड़ें, और एडिट लागू करें — प्रीव्यू और विकल्प आसानी से देखें।</value></data>
+  <data name="PdfPage_PreviewHint.Text" xml:space="preserve"><value>शुरू करने के लिए PDF छोड़ें या प्रीव्यू सरफ़ेस पर क्लिक करें। व्यवस्था, सुरक्षा, और सामग्री एडिट विकल्प पैनल से उपलब्ध रहते हैं।</value></data>
+  <data name="PdfPage_NoPdfLoaded.Text" xml:space="preserve"><value>अभी तक कोई PDF लोड नहीं हुई।</value></data>
+  <data name="PdfPage_DropHintTitle.Text" xml:space="preserve"><value>PDF यहाँ छोड़ें</value></data>
+  <data name="PdfPage_DropHintSubtitle.Text" xml:space="preserve"><value>फ़ाइल ब्राउज़ करने के लिए इस सरफ़ेस पर क्लिक भी कर सकते हैं। मर्ज, विभाजित, एन्क्रिप्ट, और सामग्री विकल्प पैनल से उपलब्ध रहते हैं।</value></data>
+  <data name="PdfPage_FitPage.Content" xml:space="preserve"><value>पृष्ठ फ़िट करें</value></data>
+  <data name="PdfPage_Previous.Content" xml:space="preserve"><value>← पिछला</value></data>
+  <data name="PdfPage_Next.Content" xml:space="preserve"><value>अगला →</value></data>
+  <data name="PdfPage_SelectCategory.Text" xml:space="preserve"><value>बाईं ओर से श्रेणी चुनें</value></data>
+  <data name="PdfPage_Processing.Text" xml:space="preserve"><value>PDF प्रोसेस हो रही है...</value></data>
+  <data name="PdfPage_PreparingService.Text" xml:space="preserve"><value>PDF सेवा तैयार हो रही है...</value></data>
+  <data name="PdfPage_Merge.Text" xml:space="preserve"><value>मर्ज</value></data>
+  <data name="PdfPage_MergeHint.Text" xml:space="preserve"><value>कई PDF को एक दस्तावेज़ में जोड़ें।</value></data>
+  <data name="PdfPage_AddPdf.Content" xml:space="preserve"><value>मर्ज के लिए PDF जोड़ें</value></data>
+  <data name="PdfPage_Split.Text" xml:space="preserve"><value>विभाजित करें</value></data>
+  <data name="PdfPage_SplitMode.Header" xml:space="preserve"><value>विभाजन मोड</value></data>
+  <data name="PdfPage_OnePagePerFile.Content" xml:space="preserve"><value>प्रति फ़ाइल एक पृष्ठ</value></data>
+  <data name="PdfPage_ByPageRanges.Content" xml:space="preserve"><value>पृष्ठ श्रेणी के अनुसार</value></data>
+  <data name="PdfPage_PageRanges.Header" xml:space="preserve"><value>पृष्ठ श्रेणियाँ</value></data>
+  <data name="PdfPage_PageRanges.PlaceholderText" xml:space="preserve"><value>उदाहरण: 1-3, 5, 7-9</value></data>
+  <data name="PdfPage_PageRangesHint.Text" xml:space="preserve"><value>1-3 जैसी श्रेणियाँ (पृष्ठ 1 से 3 तक) या 5 जैसे एकल पृष्ठ निर्दिष्ट करें।</value></data>
+  <data name="PdfPage_Reorder.Text" xml:space="preserve"><value>क्रम बदलें</value></data>
+  <data name="PdfPage_ReorderHint.Text" xml:space="preserve"><value>नया क्रम निर्दिष्ट करके पृष्ठों को पुनर्व्यवस्थित करें।</value></data>
+  <data name="PdfPage_PageOrder.Header" xml:space="preserve"><value>पृष्ठ क्रम</value></data>
+  <data name="PdfPage_PageOrder.PlaceholderText" xml:space="preserve"><value>उदाहरण: 3, 1, 2, 5, 4</value></data>
+  <data name="PdfPage_PageOrderHint.Text" xml:space="preserve"><value>वांछित क्रम में पृष्ठ संख्याएँ, अल्पविराम से अलग करके लिखें।</value></data>
+  <data name="PdfPage_Extract.Text" xml:space="preserve"><value>निकालें</value></data>
+  <data name="PdfPage_ExtractImages.Content" xml:space="preserve"><value>इमेज निकालें</value></data>
+  <data name="PdfPage_ExtractAttachments.Content" xml:space="preserve"><value>अटैचमेंट निकालें</value></data>
+  <data name="PdfPage_ExtractHint.Text" xml:space="preserve"><value>निकाली गई फ़ाइलें अलग-अलग फ़ोल्डर में सहेजी जाएँगी।</value></data>
+  <data name="PdfPage_Rotate.Text" xml:space="preserve"><value>घुमाएँ</value></data>
+  <data name="PdfPage_Rotation.Header" xml:space="preserve"><value>रोटेशन</value></data>
+  <data name="PdfPage_0Degrees.Content" xml:space="preserve"><value>0 डिग्री</value></data>
+  <data name="PdfPage_90CW.Content" xml:space="preserve"><value>90 डिग्री दक्षिणावर्त</value></data>
+  <data name="PdfPage_180Degrees.Content" xml:space="preserve"><value>180 डिग्री</value></data>
+  <data name="PdfPage_270CW.Content" xml:space="preserve"><value>270 डिग्री दक्षिणावर्त</value></data>
+  <data name="PdfPage_ApplyTo.Header" xml:space="preserve"><value>लागू करें</value></data>
+  <data name="PdfPage_AllPages.Content" xml:space="preserve"><value>सभी पृष्ठ</value></data>
+  <data name="PdfPage_CurrentPage.Content" xml:space="preserve"><value>वर्तमान पृष्ठ</value></data>
+  <data name="PdfPage_SelectedPages.Content" xml:space="preserve"><value>चुने गए पृष्ठ</value></data>
+  <data name="PdfPage_PageNumbers.Header" xml:space="preserve"><value>पृष्ठ संख्याएँ</value></data>
+  <data name="PdfPage_PageNumbers.PlaceholderText" xml:space="preserve"><value>उदाहरण: 1, 3-5, 7</value></data>
+  <data name="PdfPage_Encrypt.Text" xml:space="preserve"><value>एन्क्रिप्ट</value></data>
+  <data name="PdfPage_Password.Header" xml:space="preserve"><value>पासवर्ड</value></data>
+  <data name="PdfPage_ConfirmPassword.Header" xml:space="preserve"><value>पासवर्ड की पुष्टि करें</value></data>
+  <data name="PdfPage_SetOwnerPassword.Content" xml:space="preserve"><value>ओनर पासवर्ड सेट करें</value></data>
+  <data name="PdfPage_OwnerPassword.Header" xml:space="preserve"><value>ओनर पासवर्ड</value></data>
+  <data name="PdfPage_PasswordSection.Text" xml:space="preserve"><value>पासवर्ड</value></data>
+  <data name="PdfPage_PasswordAction.Header" xml:space="preserve"><value>कार्रवाई</value></data>
+  <data name="PdfPage_RemovePassword.Content" xml:space="preserve"><value>पासवर्ड हटाएँ</value></data>
+  <data name="PdfPage_ChangePassword.Content" xml:space="preserve"><value>पासवर्ड बदलें</value></data>
+  <data name="PdfPage_CurrentPassword.Header" xml:space="preserve"><value>वर्तमान पासवर्ड</value></data>
+  <data name="PdfPage_RemovePasswordHint.Text" xml:space="preserve"><value>सुरक्षा हटाने के लिए PDF का वर्तमान पासवर्ड दर्ज करें।</value></data>
+  <data name="PdfPage_NewPassword.Header" xml:space="preserve"><value>नया पासवर्ड</value></data>
+  <data name="PdfPage_ConfirmNewPassword.Header" xml:space="preserve"><value>नए पासवर्ड की पुष्टि करें</value></data>
+  <data name="PdfPage_PermissionsSection.Text" xml:space="preserve"><value>अनुमतियाँ</value></data>
+  <data name="PdfPage_PermissionsHint.Text" xml:space="preserve"><value>उपयोगकर्ता PDF के साथ क्या कर सकते हैं, यह नियंत्रित करें।</value></data>
+  <data name="PdfPage_AllowPrinting.Content" xml:space="preserve"><value>प्रिंटिंग की अनुमति दें</value></data>
+  <data name="PdfPage_AllowCopying.Content" xml:space="preserve"><value>टेक्स्ट और इमेज कॉपी करने की अनुमति दें</value></data>
+  <data name="PdfPage_AllowEditing.Content" xml:space="preserve"><value>संपादन की अनुमति दें</value></data>
+  <data name="PdfPage_AllowAnnotations.Content" xml:space="preserve"><value>एनोटेशन की अनुमति दें</value></data>
+  <data name="PdfPage_OCR.Text" xml:space="preserve"><value>OCR</value></data>
+  <data name="PdfPage_OcrHint.Text" xml:space="preserve"><value>टेक्स्ट पहचानकर स्कैन की गई PDF को खोज योग्य बनाएँ।</value></data>
+  <data name="PdfPage_OcrLanguage.Header" xml:space="preserve"><value>भाषा</value></data>
+  <data name="PdfPage_OcrAutoDetect.Content" xml:space="preserve"><value>स्वतः-पहचान</value></data>
+  <data name="PdfPage_Metadata.Text" xml:space="preserve"><value>मेटाडेटा</value></data>
+  <data name="PdfPage_MetadataTitle.Header" xml:space="preserve"><value>शीर्षक</value></data>
+  <data name="PdfPage_MetadataTitle.PlaceholderText" xml:space="preserve"><value>दस्तावेज़ का शीर्षक</value></data>
+  <data name="PdfPage_MetadataAuthor.Header" xml:space="preserve"><value>लेखक</value></data>
+  <data name="PdfPage_MetadataAuthor.PlaceholderText" xml:space="preserve"><value>लेखक का नाम</value></data>
+  <data name="PdfPage_MetadataSubject.Header" xml:space="preserve"><value>विषय</value></data>
+  <data name="PdfPage_MetadataSubject.PlaceholderText" xml:space="preserve"><value>दस्तावेज़ का विषय</value></data>
+  <data name="PdfPage_MetadataKeywords.Header" xml:space="preserve"><value>कीवर्ड</value></data>
+  <data name="PdfPage_MetadataKeywords.PlaceholderText" xml:space="preserve"><value>अल्पविराम से अलग कीवर्ड</value></data>
+  <data name="PdfPage_MetadataCreator.Header" xml:space="preserve"><value>निर्माता</value></data>
+  <data name="PdfPage_MetadataCreator.PlaceholderText" xml:space="preserve"><value>निर्माता एप्लिकेशन</value></data>
+  <data name="PdfPage_MetadataProducer.Header" xml:space="preserve"><value>प्रोड्यूसर</value></data>
+  <data name="PdfPage_MetadataProducer.PlaceholderText" xml:space="preserve"><value>प्रोड्यूसर एप्लिकेशन</value></data>
+  <data name="PdfPage_Repair.Text" xml:space="preserve"><value>मरम्मत</value></data>
+  <data name="PdfPage_RepairHint.Text" xml:space="preserve"><value>दूषित या क्षतिग्रस्त PDF फ़ाइलें ठीक करें।</value></data>
+  <data name="PdfPage_RepairButton.Content" xml:space="preserve"><value>PDF की मरम्मत करें</value></data>
+  <data name="PdfPage_RepairReady.Text" xml:space="preserve"><value>मरम्मत के लिए तैयार।</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Document editor page
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="DocPage_Title.Text" xml:space="preserve"><value>दस्तावेज़ प्रोसेसिंग</value></data>
+  <data name="DocPage_Subtitle.Text" xml:space="preserve"><value>दस्तावेज़ों को PDF में बदलें, दूषित फ़ाइलें ठीक करें, या एम्बेडेड इमेज निकालें। पैनल से ऑपरेशन चुनें और अपना दस्तावेज़ छोड़ें या ब्राउज़ करें।</value></data>
+  <data name="DocPage_LibreOfficeRequired.Text" xml:space="preserve"><value>LibreOffice आवश्यक है</value></data>
+  <data name="DocPage_LibreOfficeStatus.Text" xml:space="preserve"><value>दस्तावेज़ प्रोसेसिंग के लिए LibreOffice आवश्यक है, जिसे डाउनलोड करना होगा (~420 MB)। यह एक बार का डाउनलोड है जो आपकी मशीन पर रहेगा।</value></data>
+  <data name="DocPage_DownloadLibreOffice.Content" xml:space="preserve"><value>LibreOffice डाउनलोड करें</value></data>
+  <data name="DocPage_Cancel.Content" xml:space="preserve"><value>रद्द करें</value></data>
+  <data name="DocPage_DocumentSection.Text" xml:space="preserve"><value>दस्तावेज़</value></data>
+  <data name="DocPage_DocumentSectionHint.Text" xml:space="preserve"><value>दस्तावेज़ छोड़ें या ब्राउज़ करने के लिए सरफ़ेस पर क्लिक करें। एक्शन बटन क्लिक करने पर चुना गया ऑपरेशन लागू होगा।</value></data>
+  <data name="DocPage_NoDocumentLoaded.Text" xml:space="preserve"><value>अभी तक कोई दस्तावेज़ लोड नहीं हुआ।</value></data>
+  <data name="DocPage_DropHintTitle.Text" xml:space="preserve"><value>दस्तावेज़ यहाँ छोड़ें</value></data>
+  <data name="DocPage_DropHintSubtitle.Text" xml:space="preserve"><value>फ़ाइल ब्राउज़ करने के लिए इस सरफ़ेस पर क्लिक भी कर सकते हैं। समर्थित फ़ॉर्मेट में DOCX, PDF, PPTX, XLSX आदि शामिल हैं।</value></data>
+  <data name="DocPage_ProcessDocument.Content" xml:space="preserve"><value>दस्तावेज़ प्रोसेस करें</value></data>
+  <data name="DocPage_SelectOperation.Text" xml:space="preserve"><value>एक ऑपरेशन चुनें</value></data>
+  <data name="DocPage_PdfVariant.Text" xml:space="preserve"><value>PDF वेरिएंट</value></data>
+  <data name="DocPage_OutputStandard.Header" xml:space="preserve"><value>आउटपुट मानक</value></data>
+  <data name="DocPage_StandardPdf.Content" xml:space="preserve"><value>मानक PDF 1.4</value></data>
+  <data name="DocPage_PdfA1b.Content" xml:space="preserve"><value>PDF/A-1b (दीर्घकालिक संग्रहण)</value></data>
+  <data name="DocPage_PdfA2b.Content" xml:space="preserve"><value>PDF/A-2b (विस्तारित संग्रहण)</value></data>
+  <data name="DocPage_PdfA3b.Content" xml:space="preserve"><value>PDF/A-3b (अटैचमेंट सहित)</value></data>
+  <data name="DocPage_ImageCompression.Text" xml:space="preserve"><value>इमेज कंप्रेशन</value></data>
+  <data name="DocPage_CompressionMethod.Header" xml:space="preserve"><value>कंप्रेशन विधि</value></data>
+  <data name="DocPage_DefaultCompression.Content" xml:space="preserve"><value>डिफ़ॉल्ट कंप्रेशन</value></data>
+  <data name="DocPage_Lossless.Content" xml:space="preserve"><value>लॉसलेस (गुणवत्ता हानि नहीं)</value></data>
+  <data name="DocPage_JpegCompression.Content" xml:space="preserve"><value>JPEG (छोटा फ़ाइल साइज़)</value></data>
+  <data name="DocPage_PageRange.Text" xml:space="preserve"><value>पृष्ठ श्रेणी (वैकल्पिक)</value></data>
+  <data name="DocPage_PagesToInclude.Header" xml:space="preserve"><value>शामिल करने के लिए पृष्ठ</value></data>
+  <data name="DocPage_PagesToInclude.PlaceholderText" xml:space="preserve"><value>सभी पृष्ठों के लिए खाली छोड़ें। उदाहरण: 1-3,5,8-10</value></data>
+  <data name="DocPage_PageRangeHint.Text" xml:space="preserve"><value>पृष्ठों या श्रेणियों की अल्पविराम से अलग सूची। प्रेज़ेंटेशन के लिए स्लाइड संख्याएँ, स्प्रेडशीट के लिए शीट इंडेक्स उपयोग करें।</value></data>
+  <data name="DocPage_RepairOutputFormat.Text" xml:space="preserve"><value>आउटपुट फ़ॉर्मेट</value></data>
+  <data name="DocPage_SaveAs.Header" xml:space="preserve"><value>इस रूप में सहेजें</value></data>
+  <data name="DocPage_KeepOriginalFormat.Content" xml:space="preserve"><value>मूल फ़ॉर्मेट रखें</value></data>
+  <data name="DocPage_Docx.Content" xml:space="preserve"><value>DOCX (Word)</value></data>
+  <data name="DocPage_Pptx.Content" xml:space="preserve"><value>PPTX (PowerPoint)</value></data>
+  <data name="DocPage_Xlsx.Content" xml:space="preserve"><value>XLSX (Excel)</value></data>
+  <data name="DocPage_Odt.Content" xml:space="preserve"><value>ODT (OpenDocument Text)</value></data>
+  <data name="DocPage_Odp.Content" xml:space="preserve"><value>ODP (OpenDocument Presentation)</value></data>
+  <data name="DocPage_Ods.Content" xml:space="preserve"><value>ODS (OpenDocument Spreadsheet)</value></data>
+  <data name="DocPage_RepairHint.Text" xml:space="preserve"><value>मरम्मत प्रक्रिया दूषित संरचनाएँ ठीक करेगी। मरम्मत के दौरान आप वैकल्पिक रूप से किसी भिन्न फ़ॉर्मेट में बदल सकते हैं।</value></data>
+  <data name="DocPage_ExtractSettings.Text" xml:space="preserve"><value>निष्कर्षण सेटिंग</value></data>
+  <data name="DocPage_ExtractHint.Text" xml:space="preserve"><value>सभी एम्बेडेड इमेज निकाली जाएँगी और ZIP आर्काइव में पैक की जाएँगी। आर्काइव आपके चुने गए स्थान पर बनाई जाएगी।</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Batch editor page
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="BatchPage_Title.Text" xml:space="preserve"><value>बैच प्रोसेसर</value></data>
+  <data name="BatchPage_Subtitle.Text" xml:space="preserve"><value>कई फ़ाइलें छोड़ें — ऑडियो, वीडियो, दस्तावेज़, PDF, इमेज — और एक रन में प्रत्येक प्रकार समूह पर चुना गया ऑपरेशन लागू करें।</value></data>
+  <data name="BatchPage_FilesSection.Text" xml:space="preserve"><value>फ़ाइलें</value></data>
+  <data name="BatchPage_FileCountDefault.Text" xml:space="preserve"><value>शुरू करने के लिए नीचे फ़ाइलें छोड़ें या जोड़ें क्लिक करें।</value></data>
+  <data name="BatchPage_AddFiles.Content" xml:space="preserve"><value>फ़ाइलें जोड़ें</value></data>
+  <data name="BatchPage_ClearAll.Content" xml:space="preserve"><value>सब साफ़ करें</value></data>
+  <data name="BatchPage_DropHintTitle.Text" xml:space="preserve"><value>फ़ाइलें यहाँ छोड़ें</value></data>
+  <data name="BatchPage_DropHintSubtitle.Text" xml:space="preserve"><value>प्रकार स्वतंत्र रूप से मिलाएँ। ऑडियो, वीडियो, दस्तावेज़, PDF, और इमेज सभी समर्थित हैं — प्रत्येक समूह को अपना ऑपरेशन मिलता है।</value></data>
+  <data name="BatchPage_Preparing.Text" xml:space="preserve"><value>तैयार हो रहा है…</value></data>
+  <data name="BatchPage_NoFilesLoaded.Text" xml:space="preserve"><value>अभी तक कोई फ़ाइल लोड नहीं हुई।</value></data>
+  <data name="BatchPage_ShowInFolder.Content" xml:space="preserve"><value>फ़ोल्डर में दिखाएँ</value></data>
+  <data name="BatchPage_Cancel.Content" xml:space="preserve"><value>रद्द करें</value></data>
+  <data name="BatchPage_ProcessBatch.Content" xml:space="preserve"><value>बैच प्रोसेस करें</value></data>
+  <data name="BatchPage_SelectOperationHeader.Text" xml:space="preserve"><value>एक ऑपरेशन चुनें</value></data>
+  <data name="BatchPage_NoSelectionHint.Text" xml:space="preserve"><value>कॉन्फ़िगर करने के लिए साइडबार से एक ऑपरेशन चुनें। जितने चाहें उतने सक्षम करें — वे प्रत्येक फ़ाइल पर पाइपलाइन के रूप में चलते हैं।</value></data>
+  <data name="BatchPage_OutputSettings.Text" xml:space="preserve"><value>आउटपुट सेटिंग</value></data>
+  <data name="BatchPage_FilenameSuffix.Header" xml:space="preserve"><value>फ़ाइलनाम सफ़िक्स</value></data>
+  <data name="BatchPage_FilesInParallel.Header" xml:space="preserve"><value>समानांतर फ़ाइलें</value></data>
+  <data name="BatchPage_ConvertAudioFormat.Content" xml:space="preserve"><value>ऑडियो फ़ॉर्मेट बदलें</value></data>
+  <data name="BatchPage_AudioOutputFormat.Header" xml:space="preserve"><value>आउटपुट फ़ॉर्मेट</value></data>
+  <data name="BatchPage_FlacLossless.Content" xml:space="preserve"><value>FLAC (लॉसलेस)</value></data>
+  <data name="BatchPage_WavPcm.Content" xml:space="preserve"><value>WAV (PCM)</value></data>
+  <data name="BatchPage_OggVorbis.Content" xml:space="preserve"><value>OGG Vorbis</value></data>
+  <data name="BatchPage_CompressAudio.Content" xml:space="preserve"><value>ऑडियो कंप्रेस करें</value></data>
+  <data name="BatchPage_CompressionMode.Header" xml:space="preserve"><value>कंप्रेशन मोड</value></data>
+  <data name="BatchPage_LossySmaller.Content" xml:space="preserve"><value>लॉसी (छोटी फ़ाइल)</value></data>
+  <data name="BatchPage_Lossless.Content" xml:space="preserve"><value>लॉसलेस</value></data>
+  <data name="BatchPage_TargetBitrate.Header" xml:space="preserve"><value>लक्ष्य बिटरेट (kbps)</value></data>
+  <data name="BatchPage_NormalizeLoudness.Content" xml:space="preserve"><value>लाउडनेस नॉर्मलाइज़ करें</value></data>
+  <data name="BatchPage_NormalizeMode.Header" xml:space="preserve"><value>मोड</value></data>
+  <data name="BatchPage_LUFS.Content" xml:space="preserve"><value>LUFS (ब्रॉडकास्ट)</value></data>
+  <data name="BatchPage_Peak.Content" xml:space="preserve"><value>पीक</value></data>
+  <data name="BatchPage_TargetLevel.Header" xml:space="preserve"><value>लक्ष्य स्तर (dB / LUFS)</value></data>
+  <data name="BatchPage_ChangeContainer.Content" xml:space="preserve"><value>कंटेनर बदलें</value></data>
+  <data name="BatchPage_TargetContainer.Header" xml:space="preserve"><value>लक्ष्य कंटेनर</value></data>
+  <data name="BatchPage_ChangeCodec.Content" xml:space="preserve"><value>कोडेक बदलें</value></data>
+  <data name="BatchPage_VideoCodec.Header" xml:space="preserve"><value>वीडियो कोडेक</value></data>
+  <data name="BatchPage_AudioCodec.Header" xml:space="preserve"><value>ऑडियो कोडेक</value></data>
+  <data name="BatchPage_H264.Content" xml:space="preserve"><value>H.264</value></data>
+  <data name="BatchPage_H265.Content" xml:space="preserve"><value>H.265 / HEVC</value></data>
+  <data name="BatchPage_CompressVideo.Content" xml:space="preserve"><value>वीडियो कंप्रेस करें</value></data>
+  <data name="BatchPage_VideoQualityPreset.Header" xml:space="preserve"><value>गुणवत्ता प्रीसेट</value></data>
+  <data name="BatchPage_VeryHighQuality.Content" xml:space="preserve"><value>बहुत उच्च गुणवत्ता</value></data>
+  <data name="BatchPage_HighQuality.Content" xml:space="preserve"><value>उच्च गुणवत्ता</value></data>
+  <data name="BatchPage_Balanced.Content" xml:space="preserve"><value>संतुलित</value></data>
+  <data name="BatchPage_SmallSize.Content" xml:space="preserve"><value>छोटा आकार</value></data>
+  <data name="BatchPage_ResizeVideo.Content" xml:space="preserve"><value>वीडियो का आकार बदलें</value></data>
+  <data name="BatchPage_VideoWidth.Header" xml:space="preserve"><value>चौड़ाई</value></data>
+  <data name="BatchPage_VideoHeight.Header" xml:space="preserve"><value>ऊँचाई</value></data>
+  <data name="BatchPage_ExtractAudioTrack.Content" xml:space="preserve"><value>ऑडियो ट्रैक निकालें</value></data>
+  <data name="BatchPage_OutputAudioFormat.Header" xml:space="preserve"><value>आउटपुट ऑडियो फ़ॉर्मेट</value></data>
+  <data name="BatchPage_GenerateMuxSubtitles.Content" xml:space="preserve"><value>सबटाइटल जनरेट और मक्स करें</value></data>
+  <data name="BatchPage_TranscriptionSection.Text" xml:space="preserve"><value>ट्रांसक्रिप्शन</value></data>
+  <data name="BatchPage_TranscriptionHint.Text" xml:space="preserve"><value>प्रत्येक वीडियो ट्रांसक्राइब करने के लिए Whisper उपयोग करता है। बेसिक मोड SRT फ़ाइल लिखता है; उन्नत मोड स्टाइल्ड ASS सबटाइटल बनाता है।</value></data>
+  <data name="BatchPage_DownloadTranscription.Content" xml:space="preserve"><value>ट्रांसक्रिप्शन फ़ीचर डाउनलोड करें</value></data>
+  <data name="BatchPage_TranscriptionNotDownloaded.Text" xml:space="preserve"><value>ट्रांसक्रिप्शन फ़ीचर अभी तक डाउनलोड नहीं हुआ।</value></data>
+  <data name="BatchPage_SubtitleGenMode.Header" xml:space="preserve"><value>सबटाइटल जनरेशन मोड</value></data>
+  <data name="BatchPage_BasicSRT.Content" xml:space="preserve"><value>बेसिक (SRT)</value></data>
+  <data name="BatchPage_AdvancedASS.Content" xml:space="preserve"><value>उन्नत (ASS)</value></data>
+  <data name="BatchPage_AdvancedOutputType.Header" xml:space="preserve"><value>उन्नत आउटपुट प्रकार</value></data>
+  <data name="BatchPage_StyledASS.Content" xml:space="preserve"><value>स्टाइल्ड ASS</value></data>
+  <data name="BatchPage_KaraokeASS.Content" xml:space="preserve"><value>कराओके ASS</value></data>
+  <data name="BatchPage_ConfigureAdvanced.Content" xml:space="preserve"><value>उन्नत सबटाइटल कॉन्फ़िगर करें</value></data>
+  <data name="BatchPage_SecondsMax.Header" xml:space="preserve"><value>अधिकतम सेकंड</value></data>
+  <data name="BatchPage_LimitWords.Content" xml:space="preserve"><value>प्रति सेक्शन शब्द सीमित करें</value></data>
+  <data name="BatchPage_WordsMax.Header" xml:space="preserve"><value>अधिकतम शब्द</value></data>
+  <data name="BatchPage_SubtitleMux.Text" xml:space="preserve"><value>सबटाइटल मक्स</value></data>
+  <data name="BatchPage_MuxMode.Header" xml:space="preserve"><value>मक्स मोड</value></data>
+  <data name="BatchPage_SoftMux.Content" xml:space="preserve"><value>SoftMux (एम्बेडेड ट्रैक)</value></data>
+  <data name="BatchPage_BurnIn.Content" xml:space="preserve"><value>BurnIn (चित्र में बेक किया गया)</value></data>
+  <data name="BatchPage_PlacementSection.Text" xml:space="preserve"><value>स्थान</value></data>
+  <data name="BatchPage_PlacementHint.Text" xml:space="preserve"><value>वीडियो फ़्रेम के प्रतिशत के रूप में सबटाइटल की स्थिति बारीकी से ट्यून करें।</value></data>
+  <data name="BatchPage_Horizontal.Header" xml:space="preserve"><value>क्षैतिज (%)</value></data>
+  <data name="BatchPage_Vertical.Header" xml:space="preserve"><value>लंबवत (%)</value></data>
+  <data name="BatchPage_ResetPlacement.Content" xml:space="preserve"><value>स्थान रीसेट करें</value></data>
+  <data name="BatchPage_LanguageTag.Header" xml:space="preserve"><value>भाषा टैग</value></data>
+  <data name="BatchPage_LanguageTag.PlaceholderText" xml:space="preserve"><value>उदाहरण: hi</value></data>
+  <data name="BatchPage_SubtitleTitle.Header" xml:space="preserve"><value>सबटाइटल शीर्षक</value></data>
+  <data name="BatchPage_SubtitleTitle.PlaceholderText" xml:space="preserve"><value>उदाहरण: हिंदी</value></data>
+  <data name="BatchPage_SetDefaultSubtitle.Content" xml:space="preserve"><value>डिफ़ॉल्ट सबटाइटल के रूप में सेट करें</value></data>
+  <data name="BatchPage_ConvertToPdf.Content" xml:space="preserve"><value>PDF में बदलें</value></data>
+  <data name="BatchPage_LibreOfficeHint.Text" xml:space="preserve"><value>प्रत्येक दस्तावेज़ बदलने के लिए LibreOffice उपयोग करता है।</value></data>
+  <data name="BatchPage_PdfVariant.Header" xml:space="preserve"><value>PDF वेरिएंट</value></data>
+  <data name="BatchPage_StandardPdf.Content" xml:space="preserve"><value>मानक PDF</value></data>
+  <data name="BatchPage_PdfA1b.Content" xml:space="preserve"><value>PDF/A-1b (संग्रहण)</value></data>
+  <data name="BatchPage_PdfA2b.Content" xml:space="preserve"><value>PDF/A-2b</value></data>
+  <data name="BatchPage_PdfA3b.Content" xml:space="preserve"><value>PDF/A-3b</value></data>
+  <data name="BatchPage_CompressOptimizePdf.Content" xml:space="preserve"><value>PDF कंप्रेस / ऑप्टिमाइज़ करें</value></data>
+  <data name="BatchPage_CompressPdfHint.Text" xml:space="preserve"><value>आकार कम करने के लिए फ़ाइल को रैखिक और पुनर्निर्मित करता है (qpdf उपयोग करता है)।</value></data>
+  <data name="BatchPage_RepairPdf.Content" xml:space="preserve"><value>PDF की मरम्मत करें</value></data>
+  <data name="BatchPage_RepairPdfHint.Text" xml:space="preserve"><value>भ्रष्टाचार ठीक करने के लिए दस्तावेज़ संरचना पुनर्निर्मित करता है (qpdf उपयोग करता है)।</value></data>
+  <data name="BatchPage_AddOcrLayer.Content" xml:space="preserve"><value>OCR टेक्स्ट लेयर जोड़ें</value></data>
+  <data name="BatchPage_TessdataPath.Header" xml:space="preserve"><value>Tessdata डायरेक्टरी पाथ</value></data>
+  <data name="BatchPage_TessdataPath.PlaceholderText" xml:space="preserve"><value>C:\पथ\to\tessdata</value></data>
+  <data name="BatchPage_OcrLanguages.Header" xml:space="preserve"><value>भाषाएँ (Tesseract कोड)</value></data>
+  <data name="BatchPage_RasterizationDpi.Header" xml:space="preserve"><value>रेस्टराइज़ेशन DPI</value></data>
+  <data name="BatchPage_MergeAllPdfs.Content" xml:space="preserve"><value>सभी PDF एक फ़ाइल में मर्ज करें</value></data>
+  <data name="BatchPage_MergeHint.Text" xml:space="preserve"><value>अन्य PDF ऑपरेशन के साथ संयुक्त नहीं किया जा सकता।</value></data>
+  <data name="BatchPage_MergeFilename.Header" xml:space="preserve"><value>आउटपुट फ़ाइलनाम</value></data>
+  <data name="BatchPage_ConvertImageFormat.Content" xml:space="preserve"><value>इमेज फ़ॉर्मेट बदलें</value></data>
+  <data name="BatchPage_ImageTargetFormat.Header" xml:space="preserve"><value>लक्ष्य फ़ॉर्मेट</value></data>
+  <data name="BatchPage_CompressImages.Content" xml:space="preserve"><value>इमेज कंप्रेस करें</value></data>
+  <data name="BatchPage_ResizeImages.Content" xml:space="preserve"><value>इमेज का आकार बदलें</value></data>
+  <data name="BatchPage_ImageWidth.Header" xml:space="preserve"><value>चौड़ाई</value></data>
+  <data name="BatchPage_ImageHeight.Header" xml:space="preserve"><value>ऊँचाई</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Licenses page
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="LicensesPage_Title.Text" xml:space="preserve"><value>लाइसेंस</value></data>
+  <data name="LicensesPage_Subtitle1.Text" xml:space="preserve"><value>इस ऐप द्वारा उपयोग किए गए थर्ड-पार्टी कंपोनेंट, उनका एट्रिब्यूशन, और उनके लाइसेंस।</value></data>
+  <data name="LicensesPage_Subtitle2.Text" xml:space="preserve"><value>सूचीबद्ध सभी लाइसेंस वाणिज्यिक उपयोग की अनुमति देते हैं, उनकी शर्तों और किसी भी पुनर्वितरण दायित्व के अधीन।</value></data>
+  <data name="LicensesPage_ShowLicense.Content" xml:space="preserve"><value>लाइसेंस दिखाएँ</value></data>
+
+</root>

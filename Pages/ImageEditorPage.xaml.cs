@@ -362,11 +362,6 @@ namespace Files_Tools.Pages
             RefreshValidation();
         }
 
-        private void DimensionTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            RefreshValidation();
-        }
-
         private void UpscaleDimensionNumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
         {
             ClampUpscaleNumberBoxesToBounds();
@@ -677,16 +672,6 @@ namespace Files_Tools.Pages
             };
         }
 
-        private static int ToDimension(string? value, int fallback)
-        {
-            if (!int.TryParse(value, out var parsed))
-            {
-                return fallback;
-            }
-
-            return Math.Max(1, parsed);
-        }
-
         private static int ToDimensionFromDouble(double? value, int fallback)
         {
             if (!value.HasValue || double.IsNaN(value.Value) || double.IsInfinity(value.Value))
@@ -737,21 +722,6 @@ namespace Files_Tools.Pages
         private static int ToPercentage(double value)
         {
             return Math.Clamp((int)Math.Round(value), 0, 100);
-        }
-
-        private static string BuildOptionsSummary(ImageEditOptions options)
-        {
-            return
-                $"Format: {options.OutputFormat}\n" +
-                $"Preserve quality: {options.PreserveOriginalQuality}\n" +
-                $"Quality: {options.QualityPercent}%\n" +
-                $"Crop enabled: {options.EnableCrop} ({options.CropLeft}, {options.CropTop}, {options.CropWidth} x {options.CropHeight})\n" +
-                $"Resize enabled: {options.EnableResize} ({options.ResizeWidth} x {options.ResizeHeight})\n" +
-                $"Preserve aspect ratio: {options.PreserveAspectRatio}\n" +
-                $"Upscale enabled: {options.EnableUpscale} ({options.UpscaleWidth} x {options.UpscaleHeight})\n" +
-                $"Rotation: {options.RotationDegrees} degrees\n" +
-                $"Mirror H/V: {options.MirrorHorizontally}/{options.MirrorVertically}\n" +
-                $"RGB enabled: {options.EnableRgbAdjustments} ({options.RedPercent}% / {options.GreenPercent}% / {options.BluePercent}%)";
         }
 
         private void ResetCropState()

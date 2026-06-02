@@ -407,7 +407,7 @@ public sealed partial class DocumentEditorPage : Page
 
     private void OptionsSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (sender == ImageCompressionComboBox && JpegQualityPanel != null)
+        if (ReferenceEquals(sender, ImageCompressionComboBox) && JpegQualityPanel != null)
         {
             JpegQualityPanel.Visibility = ImageCompressionComboBox.SelectedIndex == 2 ? Visibility.Visible : Visibility.Collapsed;
         }

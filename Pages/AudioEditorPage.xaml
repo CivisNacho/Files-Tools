@@ -7,14 +7,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
     <Page.Resources>
-        <SolidColorBrush x:Key="ImageAccentBrush" Color="#FF3B82F6" />
-        <SolidColorBrush x:Key="ImageAccentDarkBrush" Color="#FF2563EB" />
-        <SolidColorBrush x:Key="AudioAccentBrush" Color="#FF8B5CF6" />
-        <SolidColorBrush x:Key="AudioAccentDarkBrush" Color="#FF6D28D9" />
-        <LinearGradientBrush x:Key="AudioHintBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#FFF4EDFF" Offset="0" />
-            <GradientStop Color="#FFE9D5FF" Offset="1" />
-        </LinearGradientBrush>
+        <!--  Accent/hint brushes (Image*/Audio* accent + AudioHintBackgroundBrush) are defined
+              app-wide and theme-aware in Themes/AppTheme.xaml.  -->
         <Style x:Key="SettingsCardStyle" TargetType="Border">
             <Setter Property="Padding" Value="16" />
             <Setter Property="CornerRadius" Value="12" />
@@ -34,8 +28,8 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel MaxWidth="880" Spacing="6">
-                    <TextBlock FontSize="38" FontWeight="SemiBold" Text="Audio Editor" />
-                    <TextBlock Opacity="0.78" Text="Load an audio file, build a processing chain, and apply all selected operations in one run." TextWrapping="Wrap" />
+                    <TextBlock x:Uid="AudioPage_Title" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="38" FontWeight="SemiBold" Text="Audio Editor" />
+                    <TextBlock x:Uid="AudioPage_Subtitle" Opacity="0.78" Text="Load an audio file, build a processing chain, and apply all selected operations in one run." TextWrapping="Wrap" />
                 </StackPanel>
 
                 <Grid x:Name="EditorGrid" Grid.Row="1" ColumnSpacing="20" RowSpacing="16">
@@ -59,8 +53,8 @@
                             </Grid.RowDefinitions>
 
                             <StackPanel Spacing="4">
-                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="Preview" />
-                                <TextBlock Opacity="0.72" Text="Drop an audio file or click the surface to pick one. Processing status appears below when running." TextWrapping="Wrap" />
+                                <TextBlock x:Uid="PreviewTitle" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="24" FontWeight="SemiBold" Text="Preview" />
+                                <TextBlock x:Uid="AudioPage_PreviewHint" Opacity="0.72" Text="Drop an audio file or click the surface to pick one. Processing status appears below when running." TextWrapping="Wrap" />
                             </StackPanel>
 
                             <Border x:Name="UploadSurface" Grid.Row="1" AllowDrop="True" MinHeight="200" Padding="16" HorizontalAlignment="Stretch" VerticalAlignment="Top" CornerRadius="14" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource LayerFillColorDefaultBrush}" DragOver="UploadSurface_DragOver" Drop="UploadSurface_Drop" PointerPressed="UploadSurface_PointerPressed">
@@ -81,7 +75,7 @@
                                             Visibility="Collapsed" />
 
                                         <StackPanel Spacing="8">
-                                            <TextBlock FontSize="18" FontWeight="SemiBold" Text="Audio details" />
+                                            <TextBlock x:Uid="AudioPage_AudioDetails" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Audio details" />
                                             <TextBlock x:Name="PreviewCodecTextBlock" Opacity="0.8" Text="Codec: -" />
                                             <TextBlock x:Name="PreviewRateTextBlock" Opacity="0.8" Text="Sample rate: -" />
                                             <TextBlock x:Name="PreviewChannelsTextBlock" Opacity="0.8" Text="Channels: -" />
@@ -163,8 +157,8 @@
                                         <Border HorizontalAlignment="Center" Padding="18" CornerRadius="999" Background="{StaticResource AudioHintBackgroundBrush}">
                                             <FontIcon HorizontalAlignment="Center" FontSize="52" Foreground="{StaticResource AudioAccentDarkBrush}" Glyph="&#xE189;" />
                                         </Border>
-                                        <TextBlock HorizontalAlignment="Center" FontSize="24" FontWeight="SemiBold" Text="Drop audio here" TextAlignment="Center" />
-                                        <TextBlock HorizontalAlignment="Center" Opacity="0.76" Text="Click to browse a track. Format, normalization, trim, EQ, denoise, and metadata tools are in the options panel." TextAlignment="Center" TextWrapping="Wrap" />
+                                        <TextBlock x:Uid="AudioPage_DropHintTitle" HorizontalAlignment="Center" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="24" FontWeight="SemiBold" Text="Drop audio here" TextAlignment="Center" />
+                                        <TextBlock x:Uid="AudioPage_DropHintSubtitle" HorizontalAlignment="Center" Opacity="0.76" Text="Click to browse a track. Format, normalization, trim, EQ, denoise, and metadata tools are in the options panel." TextAlignment="Center" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -175,9 +169,9 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <TextBlock x:Name="LoadedAudioInfoTextBlock" VerticalAlignment="Center" Opacity="0.76" Text="No audio loaded yet." TextWrapping="Wrap" />
+                                <TextBlock x:Name="LoadedAudioInfoTextBlock" x:Uid="AudioPage_NoAudioLoaded" VerticalAlignment="Center" Opacity="0.76" Text="No audio loaded yet." TextWrapping="Wrap" />
 
-                                <Button x:Name="ApplyButton" Grid.Column="1" MinWidth="180" Height="44" HorizontalAlignment="Right" Content="Apply changes" Background="{StaticResource ImageAccentBrush}" BorderBrush="{StaticResource ImageAccentBrush}" Foreground="White" Click="ApplyButton_Click" />
+                                <Button x:Name="ApplyButton" x:Uid="ApplyChanges" Grid.Column="1" MinWidth="180" Height="44" HorizontalAlignment="Right" Content="Apply changes" Background="{StaticResource ImageAccentBrush}" BorderBrush="{StaticResource ImageAccentBrush}" Foreground="White" Click="ApplyButton_Click" />
                             </Grid>
 
                             <StackPanel x:Name="ProcessingStatusPanel" Grid.Row="3" Visibility="Collapsed" Spacing="8">
@@ -186,13 +180,13 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock x:Name="ProcessingStatusTextBlock" FontWeight="SemiBold" Text="Processing audio..." />
-                                    <TextBlock x:Name="ProcessingEtaTextBlock" Grid.Column="1" Opacity="0.76" Text="ETA calculating..." />
+                                    <TextBlock x:Name="ProcessingStatusTextBlock" x:Uid="AudioPage_Processing" FontWeight="SemiBold" Text="Processing audio..." />
+                                    <TextBlock x:Name="ProcessingEtaTextBlock" x:Uid="EtaCalculating" Grid.Column="1" Opacity="0.76" Text="ETA calculating..." />
                                 </Grid>
 
                                 <ProgressBar x:Name="ProcessingProgressBar" Height="6" Minimum="0" Maximum="1" Value="0" />
 
-                                <TextBlock x:Name="ProcessingDetailTextBlock" Opacity="0.76" Text="Preparing pipeline..." />
+                                <TextBlock x:Name="ProcessingDetailTextBlock" x:Uid="AudioPage_PreparingPipeline" Opacity="0.76" Text="Preparing pipeline..." />
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -206,7 +200,7 @@
 
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                 <StackPanel Spacing="2">
-                                    <TextBlock x:Name="SelectedOptionHeaderTextBlock" Margin="0,0,0,12" FontSize="22" FontWeight="SemiBold" Text="Select an option" />
+                                    <TextBlock x:Name="SelectedOptionHeaderTextBlock" x:Uid="SelectOptionHeader" Margin="0,0,0,12" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="22" FontWeight="SemiBold" Text="Select an option" />
                                     <StackPanel x:Name="MediaPanel" Visibility="Collapsed" Spacing="12" />
                                     <StackPanel x:Name="TransformPanel" Visibility="Collapsed" Spacing="12" />
                                     <StackPanel x:Name="AdjustPanel" Visibility="Collapsed" Spacing="12" />

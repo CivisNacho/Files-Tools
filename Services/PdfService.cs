@@ -137,14 +137,18 @@ public interface IPdfService
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Re-encrypts the PDF using the supplied owner password but with a new permission set.
-    /// The user password is preserved. Use this to flip print/copy/edit/annotate flags without
-    /// rotating credentials.
+    /// Applies a permission set to the PDF by (re-)encrypting it. The user password is left empty
+    /// so the document still opens without a prompt; permission flags are enforced via encryption.
+    /// <para>
+    /// <paramref name="ownerPassword"/> is optional. When null or empty, an empty owner password is
+    /// used — the restrictions are written but can be lifted by any tool. Supply an owner password to
+    /// make the restrictions removable only with that password (and to open an already-encrypted input).
+    /// </para>
     /// </summary>
     Task UpdatePermissionsAsync(
         string inputPath,
         string outputPath,
-        string ownerPassword,
+        string? ownerPassword,
         PdfPermissions permissions,
         PdfEncryptionStrength strength,
         CancellationToken cancellationToken = default);
@@ -426,7 +430,8 @@ public sealed class PdfService : IPdfService
                 .InputFile(fullInput)
                 .Json(JsonVersion.Version2);
 
-            string jsonOutput = ExecuteAndCaptureOutput(jsonJob);
+            byte[] jsonBytes = ExecuteAndCaptureBinaryOutput(jsonJob);
+            string jsonOutput = Encoding.UTF8.GetString(jsonBytes);
             int imageCount = ExtractImagesFromJson(fullInput, jsonOutput, imagesDir, cancellationToken);
 
             // ── Attachments ───────────────────────────────────────────────
@@ -554,30 +559,33 @@ public sealed class PdfService : IPdfService
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            // QPdfNet 1.5.0 does not surface qpdf's --set-info-key flag. We achieve the same
-            // effect via a JSON round-trip: dump the PDF as qpdf JSON, mutate the /Info
-            // dictionary entries in-place, then write the modified JSON back as a PDF.
+            // Strategy: dump the PDF structure as qpdf JSON (no stream data needed), locate the
+            // /Info object, write a MINIMAL patch JSON with only the /Info changes, then use
+            // UpdateFromJson so qpdf merges the patch into the original PDF — supplying all stream
+            // data itself. This avoids the fragile full-JSON round-trip.
             var fullInput = Path.GetFullPath(inputPath);
             var fullOutput = Path.GetFullPath(outputPath);
 
             var workDir = Path.Combine(Path.GetTempPath(), "ft_meta_" + Path.GetRandomFileName());
             Directory.CreateDirectory(workDir);
-            var srcJson = Path.Combine(workDir, "src.json");
-            var dstJson = Path.Combine(workDir, "dst.json");
+            var patchJson = Path.Combine(workDir, "patch.json");
 
             try
             {
+                // Dump structure only (no stream data; UpdateFromJson reads streams from the original PDF).
+                var jsonBytes = ExecuteAndCaptureBinaryOutput(new Job()
+                    .InputFile(fullInput)
+                    .Json(JsonVersion.Version2));
+                var structureJson = Encoding.UTF8.GetString(jsonBytes);
+
+                var patch = BuildInfoPatchJson(structureJson, metadata);
+                // qpdf's JSON parser rejects a UTF-8 BOM ("offset 0: unexpected character"),
+                // and Encoding.UTF8 emits one — write without a BOM.
+                File.WriteAllText(patchJson, patch, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+
                 Execute(new Job()
                     .InputFile(fullInput)
-                    .JsonOutput(JsonVersion.Version2)
-                    .OutputFile(srcJson));
-
-                var patched = PatchInfoDictionary(File.ReadAllText(srcJson), metadata);
-                File.WriteAllText(dstJson, patched);
-
-                Execute(new Job()
-                    .JsonInput()
-                    .InputFile(dstJson)
+                    .UpdateFromJson(patchJson)
                     .OutputFile(fullOutput));
             }
             finally
@@ -588,137 +596,99 @@ public sealed class PdfService : IPdfService
     }
 
     /// <summary>
-    /// Rewrites the qpdf JSON document so the trailer's /Info object reflects the supplied metadata.
-    /// Null fields are left as-is; empty fields remove the entry.
+    /// Builds a minimal qpdf patch JSON that contains only the /Info object update.
+    /// qpdf's UpdateFromJson merges this into the original PDF object-by-object, so only
+    /// objects present in the patch are changed; everything else (including streams) is
+    /// preserved from the input PDF.
     /// </summary>
-    private static string PatchInfoDictionary(string sourceJson, PdfMetadata metadata)
+    private static string BuildInfoPatchJson(string structureJson, PdfMetadata metadata)
     {
-        using var doc = JsonDocument.Parse(sourceJson);
+        using var doc = JsonDocument.Parse(structureJson);
         var root = doc.RootElement;
 
         if (!root.TryGetProperty("qpdf", out var qpdfArr) ||
             qpdfArr.ValueKind != JsonValueKind.Array ||
             qpdfArr.GetArrayLength() < 2)
-        {
             throw new PdfOperationException("Unexpected qpdf JSON shape: missing 'qpdf' array.");
-        }
 
-        // The second element is the object map; find or create the /Info object ref via trailer.
-        var objectsElement = qpdfArr[1];
+        var header = qpdfArr[0];
+        var objects = qpdfArr[1];
 
-        // Locate the trailer's /Info entry to know which object holds the Info dictionary.
+        // Locate the /Info object reference from the trailer.
         string? infoObjKey = null;
-        if (objectsElement.TryGetProperty("trailer", out var trailer) &&
+        if (objects.TryGetProperty("trailer", out var trailer) &&
             trailer.TryGetProperty("value", out var trailerValue) &&
             trailerValue.TryGetProperty("/Info", out var infoRef) &&
             infoRef.ValueKind == JsonValueKind.String)
         {
-            // qpdf encodes references as e.g. "12 0 R"; the object map key is "obj:12 0 R".
             infoObjKey = "obj:" + infoRef.GetString();
         }
 
-        // Build a mutable representation by serialising back through a writer.
-        using var stream = new MemoryStream();
-        using (var writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true }))
+        // Read existing /Info fields so we can preserve anything we're not overwriting.
+        JsonElement existingInfoDict = default;
+        if (infoObjKey is not null &&
+            objects.TryGetProperty(infoObjKey, out var infoObj) &&
+            infoObj.TryGetProperty("value", out var infoValue) &&
+            infoValue.ValueKind == JsonValueKind.Object)
         {
-            writer.WriteStartObject();
+            existingInfoDict = infoValue;
+        }
 
-            foreach (var topProp in root.EnumerateObject())
+        using var ms = new MemoryStream();
+        using (var w = new Utf8JsonWriter(ms, new JsonWriterOptions { Indented = true }))
+        {
+            w.WriteStartObject();
+            w.WritePropertyName("qpdf");
+            w.WriteStartArray();
+
+            // Header element — qpdf validates this on update and uses "maxobjectid"
+            // to allocate any new objects, so it must carry the original jsonversion,
+            // pdfversion, and maxobjectid. An empty object here makes qpdf reject the
+            // patch with ErrorsFoundFileNotProcessed, so echo the original verbatim.
+            header.WriteTo(w);
+
+            // Object map — we include only the /Info object (all others untouched).
+            w.WriteStartObject();
+
+            if (infoObjKey is not null)
             {
-                if (topProp.Name != "qpdf")
-                {
-                    topProp.WriteTo(writer);
-                    continue;
-                }
+                w.WritePropertyName(infoObjKey);
+                w.WriteStartObject();
+                w.WritePropertyName("value");
+                w.WriteStartObject();
 
-                writer.WritePropertyName("qpdf");
-                writer.WriteStartArray();
-                for (int i = 0; i < qpdfArr.GetArrayLength(); i++)
+                var seen = new HashSet<string>(StringComparer.Ordinal);
+                if (existingInfoDict.ValueKind == JsonValueKind.Object)
                 {
-                    if (i == 1)
+                    foreach (var entry in existingInfoDict.EnumerateObject())
                     {
-                        WritePatchedObjectMap(writer, qpdfArr[i], infoObjKey, metadata);
+                        seen.Add(entry.Name);
+                        var replacement = ResolveInfoReplacement(entry.Name, metadata);
+                        if (replacement is null)
+                            entry.WriteTo(w);
+                        else if (replacement.Length > 0)
+                            w.WriteString(entry.Name, "u:" + replacement);
+                        // empty string → drop the key
                     }
-                    else
-                    {
-                        qpdfArr[i].WriteTo(writer);
-                    }
                 }
-                writer.WriteEndArray();
+
+                AddIfMissing(w, seen, "/Title",    metadata.Title);
+                AddIfMissing(w, seen, "/Author",   metadata.Author);
+                AddIfMissing(w, seen, "/Subject",  metadata.Subject);
+                AddIfMissing(w, seen, "/Keywords", metadata.Keywords);
+                AddIfMissing(w, seen, "/Creator",  metadata.Creator);
+                AddIfMissing(w, seen, "/Producer", metadata.Producer);
+
+                w.WriteEndObject(); // value
+                w.WriteEndObject(); // info object
             }
 
-            writer.WriteEndObject();
+            w.WriteEndObject(); // object map
+            w.WriteEndArray();  // qpdf
+            w.WriteEndObject(); // root
         }
 
-        return Encoding.UTF8.GetString(stream.ToArray());
-    }
-
-    private static void WritePatchedObjectMap(
-        Utf8JsonWriter writer,
-        JsonElement objects,
-        string? infoObjKey,
-        PdfMetadata metadata)
-    {
-        writer.WriteStartObject();
-        foreach (var entry in objects.EnumerateObject())
-        {
-            if (infoObjKey is not null && entry.Name == infoObjKey)
-            {
-                writer.WritePropertyName(entry.Name);
-                WritePatchedInfoObject(writer, entry.Value, metadata);
-            }
-            else
-            {
-                entry.WriteTo(writer);
-            }
-        }
-        writer.WriteEndObject();
-    }
-
-    private static void WritePatchedInfoObject(
-        Utf8JsonWriter writer,
-        JsonElement infoObject,
-        PdfMetadata metadata)
-    {
-        writer.WriteStartObject();
-        foreach (var prop in infoObject.EnumerateObject())
-        {
-            if (prop.Name != "value")
-            {
-                prop.WriteTo(writer);
-                continue;
-            }
-
-            writer.WritePropertyName("value");
-            writer.WriteStartObject();
-
-            var seen = new HashSet<string>(StringComparer.Ordinal);
-            foreach (var dictEntry in prop.Value.EnumerateObject())
-            {
-                seen.Add(dictEntry.Name);
-                var replacement = ResolveInfoReplacement(dictEntry.Name, metadata);
-                if (replacement is null)
-                {
-                    dictEntry.WriteTo(writer);
-                }
-                else if (replacement.Length > 0)
-                {
-                    writer.WriteString(dictEntry.Name, "u:" + replacement);
-                }
-                // empty replacement string => drop the key
-            }
-
-            // Add any keys that weren't previously present.
-            AddIfMissing(writer, seen, "/Title",    metadata.Title);
-            AddIfMissing(writer, seen, "/Author",   metadata.Author);
-            AddIfMissing(writer, seen, "/Subject",  metadata.Subject);
-            AddIfMissing(writer, seen, "/Keywords", metadata.Keywords);
-            AddIfMissing(writer, seen, "/Creator",  metadata.Creator);
-            AddIfMissing(writer, seen, "/Producer", metadata.Producer);
-
-            writer.WriteEndObject();
-        }
-        writer.WriteEndObject();
+        return Encoding.UTF8.GetString(ms.ToArray());
     }
 
     private static string? ResolveInfoReplacement(string key, PdfMetadata metadata) => key switch
@@ -833,27 +803,30 @@ public sealed class PdfService : IPdfService
     public Task UpdatePermissionsAsync(
         string inputPath,
         string outputPath,
-        string ownerPassword,
+        string? ownerPassword,
         PdfPermissions permissions,
         PdfEncryptionStrength strength,
         CancellationToken cancellationToken = default)
     {
         ValidateInputPath(inputPath);
         ValidateOutputPath(outputPath);
-        if (ownerPassword is null) throw new ArgumentNullException(nameof(ownerPassword));
         if (permissions is null) throw new ArgumentNullException(nameof(permissions));
 
+        // An empty owner password is valid: qpdf writes the permission flags without requiring a
+        // password to open or to lift them. A non-empty password also doubles as the credential
+        // needed to open an already-encrypted input.
+        var owner = ownerPassword ?? string.Empty;
+
         // Re-encrypt with empty user password (no password needed to open) but enforce
-        // the new permission set via the supplied owner password.
+        // the new permission set via the owner password.
         return Task.Run(() =>
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var job = new Job()
-                .InputFile(Path.GetFullPath(inputPath))
-                .Password(ownerPassword);
+            var job = new Job().InputFile(Path.GetFullPath(inputPath));
+            if (owner.Length > 0) job.Password(owner);
 
-            ApplyEncryption(job, userPassword: string.Empty, ownerPassword, permissions, strength);
+            ApplyEncryption(job, userPassword: string.Empty, owner, permissions, strength);
             job.OutputFile(Path.GetFullPath(outputPath));
             Execute(job);
         }, cancellationToken);

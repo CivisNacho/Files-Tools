@@ -20,15 +20,23 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <TextBlock FontSize="34" FontWeight="SemiBold" Text="Licenses" />
+                <TextBlock x:Uid="LicensesPage_Title" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="34" FontWeight="SemiBold" Text="Licenses" />
 
-                <TextBlock
-                    Grid.Row="1"
-                    Opacity="0.85"
-                    TextWrapping="Wrap"
-                    Text="Third-party components used by this app and their licenses." />
+                <StackPanel Grid.Row="1" Spacing="6">
+                    <TextBlock
+                        x:Uid="LicensesPage_Subtitle1"
+                        Opacity="0.85"
+                        TextWrapping="Wrap"
+                        Text="Third-party components used by this app, their attributions, and their licenses." />
+                    <TextBlock
+                        x:Uid="LicensesPage_Subtitle2"
+                        Opacity="0.78"
+                        TextWrapping="Wrap"
+                        Text="All listed licenses permit commercial use, subject to their terms and any redistribution obligations." />
+                </StackPanel>
 
                 <Border
                     Grid.Row="2"
@@ -40,20 +48,18 @@
                     <Grid ColumnSpacing="16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Spacing="2">
-                            <TextBlock FontSize="20" FontWeight="SemiBold" Text="libvips" />
-                            <TextBlock Opacity="0.82" Text="License: LGPL-3.0-or-later" />
-                            <TextBlock Opacity="0.82" Text="Usage: image conversion, compression and resize" />
+                            <TextBlock FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="App Icon" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap">
+                                <Run Text="Artwork by O.Marquez on" />
+                                <Hyperlink NavigateUri="https://www.instagram.com/wht_yuki/">
+                                    <Run Text="Instagram" />
+                                </Hyperlink>
+                                <Run Text="." />
+                            </TextBlock>
                         </StackPanel>
-
-                        <Button
-                            Grid.Column="1"
-                            VerticalAlignment="Center"
-                            Content="Show License"
-                            Click="ShowLibvipsLicense_Click" />
                     </Grid>
                 </Border>
 
@@ -71,16 +77,18 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Spacing="2">
-                            <TextBlock FontSize="20" FontWeight="SemiBold" Text="FFmpeg" />
-                            <TextBlock Opacity="0.82" Text="License: LGPL-2.1-or-later" />
-                            <TextBlock Opacity="0.82" Text="Usage: video/audio processing and transcoding" />
+                            <TextBlock FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="libvips" />
+                            <TextBlock Opacity="0.82" Text="License: LGPL-3.0-or-later" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Attribution: libvips project, packaged via NetVips.Native.win-x64 / win-x86 / win-arm64" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Usage: image conversion, compression and resize" />
                         </StackPanel>
 
                         <Button
+                            x:Uid="LicensesPage_ShowLicense"
                             Grid.Column="1"
                             VerticalAlignment="Center"
                             Content="Show License"
-                            Click="ShowFfmpegLicense_Click" />
+                            Click="ShowLibvipsLicense_Click" />
                     </Grid>
                 </Border>
 
@@ -98,16 +106,18 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Spacing="2">
-                            <TextBlock FontSize="20" FontWeight="SemiBold" Text="DTLN pretrained ONNX models" />
-                            <TextBlock Opacity="0.82" Text="License: MIT" />
-                            <TextBlock Opacity="0.82" Text="Usage: local audio noise suppression model inference" />
+                            <TextBlock FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="FFmpeg" />
+                            <TextBlock Opacity="0.82" Text="License: LGPL-2.1-or-later" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Attribution: FFmpeg project, packaged via DevEnvy.FFmpeg.Binaries.LGPL" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Usage: video/audio processing and transcoding" />
                         </StackPanel>
 
                         <Button
+                            x:Uid="LicensesPage_ShowLicense"
                             Grid.Column="1"
                             VerticalAlignment="Center"
                             Content="Show License"
-                            Click="ShowDtlnLicense_Click" />
+                            Click="ShowFfmpegLicense_Click" />
                     </Grid>
                 </Border>
 
@@ -125,16 +135,18 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Spacing="2">
-                            <TextBlock FontSize="20" FontWeight="SemiBold" Text="ONNX Runtime" />
+                            <TextBlock FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="DTLN pretrained ONNX models" />
                             <TextBlock Opacity="0.82" Text="License: MIT" />
-                            <TextBlock Opacity="0.82" Text="Usage: executing DTLN ONNX models" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Attribution: DTLN project and bundled model files" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Usage: local audio noise suppression model inference" />
                         </StackPanel>
 
                         <Button
+                            x:Uid="LicensesPage_ShowLicense"
                             Grid.Column="1"
                             VerticalAlignment="Center"
                             Content="Show License"
-                            Click="ShowOnnxRuntimeLicense_Click" />
+                            Click="ShowDtlnLicense_Click" />
                     </Grid>
                 </Border>
 
@@ -152,16 +164,18 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Spacing="2">
-                            <TextBlock FontSize="20" FontWeight="SemiBold" Text="Whisper.net / whisper.cpp" />
+                            <TextBlock FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="ONNX Runtime" />
                             <TextBlock Opacity="0.82" Text="License: MIT" />
-                            <TextBlock Opacity="0.82" Text="Usage: local speech-to-text transcription and subtitle generation" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Attribution: Microsoft.ML.OnnxRuntime" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Usage: executing DTLN ONNX models" />
                         </StackPanel>
 
                         <Button
+                            x:Uid="LicensesPage_ShowLicense"
                             Grid.Column="1"
                             VerticalAlignment="Center"
                             Content="Show License"
-                            Click="ShowWhisperLicense_Click" />
+                            Click="ShowOnnxRuntimeLicense_Click" />
                     </Grid>
                 </Border>
 
@@ -179,16 +193,18 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Spacing="2">
-                            <TextBlock FontSize="20" FontWeight="SemiBold" Text="LibreOffice" />
-                            <TextBlock Opacity="0.82" Text="License: MPL-2.0" />
-                            <TextBlock Opacity="0.82" Text="Usage: document format conversion (DOCX, ODT, PPTX, ODP → PDF)" />
+                            <TextBlock FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="Whisper.net / whisper.cpp" />
+                            <TextBlock Opacity="0.82" Text="License: MIT" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Attribution: Whisper.net and whisper.cpp projects" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Usage: local speech-to-text transcription and subtitle generation" />
                         </StackPanel>
 
                         <Button
+                            x:Uid="LicensesPage_ShowLicense"
                             Grid.Column="1"
                             VerticalAlignment="Center"
                             Content="Show License"
-                            Click="ShowLibreOfficeLicense_Click" />
+                            Click="ShowWhisperLicense_Click" />
                     </Grid>
                 </Border>
 
@@ -206,16 +222,18 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Spacing="2">
-                            <TextBlock FontSize="20" FontWeight="SemiBold" Text="qpdf / QPdfNet" />
-                            <TextBlock Opacity="0.82" Text="License: Apache-2.0" />
-                            <TextBlock Opacity="0.82" Text="Usage: PDF merge, split, reorder, rotate, encrypt, metadata, repair, image and attachment extraction" />
+                            <TextBlock FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="LibreOffice" />
+                            <TextBlock Opacity="0.82" Text="License: MPL-2.0" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Attribution: The Document Foundation and LibreOffice contributors" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Usage: document format conversion (DOCX, ODT, PPTX, ODP → PDF)" />
                         </StackPanel>
 
                         <Button
+                            x:Uid="LicensesPage_ShowLicense"
                             Grid.Column="1"
                             VerticalAlignment="Center"
                             Content="Show License"
-                            Click="ShowQpdfLicense_Click" />
+                            Click="ShowLibreOfficeLicense_Click" />
                     </Grid>
                 </Border>
 
@@ -233,12 +251,43 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Spacing="2">
-                            <TextBlock FontSize="20" FontWeight="SemiBold" Text="Tesseract OCR" />
+                            <TextBlock FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="qpdf / QPdfNet" />
                             <TextBlock Opacity="0.82" Text="License: Apache-2.0" />
-                            <TextBlock Opacity="0.82" Text="Usage: local OCR of PDF documents to produce searchable PDFs" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Attribution: qpdf project and QPdfNet wrapper" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Usage: PDF merge, split, reorder, rotate, encrypt, metadata, repair, image and attachment extraction" />
                         </StackPanel>
 
                         <Button
+                            x:Uid="LicensesPage_ShowLicense"
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Content="Show License"
+                            Click="ShowQpdfLicense_Click" />
+                    </Grid>
+                </Border>
+
+                <Border
+                    Grid.Row="10"
+                    Padding="16"
+                    CornerRadius="10"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Spacing="2">
+                            <TextBlock FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="Tesseract OCR" />
+                            <TextBlock Opacity="0.82" Text="License: Apache-2.0" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Attribution: Tesseract project, Leptonica, and TesseractOCR wrapper" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Usage: local OCR of PDF documents to produce searchable PDFs" />
+                        </StackPanel>
+
+                        <Button
+                            x:Uid="LicensesPage_ShowLicense"
                             Grid.Column="1"
                             VerticalAlignment="Center"
                             Content="Show License"

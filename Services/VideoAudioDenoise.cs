@@ -1043,7 +1043,7 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
             throw new DenoiseValidationException("Audio stream index must be greater than or equal to 0.");
         }
 
-        var ffprobeCandidates = ResolveExecutableCandidates("ffprobe");
+        var ffprobeCandidates = FfmpegLocator.ResolveExecutableCandidates("ffprobe");
         var args = new List<string>(SplitArguments(FfprobeJsonArgs))
         {
             Path.GetFullPath(inputPath)
@@ -1295,7 +1295,7 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         };
 
         var observer = CreateFfmpegProgressObserver(DenoiseProcessingStage.ExtractingAudio, "Preparing model input audio", progress, duration);
-        await RunProcessWithFallbackAsync(ResolveExecutableCandidates("ffmpeg"), args, cancellationToken, observer).ConfigureAwait(false);
+        await RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffmpeg"), args, cancellationToken, observer).ConfigureAwait(false);
     }
 
     private static async Task EncodeAudioAsync(
@@ -1337,7 +1337,7 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         args.Add(Path.GetFullPath(outputPath));
 
         var observer = CreateFfmpegProgressObserver(DenoiseProcessingStage.EncodingAudio, "Encoding output audio", progress, duration);
-        await RunProcessWithFallbackAsync(ResolveExecutableCandidates("ffmpeg"), args, cancellationToken, observer).ConfigureAwait(false);
+        await RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffmpeg"), args, cancellationToken, observer).ConfigureAwait(false);
     }
 
     private static async Task RemuxVideoAsync(
@@ -1388,7 +1388,7 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         var observer = CreateFfmpegProgressObserver(DenoiseProcessingStage.RemuxingVideo, "Remuxing processed audio", progress, duration);
         try
         {
-            await RunProcessWithFallbackAsync(ResolveExecutableCandidates("ffmpeg"), args, cancellationToken, observer).ConfigureAwait(false);
+            await RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffmpeg"), args, cancellationToken, observer).ConfigureAwait(false);
         }
         catch (DenoiseProcessException ex)
         {
@@ -1935,61 +1935,6 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         return candidates.Count > 1 &&
             !string.Equals(candidate, candidates[^1], StringComparison.OrdinalIgnoreCase) &&
             exception.ExitCode is null;
-    }
-
-    private static IReadOnlyList<string> ResolveExecutableCandidates(string executableNameWithoutExtension)
-    {
-        var executableName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? executableNameWithoutExtension + ".exe"
-            : executableNameWithoutExtension;
-
-        var rid = GetCurrentRid();
-        var bundledPath = Path.Combine(AppContext.BaseDirectory, "ffmpeg", rid, executableName);
-        var candidates = new List<string>();
-
-        if (File.Exists(bundledPath))
-        {
-            candidates.Add(bundledPath);
-        }
-
-        candidates.Add(executableName);
-        return candidates;
-    }
-
-    private static string GetCurrentRid()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            return RuntimeInformation.ProcessArchitecture switch
-            {
-                Architecture.X64 => "win-x64",
-                Architecture.X86 => "win-x86",
-                Architecture.Arm64 => "win-arm64",
-                _ => throw new PlatformNotSupportedException($"Unsupported Windows architecture '{RuntimeInformation.ProcessArchitecture}'.")
-            };
-        }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            return RuntimeInformation.ProcessArchitecture switch
-            {
-                Architecture.X64 => "osx-x64",
-                Architecture.Arm64 => "osx-arm64",
-                _ => throw new PlatformNotSupportedException($"Unsupported macOS architecture '{RuntimeInformation.ProcessArchitecture}'.")
-            };
-        }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            return RuntimeInformation.ProcessArchitecture switch
-            {
-                Architecture.X64 => "linux-x64",
-                Architecture.Arm64 => "linux-arm64",
-                _ => throw new PlatformNotSupportedException($"Unsupported Linux architecture '{RuntimeInformation.ProcessArchitecture}'.")
-            };
-        }
-
-        throw new PlatformNotSupportedException("Current operating system is not supported.");
     }
 
     private static string FormatCommandLine(string binaryPath, IReadOnlyList<string> arguments)

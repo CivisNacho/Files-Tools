@@ -73,6 +73,8 @@ namespace Files_Tools.Pages
         private readonly IAudioTranscriptionService _audioTranscriptionService = new AudioTranscriptionService();
         private readonly ISubtitlesService _subtitlesService;
         private StorageFile? _sourceVideoFile;
+        private string? _sourceVideoCodecName;
+        private string? _sourceAudioCodecName;
         private TimeSpan? _videoDuration;
         private TimeSpan _trimStart = TimeSpan.Zero;
         private TimeSpan _trimEnd = TimeSpan.Zero;
@@ -374,6 +376,8 @@ namespace Files_Tools.Pages
         private async Task LoadVideoPreviewAsync(StorageFile file)
         {
             _sourceVideoFile = file;
+            _sourceVideoCodecName = null;
+            _sourceAudioCodecName = null;
             ResetTrimState();
             _generatedSubtitlePath = null;
             _pendingAdvancedSubtitleOutputPath = null;
@@ -392,11 +396,23 @@ namespace Files_Tools.Pages
 
             UpdateSubtitlePlacementPreview();
             RefreshValidationAndState();
+
+            _ = ProbeAndStoreSourceCodecsAsync(file.Path);
         }
 
-        private static string CreateGeneratedSubtitlePath(StorageFile sourceVideoFile)
+        private async Task ProbeAndStoreSourceCodecsAsync(string path)
         {
-            return CreateGeneratedSubtitlePath(sourceVideoFile, ".srt");
+            try
+            {
+                var info = await _videoProcessingService.ProbeSourceAsync(path);
+                _sourceVideoCodecName = info.VideoCodecName;
+                _sourceAudioCodecName = info.AudioCodecName;
+            }
+            catch
+            {
+                _sourceVideoCodecName = null;
+                _sourceAudioCodecName = null;
+            }
         }
 
         private static string CreateGeneratedSubtitlePath(StorageFile sourceVideoFile, string extension)
@@ -780,8 +796,8 @@ namespace Files_Tools.Pages
             var videoSupported = SupportedVideoCodecNamesByContainer[format.Value];
             var audioSupported = SupportedAudioCodecNamesByContainer[format.Value];
 
-            UpdateCodecComboItems(VideoCodecComboBox, videoSupported, allowRemoveAudio: false);
-            UpdateCodecComboItems(AudioCodecComboBox, audioSupported, allowRemoveAudio: true);
+            UpdateCodecComboItems(VideoCodecComboBox, videoSupported, allowRemoveAudio: false, _sourceVideoCodecName);
+            UpdateCodecComboItems(AudioCodecComboBox, audioSupported, allowRemoveAudio: true, _sourceAudioCodecName);
         }
 
         private static void SetAllCodecItemsEnabled(ComboBox? comboBox)
@@ -797,7 +813,7 @@ namespace Files_Tools.Pages
             }
         }
 
-        private static void UpdateCodecComboItems(ComboBox? comboBox, HashSet<string> supportedCodecs, bool allowRemoveAudio)
+        private static void UpdateCodecComboItems(ComboBox? comboBox, HashSet<string> supportedCodecs, bool allowRemoveAudio, string? originalCodecName = null)
         {
             if (comboBox is null)
             {
@@ -822,6 +838,21 @@ namespace Files_Tools.Pages
             if (comboBox.SelectedItem is ComboBoxItem selectedItem && !selectedItem.IsEnabled)
             {
                 comboBox.SelectedItem = firstEnabled;
+                return;
+            }
+
+            // When "Keep original" is selected but the source codec is incompatible with the chosen
+            // container, switch to the first supported codec so the output isn't silently broken.
+            if (supportedCodecs.Count > 0 &&
+                originalCodecName is not null &&
+                !supportedCodecs.Contains(originalCodecName) &&
+                comboBox.SelectedItem is ComboBoxItem currentItem &&
+                string.Equals(currentItem.Content?.ToString(), "Keep original", StringComparison.Ordinal))
+            {
+                var firstSupported = comboBox.Items.OfType<ComboBoxItem>()
+                    .FirstOrDefault(i => supportedCodecs.Contains(i.Content?.ToString() ?? string.Empty));
+                if (firstSupported is not null)
+                    comboBox.SelectedItem = firstSupported;
             }
         }
 
@@ -1191,32 +1222,6 @@ namespace Files_Tools.Pages
 
                 RefreshValidationAndState();
             }
-        }
-
-        private async void ShowNotImplementedButton_Click(object sender, RoutedEventArgs e)
-        {
-            var text = "Not implemented yet in this phase:\n\n" +
-                "- FPS / VFR / CFR conversion\n" +
-                "- Split/join/segment workflows\n" +
-                "- Multi-track audio mixing\n" +
-                "- Subtitle conversion/replacement/removal workflows\n" +
-                "- Chapters add/edit/remove\n" +
-                "- Thumbnails, contact sheets, preview strips\n" +
-                "- Streaming preset profiles (Discord/YouTube/mobile)\n" +
-                "- Visual filters (denoise, deinterlace, watermark, color correction)\n" +
-                "- Batch queue, retry, pause/resume\n" +
-                "- Explicit hardware encoder selection (NVENC/AMF/QSV)\n" +
-                "- Animated WebP helpers";
-
-            var dialog = new ContentDialog
-            {
-                Title = "Roadmap not implemented yet",
-                Content = text,
-                PrimaryButtonText = "OK",
-                XamlRoot = XamlRoot
-            };
-
-            _ = await dialog.ShowAsync();
         }
 
         private void RefreshValidationAndState(IReadOnlyList<string>? forcedErrors = null)
@@ -2230,17 +2235,6 @@ namespace Files_Tools.Pages
         private static string FormatDraftTime(TimeSpan value)
         {
             return value.ToString(@"hh\:mm\:ss\.fff", CultureInfo.InvariantCulture);
-        }
-
-        private void SubtitleEditorRow_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (sender is TextBox textBox && textBox.DataContext is SubtitleEditableRow row)
-            {
-                row.Status = IsSubtitleRowChanged(row) ? "Pending changes" : "No changes";
-                return;
-            }
-
-            UpdateSubtitleEditorRowStatuses();
         }
 
         private void UpdateSubtitleEditorRowStatuses()

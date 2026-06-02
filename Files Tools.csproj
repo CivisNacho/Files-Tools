@@ -5,6 +5,7 @@
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>Files_Tools</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>AppIcon.ico</ApplicationIcon>
     <Platforms>x86;x64;ARM64</Platforms>
     <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <PublishProfile>win-$(Platform).pubxml</PublishProfile>
@@ -31,6 +32,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\Models\Dtln\model_2.onnx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <!--  Brand fonts (Inter + Poppins, SIL OFL). Shipped with the app and loaded via ms-appx.  -->
+    <Content Include="Assets\Fonts\*.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -112,4 +117,32 @@
     the Document Editor and clicks "Download LibreOffice".
     Downloaded binaries are stored in %LOCALAPPDATA%\FilesTools\libreoffice\<rid>\.
   -->
+
+  <!--
+    win-arm64 FFmpeg binaries.
+    DevEnvy.FFmpeg.Binaries.LGPL does not ship a win-arm64 build, so we bundle
+    the LGPL shared-library build from BtbN ourselves, stored under
+    Binaries\ffmpeg\win-arm64\.  The targets below copy them to the same output
+    layout that the DevEnvy package uses for other platforms:
+      $(OutDir)ffmpeg\win-arm64\*
+    so FfmpegLocator resolves them via the standard bundled-path logic.
+  -->
+  <Target Name="CopyFfmpegArm64Binaries" AfterTargets="Build">
+    <ItemGroup>
+      <_FfmpegArm64Files Include="$(MSBuildThisFileDirectory)Binaries\ffmpeg\win-arm64\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_FfmpegArm64Files)"
+          DestinationFolder="$(OutDir)ffmpeg\win-arm64"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="PublishFfmpegArm64Binaries" AfterTargets="Publish">
+    <ItemGroup>
+      <_FfmpegArm64PublishFiles Include="$(MSBuildThisFileDirectory)Binaries\ffmpeg\win-arm64\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_FfmpegArm64PublishFiles)"
+          DestinationFolder="$(PublishDir)ffmpeg\win-arm64"
+          SkipUnchangedFiles="true" />
+  </Target>
+
 </Project>

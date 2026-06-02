@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Main Window
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="AppTitleBar.Title" xml:space="preserve"><value>Files Tools</value></data>
+  <data name="LicensesButton.Content" xml:space="preserve"><value>Licenses</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Navigation items  (reused across all editor nav menus)
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="NavMedia.Content" xml:space="preserve"><value>Media</value></data>
+  <data name="NavTransform.Content" xml:space="preserve"><value>Transform</value></data>
+  <data name="NavAdjust.Content" xml:space="preserve"><value>Adjust</value></data>
+  <data name="NavAdvanced.Content" xml:space="preserve"><value>Advanced</value></data>
+  <data name="NavFormat.Content" xml:space="preserve"><value>Format</value></data>
+  <data name="NavAudio.Content" xml:space="preserve"><value>Audio</value></data>
+  <data name="NavSubtitles.Content" xml:space="preserve"><value>Subtitles</value></data>
+  <data name="NavResize.Content" xml:space="preserve"><value>Resize</value></data>
+  <data name="NavTrim.Content" xml:space="preserve"><value>Trim</value></data>
+  <data name="NavRotate.Content" xml:space="preserve"><value>Rotate</value></data>
+  <data name="NavMetadata.Content" xml:space="preserve"><value>Metadata</value></data>
+  <data name="NavRepair.Content" xml:space="preserve"><value>Repair</value></data>
+  <data name="NavCrop.Content" xml:space="preserve"><value>Crop</value></data>
+  <data name="NavUpscale.Content" xml:space="preserve"><value>Upscale</value></data>
+  <data name="NavColor.Content" xml:space="preserve"><value>Color</value></data>
+  <data name="NavSilence.Content" xml:space="preserve"><value>Silence</value></data>
+  <data name="NavNormalize.Content" xml:space="preserve"><value>Normalize</value></data>
+  <data name="NavEQ.Content" xml:space="preserve"><value>EQ</value></data>
+  <data name="NavDenoise.Content" xml:space="preserve"><value>Denoise</value></data>
+  <data name="NavTranscription.Content" xml:space="preserve"><value>Transcription</value></data>
+  <data name="NavGenerate.Content" xml:space="preserve"><value>Generate</value></data>
+  <data name="NavOrganization.Content" xml:space="preserve"><value>Organization</value></data>
+  <data name="NavMerge.Content" xml:space="preserve"><value>Merge</value></data>
+  <data name="NavSplit.Content" xml:space="preserve"><value>Split</value></data>
+  <data name="NavReorder.Content" xml:space="preserve"><value>Reorder</value></data>
+  <data name="NavExtract.Content" xml:space="preserve"><value>Extract</value></data>
+  <data name="NavExtractAudio.Content" xml:space="preserve"><value>Extract audio</value></data>
+  <data name="NavSecurity.Content" xml:space="preserve"><value>Security</value></data>
+  <data name="NavEncrypt.Content" xml:space="preserve"><value>Encrypt</value></data>
+  <data name="NavPassword.Content" xml:space="preserve"><value>Password</value></data>
+  <data name="NavPermissions.Content" xml:space="preserve"><value>Permissions</value></data>
+  <data name="NavContent.Content" xml:space="preserve"><value>Content</value></data>
+  <data name="NavOCR.Content" xml:space="preserve"><value>OCR</value></data>
+  <data name="NavPodcast.Content" xml:space="preserve"><value>Podcast</value></data>
+  <data name="NavVideo.Content" xml:space="preserve"><value>Video</value></data>
+  <data name="NavContainer.Content" xml:space="preserve"><value>Container</value></data>
+  <data name="NavCodec.Content" xml:space="preserve"><value>Codec</value></data>
+  <data name="NavCompress.Content" xml:space="preserve"><value>Compress</value></data>
+  <data name="NavDocuments.Content" xml:space="preserve"><value>Documents</value></data>
+  <data name="NavPDF.Content" xml:space="preserve"><value>PDF</value></data>
+  <data name="NavImages.Content" xml:space="preserve"><value>Images</value></data>
+  <data name="NavOutput.Content" xml:space="preserve"><value>Output</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Shared editor strings  (reused across multiple pages)
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="PreviewTitle.Text" xml:space="preserve"><value>Preview</value></data>
+  <data name="ApplyChanges.Content" xml:space="preserve"><value>Apply changes</value></data>
+  <data name="SelectOptionHeader.Text" xml:space="preserve"><value>Select an option</value></data>
+  <data name="EtaCalculating.Text" xml:space="preserve"><value>ETA calculating...</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Home page
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="HomePage_Header.Text" xml:space="preserve"><value>Drop files to get started</value></data>
+  <data name="HomePage_Subtitle.Text" xml:space="preserve"><value>Drop a single file to open the right editor, or drop multiple files of the same type to batch-process them all at once. You can also browse using the buttons below.</value></data>
+  <data name="HomePage_Formats.Text" xml:space="preserve"><value>Images: PNG, JPG, WebP, AVIF   •   Video: MP4, MKV, MOV, AVI, WebM   •   Audio: MP3, M4A, FLAC, WAV, OPUS   •   Documents: DOCX, PPTX, XLSX, PDF</value></data>
+  <data name="HomePage_OrBrowse.Text" xml:space="preserve"><value>or browse</value></data>
+  <data name="HomePage_SingleFile.Text" xml:space="preserve"><value>Single file</value></data>
+  <data name="HomePage_BatchFiles.Text" xml:space="preserve"><value>Multiple files for batch</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Audio editor page
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="AudioPage_Title.Text" xml:space="preserve"><value>Audio Editor</value></data>
+  <data name="AudioPage_Subtitle.Text" xml:space="preserve"><value>Load an audio file, build a processing chain, and apply all selected operations in one run.</value></data>
+  <data name="AudioPage_PreviewHint.Text" xml:space="preserve"><value>Drop an audio file or click the surface to pick one. Processing status appears below when running.</value></data>
+  <data name="AudioPage_AudioDetails.Text" xml:space="preserve"><value>Audio details</value></data>
+  <data name="AudioPage_NoAudioLoaded.Text" xml:space="preserve"><value>No audio loaded yet.</value></data>
+  <data name="AudioPage_DropHintTitle.Text" xml:space="preserve"><value>Drop audio here</value></data>
+  <data name="AudioPage_DropHintSubtitle.Text" xml:space="preserve"><value>Click to browse a track. Format, normalization, trim, EQ, denoise, and metadata tools are in the options panel.</value></data>
+  <data name="AudioPage_Processing.Text" xml:space="preserve"><value>Processing audio...</value></data>
+  <data name="AudioPage_PreparingPipeline.Text" xml:space="preserve"><value>Preparing pipeline...</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Image editor page
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="ImagePage_Title.Text" xml:space="preserve"><value>Image Editor</value></data>
+  <data name="ImagePage_Subtitle.Text" xml:space="preserve"><value>Import an image, line up your edits, and apply them in one run with a layout that keeps preview and controls easy to scan.</value></data>
+  <data name="ImagePage_PreviewHint.Text" xml:space="preserve"><value>Drop an image or click the preview surface to start. Crop handles and visual edits stay centered around this working area.</value></data>
+  <data name="ImagePage_NoImageLoaded.Text" xml:space="preserve"><value>No image loaded yet.</value></data>
+  <data name="ImagePage_DropHintTitle.Text" xml:space="preserve"><value>Drop an image here</value></data>
+  <data name="ImagePage_DropHintSubtitle.Text" xml:space="preserve"><value>You can also click this surface to browse for a file. Crop, resize, upscale, rotate, mirror, and tune RGB levels from the options panel.</value></data>
+  <data name="ImagePage_FormatSection.Text" xml:space="preserve"><value>Format and quality</value></data>
+  <data name="ImagePage_OutputFormat.Header" xml:space="preserve"><value>Output format</value></data>
+  <data name="ImagePage_KeepOriginalFormat.Content" xml:space="preserve"><value>Keep original format</value></data>
+  <data name="ImagePage_PreserveQuality.Content" xml:space="preserve"><value>Preserve original quality</value></data>
+  <data name="ImagePage_Crop.Text" xml:space="preserve"><value>Crop</value></data>
+  <data name="ImagePage_EnableCrop.Content" xml:space="preserve"><value>Enable crop</value></data>
+  <data name="ImagePage_ApplyCrop.Content" xml:space="preserve"><value>Apply crop</value></data>
+  <data name="ImagePage_CropDisabled.Text" xml:space="preserve"><value>Crop disabled</value></data>
+  <data name="ImagePage_Resize.Text" xml:space="preserve"><value>Resize</value></data>
+  <data name="ImagePage_EnableResize.Content" xml:space="preserve"><value>Enable resize</value></data>
+  <data name="ImagePage_Width.Header" xml:space="preserve"><value>Width</value></data>
+  <data name="ImagePage_Height.Header" xml:space="preserve"><value>Height</value></data>
+  <data name="ImagePage_PreserveAspectRatio.Content" xml:space="preserve"><value>Preserve aspect ratio</value></data>
+  <data name="ImagePage_Upscale.Text" xml:space="preserve"><value>Upscale</value></data>
+  <data name="ImagePage_EnableUpscale.Content" xml:space="preserve"><value>Enable upscale</value></data>
+  <data name="ImagePage_TargetWidth.Header" xml:space="preserve"><value>Target width</value></data>
+  <data name="ImagePage_TargetHeight.Header" xml:space="preserve"><value>Target height</value></data>
+  <data name="ImagePage_RotateAndMirror.Text" xml:space="preserve"><value>Rotate and mirror</value></data>
+  <data name="ImagePage_Rotation.Header" xml:space="preserve"><value>Rotation</value></data>
+  <data name="ImagePage_FlipHorizontally.Content" xml:space="preserve"><value>Flip horizontally</value></data>
+  <data name="ImagePage_FlipVertically.Content" xml:space="preserve"><value>Flip vertically</value></data>
+  <data name="ImagePage_RGBAdjustments.Text" xml:space="preserve"><value>RGB adjustments</value></data>
+  <data name="ImagePage_EnableRGB.Content" xml:space="preserve"><value>Enable RGB adjustments</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Video editor page
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="VideoPage_Title.Text" xml:space="preserve"><value>Video Editor</value></data>
+  <data name="VideoPage_Subtitle.Text" xml:space="preserve"><value>Import a video, tune processing options, and run FFmpeg-backed edits with a layout that keeps preview and decisions easy to follow.</value></data>
+  <data name="VideoPage_PreviewHint.Text" xml:space="preserve"><value>Drop a video or click the preview surface to start. Playback and edit options stay centered around this working area.</value></data>
+  <data name="VideoPage_NoVideoLoaded.Text" xml:space="preserve"><value>No video loaded yet.</value></data>
+  <data name="VideoPage_DropHintTitle.Text" xml:space="preserve"><value>Drop a video here</value></data>
+  <data name="VideoPage_DropHintSubtitle.Text" xml:space="preserve"><value>You can also click this surface to browse for a file. Trim, resize, repair, and container options stay available from the options panel.</value></data>
+  <data name="VideoPage_SubtitlePosition.Text" xml:space="preserve"><value>Subtitle position</value></data>
+  <data name="VideoPage_DragToPlace.Text" xml:space="preserve"><value>Drag to place subtitles</value></data>
+  <data name="VideoPage_Processing.Text" xml:space="preserve"><value>Processing video...</value></data>
+  <data name="VideoPage_PreparingFFmpeg.Text" xml:space="preserve"><value>Preparing FFmpeg...</value></data>
+  <data name="VideoPage_FormatAndCodecs.Text" xml:space="preserve"><value>Format and codecs</value></data>
+  <data name="VideoPage_OutputFormat.Header" xml:space="preserve"><value>Output format</value></data>
+  <data name="VideoPage_KeepOriginal.Content" xml:space="preserve"><value>Keep original</value></data>
+  <data name="VideoPage_VideoCodec.Header" xml:space="preserve"><value>Video codec</value></data>
+  <data name="VideoPage_VideoCodecPlaceholder.PlaceholderText" xml:space="preserve"><value>Video codec</value></data>
+  <data name="VideoPage_AudioCodec.Header" xml:space="preserve"><value>Audio codec</value></data>
+  <data name="VideoPage_AudioCodecPlaceholder.PlaceholderText" xml:space="preserve"><value>Audio codec</value></data>
+  <data name="VideoPage_RemoveAudio.Content" xml:space="preserve"><value>Remove audio</value></data>
+  <data name="VideoPage_Compression.Text" xml:space="preserve"><value>Compression</value></data>
+  <data name="VideoPage_EnableCompression.Content" xml:space="preserve"><value>Enable compression preset</value></data>
+  <data name="VideoPage_CompressionPreset.Header" xml:space="preserve"><value>Compression preset</value></data>
+  <data name="VideoPage_AudioAndVolume.Text" xml:space="preserve"><value>Audio and volume</value></data>
+  <data name="VideoPage_ExtractAudio.Content" xml:space="preserve"><value>Extract audio</value></data>
+  <data name="VideoPage_AdjustVolume.Content" xml:space="preserve"><value>Adjust output volume</value></data>
+  <data name="VideoPage_VolumeHint.Text" xml:space="preserve"><value>This slider changes the final exported audio level, including replacement audio when muxing is enabled.</value></data>
+  <data name="VideoPage_NormalizeAudio.Content" xml:space="preserve"><value>Normalize audio</value></data>
+  <data name="VideoPage_NormalizeHint.Text" xml:space="preserve"><value>Applies a simple loudness normalization pass to the final output audio.</value></data>
+  <data name="VideoPage_FixAudioSync.Content" xml:space="preserve"><value>Fix audio sync</value></data>
+  <data name="VideoPage_MoveAudio.Header" xml:space="preserve"><value>Move audio</value></data>
+  <data name="VideoPage_Earlier.Content" xml:space="preserve"><value>Earlier</value></data>
+  <data name="VideoPage_Later.Content" xml:space="preserve"><value>Later</value></data>
+  <data name="VideoPage_ApplyDenoise.Content" xml:space="preserve"><value>Apply audio denoise</value></data>
+  <data name="VideoPage_DenoiseMode.Header" xml:space="preserve"><value>Denoise mode</value></data>
+  <data name="VideoPage_DenoiseMono.Content" xml:space="preserve"><value>Mono</value></data>
+  <data name="VideoPage_DenoiseStereo.Content" xml:space="preserve"><value>Stereo</value></data>
+  <data name="VideoPage_AddReplaceAudio.Content" xml:space="preserve"><value>Add or replace audio track</value></data>
+  <data name="VideoPage_AudioFile.Header" xml:space="preserve"><value>Audio file</value></data>
+  <data name="VideoPage_AudioFile.PlaceholderText" xml:space="preserve"><value>Choose an audio source</value></data>
+  <data name="VideoPage_BrowseAudio.Content" xml:space="preserve"><value>Browse audio file</value></data>
+  <data name="VideoPage_ReplaceAudio.Content" xml:space="preserve"><value>Replace existing audio</value></data>
+  <data name="VideoPage_UseShortest.Content" xml:space="preserve"><value>Use shortest duration</value></data>
+  <data name="VideoPage_SetDefaultAudio.Content" xml:space="preserve"><value>Set as default audio</value></data>
+  <data name="VideoPage_Subtitles.Text" xml:space="preserve"><value>Subtitles</value></data>
+  <data name="VideoPage_TranscriptionHeader.Text" xml:space="preserve"><value>Transcription</value></data>
+  <data name="VideoPage_TranscriptionHint.Text" xml:space="preserve"><value>Choose basic SRT or advanced styled ASS subtitles generation.</value></data>
+  <data name="VideoPage_DownloadTranscription.Content" xml:space="preserve"><value>Download transcription feature</value></data>
+  <data name="VideoPage_TranscriptionNotDownloaded.Text" xml:space="preserve"><value>Transcription feature not downloaded yet.</value></data>
+  <data name="VideoPage_SubtitleGenMode.Header" xml:space="preserve"><value>Subtitle generation mode</value></data>
+  <data name="VideoPage_BasicSRT.Content" xml:space="preserve"><value>Basic (SRT)</value></data>
+  <data name="VideoPage_AdvancedASS.Content" xml:space="preserve"><value>Advanced (ASS)</value></data>
+  <data name="VideoPage_AdvancedOutputType.Header" xml:space="preserve"><value>Advanced output type</value></data>
+  <data name="VideoPage_StyledASS.Content" xml:space="preserve"><value>Styled ASS</value></data>
+  <data name="VideoPage_KaraokeASS.Content" xml:space="preserve"><value>Karaoke ASS</value></data>
+  <data name="VideoPage_ConfigureAdvanced.Content" xml:space="preserve"><value>Configure advanced subtitles</value></data>
+  <data name="VideoPage_SecondsMax.Header" xml:space="preserve"><value>Seconds max</value></data>
+  <data name="VideoPage_LimitWords.Content" xml:space="preserve"><value>Limit words per section</value></data>
+  <data name="VideoPage_WordsMax.Header" xml:space="preserve"><value>Words max</value></data>
+  <data name="VideoPage_SectionHint.Text" xml:space="preserve"><value>Seconds limits how long a section can stay on screen. Words max limits how many words can stay in one section when enabled.</value></data>
+  <data name="VideoPage_GenerateSubtitles.Content" xml:space="preserve"><value>Generate subtitles from video</value></data>
+  <data name="VideoPage_SubtitlesNotGenerated.Text" xml:space="preserve"><value>Subtitles not generated yet.</value></data>
+  <data name="VideoPage_AddSubtitles.Content" xml:space="preserve"><value>Add subtitles</value></data>
+  <data name="VideoPage_SubtitleFile.Header" xml:space="preserve"><value>Subtitle file</value></data>
+  <data name="VideoPage_SubtitleFile.PlaceholderText" xml:space="preserve"><value>Choose a subtitle source</value></data>
+  <data name="VideoPage_BrowseSubtitle.Content" xml:space="preserve"><value>Browse subtitle file</value></data>
+  <data name="VideoPage_SubtitleMode.Header" xml:space="preserve"><value>Subtitle mode</value></data>
+  <data name="VideoPage_SoftMux.Content" xml:space="preserve"><value>SoftMux</value></data>
+  <data name="VideoPage_BurnIn.Content" xml:space="preserve"><value>BurnIn</value></data>
+  <data name="VideoPage_Placement.Text" xml:space="preserve"><value>Placement</value></data>
+  <data name="VideoPage_PlacementHint.Text" xml:space="preserve"><value>Drag the subtitle badge on the preview or fine-tune the placement here.</value></data>
+  <data name="VideoPage_Horizontal.Header" xml:space="preserve"><value>Horizontal (%)</value></data>
+  <data name="VideoPage_Vertical.Header" xml:space="preserve"><value>Vertical (%)</value></data>
+  <data name="VideoPage_ResetPlacement.Content" xml:space="preserve"><value>Reset placement</value></data>
+  <data name="VideoPage_PlacementStatus.Text" xml:space="preserve"><value>Placement is rendered exactly for generated ASS subtitles and approximated for burn-in text subtitles, including boxed and animated presentation presets.</value></data>
+  <data name="VideoPage_LanguageTag.Header" xml:space="preserve"><value>Language tag</value></data>
+  <data name="VideoPage_LanguageTag.PlaceholderText" xml:space="preserve"><value>Example: en</value></data>
+  <data name="VideoPage_SubtitleTitle.Header" xml:space="preserve"><value>Subtitle title</value></data>
+  <data name="VideoPage_SubtitleTitle.PlaceholderText" xml:space="preserve"><value>Example: English</value></data>
+  <data name="VideoPage_SetDefaultSubtitle.Content" xml:space="preserve"><value>Set as default subtitle</value></data>
+  <data name="VideoPage_Resize.Text" xml:space="preserve"><value>Resize</value></data>
+  <data name="VideoPage_EnableResize.Content" xml:space="preserve"><value>Enable resize</value></data>
+  <data name="VideoPage_Width.Header" xml:space="preserve"><value>Width</value></data>
+  <data name="VideoPage_Height.Header" xml:space="preserve"><value>Height</value></data>
+  <data name="VideoPage_ResizeMode.Header" xml:space="preserve"><value>Resize mode</value></data>
+  <data name="VideoPage_PadToFit.Content" xml:space="preserve"><value>PadToFit</value></data>
+  <data name="VideoPage_CropToFill.Content" xml:space="preserve"><value>CropToFill</value></data>
+  <data name="VideoPage_Stretch.Content" xml:space="preserve"><value>Stretch</value></data>
+  <data name="VideoPage_PaddingColor.Header" xml:space="preserve"><value>Padding color</value></data>
+  <data name="VideoPage_PaddingColor.PlaceholderText" xml:space="preserve"><value>For example black or #000000</value></data>
+  <data name="VideoPage_Trim.Text" xml:space="preserve"><value>Trim</value></data>
+  <data name="VideoPage_EnableTrim.Content" xml:space="preserve"><value>Enable trim</value></data>
+  <data name="VideoPage_TrimHint.Text" xml:space="preserve"><value>Drag the trim handles under the preview to choose the start and end points.</value></data>
+  <data name="VideoPage_RotateAndMirror.Text" xml:space="preserve"><value>Rotate and mirror</value></data>
+  <data name="VideoPage_Rotation.Header" xml:space="preserve"><value>Rotation</value></data>
+  <data name="VideoPage_MirrorHorizontally.Content" xml:space="preserve"><value>Mirror horizontally</value></data>
+  <data name="VideoPage_MirrorVertically.Content" xml:space="preserve"><value>Mirror vertically</value></data>
+  <data name="VideoPage_Metadata.Text" xml:space="preserve"><value>Metadata</value></data>
+  <data name="VideoPage_RemoveMetadata.Content" xml:space="preserve"><value>Remove metadata</value></data>
+  <data name="VideoPage_Repair.Text" xml:space="preserve"><value>Repair</value></data>
+  <data name="VideoPage_EnableRepair.Content" xml:space="preserve"><value>Enable repair mode</value></data>
+  <data name="VideoPage_RepairMode.Header" xml:space="preserve"><value>Repair mode</value></data>
+  <data name="VideoPage_Remux.Content" xml:space="preserve"><value>Remux</value></data>
+  <data name="VideoPage_Reencode.Content" xml:space="preserve"><value>Reencode</value></data>
+  <data name="VideoPage_RegenerateTimestamps.Content" xml:space="preserve"><value>Regenerate timestamps</value></data>
+  <data name="VideoPage_IgnoreErrors.Content" xml:space="preserve"><value>Ignore recoverable errors</value></data>
+  <data name="VideoPage_DropNonEssential.Content" xml:space="preserve"><value>Drop non-essential streams</value></data>
+  <data name="VideoPage_RemoveMetadataRepair.Content" xml:space="preserve"><value>Remove metadata during repair</value></data>
+  <data name="VideoPage_TranscriptionReview.Text" xml:space="preserve"><value>Transcription review</value></data>
+  <data name="VideoPage_TranscriptionReviewHint.Text" xml:space="preserve"><value>Review each Whisper segment here before the app generates the final ASS subtitles for export. Your edits are applied automatically when you process the video.</value></data>
+  <data name="VideoPage_SubtitleEditorStatus.Text" xml:space="preserve"><value>Generate or choose a subtitle file to edit.</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       PDF editor page
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="PdfPage_Title.Text" xml:space="preserve"><value>PDF Editor</value></data>
+  <data name="PdfPage_Subtitle.Text" xml:space="preserve"><value>Import a PDF, organize pages, add security, and apply edits with a layout that keeps preview and options easy to follow.</value></data>
+  <data name="PdfPage_PreviewHint.Text" xml:space="preserve"><value>Drop a PDF or click the preview surface to start. Organization, security, and content edits stay available from the options panel.</value></data>
+  <data name="PdfPage_NoPdfLoaded.Text" xml:space="preserve"><value>No PDF loaded yet.</value></data>
+  <data name="PdfPage_DropHintTitle.Text" xml:space="preserve"><value>Drop a PDF here</value></data>
+  <data name="PdfPage_DropHintSubtitle.Text" xml:space="preserve"><value>You can also click this surface to browse for a file. Merge, split, encrypt, and content options stay available from the options panel.</value></data>
+  <data name="PdfPage_FitPage.Content" xml:space="preserve"><value>Fit page</value></data>
+  <data name="PdfPage_Previous.Content" xml:space="preserve"><value>← Previous</value></data>
+  <data name="PdfPage_Next.Content" xml:space="preserve"><value>Next →</value></data>
+  <data name="PdfPage_SelectCategory.Text" xml:space="preserve"><value>Select a category from the left</value></data>
+  <data name="PdfPage_Processing.Text" xml:space="preserve"><value>Processing PDF...</value></data>
+  <data name="PdfPage_PreparingService.Text" xml:space="preserve"><value>Preparing PDF service...</value></data>
+  <data name="PdfPage_Merge.Text" xml:space="preserve"><value>Merge</value></data>
+  <data name="PdfPage_MergeHint.Text" xml:space="preserve"><value>Combine multiple PDFs into a single document.</value></data>
+  <data name="PdfPage_AddPdf.Content" xml:space="preserve"><value>Add PDF to merge</value></data>
+  <data name="PdfPage_Split.Text" xml:space="preserve"><value>Split</value></data>
+  <data name="PdfPage_SplitMode.Header" xml:space="preserve"><value>Split mode</value></data>
+  <data name="PdfPage_OnePagePerFile.Content" xml:space="preserve"><value>One page per file</value></data>
+  <data name="PdfPage_ByPageRanges.Content" xml:space="preserve"><value>By page ranges</value></data>
+  <data name="PdfPage_PageRanges.Header" xml:space="preserve"><value>Page ranges</value></data>
+  <data name="PdfPage_PageRanges.PlaceholderText" xml:space="preserve"><value>Example: 1-3, 5, 7-9</value></data>
+  <data name="PdfPage_PageRangesHint.Text" xml:space="preserve"><value>Specify ranges like 1-3 for pages 1 to 3, or single pages like 5.</value></data>
+  <data name="PdfPage_Reorder.Text" xml:space="preserve"><value>Reorder</value></data>
+  <data name="PdfPage_ReorderHint.Text" xml:space="preserve"><value>Rearrange pages by specifying the new order.</value></data>
+  <data name="PdfPage_PageOrder.Header" xml:space="preserve"><value>Page order</value></data>
+  <data name="PdfPage_PageOrder.PlaceholderText" xml:space="preserve"><value>Example: 3, 1, 2, 5, 4</value></data>
+  <data name="PdfPage_PageOrderHint.Text" xml:space="preserve"><value>List page numbers in the desired order, separated by commas.</value></data>
+  <data name="PdfPage_Extract.Text" xml:space="preserve"><value>Extract</value></data>
+  <data name="PdfPage_ExtractImages.Content" xml:space="preserve"><value>Extract images</value></data>
+  <data name="PdfPage_ExtractAttachments.Content" xml:space="preserve"><value>Extract attachments</value></data>
+  <data name="PdfPage_ExtractHint.Text" xml:space="preserve"><value>Extracted files will be saved to separate folders.</value></data>
+  <data name="PdfPage_Rotate.Text" xml:space="preserve"><value>Rotate</value></data>
+  <data name="PdfPage_Rotation.Header" xml:space="preserve"><value>Rotation</value></data>
+  <data name="PdfPage_0Degrees.Content" xml:space="preserve"><value>0 degrees</value></data>
+  <data name="PdfPage_90CW.Content" xml:space="preserve"><value>90 degrees clockwise</value></data>
+  <data name="PdfPage_180Degrees.Content" xml:space="preserve"><value>180 degrees</value></data>
+  <data name="PdfPage_270CW.Content" xml:space="preserve"><value>270 degrees clockwise</value></data>
+  <data name="PdfPage_ApplyTo.Header" xml:space="preserve"><value>Apply to</value></data>
+  <data name="PdfPage_AllPages.Content" xml:space="preserve"><value>All pages</value></data>
+  <data name="PdfPage_CurrentPage.Content" xml:space="preserve"><value>Current page</value></data>
+  <data name="PdfPage_SelectedPages.Content" xml:space="preserve"><value>Selected pages</value></data>
+  <data name="PdfPage_PageNumbers.Header" xml:space="preserve"><value>Page numbers</value></data>
+  <data name="PdfPage_PageNumbers.PlaceholderText" xml:space="preserve"><value>Example: 1, 3-5, 7</value></data>
+  <data name="PdfPage_Encrypt.Text" xml:space="preserve"><value>Encrypt</value></data>
+  <data name="PdfPage_Password.Header" xml:space="preserve"><value>Password</value></data>
+  <data name="PdfPage_ConfirmPassword.Header" xml:space="preserve"><value>Confirm password</value></data>
+  <data name="PdfPage_SetOwnerPassword.Content" xml:space="preserve"><value>Set owner password</value></data>
+  <data name="PdfPage_OwnerPassword.Header" xml:space="preserve"><value>Owner password</value></data>
+  <data name="PdfPage_PasswordSection.Text" xml:space="preserve"><value>Password</value></data>
+  <data name="PdfPage_PasswordAction.Header" xml:space="preserve"><value>Action</value></data>
+  <data name="PdfPage_RemovePassword.Content" xml:space="preserve"><value>Remove password</value></data>
+  <data name="PdfPage_ChangePassword.Content" xml:space="preserve"><value>Change password</value></data>
+  <data name="PdfPage_CurrentPassword.Header" xml:space="preserve"><value>Current password</value></data>
+  <data name="PdfPage_RemovePasswordHint.Text" xml:space="preserve"><value>Enter the PDF's current password to remove protection.</value></data>
+  <data name="PdfPage_NewPassword.Header" xml:space="preserve"><value>New password</value></data>
+  <data name="PdfPage_ConfirmNewPassword.Header" xml:space="preserve"><value>Confirm new password</value></data>
+  <data name="PdfPage_PermissionsSection.Text" xml:space="preserve"><value>Permissions</value></data>
+  <data name="PdfPage_PermissionsHint.Text" xml:space="preserve"><value>Control what users can do with the PDF.</value></data>
+  <data name="PdfPage_AllowPrinting.Content" xml:space="preserve"><value>Allow printing</value></data>
+  <data name="PdfPage_AllowCopying.Content" xml:space="preserve"><value>Allow copying text and images</value></data>
+  <data name="PdfPage_AllowEditing.Content" xml:space="preserve"><value>Allow editing</value></data>
+  <data name="PdfPage_AllowAnnotations.Content" xml:space="preserve"><value>Allow annotations</value></data>
+  <data name="PdfPage_OCR.Text" xml:space="preserve"><value>OCR</value></data>
+  <data name="PdfPage_OcrHint.Text" xml:space="preserve"><value>Make scanned PDFs searchable by recognizing text.</value></data>
+  <data name="PdfPage_OcrLanguage.Header" xml:space="preserve"><value>Language</value></data>
+  <data name="PdfPage_OcrAutoDetect.Content" xml:space="preserve"><value>Auto-detect</value></data>
+  <data name="PdfPage_Metadata.Text" xml:space="preserve"><value>Metadata</value></data>
+  <data name="PdfPage_MetadataTitle.Header" xml:space="preserve"><value>Title</value></data>
+  <data name="PdfPage_MetadataTitle.PlaceholderText" xml:space="preserve"><value>Document title</value></data>
+  <data name="PdfPage_MetadataAuthor.Header" xml:space="preserve"><value>Author</value></data>
+  <data name="PdfPage_MetadataAuthor.PlaceholderText" xml:space="preserve"><value>Author name</value></data>
+  <data name="PdfPage_MetadataSubject.Header" xml:space="preserve"><value>Subject</value></data>
+  <data name="PdfPage_MetadataSubject.PlaceholderText" xml:space="preserve"><value>Document subject</value></data>
+  <data name="PdfPage_MetadataKeywords.Header" xml:space="preserve"><value>Keywords</value></data>
+  <data name="PdfPage_MetadataKeywords.PlaceholderText" xml:space="preserve"><value>Comma-separated keywords</value></data>
+  <data name="PdfPage_MetadataCreator.Header" xml:space="preserve"><value>Creator</value></data>
+  <data name="PdfPage_MetadataCreator.PlaceholderText" xml:space="preserve"><value>Creator application</value></data>
+  <data name="PdfPage_MetadataProducer.Header" xml:space="preserve"><value>Producer</value></data>
+  <data name="PdfPage_MetadataProducer.PlaceholderText" xml:space="preserve"><value>Producer application</value></data>
+  <data name="PdfPage_Repair.Text" xml:space="preserve"><value>Repair</value></data>
+  <data name="PdfPage_RepairHint.Text" xml:space="preserve"><value>Fix corrupted or damaged PDF files.</value></data>
+  <data name="PdfPage_RepairButton.Content" xml:space="preserve"><value>Repair PDF</value></data>
+  <data name="PdfPage_RepairReady.Text" xml:space="preserve"><value>Ready to repair.</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Document editor page
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="DocPage_Title.Text" xml:space="preserve"><value>Document Processing</value></data>
+  <data name="DocPage_Subtitle.Text" xml:space="preserve"><value>Convert documents to PDF, repair corrupted files, or extract embedded images. Select an operation from the panel and drop or browse for your document.</value></data>
+  <data name="DocPage_LibreOfficeRequired.Text" xml:space="preserve"><value>LibreOffice required</value></data>
+  <data name="DocPage_LibreOfficeStatus.Text" xml:space="preserve"><value>Document processing requires LibreOffice, which needs to be downloaded (~420 MB). This is a one-time download that stays on your machine.</value></data>
+  <data name="DocPage_DownloadLibreOffice.Content" xml:space="preserve"><value>Download LibreOffice</value></data>
+  <data name="DocPage_Cancel.Content" xml:space="preserve"><value>Cancel</value></data>
+  <data name="DocPage_DocumentSection.Text" xml:space="preserve"><value>Document</value></data>
+  <data name="DocPage_DocumentSectionHint.Text" xml:space="preserve"><value>Drop a document or click the surface to browse. The selected operation will be applied when you click the action button.</value></data>
+  <data name="DocPage_NoDocumentLoaded.Text" xml:space="preserve"><value>No document loaded yet.</value></data>
+  <data name="DocPage_DropHintTitle.Text" xml:space="preserve"><value>Drop a document here</value></data>
+  <data name="DocPage_DropHintSubtitle.Text" xml:space="preserve"><value>You can also click this surface to browse for a file. Supported formats include DOCX, PDF, PPTX, XLSX, and more.</value></data>
+  <data name="DocPage_ProcessDocument.Content" xml:space="preserve"><value>Process document</value></data>
+  <data name="DocPage_SelectOperation.Text" xml:space="preserve"><value>Select an operation</value></data>
+  <data name="DocPage_PdfVariant.Text" xml:space="preserve"><value>PDF Variant</value></data>
+  <data name="DocPage_OutputStandard.Header" xml:space="preserve"><value>Output standard</value></data>
+  <data name="DocPage_StandardPdf.Content" xml:space="preserve"><value>Standard PDF 1.4</value></data>
+  <data name="DocPage_PdfA1b.Content" xml:space="preserve"><value>PDF/A-1b (Long-term archival)</value></data>
+  <data name="DocPage_PdfA2b.Content" xml:space="preserve"><value>PDF/A-2b (Extended archival)</value></data>
+  <data name="DocPage_PdfA3b.Content" xml:space="preserve"><value>PDF/A-3b (With attachments)</value></data>
+  <data name="DocPage_ImageCompression.Text" xml:space="preserve"><value>Image Compression</value></data>
+  <data name="DocPage_CompressionMethod.Header" xml:space="preserve"><value>Compression method</value></data>
+  <data name="DocPage_DefaultCompression.Content" xml:space="preserve"><value>Default compression</value></data>
+  <data name="DocPage_Lossless.Content" xml:space="preserve"><value>Lossless (no quality loss)</value></data>
+  <data name="DocPage_JpegCompression.Content" xml:space="preserve"><value>JPEG (smaller file size)</value></data>
+  <data name="DocPage_PageRange.Text" xml:space="preserve"><value>Page Range (optional)</value></data>
+  <data name="DocPage_PagesToInclude.Header" xml:space="preserve"><value>Pages to include</value></data>
+  <data name="DocPage_PagesToInclude.PlaceholderText" xml:space="preserve"><value>Leave empty for all pages. Example: 1-3,5,8-10</value></data>
+  <data name="DocPage_PageRangeHint.Text" xml:space="preserve"><value>Comma-separated list of pages or ranges. For presentations, use slide numbers. For spreadsheets, use sheet indices.</value></data>
+  <data name="DocPage_RepairOutputFormat.Text" xml:space="preserve"><value>Output Format</value></data>
+  <data name="DocPage_SaveAs.Header" xml:space="preserve"><value>Save as</value></data>
+  <data name="DocPage_KeepOriginalFormat.Content" xml:space="preserve"><value>Keep original format</value></data>
+  <data name="DocPage_Docx.Content" xml:space="preserve"><value>DOCX (Word)</value></data>
+  <data name="DocPage_Pptx.Content" xml:space="preserve"><value>PPTX (PowerPoint)</value></data>
+  <data name="DocPage_Xlsx.Content" xml:space="preserve"><value>XLSX (Excel)</value></data>
+  <data name="DocPage_Odt.Content" xml:space="preserve"><value>ODT (OpenDocument Text)</value></data>
+  <data name="DocPage_Odp.Content" xml:space="preserve"><value>ODP (OpenDocument Presentation)</value></data>
+  <data name="DocPage_Ods.Content" xml:space="preserve"><value>ODS (OpenDocument Spreadsheet)</value></data>
+  <data name="DocPage_RepairHint.Text" xml:space="preserve"><value>The repair process will fix corrupted structures. You can optionally convert to a different format during repair.</value></data>
+  <data name="DocPage_ExtractSettings.Text" xml:space="preserve"><value>Extract Settings</value></data>
+  <data name="DocPage_ExtractHint.Text" xml:space="preserve"><value>All embedded images will be extracted and packed into a ZIP archive. The archive will be created at your chosen location.</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Batch editor page
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="BatchPage_Title.Text" xml:space="preserve"><value>Batch Processor</value></data>
+  <data name="BatchPage_Subtitle.Text" xml:space="preserve"><value>Drop multiple files — audio, video, documents, PDFs, images — and apply a curated operation to each type group in a single run.</value></data>
+  <data name="BatchPage_FilesSection.Text" xml:space="preserve"><value>Files</value></data>
+  <data name="BatchPage_FileCountDefault.Text" xml:space="preserve"><value>Drop files below or click Add to get started.</value></data>
+  <data name="BatchPage_AddFiles.Content" xml:space="preserve"><value>Add files</value></data>
+  <data name="BatchPage_ClearAll.Content" xml:space="preserve"><value>Clear all</value></data>
+  <data name="BatchPage_DropHintTitle.Text" xml:space="preserve"><value>Drop files here</value></data>
+  <data name="BatchPage_DropHintSubtitle.Text" xml:space="preserve"><value>Mix types freely. Audio, video, documents, PDFs, and images are all supported — each group gets its own operation.</value></data>
+  <data name="BatchPage_Preparing.Text" xml:space="preserve"><value>Preparing…</value></data>
+  <data name="BatchPage_NoFilesLoaded.Text" xml:space="preserve"><value>No files loaded yet.</value></data>
+  <data name="BatchPage_ShowInFolder.Content" xml:space="preserve"><value>Show in folder</value></data>
+  <data name="BatchPage_Cancel.Content" xml:space="preserve"><value>Cancel</value></data>
+  <data name="BatchPage_ProcessBatch.Content" xml:space="preserve"><value>Process batch</value></data>
+  <data name="BatchPage_SelectOperationHeader.Text" xml:space="preserve"><value>Select an operation</value></data>
+  <data name="BatchPage_NoSelectionHint.Text" xml:space="preserve"><value>Select an operation from the sidebar to configure it. Enable as many as you like — they run as a pipeline on each file.</value></data>
+  <data name="BatchPage_OutputSettings.Text" xml:space="preserve"><value>Output settings</value></data>
+  <data name="BatchPage_FilenameSuffix.Header" xml:space="preserve"><value>Filename suffix</value></data>
+  <data name="BatchPage_FilesInParallel.Header" xml:space="preserve"><value>Files in parallel</value></data>
+  <data name="BatchPage_ConvertAudioFormat.Content" xml:space="preserve"><value>Convert audio format</value></data>
+  <data name="BatchPage_AudioOutputFormat.Header" xml:space="preserve"><value>Output format</value></data>
+  <data name="BatchPage_FlacLossless.Content" xml:space="preserve"><value>FLAC (lossless)</value></data>
+  <data name="BatchPage_WavPcm.Content" xml:space="preserve"><value>WAV (PCM)</value></data>
+  <data name="BatchPage_OggVorbis.Content" xml:space="preserve"><value>OGG Vorbis</value></data>
+  <data name="BatchPage_CompressAudio.Content" xml:space="preserve"><value>Compress audio</value></data>
+  <data name="BatchPage_CompressionMode.Header" xml:space="preserve"><value>Compression mode</value></data>
+  <data name="BatchPage_LossySmaller.Content" xml:space="preserve"><value>Lossy (smaller file)</value></data>
+  <data name="BatchPage_Lossless.Content" xml:space="preserve"><value>Lossless</value></data>
+  <data name="BatchPage_TargetBitrate.Header" xml:space="preserve"><value>Target bitrate (kbps)</value></data>
+  <data name="BatchPage_NormalizeLoudness.Content" xml:space="preserve"><value>Normalize loudness</value></data>
+  <data name="BatchPage_NormalizeMode.Header" xml:space="preserve"><value>Mode</value></data>
+  <data name="BatchPage_LUFS.Content" xml:space="preserve"><value>LUFS (broadcast)</value></data>
+  <data name="BatchPage_Peak.Content" xml:space="preserve"><value>Peak</value></data>
+  <data name="BatchPage_TargetLevel.Header" xml:space="preserve"><value>Target level (dB / LUFS)</value></data>
+  <data name="BatchPage_ChangeContainer.Content" xml:space="preserve"><value>Change container</value></data>
+  <data name="BatchPage_TargetContainer.Header" xml:space="preserve"><value>Target container</value></data>
+  <data name="BatchPage_ChangeCodec.Content" xml:space="preserve"><value>Change codec</value></data>
+  <data name="BatchPage_VideoCodec.Header" xml:space="preserve"><value>Video codec</value></data>
+  <data name="BatchPage_AudioCodec.Header" xml:space="preserve"><value>Audio codec</value></data>
+  <data name="BatchPage_H264.Content" xml:space="preserve"><value>H.264</value></data>
+  <data name="BatchPage_H265.Content" xml:space="preserve"><value>H.265 / HEVC</value></data>
+  <data name="BatchPage_CompressVideo.Content" xml:space="preserve"><value>Compress video</value></data>
+  <data name="BatchPage_VideoQualityPreset.Header" xml:space="preserve"><value>Quality preset</value></data>
+  <data name="BatchPage_VeryHighQuality.Content" xml:space="preserve"><value>Very high quality</value></data>
+  <data name="BatchPage_HighQuality.Content" xml:space="preserve"><value>High quality</value></data>
+  <data name="BatchPage_Balanced.Content" xml:space="preserve"><value>Balanced</value></data>
+  <data name="BatchPage_SmallSize.Content" xml:space="preserve"><value>Small size</value></data>
+  <data name="BatchPage_ResizeVideo.Content" xml:space="preserve"><value>Resize video</value></data>
+  <data name="BatchPage_VideoWidth.Header" xml:space="preserve"><value>Width</value></data>
+  <data name="BatchPage_VideoHeight.Header" xml:space="preserve"><value>Height</value></data>
+  <data name="BatchPage_ExtractAudioTrack.Content" xml:space="preserve"><value>Extract audio track</value></data>
+  <data name="BatchPage_OutputAudioFormat.Header" xml:space="preserve"><value>Output audio format</value></data>
+  <data name="BatchPage_GenerateMuxSubtitles.Content" xml:space="preserve"><value>Generate and mux subtitles</value></data>
+  <data name="BatchPage_TranscriptionSection.Text" xml:space="preserve"><value>Transcription</value></data>
+  <data name="BatchPage_TranscriptionHint.Text" xml:space="preserve"><value>Uses Whisper to transcribe each video. Basic mode writes an SRT file; Advanced mode produces styled ASS subtitles.</value></data>
+  <data name="BatchPage_DownloadTranscription.Content" xml:space="preserve"><value>Download transcription feature</value></data>
+  <data name="BatchPage_TranscriptionNotDownloaded.Text" xml:space="preserve"><value>Transcription feature not downloaded yet.</value></data>
+  <data name="BatchPage_SubtitleGenMode.Header" xml:space="preserve"><value>Subtitle generation mode</value></data>
+  <data name="BatchPage_BasicSRT.Content" xml:space="preserve"><value>Basic (SRT)</value></data>
+  <data name="BatchPage_AdvancedASS.Content" xml:space="preserve"><value>Advanced (ASS)</value></data>
+  <data name="BatchPage_AdvancedOutputType.Header" xml:space="preserve"><value>Advanced output type</value></data>
+  <data name="BatchPage_StyledASS.Content" xml:space="preserve"><value>Styled ASS</value></data>
+  <data name="BatchPage_KaraokeASS.Content" xml:space="preserve"><value>Karaoke ASS</value></data>
+  <data name="BatchPage_ConfigureAdvanced.Content" xml:space="preserve"><value>Configure advanced subtitles</value></data>
+  <data name="BatchPage_SecondsMax.Header" xml:space="preserve"><value>Seconds max</value></data>
+  <data name="BatchPage_LimitWords.Content" xml:space="preserve"><value>Limit words per section</value></data>
+  <data name="BatchPage_WordsMax.Header" xml:space="preserve"><value>Words max</value></data>
+  <data name="BatchPage_SubtitleMux.Text" xml:space="preserve"><value>Subtitle mux</value></data>
+  <data name="BatchPage_MuxMode.Header" xml:space="preserve"><value>Mux mode</value></data>
+  <data name="BatchPage_SoftMux.Content" xml:space="preserve"><value>SoftMux (embedded track)</value></data>
+  <data name="BatchPage_BurnIn.Content" xml:space="preserve"><value>BurnIn (baked into picture)</value></data>
+  <data name="BatchPage_PlacementSection.Text" xml:space="preserve"><value>Placement</value></data>
+  <data name="BatchPage_PlacementHint.Text" xml:space="preserve"><value>Fine-tune where subtitles appear as a percentage of the video frame.</value></data>
+  <data name="BatchPage_Horizontal.Header" xml:space="preserve"><value>Horizontal (%)</value></data>
+  <data name="BatchPage_Vertical.Header" xml:space="preserve"><value>Vertical (%)</value></data>
+  <data name="BatchPage_ResetPlacement.Content" xml:space="preserve"><value>Reset placement</value></data>
+  <data name="BatchPage_LanguageTag.Header" xml:space="preserve"><value>Language tag</value></data>
+  <data name="BatchPage_LanguageTag.PlaceholderText" xml:space="preserve"><value>Example: en</value></data>
+  <data name="BatchPage_SubtitleTitle.Header" xml:space="preserve"><value>Subtitle title</value></data>
+  <data name="BatchPage_SubtitleTitle.PlaceholderText" xml:space="preserve"><value>Example: English</value></data>
+  <data name="BatchPage_SetDefaultSubtitle.Content" xml:space="preserve"><value>Set as default subtitle</value></data>
+  <data name="BatchPage_ConvertToPdf.Content" xml:space="preserve"><value>Convert to PDF</value></data>
+  <data name="BatchPage_LibreOfficeHint.Text" xml:space="preserve"><value>Uses LibreOffice to convert each document.</value></data>
+  <data name="BatchPage_PdfVariant.Header" xml:space="preserve"><value>PDF variant</value></data>
+  <data name="BatchPage_StandardPdf.Content" xml:space="preserve"><value>Standard PDF</value></data>
+  <data name="BatchPage_PdfA1b.Content" xml:space="preserve"><value>PDF/A-1b (archival)</value></data>
+  <data name="BatchPage_PdfA2b.Content" xml:space="preserve"><value>PDF/A-2b</value></data>
+  <data name="BatchPage_PdfA3b.Content" xml:space="preserve"><value>PDF/A-3b</value></data>
+  <data name="BatchPage_CompressOptimizePdf.Content" xml:space="preserve"><value>Compress / optimize PDF</value></data>
+  <data name="BatchPage_CompressPdfHint.Text" xml:space="preserve"><value>Linearizes and rebuilds the file to reduce size (uses qpdf).</value></data>
+  <data name="BatchPage_RepairPdf.Content" xml:space="preserve"><value>Repair PDF</value></data>
+  <data name="BatchPage_RepairPdfHint.Text" xml:space="preserve"><value>Rebuilds the document structure to fix corruption (uses qpdf).</value></data>
+  <data name="BatchPage_AddOcrLayer.Content" xml:space="preserve"><value>Add OCR text layer</value></data>
+  <data name="BatchPage_TessdataPath.Header" xml:space="preserve"><value>Tessdata directory path</value></data>
+  <data name="BatchPage_TessdataPath.PlaceholderText" xml:space="preserve"><value>C:\path\to\tessdata</value></data>
+  <data name="BatchPage_OcrLanguages.Header" xml:space="preserve"><value>Languages (Tesseract codes)</value></data>
+  <data name="BatchPage_RasterizationDpi.Header" xml:space="preserve"><value>Rasterization DPI</value></data>
+  <data name="BatchPage_MergeAllPdfs.Content" xml:space="preserve"><value>Merge all PDFs into one file</value></data>
+  <data name="BatchPage_MergeHint.Text" xml:space="preserve"><value>Cannot be combined with other PDF operations.</value></data>
+  <data name="BatchPage_MergeFilename.Header" xml:space="preserve"><value>Output filename</value></data>
+  <data name="BatchPage_ConvertImageFormat.Content" xml:space="preserve"><value>Convert image format</value></data>
+  <data name="BatchPage_ImageTargetFormat.Header" xml:space="preserve"><value>Target format</value></data>
+  <data name="BatchPage_CompressImages.Content" xml:space="preserve"><value>Compress images</value></data>
+  <data name="BatchPage_ResizeImages.Content" xml:space="preserve"><value>Resize images</value></data>
+  <data name="BatchPage_ImageWidth.Header" xml:space="preserve"><value>Width</value></data>
+  <data name="BatchPage_ImageHeight.Header" xml:space="preserve"><value>Height</value></data>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Licenses page
+       ═══════════════════════════════════════════════════════════════ -->
+  <data name="LicensesPage_Title.Text" xml:space="preserve"><value>Licenses</value></data>
+  <data name="LicensesPage_Subtitle1.Text" xml:space="preserve"><value>Third-party components used by this app, their attributions, and their licenses.</value></data>
+  <data name="LicensesPage_Subtitle2.Text" xml:space="preserve"><value>All listed licenses permit commercial use, subject to their terms and any redistribution obligations.</value></data>
+  <data name="LicensesPage_ShowLicense.Content" xml:space="preserve"><value>Show License</value></data>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Code-behind strings  (used via Strings.Get() in .xaml.cs files)
+       ═══════════════════════════════════════════════════════════════ -->
+
+  <!-- Audio editor -->
+  <data name="CB_Audio_GeneratingTranscription" xml:space="preserve"><value>Generating transcription...</value></data>
+  <data name="CB_Audio_TranscriptionReady" xml:space="preserve"><value>Text transcription ready.</value></data>
+  <data name="CB_Audio_TranscriptionDownloaded" xml:space="preserve"><value>Transcription feature downloaded.</value></data>
+
+  <!-- Document editor -->
+  <data name="CB_Doc_DownloadCancelled" xml:space="preserve"><value>Download cancelled.</value></data>
+
+  <!-- PDF editor — processing status -->
+  <data name="CB_Pdf_ProcessSuccess" xml:space="preserve"><value>PDF processed successfully!</value></data>
+  <data name="CB_Pdf_AllCompleted" xml:space="preserve"><value>All operations completed.</value></data>
+  <data name="CB_Pdf_ErrorProcessing" xml:space="preserve"><value>Error processing PDF</value></data>
+  <data name="CB_Pdf_PreparingOps" xml:space="preserve"><value>Preparing operations...</value></data>
+  <data name="CB_Pdf_MergeMultiple" xml:space="preserve"><value>Merge requires selecting multiple PDFs</value></data>
+  <data name="CB_Pdf_Splitting" xml:space="preserve"><value>Splitting PDF...</value></data>
+  <data name="CB_Pdf_Reordering" xml:space="preserve"><value>Reordering pages...</value></data>
+  <data name="CB_Pdf_PagesReordered" xml:space="preserve"><value>Pages reordered</value></data>
+  <data name="CB_Pdf_Extracting" xml:space="preserve"><value>Extracting content...</value></data>
+  <data name="CB_Pdf_Rotating" xml:space="preserve"><value>Rotating pages...</value></data>
+  <data name="CB_Pdf_Encrypting" xml:space="preserve"><value>Encrypting PDF...</value></data>
+  <data name="CB_Pdf_Encrypted" xml:space="preserve"><value>PDF encrypted</value></data>
+  <data name="CB_Pdf_RemovingPassword" xml:space="preserve"><value>Removing password...</value></data>
+  <data name="CB_Pdf_PasswordRemoved" xml:space="preserve"><value>Password removed</value></data>
+  <data name="CB_Pdf_ChangingPassword" xml:space="preserve"><value>Changing password...</value></data>
+  <data name="CB_Pdf_PasswordChanged" xml:space="preserve"><value>Password changed</value></data>
+  <data name="CB_Pdf_UpdatingPermissions" xml:space="preserve"><value>Updating permissions...</value></data>
+  <data name="CB_Pdf_PermissionsConfigured" xml:space="preserve"><value>Permissions configured</value></data>
+  <data name="CB_Pdf_RunningOCR" xml:space="preserve"><value>Running OCR...</value></data>
+  <data name="CB_Pdf_OcrNeedsTesseract" xml:space="preserve"><value>OCR requires Tesseract configuration</value></data>
+  <data name="CB_Pdf_UpdatingMetadata" xml:space="preserve"><value>Updating metadata...</value></data>
+  <data name="CB_Pdf_MetadataUpdated" xml:space="preserve"><value>Metadata updated</value></data>
+  <data name="CB_Pdf_Repairing" xml:space="preserve"><value>Repairing PDF...</value></data>
+  <data name="CB_Pdf_Repaired" xml:space="preserve"><value>PDF repaired</value></data>
+
+  <!-- Video editor -->
+  <data name="CB_Video_GeneratingSubtitles" xml:space="preserve"><value>Generating subtitles...</value></data>
+  <data name="CB_Video_AssEditingDisabled" xml:space="preserve"><value>ASS text editing is disabled in advanced flow. Generate subtitle sections first, then review and apply them here.</value></data>
+
+  <!-- Batch editor — status messages -->
+  <data name="CB_Batch_ReadyToProcess" xml:space="preserve"><value>Ready to process.</value></data>
+  <data name="CB_Batch_DownloadingTranscription" xml:space="preserve"><value>Downloading transcription feature...</value></data>
+  <data name="CB_Batch_ConfigureOperation" xml:space="preserve"><value>Configure at least one type group operation.</value></data>
+  <data name="CB_Batch_Estimating" xml:space="preserve"><value>Estimating…</value></data>
+  <data name="CB_Batch_Cancelled" xml:space="preserve"><value>Batch cancelled.</value></data>
+  <data name="CB_Batch_CreatingZip" xml:space="preserve"><value>Creating ZIP archive…</value></data>
+  <data name="CB_Batch_Done" xml:space="preserve"><value>Done</value></data>
+  <data name="CB_Batch_NoFilesOfType" xml:space="preserve"><value>No files of this type in batch</value></data>
+  <!-- Format strings: {0} = number, {1} = duration string -->
+  <data name="CB_Batch_OneFile" xml:space="preserve"><value>1 file in batch</value></data>
+  <data name="CB_Batch_NFiles" xml:space="preserve"><value>{0} files in batch</value></data>
+  <data name="CB_Batch_Succeeded" xml:space="preserve"><value>{0} succeeded</value></data>
+  <data name="CB_Batch_Failed" xml:space="preserve"><value>, {0} failed</value></data>
+  <data name="CB_Batch_Skipped" xml:space="preserve"><value>, {0} skipped</value></data>
+  <data name="CB_Batch_ResultDone" xml:space="preserve"><value>Done. {0}.</value></data>
+  <data name="CB_Batch_ResultCancelled" xml:space="preserve"><value>Cancelled. {0}.</value></data>
+  <data name="CB_Batch_Elapsed" xml:space="preserve"><value>Elapsed {0}</value></data>
+  <data name="CB_Batch_TimeLeft" xml:space="preserve"><value>{0} left</value></data>
+  <data name="CB_Batch_FileProgress" xml:space="preserve"><value>File {0} of {1}</value></data>
+  <data name="CB_Batch_SectionLength" xml:space="preserve"><value>Section length: {0} s max</value></data>
+  <!-- Batch panel headers (used by GetPanelHeader) -->
+  <data name="CB_Batch_Header_Output" xml:space="preserve"><value>Output settings</value></data>
+  <data name="CB_Batch_Header_AudioFormat" xml:space="preserve"><value>Audio · Format</value></data>
+  <data name="CB_Batch_Header_AudioCompress" xml:space="preserve"><value>Audio · Compress</value></data>
+  <data name="CB_Batch_Header_AudioNormalize" xml:space="preserve"><value>Audio · Normalize</value></data>
+  <data name="CB_Batch_Header_VideoContainer" xml:space="preserve"><value>Video · Container</value></data>
+  <data name="CB_Batch_Header_VideoCodec" xml:space="preserve"><value>Video · Codec</value></data>
+  <data name="CB_Batch_Header_VideoCompress" xml:space="preserve"><value>Video · Compress</value></data>
+  <data name="CB_Batch_Header_VideoResize" xml:space="preserve"><value>Video · Resize</value></data>
+  <data name="CB_Batch_Header_VideoExtractAudio" xml:space="preserve"><value>Video · Extract audio</value></data>
+  <data name="CB_Batch_Header_VideoSubtitles" xml:space="preserve"><value>Video · Subtitles</value></data>
+  <data name="CB_Batch_Header_DocsConvert" xml:space="preserve"><value>Documents · Convert to PDF</value></data>
+  <data name="CB_Batch_Header_PdfCompress" xml:space="preserve"><value>PDF · Compress</value></data>
+  <data name="CB_Batch_Header_PdfRepair" xml:space="preserve"><value>PDF · Repair</value></data>
+  <data name="CB_Batch_Header_PdfOCR" xml:space="preserve"><value>PDF · OCR</value></data>
+  <data name="CB_Batch_Header_PdfMerge" xml:space="preserve"><value>PDF · Merge</value></data>
+  <data name="CB_Batch_Header_ImagesFormat" xml:space="preserve"><value>Images · Format</value></data>
+  <data name="CB_Batch_Header_ImagesCompress" xml:space="preserve"><value>Images · Compress</value></data>
+  <data name="CB_Batch_Header_ImagesResize" xml:space="preserve"><value>Images · Resize</value></data>
+  <!-- Format strings with {0} placeholder -->
+  <data name="CB_Batch_ImageQuality" xml:space="preserve"><value>Quality: {0}%</value></data>
+  <data name="CB_Batch_AdvSubtitleSectionLength" xml:space="preserve"><value>Advanced subtitle section length: {0} s max</value></data>
+
+</root>

@@ -1008,7 +1008,7 @@ public sealed class AudioProcessingService : IAudioProcessingService
     private static async Task<AudioProbeInfo> ProbeAudioAsync(string inputPath, CancellationToken cancellationToken)
     {
         var args = new List<string>(SplitArguments(FfprobeJsonArgs)) { Path.GetFullPath(inputPath) };
-        var result = await RunProcessWithFallbackAsync(ResolveExecutableCandidates("ffprobe"), args, cancellationToken, null).ConfigureAwait(false);
+        var result = await RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffprobe"), args, cancellationToken, null).ConfigureAwait(false);
         using var document = JsonDocument.Parse(result.StandardOutput);
         var root = document.RootElement;
         var stream = root.TryGetProperty("streams", out var streams)
@@ -1069,8 +1069,8 @@ public sealed class AudioProcessingService : IAudioProcessingService
             "-"
         };
 
-        var volumeResult = await RunProcessWithFallbackAsync(ResolveExecutableCandidates("ffmpeg"), volumeArgs, cancellationToken, null).ConfigureAwait(false);
-        var loudnessResult = await RunProcessWithFallbackAsync(ResolveExecutableCandidates("ffmpeg"), loudnessArgs, cancellationToken, null).ConfigureAwait(false);
+        var volumeResult = await RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffmpeg"), volumeArgs, cancellationToken, null).ConfigureAwait(false);
+        var loudnessResult = await RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffmpeg"), loudnessArgs, cancellationToken, null).ConfigureAwait(false);
         Report(progress, AudioProcessStage.Preparing, 0.75, "Audio analysis completed", null, null, false);
 
         var loudnormJson = ExtractLastJsonObject(loudnessResult.StandardError);
@@ -1376,7 +1376,7 @@ public sealed class AudioProcessingService : IAudioProcessingService
     {
         Report(progress, AudioProcessStage.Preparing, 1, "Audio command prepared", null, duration, false);
         var observer = CreateProgressObserver(duration, description, progress);
-        await RunProcessWithFallbackAsync(ResolveExecutableCandidates("ffmpeg"), args, cancellationToken, observer).ConfigureAwait(false);
+        await RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffmpeg"), args, cancellationToken, observer).ConfigureAwait(false);
     }
 
     private static Action<string>? CreateProgressObserver(TimeSpan? totalDuration, string description, IProgress<AudioProcessProgress>? progress)
@@ -1596,50 +1596,6 @@ public sealed class AudioProcessingService : IAudioProcessingService
         }
 
         return new ProcessResult(process.ExitCode, stdout, stderr);
-    }
-
-    private static IReadOnlyList<string> ResolveExecutableCandidates(string executableNameWithoutExtension)
-    {
-        var executableName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? executableNameWithoutExtension + ".exe"
-            : executableNameWithoutExtension;
-
-        var rid = GetCurrentRid();
-        var bundledPath = Path.Combine(AppContext.BaseDirectory, "ffmpeg", rid, executableName);
-        var candidates = new List<string>();
-        if (File.Exists(bundledPath))
-        {
-            candidates.Add(bundledPath);
-        }
-
-        candidates.Add(executableName);
-        return candidates;
-    }
-
-    private static string GetCurrentRid()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            return RuntimeInformation.ProcessArchitecture switch
-            {
-                Architecture.X64 => "win-x64",
-                Architecture.X86 => "win-x86",
-                Architecture.Arm64 => "win-arm64",
-                _ => throw new PlatformNotSupportedException($"Unsupported Windows architecture '{RuntimeInformation.ProcessArchitecture}'.")
-            };
-        }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            return RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "osx-arm64" : "osx-x64";
-        }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            return RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "linux-arm64" : "linux-x64";
-        }
-
-        throw new PlatformNotSupportedException("Current operating system is not supported.");
     }
 
     private static bool CanFallbackToPath(string candidate, AudioProcessingFfmpegException exception, IReadOnlyList<string> candidates)

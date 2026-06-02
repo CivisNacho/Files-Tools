@@ -87,6 +87,12 @@ public interface IVideoProcessingService
     /// Extracts the primary audio stream from a video into a standalone audio file inferred from the output extension.
     /// </summary>
     Task ExtractAudioAsync(string inputPath, string outputPath, CancellationToken cancellationToken = default, IProgress<VideoProcessingProgress>? progress = null);
+
+    /// <summary>
+    /// Probes a media file and returns its source video and audio codec names using the same
+    /// UI-friendly strings shown in the editor (e.g. "H264", "AAC"). Returns null for unrecognised codecs.
+    /// </summary>
+    Task<VideoSourceInfo> ProbeSourceAsync(string inputPath, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -597,6 +603,16 @@ public sealed class VideoProcessingEstimate
 }
 
 /// <summary>
+/// Basic codec information about a source media file returned by a lightweight probe.
+/// Codec names use the same UI-friendly strings shown in the editor (e.g. "H264", "AAC").
+/// </summary>
+public sealed class VideoSourceInfo
+{
+    public string? VideoCodecName { get; init; }
+    public string? AudioCodecName { get; init; }
+}
+
+/// <summary>
 /// Represents a live FFmpeg progress snapshot for a running video job.
 /// </summary>
 public sealed class VideoProcessingProgress
@@ -675,8 +691,6 @@ public sealed class VideoProcessingException : InvalidOperationException
 /// </summary>
 public sealed class VideoProcessingService : IVideoProcessingService
 {
-    private static readonly ConcurrentDictionary<string, string> VerifiedExecutableCache = new(StringComparer.OrdinalIgnoreCase);
-
     private const string FfprobeJsonArgs = "-v error -print_format json -show_streams -show_format";
     private static readonly object VideoEncoderPlanCacheLock = new();
     private static readonly Dictionary<string, VideoEncoderPlan> VideoEncoderPlanCache = new(StringComparer.OrdinalIgnoreCase);
@@ -690,7 +704,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
         ValidateInputPath(inputPath);
         ValidateOptions(options);
 
-        var ffprobeCandidates = ResolveExecutableCandidates("ffprobe");
+        var ffprobeCandidates = FfmpegLocator.ResolveExecutableCandidates("ffprobe");
         var (inputInfo, _) = await ProbeAsync(ffprobeCandidates, inputPath, cancellationToken).ConfigureAwait(false);
         var outputFormat = ResolveOutputFormat(inputPath, inputPath, options.Output.Format);
 
@@ -713,6 +727,19 @@ public sealed class VideoProcessingService : IVideoProcessingService
             OutputVideoCodec = streamPlan.VideoCodec,
             OutputAudioCodec = streamPlan.AudioCodec,
             Notes = BuildEstimateNotes(options, streamPlan, inputInfo, estimatedOutputSizeBytes)
+        };
+    }
+
+    /// <inheritdoc />
+    public async Task<VideoSourceInfo> ProbeSourceAsync(string inputPath, CancellationToken cancellationToken = default)
+    {
+        ValidateInputPath(inputPath);
+        var ffprobeCandidates = FfmpegLocator.ResolveExecutableCandidates("ffprobe");
+        var (info, _) = await ProbeAsync(ffprobeCandidates, inputPath, cancellationToken).ConfigureAwait(false);
+        return new VideoSourceInfo
+        {
+            VideoCodecName = MapVideoCodecToUiName(info.PrimaryVideoStream?.CodecName),
+            AudioCodecName = MapAudioCodecToUiName(info.PrimaryAudioStream?.CodecName)
         };
     }
 
@@ -855,8 +882,8 @@ public sealed class VideoProcessingService : IVideoProcessingService
         ValidateInputPath(inputPath);
         ValidateOutputPath(outputPath);
 
-        var ffmpegCandidates = ResolveExecutableCandidates("ffmpeg");
-        var ffprobeCandidates = ResolveExecutableCandidates("ffprobe");
+        var ffmpegCandidates = FfmpegLocator.ResolveExecutableCandidates("ffmpeg");
+        var ffprobeCandidates = FfmpegLocator.ResolveExecutableCandidates("ffprobe");
         var (inputInfo, probeJson) = await ProbeAsync(ffprobeCandidates, inputPath, cancellationToken).ConfigureAwait(false);
 
         if (inputInfo.PrimaryAudioStream is null)
@@ -898,8 +925,8 @@ public sealed class VideoProcessingService : IVideoProcessingService
 
     private static async Task ProcessVideoCoreAsync(string inputPath, string outputPath, ProcessVideoOptions options, CancellationToken cancellationToken, IProgress<VideoProcessingProgress>? progress = null)
     {
-        var ffmpegCandidates = ResolveExecutableCandidates("ffmpeg");
-        var ffprobeCandidates = ResolveExecutableCandidates("ffprobe");
+        var ffmpegCandidates = FfmpegLocator.ResolveExecutableCandidates("ffmpeg");
+        var ffprobeCandidates = FfmpegLocator.ResolveExecutableCandidates("ffprobe");
 
         string? probeJson = null;
         MediaInfo? inputInfo = null;
@@ -2100,125 +2127,6 @@ public sealed class VideoProcessingService : IVideoProcessingService
         return TimeSpan.Zero;
     }
 
-    private static IReadOnlyList<string> ResolveExecutableCandidates(string executableNameWithoutExtension)
-    {
-        var executableName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? executableNameWithoutExtension + ".exe"
-            : executableNameWithoutExtension;
-
-        var rid = GetCurrentRid();
-        var bundledPath = Path.Combine(AppContext.BaseDirectory, "ffmpeg", rid, executableName);
-        var candidates = new List<string>();
-
-        if (File.Exists(bundledPath))
-        {
-            candidates.Add(bundledPath);
-        }
-
-        candidates.Add(executableName);
-
-        if (VerifiedExecutableCache.TryGetValue(executableName, out var cachedExecutable))
-        {
-            return [cachedExecutable];
-        }
-
-        foreach (var candidate in candidates)
-        {
-            if (!CanLaunchExecutable(candidate))
-            {
-                continue;
-            }
-
-            VerifiedExecutableCache[executableName] = candidate;
-            return [candidate];
-        }
-
-        return candidates;
-    }
-
-    private static bool CanLaunchExecutable(string binaryPath)
-    {
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = binaryPath,
-            RedirectStandardError = true,
-            RedirectStandardOutput = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            WorkingDirectory = Path.IsPathRooted(binaryPath)
-                ? (Path.GetDirectoryName(binaryPath) ?? AppContext.BaseDirectory)
-                : AppContext.BaseDirectory
-        };
-
-        startInfo.ArgumentList.Add("-version");
-
-        try
-        {
-            using var process = new Process { StartInfo = startInfo };
-            if (!process.Start())
-            {
-                return false;
-            }
-
-            process.WaitForExit(5000);
-            if (!process.HasExited)
-            {
-                try
-                {
-                    process.Kill(entireProcessTree: true);
-                }
-                catch
-                {
-                    // Best effort only.
-                }
-
-                return false;
-            }
-
-            return process.ExitCode == 0;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    private static string GetCurrentRid()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            return RuntimeInformation.ProcessArchitecture switch
-            {
-                Architecture.X64 => "win-x64",
-                Architecture.X86 => "win-x86",
-                Architecture.Arm64 => "win-arm64",
-                _ => throw new PlatformNotSupportedException($"Unsupported Windows architecture '{RuntimeInformation.ProcessArchitecture}'.")
-            };
-        }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            return RuntimeInformation.ProcessArchitecture switch
-            {
-                Architecture.X64 => "osx-x64",
-                Architecture.Arm64 => "osx-arm64",
-                _ => throw new PlatformNotSupportedException($"Unsupported macOS architecture '{RuntimeInformation.ProcessArchitecture}'.")
-            };
-        }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            return RuntimeInformation.ProcessArchitecture switch
-            {
-                Architecture.X64 => "linux-x64",
-                Architecture.Arm64 => "linux-arm64",
-                _ => throw new PlatformNotSupportedException($"Unsupported Linux architecture '{RuntimeInformation.ProcessArchitecture}'.")
-            };
-        }
-
-        throw new PlatformNotSupportedException("Current operating system is not supported.");
-    }
-
     private static VideoContainerFormat ResolveOutputFormat(string inputPath, string outputPath, VideoContainerFormat? requestedFormat)
     {
         if (requestedFormat.HasValue)
@@ -2445,6 +2353,35 @@ public sealed class VideoProcessingService : IVideoProcessingService
             "ac3" => AudioCodec.Ac3,
             "flac" => AudioCodec.Flac,
             "pcm_s16le" => AudioCodec.PcmS16Le,
+            _ => null
+        };
+    }
+
+    private static string? MapVideoCodecToUiName(string? codecName)
+    {
+        return codecName?.ToLowerInvariant() switch
+        {
+            "h264" => "H264",
+            "hevc" => "H265",
+            "av1" => "AV1",
+            "vp9" => "VP9",
+            "vp8" => "VP8",
+            "mpeg4" => "MPEG4",
+            _ => null
+        };
+    }
+
+    private static string? MapAudioCodecToUiName(string? codecName)
+    {
+        return codecName?.ToLowerInvariant() switch
+        {
+            "aac" => "AAC",
+            "opus" => "Opus",
+            "vorbis" => "Vorbis",
+            "mp3" => "MP3",
+            "ac3" => "AC3",
+            "flac" => "FLAC",
+            "pcm_s16le" => "PCM_S16LE",
             _ => null
         };
     }
