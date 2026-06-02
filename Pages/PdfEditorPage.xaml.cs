@@ -23,6 +23,7 @@ namespace Files_Tools.Pages
         private PdfService _pdfService;
         private StorageFile _currentPdfFile;
         private PdfDocument _currentPdf;
+        private long? _currentPdfFileSizeBytes;
         private int _currentPageIndex;
         private bool _isProcessing;
         private double _currentZoom = 1.0;
@@ -55,7 +56,11 @@ namespace Files_Tools.Pages
         public void HandleNavigationViewSelection(string tag)
         {
             if (string.IsNullOrEmpty(tag))
+            {
+                HideAllOperationPanels();
+                UpdateFileInfoPanel();
                 return;
+            }
 
             HideAllOperationPanels();
 
@@ -142,8 +147,43 @@ namespace Files_Tools.Pages
             }
         }
 
+        private void UpdateFileInfoPanel()
+        {
+            if (_currentPdfFile is null || _currentPdf is null)
+            {
+                FileInfoPanel.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            FileInfoNameTextBlock.Text = _currentPdfFile.Name;
+            FileInfoPagesTextBlock.Text = _currentPdf.PageCount.ToString();
+            FileInfoSizeTextBlock.Text = _currentPdfFileSizeBytes.HasValue ? FormatFileSize(_currentPdfFileSizeBytes.Value) : "—";
+            FileInfoPanel.Visibility = Visibility.Visible;
+        }
+
+        private static string FormatFileSize(long bytes)
+        {
+            if (bytes >= 1_073_741_824)
+            {
+                return $"{bytes / 1_073_741_824.0:F1} GB";
+            }
+
+            if (bytes >= 1_048_576)
+            {
+                return $"{bytes / 1_048_576.0:F1} MB";
+            }
+
+            if (bytes >= 1024)
+            {
+                return $"{bytes / 1024.0:F1} KB";
+            }
+
+            return $"{bytes} B";
+        }
+
         private void HideAllOperationPanels()
         {
+            FileInfoPanel.Visibility = Visibility.Collapsed;
             OrganizationPanel.Visibility = Visibility.Collapsed;
             TransformPanel.Visibility = Visibility.Collapsed;
             SecurityPanel.Visibility = Visibility.Collapsed;
@@ -238,8 +278,10 @@ namespace Files_Tools.Pages
                 await DisplayPdfPage(0);
 
                 var properties = await file.GetBasicPropertiesAsync();
+                _currentPdfFileSizeBytes = (long)properties.Size;
                 var sizeInMb = (properties.Size / (1024.0 * 1024.0)).ToString("F2");
                 LoadedPdfInfoTextBlock.Text = $"{file.Name} ({sizeInMb} MB) — {_currentPdf.PageCount} pages";
+                UpdateFileInfoPanel();
 
                 PdfPageImage.Visibility = Visibility.Visible;
                 PdfNavigationPanel.Visibility = Visibility.Visible;

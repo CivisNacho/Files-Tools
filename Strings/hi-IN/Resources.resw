@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
   <resheader name="version"><value>2.0</value></resheader>
@@ -482,4 +482,98 @@
   <data name="LicensesPage_Subtitle2.Text" xml:space="preserve"><value>सूचीबद्ध सभी लाइसेंस वाणिज्यिक उपयोग की अनुमति देते हैं, उनकी शर्तों और किसी भी पुनर्वितरण दायित्व के अधीन।</value></data>
   <data name="LicensesPage_ShowLicense.Content" xml:space="preserve"><value>लाइसेंस दिखाएँ</value></data>
 
+
+  <data name="ImagePage_FileInfoSection.Text" xml:space="preserve"><value>फ़ाइल जानकारी</value></data>
+  <data name="ImagePage_FileInfoName.Text" xml:space="preserve"><value>नाम</value></data>
+  <data name="ImagePage_FileInfoDimensions.Text" xml:space="preserve"><value>आयाम</value></data>
+  <data name="ImagePage_FileInfoFormat.Text" xml:space="preserve"><value>प्रारूप</value></data>
+  <data name="ImagePage_FileInfoSize.Text" xml:space="preserve"><value>आकार</value></data>
+  <data name="VideoPage_FileInfoSection.Text" xml:space="preserve"><value>फ़ाइल जानकारी</value></data>
+  <data name="VideoPage_FileInfoName.Text" xml:space="preserve"><value>नाम</value></data>
+  <data name="VideoPage_FileInfoDimensions.Text" xml:space="preserve"><value>आयाम</value></data>
+  <data name="VideoPage_FileInfoDuration.Text" xml:space="preserve"><value>अवधि</value></data>
+  <data name="VideoPage_FileInfoFormat.Text" xml:space="preserve"><value>प्रारूप</value></data>
+  <data name="VideoPage_FileInfoSize.Text" xml:space="preserve"><value>आकार</value></data>
+  <data name="AudioPage_FileInfoSection.Text" xml:space="preserve"><value>फ़ाइल जानकारी</value></data>
+  <data name="AudioPage_FileInfoName.Text" xml:space="preserve"><value>नाम</value></data>
+  <data name="AudioPage_FileInfoDuration.Text" xml:space="preserve"><value>अवधि</value></data>
+  <data name="AudioPage_FileInfoFormat.Text" xml:space="preserve"><value>प्रारूप</value></data>
+  <data name="AudioPage_FileInfoSize.Text" xml:space="preserve"><value>आकार</value></data>
+  <data name="PdfPage_FileInfoSection.Text" xml:space="preserve"><value>फ़ाइल जानकारी</value></data>
+  <data name="PdfPage_FileInfoName.Text" xml:space="preserve"><value>नाम</value></data>
+  <data name="PdfPage_FileInfoPages.Text" xml:space="preserve"><value>पृष्ठ</value></data>
+  <data name="PdfPage_FileInfoSize.Text" xml:space="preserve"><value>आकार</value></data>
+  <data name="DocPage_FileInfoSection.Text" xml:space="preserve"><value>फ़ाइल जानकारी</value></data>
+  <data name="DocPage_FileInfoName.Text" xml:space="preserve"><value>नाम</value></data>
+  <data name="DocPage_FileInfoFormat.Text" xml:space="preserve"><value>प्रारूप</value></data>
+  <data name="DocPage_FileInfoSize.Text" xml:space="preserve"><value>आकार</value></data>
+  <data name="CB_Audio_GeneratingTranscription" xml:space="preserve"><value>ट्रांसक्रिप्शन बनाई जा रही है...</value></data>
+  <data name="CB_Audio_TranscriptionReady" xml:space="preserve"><value>टेक्स्ट ट्रांसक्रिप्शन तैयार है।</value></data>
+  <data name="CB_Audio_TranscriptionDownloaded" xml:space="preserve"><value>ट्रांसक्रिप्शन सुविधा डाउनलोड हो गई।</value></data>
+  <data name="CB_Doc_DownloadCancelled" xml:space="preserve"><value>डाउनलोड रद्द हो गया।</value></data>
+  <data name="CB_Pdf_ProcessSuccess" xml:space="preserve"><value>PDF सफलतापूर्वक संसाधित हुई!</value></data>
+  <data name="CB_Pdf_AllCompleted" xml:space="preserve"><value>सभी ऑपरेशन पूरे हुए।</value></data>
+  <data name="CB_Pdf_ErrorProcessing" xml:space="preserve"><value>PDF संसाधित करने में त्रुटि</value></data>
+  <data name="CB_Pdf_PreparingOps" xml:space="preserve"><value>ऑपरेशन तैयार हो रहे हैं...</value></data>
+  <data name="CB_Pdf_MergeMultiple" xml:space="preserve"><value>मर्ज के लिए कई PDF चुनना आवश्यक है</value></data>
+  <data name="CB_Pdf_Splitting" xml:space="preserve"><value>PDF विभाजित हो रही है...</value></data>
+  <data name="CB_Pdf_Reordering" xml:space="preserve"><value>पृष्ठ पुनः क्रमबद्ध हो रहे हैं...</value></data>
+  <data name="CB_Pdf_PagesReordered" xml:space="preserve"><value>पृष्ठ पुनः क्रमबद्ध हुए</value></data>
+  <data name="CB_Pdf_Extracting" xml:space="preserve"><value>सामग्री निकाली जा रही है...</value></data>
+  <data name="CB_Pdf_Rotating" xml:space="preserve"><value>पृष्ठ घुमाए जा रहे हैं...</value></data>
+  <data name="CB_Pdf_Encrypting" xml:space="preserve"><value>PDF एन्क्रिप्ट हो रही है...</value></data>
+  <data name="CB_Pdf_Encrypted" xml:space="preserve"><value>PDF एन्क्रिप्ट हुई</value></data>
+  <data name="CB_Pdf_RemovingPassword" xml:space="preserve"><value>पासवर्ड हटाया जा रहा है...</value></data>
+  <data name="CB_Pdf_PasswordRemoved" xml:space="preserve"><value>पासवर्ड हटाया गया</value></data>
+  <data name="CB_Pdf_ChangingPassword" xml:space="preserve"><value>पासवर्ड बदला जा रहा है...</value></data>
+  <data name="CB_Pdf_PasswordChanged" xml:space="preserve"><value>पासवर्ड बदला गया</value></data>
+  <data name="CB_Pdf_UpdatingPermissions" xml:space="preserve"><value>अनुमतियाँ अपडेट हो रही हैं...</value></data>
+  <data name="CB_Pdf_PermissionsConfigured" xml:space="preserve"><value>अनुमतियाँ कॉन्फ़िगर हुईं</value></data>
+  <data name="CB_Pdf_RunningOCR" xml:space="preserve"><value>OCR चल रहा है...</value></data>
+  <data name="CB_Pdf_OcrNeedsTesseract" xml:space="preserve"><value>OCR के लिए Tesseract कॉन्फ़िगरेशन आवश्यक है</value></data>
+  <data name="CB_Pdf_UpdatingMetadata" xml:space="preserve"><value>मेटाडेटा अपडेट हो रहा है...</value></data>
+  <data name="CB_Pdf_MetadataUpdated" xml:space="preserve"><value>मेटाडेटा अपडेट हुआ</value></data>
+  <data name="CB_Pdf_Repairing" xml:space="preserve"><value>PDF ठीक हो रही है...</value></data>
+  <data name="CB_Pdf_Repaired" xml:space="preserve"><value>PDF ठीक हुई</value></data>
+  <data name="CB_Video_GeneratingSubtitles" xml:space="preserve"><value>उपशीर्षक बनाए जा रहे हैं...</value></data>
+  <data name="CB_Video_AssEditingDisabled" xml:space="preserve"><value>उन्नत प्रवाह में ASS टेक्स्ट संपादन अक्षम है। पहले उपशीर्षक अनुभाग बनाएं, फिर उन्हें यहाँ समीक्षा करें और लागू करें।</value></data>
+  <data name="CB_Batch_ReadyToProcess" xml:space="preserve"><value>प्रसंस्करण के लिए तैयार।</value></data>
+  <data name="CB_Batch_DownloadingTranscription" xml:space="preserve"><value>ट्रांसक्रिप्शन सुविधा डाउनलोड हो रही है...</value></data>
+  <data name="CB_Batch_ConfigureOperation" xml:space="preserve"><value>कम से कम एक प्रकार समूह ऑपरेशन कॉन्फ़िगर करें।</value></data>
+  <data name="CB_Batch_Estimating" xml:space="preserve"><value>अनुमान लगाया जा रहा है…</value></data>
+  <data name="CB_Batch_Cancelled" xml:space="preserve"><value>बैच रद्द हुआ।</value></data>
+  <data name="CB_Batch_CreatingZip" xml:space="preserve"><value>ZIP संग्रह बनाया जा रहा है…</value></data>
+  <data name="CB_Batch_Done" xml:space="preserve"><value>हो गया</value></data>
+  <data name="CB_Batch_NoFilesOfType" xml:space="preserve"><value>बैच में इस प्रकार की कोई फ़ाइल नहीं</value></data>
+  <data name="CB_Batch_OneFile" xml:space="preserve"><value>बैच में 1 फ़ाइल</value></data>
+  <data name="CB_Batch_NFiles" xml:space="preserve"><value>बैच में {0} फ़ाइलें</value></data>
+  <data name="CB_Batch_Succeeded" xml:space="preserve"><value>{0} सफल</value></data>
+  <data name="CB_Batch_Failed" xml:space="preserve"><value>, {0} विफल</value></data>
+  <data name="CB_Batch_Skipped" xml:space="preserve"><value>, {0} छोड़े गए</value></data>
+  <data name="CB_Batch_ResultDone" xml:space="preserve"><value>हो गया। {0}।</value></data>
+  <data name="CB_Batch_ResultCancelled" xml:space="preserve"><value>रद्द। {0}।</value></data>
+  <data name="CB_Batch_Elapsed" xml:space="preserve"><value>बीता {0}</value></data>
+  <data name="CB_Batch_TimeLeft" xml:space="preserve"><value>{0} शेष</value></data>
+  <data name="CB_Batch_FileProgress" xml:space="preserve"><value>फ़ाइल {0} में से {1}</value></data>
+  <data name="CB_Batch_SectionLength" xml:space="preserve"><value>अनुभाग लंबाई: अधिकतम {0} s</value></data>
+  <data name="CB_Batch_Header_Output" xml:space="preserve"><value>आउटपुट सेटिंग्स</value></data>
+  <data name="CB_Batch_Header_AudioFormat" xml:space="preserve"><value>ऑडियो · फ़ॉर्मेट</value></data>
+  <data name="CB_Batch_Header_AudioCompress" xml:space="preserve"><value>ऑडियो · संपीड़ित करें</value></data>
+  <data name="CB_Batch_Header_AudioNormalize" xml:space="preserve"><value>ऑडियो · सामान्य करें</value></data>
+  <data name="CB_Batch_Header_VideoContainer" xml:space="preserve"><value>वीडियो · कंटेनर</value></data>
+  <data name="CB_Batch_Header_VideoCodec" xml:space="preserve"><value>वीडियो · कोडेक</value></data>
+  <data name="CB_Batch_Header_VideoCompress" xml:space="preserve"><value>वीडियो · संपीड़ित करें</value></data>
+  <data name="CB_Batch_Header_VideoResize" xml:space="preserve"><value>वीडियो · आकार बदलें</value></data>
+  <data name="CB_Batch_Header_VideoExtractAudio" xml:space="preserve"><value>वीडियो · ऑडियो निकालें</value></data>
+  <data name="CB_Batch_Header_VideoSubtitles" xml:space="preserve"><value>वीडियो · उपशीर्षक</value></data>
+  <data name="CB_Batch_Header_DocsConvert" xml:space="preserve"><value>दस्तावेज़ · PDF में बदलें</value></data>
+  <data name="CB_Batch_Header_PdfCompress" xml:space="preserve"><value>PDF · संपीड़ित करें</value></data>
+  <data name="CB_Batch_Header_PdfRepair" xml:space="preserve"><value>PDF · ठीक करें</value></data>
+  <data name="CB_Batch_Header_PdfOCR" xml:space="preserve"><value>PDF · OCR</value></data>
+  <data name="CB_Batch_Header_PdfMerge" xml:space="preserve"><value>PDF · मर्ज करें</value></data>
+  <data name="CB_Batch_Header_ImagesFormat" xml:space="preserve"><value>छवियाँ · फ़ॉर्मेट</value></data>
+  <data name="CB_Batch_Header_ImagesCompress" xml:space="preserve"><value>छवियाँ · संपीड़ित करें</value></data>
+  <data name="CB_Batch_Header_ImagesResize" xml:space="preserve"><value>छवियाँ · आकार बदलें</value></data>
+  <data name="CB_Batch_ImageQuality" xml:space="preserve"><value>गुणवत्ता: {0}%</value></data>
+  <data name="CB_Batch_AdvSubtitleSectionLength" xml:space="preserve"><value>उन्नत उपशीर्षक अनुभाग लंबाई: अधिकतम {0} s</value></data>
 </root>

@@ -38,6 +38,7 @@ namespace Files_Tools.Pages
         private int? _previewImageHeight;
         private (int Left, int Top, int Width, int Height)? _committedCropPixels;
         private StorageFile? _sourceImageFile;
+        private long? _sourceFileSizeBytes;
         private bool _syncingResizeDimensions;
         private bool _syncingUpscaleDimensions;
         private bool _updatingLivePreview;
@@ -229,6 +230,8 @@ namespace Files_Tools.Pages
             _previewImageHeight = _originalImageHeight;
             _committedCropPixels = null;
             _sourceImageFile = file;
+            var basicProps = await file.GetBasicPropertiesAsync();
+            _sourceFileSizeBytes = (long)basicProps.Size;
             stream.Seek(0);
 
             var bitmap = new BitmapImage();
@@ -244,6 +247,7 @@ namespace Files_Tools.Pages
                 ApplyDimensionBounds(_previewImageWidth.Value, _previewImageHeight.Value);
                 UpdateDimensionBoundsForWorkingImage(resetDisabledInputs: true);
             }
+            UpdateFileInfoPanel();
             RefreshValidation();
         }
 
@@ -295,6 +299,7 @@ namespace Files_Tools.Pages
             MediaPanel.Visibility = selected == "Media" ? Visibility.Visible : Visibility.Collapsed;
             TransformPanel.Visibility = selected == "Transform" ? Visibility.Visible : Visibility.Collapsed;
             AdjustPanel.Visibility = selected == "Adjust" ? Visibility.Visible : Visibility.Collapsed;
+            FileInfoPanel.Visibility = string.IsNullOrEmpty(selected) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private static bool TryParseNavigationTag(string tag, out string section, out string subgroup)
@@ -937,6 +942,36 @@ namespace Files_Tools.Pages
             }
 
             return $"Loaded image: {_originalImageWidth} x {_originalImageHeight} px";
+        }
+
+        private void UpdateFileInfoPanel()
+        {
+            if (_sourceImageFile is null || !_originalImageWidth.HasValue || !_originalImageHeight.HasValue)
+            {
+                FileInfoPanel.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            FileInfoNameTextBlock.Text = _sourceImageFile.Name;
+            FileInfoDimensionsTextBlock.Text = $"{_originalImageWidth} × {_originalImageHeight} px";
+            FileInfoFormatTextBlock.Text = _sourceImageFile.FileType.TrimStart('.').ToUpperInvariant();
+            FileInfoSizeTextBlock.Text = _sourceFileSizeBytes.HasValue ? FormatFileSize(_sourceFileSizeBytes.Value) : "—";
+            FileInfoPanel.Visibility = Visibility.Visible;
+        }
+
+        private static string FormatFileSize(long bytes)
+        {
+            if (bytes >= 1_048_576)
+            {
+                return $"{bytes / 1_048_576.0:F1} MB";
+            }
+
+            if (bytes >= 1024)
+            {
+                return $"{bytes / 1024.0:F1} KB";
+            }
+
+            return $"{bytes} B";
         }
 
         private int GetSelectedRotationDegrees()

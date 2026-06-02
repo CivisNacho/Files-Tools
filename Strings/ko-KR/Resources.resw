@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
   <resheader name="version"><value>2.0</value></resheader>
@@ -482,4 +482,98 @@
   <data name="LicensesPage_Subtitle2.Text" xml:space="preserve"><value>나열된 모든 라이선스는 해당 약관 및 재배포 의무에 따라 상업적 사용을 허용합니다.</value></data>
   <data name="LicensesPage_ShowLicense.Content" xml:space="preserve"><value>라이선스 보기</value></data>
 
+
+  <data name="ImagePage_FileInfoSection.Text" xml:space="preserve"><value>파일 정보</value></data>
+  <data name="ImagePage_FileInfoName.Text" xml:space="preserve"><value>파일 이름</value></data>
+  <data name="ImagePage_FileInfoDimensions.Text" xml:space="preserve"><value>해상도</value></data>
+  <data name="ImagePage_FileInfoFormat.Text" xml:space="preserve"><value>형식</value></data>
+  <data name="ImagePage_FileInfoSize.Text" xml:space="preserve"><value>파일 크기</value></data>
+  <data name="VideoPage_FileInfoSection.Text" xml:space="preserve"><value>파일 정보</value></data>
+  <data name="VideoPage_FileInfoName.Text" xml:space="preserve"><value>파일 이름</value></data>
+  <data name="VideoPage_FileInfoDimensions.Text" xml:space="preserve"><value>해상도</value></data>
+  <data name="VideoPage_FileInfoDuration.Text" xml:space="preserve"><value>재생 시간</value></data>
+  <data name="VideoPage_FileInfoFormat.Text" xml:space="preserve"><value>형식</value></data>
+  <data name="VideoPage_FileInfoSize.Text" xml:space="preserve"><value>파일 크기</value></data>
+  <data name="AudioPage_FileInfoSection.Text" xml:space="preserve"><value>파일 정보</value></data>
+  <data name="AudioPage_FileInfoName.Text" xml:space="preserve"><value>파일 이름</value></data>
+  <data name="AudioPage_FileInfoDuration.Text" xml:space="preserve"><value>재생 시간</value></data>
+  <data name="AudioPage_FileInfoFormat.Text" xml:space="preserve"><value>형식</value></data>
+  <data name="AudioPage_FileInfoSize.Text" xml:space="preserve"><value>파일 크기</value></data>
+  <data name="PdfPage_FileInfoSection.Text" xml:space="preserve"><value>파일 정보</value></data>
+  <data name="PdfPage_FileInfoName.Text" xml:space="preserve"><value>파일 이름</value></data>
+  <data name="PdfPage_FileInfoPages.Text" xml:space="preserve"><value>페이지 수</value></data>
+  <data name="PdfPage_FileInfoSize.Text" xml:space="preserve"><value>파일 크기</value></data>
+  <data name="DocPage_FileInfoSection.Text" xml:space="preserve"><value>파일 정보</value></data>
+  <data name="DocPage_FileInfoName.Text" xml:space="preserve"><value>파일 이름</value></data>
+  <data name="DocPage_FileInfoFormat.Text" xml:space="preserve"><value>형식</value></data>
+  <data name="DocPage_FileInfoSize.Text" xml:space="preserve"><value>파일 크기</value></data>
+  <data name="CB_Audio_GeneratingTranscription" xml:space="preserve"><value>전사 생성 중...</value></data>
+  <data name="CB_Audio_TranscriptionReady" xml:space="preserve"><value>텍스트 전사 준비 완료.</value></data>
+  <data name="CB_Audio_TranscriptionDownloaded" xml:space="preserve"><value>전사 기능이 다운로드되었습니다.</value></data>
+  <data name="CB_Doc_DownloadCancelled" xml:space="preserve"><value>다운로드가 취소되었습니다.</value></data>
+  <data name="CB_Pdf_ProcessSuccess" xml:space="preserve"><value>PDF가 성공적으로 처리되었습니다!</value></data>
+  <data name="CB_Pdf_AllCompleted" xml:space="preserve"><value>모든 작업이 완료되었습니다.</value></data>
+  <data name="CB_Pdf_ErrorProcessing" xml:space="preserve"><value>PDF 처리 중 오류 발생</value></data>
+  <data name="CB_Pdf_PreparingOps" xml:space="preserve"><value>작업 준비 중...</value></data>
+  <data name="CB_Pdf_MergeMultiple" xml:space="preserve"><value>병합하려면 여러 PDF를 선택해야 합니다</value></data>
+  <data name="CB_Pdf_Splitting" xml:space="preserve"><value>PDF 분할 중...</value></data>
+  <data name="CB_Pdf_Reordering" xml:space="preserve"><value>페이지 재정렬 중...</value></data>
+  <data name="CB_Pdf_PagesReordered" xml:space="preserve"><value>페이지 재정렬 완료</value></data>
+  <data name="CB_Pdf_Extracting" xml:space="preserve"><value>콘텐츠 추출 중...</value></data>
+  <data name="CB_Pdf_Rotating" xml:space="preserve"><value>페이지 회전 중...</value></data>
+  <data name="CB_Pdf_Encrypting" xml:space="preserve"><value>PDF 암호화 중...</value></data>
+  <data name="CB_Pdf_Encrypted" xml:space="preserve"><value>PDF 암호화 완료</value></data>
+  <data name="CB_Pdf_RemovingPassword" xml:space="preserve"><value>비밀번호 제거 중...</value></data>
+  <data name="CB_Pdf_PasswordRemoved" xml:space="preserve"><value>비밀번호가 제거되었습니다</value></data>
+  <data name="CB_Pdf_ChangingPassword" xml:space="preserve"><value>비밀번호 변경 중...</value></data>
+  <data name="CB_Pdf_PasswordChanged" xml:space="preserve"><value>비밀번호가 변경되었습니다</value></data>
+  <data name="CB_Pdf_UpdatingPermissions" xml:space="preserve"><value>권한 업데이트 중...</value></data>
+  <data name="CB_Pdf_PermissionsConfigured" xml:space="preserve"><value>권한이 구성되었습니다</value></data>
+  <data name="CB_Pdf_RunningOCR" xml:space="preserve"><value>OCR 실행 중...</value></data>
+  <data name="CB_Pdf_OcrNeedsTesseract" xml:space="preserve"><value>OCR에는 Tesseract 구성이 필요합니다</value></data>
+  <data name="CB_Pdf_UpdatingMetadata" xml:space="preserve"><value>메타데이터 업데이트 중...</value></data>
+  <data name="CB_Pdf_MetadataUpdated" xml:space="preserve"><value>메타데이터가 업데이트되었습니다</value></data>
+  <data name="CB_Pdf_Repairing" xml:space="preserve"><value>PDF 복구 중...</value></data>
+  <data name="CB_Pdf_Repaired" xml:space="preserve"><value>PDF 복구 완료</value></data>
+  <data name="CB_Video_GeneratingSubtitles" xml:space="preserve"><value>자막 생성 중...</value></data>
+  <data name="CB_Video_AssEditingDisabled" xml:space="preserve"><value>고급 흐름에서는 ASS 텍스트 편집이 비활성화됩니다. 먼저 자막 섹션을 생성한 다음 여기에서 검토하고 적용하세요.</value></data>
+  <data name="CB_Batch_ReadyToProcess" xml:space="preserve"><value>처리할 준비가 되었습니다.</value></data>
+  <data name="CB_Batch_DownloadingTranscription" xml:space="preserve"><value>전사 기능 다운로드 중...</value></data>
+  <data name="CB_Batch_ConfigureOperation" xml:space="preserve"><value>최소한 하나의 유형 그룹 작업을 구성하세요.</value></data>
+  <data name="CB_Batch_Estimating" xml:space="preserve"><value>추정 중…</value></data>
+  <data name="CB_Batch_Cancelled" xml:space="preserve"><value>배치가 취소되었습니다.</value></data>
+  <data name="CB_Batch_CreatingZip" xml:space="preserve"><value>ZIP 압축 파일 생성 중…</value></data>
+  <data name="CB_Batch_Done" xml:space="preserve"><value>완료</value></data>
+  <data name="CB_Batch_NoFilesOfType" xml:space="preserve"><value>배치에 이 유형의 파일이 없습니다</value></data>
+  <data name="CB_Batch_OneFile" xml:space="preserve"><value>배치에 1개 파일</value></data>
+  <data name="CB_Batch_NFiles" xml:space="preserve"><value>배치에 {0}개 파일</value></data>
+  <data name="CB_Batch_Succeeded" xml:space="preserve"><value>{0}개 성공</value></data>
+  <data name="CB_Batch_Failed" xml:space="preserve"><value>, {0}개 실패</value></data>
+  <data name="CB_Batch_Skipped" xml:space="preserve"><value>, {0}개 건너뜀</value></data>
+  <data name="CB_Batch_ResultDone" xml:space="preserve"><value>완료. {0}.</value></data>
+  <data name="CB_Batch_ResultCancelled" xml:space="preserve"><value>취소됨. {0}.</value></data>
+  <data name="CB_Batch_Elapsed" xml:space="preserve"><value>경과 {0}</value></data>
+  <data name="CB_Batch_TimeLeft" xml:space="preserve"><value>{0} 남음</value></data>
+  <data name="CB_Batch_FileProgress" xml:space="preserve"><value>파일 {0}/{1}</value></data>
+  <data name="CB_Batch_SectionLength" xml:space="preserve"><value>섹션 길이: 최대 {0}초</value></data>
+  <data name="CB_Batch_Header_Output" xml:space="preserve"><value>출력 설정</value></data>
+  <data name="CB_Batch_Header_AudioFormat" xml:space="preserve"><value>오디오 · 형식</value></data>
+  <data name="CB_Batch_Header_AudioCompress" xml:space="preserve"><value>오디오 · 압축</value></data>
+  <data name="CB_Batch_Header_AudioNormalize" xml:space="preserve"><value>오디오 · 정규화</value></data>
+  <data name="CB_Batch_Header_VideoContainer" xml:space="preserve"><value>비디오 · 컨테이너</value></data>
+  <data name="CB_Batch_Header_VideoCodec" xml:space="preserve"><value>비디오 · 코덱</value></data>
+  <data name="CB_Batch_Header_VideoCompress" xml:space="preserve"><value>비디오 · 압축</value></data>
+  <data name="CB_Batch_Header_VideoResize" xml:space="preserve"><value>비디오 · 크기 조정</value></data>
+  <data name="CB_Batch_Header_VideoExtractAudio" xml:space="preserve"><value>비디오 · 오디오 추출</value></data>
+  <data name="CB_Batch_Header_VideoSubtitles" xml:space="preserve"><value>비디오 · 자막</value></data>
+  <data name="CB_Batch_Header_DocsConvert" xml:space="preserve"><value>문서 · PDF로 변환</value></data>
+  <data name="CB_Batch_Header_PdfCompress" xml:space="preserve"><value>PDF · 압축</value></data>
+  <data name="CB_Batch_Header_PdfRepair" xml:space="preserve"><value>PDF · 복구</value></data>
+  <data name="CB_Batch_Header_PdfOCR" xml:space="preserve"><value>PDF · OCR</value></data>
+  <data name="CB_Batch_Header_PdfMerge" xml:space="preserve"><value>PDF · 병합</value></data>
+  <data name="CB_Batch_Header_ImagesFormat" xml:space="preserve"><value>이미지 · 형식</value></data>
+  <data name="CB_Batch_Header_ImagesCompress" xml:space="preserve"><value>이미지 · 압축</value></data>
+  <data name="CB_Batch_Header_ImagesResize" xml:space="preserve"><value>이미지 · 크기 조정</value></data>
+  <data name="CB_Batch_ImageQuality" xml:space="preserve"><value>품질: {0}%</value></data>
+  <data name="CB_Batch_AdvSubtitleSectionLength" xml:space="preserve"><value>고급 자막 섹션 길이: 최대 {0}초</value></data>
 </root>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
   <resheader name="version"><value>2.0</value></resheader>
@@ -482,4 +482,98 @@
   <data name="LicensesPage_Subtitle2.Text" xml:space="preserve"><value>記載されているすべてのライセンスは、条件および再配布義務に従い商用利用を許可しています。</value></data>
   <data name="LicensesPage_ShowLicense.Content" xml:space="preserve"><value>ライセンスを表示</value></data>
 
+
+  <data name="ImagePage_FileInfoSection.Text" xml:space="preserve"><value>ファイル情報</value></data>
+  <data name="ImagePage_FileInfoName.Text" xml:space="preserve"><value>ファイル名</value></data>
+  <data name="ImagePage_FileInfoDimensions.Text" xml:space="preserve"><value>解像度</value></data>
+  <data name="ImagePage_FileInfoFormat.Text" xml:space="preserve"><value>形式</value></data>
+  <data name="ImagePage_FileInfoSize.Text" xml:space="preserve"><value>ファイルサイズ</value></data>
+  <data name="VideoPage_FileInfoSection.Text" xml:space="preserve"><value>ファイル情報</value></data>
+  <data name="VideoPage_FileInfoName.Text" xml:space="preserve"><value>ファイル名</value></data>
+  <data name="VideoPage_FileInfoDimensions.Text" xml:space="preserve"><value>解像度</value></data>
+  <data name="VideoPage_FileInfoDuration.Text" xml:space="preserve"><value>再生時間</value></data>
+  <data name="VideoPage_FileInfoFormat.Text" xml:space="preserve"><value>形式</value></data>
+  <data name="VideoPage_FileInfoSize.Text" xml:space="preserve"><value>ファイルサイズ</value></data>
+  <data name="AudioPage_FileInfoSection.Text" xml:space="preserve"><value>ファイル情報</value></data>
+  <data name="AudioPage_FileInfoName.Text" xml:space="preserve"><value>ファイル名</value></data>
+  <data name="AudioPage_FileInfoDuration.Text" xml:space="preserve"><value>再生時間</value></data>
+  <data name="AudioPage_FileInfoFormat.Text" xml:space="preserve"><value>形式</value></data>
+  <data name="AudioPage_FileInfoSize.Text" xml:space="preserve"><value>ファイルサイズ</value></data>
+  <data name="PdfPage_FileInfoSection.Text" xml:space="preserve"><value>ファイル情報</value></data>
+  <data name="PdfPage_FileInfoName.Text" xml:space="preserve"><value>ファイル名</value></data>
+  <data name="PdfPage_FileInfoPages.Text" xml:space="preserve"><value>ページ数</value></data>
+  <data name="PdfPage_FileInfoSize.Text" xml:space="preserve"><value>ファイルサイズ</value></data>
+  <data name="DocPage_FileInfoSection.Text" xml:space="preserve"><value>ファイル情報</value></data>
+  <data name="DocPage_FileInfoName.Text" xml:space="preserve"><value>ファイル名</value></data>
+  <data name="DocPage_FileInfoFormat.Text" xml:space="preserve"><value>形式</value></data>
+  <data name="DocPage_FileInfoSize.Text" xml:space="preserve"><value>ファイルサイズ</value></data>
+  <data name="CB_Audio_GeneratingTranscription" xml:space="preserve"><value>文字起こしを生成中...</value></data>
+  <data name="CB_Audio_TranscriptionReady" xml:space="preserve"><value>テキスト文字起こし完了。</value></data>
+  <data name="CB_Audio_TranscriptionDownloaded" xml:space="preserve"><value>文字起こし機能をダウンロードしました。</value></data>
+  <data name="CB_Doc_DownloadCancelled" xml:space="preserve"><value>ダウンロードがキャンセルされました。</value></data>
+  <data name="CB_Pdf_ProcessSuccess" xml:space="preserve"><value>PDFの処理が完了しました！</value></data>
+  <data name="CB_Pdf_AllCompleted" xml:space="preserve"><value>すべての操作が完了しました。</value></data>
+  <data name="CB_Pdf_ErrorProcessing" xml:space="preserve"><value>PDFの処理中にエラーが発生しました</value></data>
+  <data name="CB_Pdf_PreparingOps" xml:space="preserve"><value>操作を準備中...</value></data>
+  <data name="CB_Pdf_MergeMultiple" xml:space="preserve"><value>結合には複数のPDFを選択する必要があります</value></data>
+  <data name="CB_Pdf_Splitting" xml:space="preserve"><value>PDFを分割中...</value></data>
+  <data name="CB_Pdf_Reordering" xml:space="preserve"><value>ページを並べ替え中...</value></data>
+  <data name="CB_Pdf_PagesReordered" xml:space="preserve"><value>ページの並べ替え完了</value></data>
+  <data name="CB_Pdf_Extracting" xml:space="preserve"><value>コンテンツを抽出中...</value></data>
+  <data name="CB_Pdf_Rotating" xml:space="preserve"><value>ページを回転中...</value></data>
+  <data name="CB_Pdf_Encrypting" xml:space="preserve"><value>PDFを暗号化中...</value></data>
+  <data name="CB_Pdf_Encrypted" xml:space="preserve"><value>PDF暗号化完了</value></data>
+  <data name="CB_Pdf_RemovingPassword" xml:space="preserve"><value>パスワードを削除中...</value></data>
+  <data name="CB_Pdf_PasswordRemoved" xml:space="preserve"><value>パスワードを削除しました</value></data>
+  <data name="CB_Pdf_ChangingPassword" xml:space="preserve"><value>パスワードを変更中...</value></data>
+  <data name="CB_Pdf_PasswordChanged" xml:space="preserve"><value>パスワードが変更されました</value></data>
+  <data name="CB_Pdf_UpdatingPermissions" xml:space="preserve"><value>権限を更新中...</value></data>
+  <data name="CB_Pdf_PermissionsConfigured" xml:space="preserve"><value>権限を設定しました</value></data>
+  <data name="CB_Pdf_RunningOCR" xml:space="preserve"><value>OCRを実行中...</value></data>
+  <data name="CB_Pdf_OcrNeedsTesseract" xml:space="preserve"><value>OCRにはTesseractの設定が必要です</value></data>
+  <data name="CB_Pdf_UpdatingMetadata" xml:space="preserve"><value>メタデータを更新中...</value></data>
+  <data name="CB_Pdf_MetadataUpdated" xml:space="preserve"><value>メタデータを更新しました</value></data>
+  <data name="CB_Pdf_Repairing" xml:space="preserve"><value>PDFを修復中...</value></data>
+  <data name="CB_Pdf_Repaired" xml:space="preserve"><value>PDF修復完了</value></data>
+  <data name="CB_Video_GeneratingSubtitles" xml:space="preserve"><value>字幕を生成中...</value></data>
+  <data name="CB_Video_AssEditingDisabled" xml:space="preserve"><value>高度なフローではASSテキスト編集が無効です。まず字幕セクションを生成し、ここで確認して適用してください。</value></data>
+  <data name="CB_Batch_ReadyToProcess" xml:space="preserve"><value>処理の準備ができました。</value></data>
+  <data name="CB_Batch_DownloadingTranscription" xml:space="preserve"><value>文字起こし機能をダウンロード中...</value></data>
+  <data name="CB_Batch_ConfigureOperation" xml:space="preserve"><value>少なくとも1つのタイプグループ操作を設定してください。</value></data>
+  <data name="CB_Batch_Estimating" xml:space="preserve"><value>見積もり中…</value></data>
+  <data name="CB_Batch_Cancelled" xml:space="preserve"><value>バッチがキャンセルされました。</value></data>
+  <data name="CB_Batch_CreatingZip" xml:space="preserve"><value>ZIPアーカイブを作成中…</value></data>
+  <data name="CB_Batch_Done" xml:space="preserve"><value>完了</value></data>
+  <data name="CB_Batch_NoFilesOfType" xml:space="preserve"><value>このタイプのファイルはバッチにありません</value></data>
+  <data name="CB_Batch_OneFile" xml:space="preserve"><value>バッチに1ファイル</value></data>
+  <data name="CB_Batch_NFiles" xml:space="preserve"><value>バッチに{0}ファイル</value></data>
+  <data name="CB_Batch_Succeeded" xml:space="preserve"><value>{0}件成功</value></data>
+  <data name="CB_Batch_Failed" xml:space="preserve"><value>、{0}件失敗</value></data>
+  <data name="CB_Batch_Skipped" xml:space="preserve"><value>、{0}件スキップ</value></data>
+  <data name="CB_Batch_ResultDone" xml:space="preserve"><value>完了。{0}。</value></data>
+  <data name="CB_Batch_ResultCancelled" xml:space="preserve"><value>キャンセル。{0}。</value></data>
+  <data name="CB_Batch_Elapsed" xml:space="preserve"><value>経過 {0}</value></data>
+  <data name="CB_Batch_TimeLeft" xml:space="preserve"><value>あと{0}</value></data>
+  <data name="CB_Batch_FileProgress" xml:space="preserve"><value>ファイル {0}/{1}</value></data>
+  <data name="CB_Batch_SectionLength" xml:space="preserve"><value>セクション長: 最大{0}秒</value></data>
+  <data name="CB_Batch_Header_Output" xml:space="preserve"><value>出力設定</value></data>
+  <data name="CB_Batch_Header_AudioFormat" xml:space="preserve"><value>オーディオ · フォーマット</value></data>
+  <data name="CB_Batch_Header_AudioCompress" xml:space="preserve"><value>オーディオ · 圧縮</value></data>
+  <data name="CB_Batch_Header_AudioNormalize" xml:space="preserve"><value>オーディオ · 正規化</value></data>
+  <data name="CB_Batch_Header_VideoContainer" xml:space="preserve"><value>ビデオ · コンテナ</value></data>
+  <data name="CB_Batch_Header_VideoCodec" xml:space="preserve"><value>ビデオ · コーデック</value></data>
+  <data name="CB_Batch_Header_VideoCompress" xml:space="preserve"><value>ビデオ · 圧縮</value></data>
+  <data name="CB_Batch_Header_VideoResize" xml:space="preserve"><value>ビデオ · サイズ変更</value></data>
+  <data name="CB_Batch_Header_VideoExtractAudio" xml:space="preserve"><value>ビデオ · オーディオ抽出</value></data>
+  <data name="CB_Batch_Header_VideoSubtitles" xml:space="preserve"><value>ビデオ · 字幕</value></data>
+  <data name="CB_Batch_Header_DocsConvert" xml:space="preserve"><value>ドキュメント · PDFに変換</value></data>
+  <data name="CB_Batch_Header_PdfCompress" xml:space="preserve"><value>PDF · 圧縮</value></data>
+  <data name="CB_Batch_Header_PdfRepair" xml:space="preserve"><value>PDF · 修復</value></data>
+  <data name="CB_Batch_Header_PdfOCR" xml:space="preserve"><value>PDF · OCR</value></data>
+  <data name="CB_Batch_Header_PdfMerge" xml:space="preserve"><value>PDF · 結合</value></data>
+  <data name="CB_Batch_Header_ImagesFormat" xml:space="preserve"><value>画像 · フォーマット</value></data>
+  <data name="CB_Batch_Header_ImagesCompress" xml:space="preserve"><value>画像 · 圧縮</value></data>
+  <data name="CB_Batch_Header_ImagesResize" xml:space="preserve"><value>画像 · サイズ変更</value></data>
+  <data name="CB_Batch_ImageQuality" xml:space="preserve"><value>品質: {0}%</value></data>
+  <data name="CB_Batch_AdvSubtitleSectionLength" xml:space="preserve"><value>高度な字幕セクション長: 最大{0}秒</value></data>
 </root>

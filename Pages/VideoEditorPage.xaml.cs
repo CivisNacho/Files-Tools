@@ -73,6 +73,7 @@ namespace Files_Tools.Pages
         private readonly IAudioTranscriptionService _audioTranscriptionService = new AudioTranscriptionService();
         private readonly ISubtitlesService _subtitlesService;
         private StorageFile? _sourceVideoFile;
+        private long? _sourceVideoFileSizeBytes;
         private string? _sourceVideoCodecName;
         private string? _sourceAudioCodecName;
         private TimeSpan? _videoDuration;
@@ -392,7 +393,9 @@ namespace Files_Tools.Pages
             AttachVideoOpenedHandler();
 
             var basicProperties = await file.GetBasicPropertiesAsync();
+            _sourceVideoFileSizeBytes = (long)basicProperties.Size;
             LoadedVideoInfoTextBlock.Text = $"Loaded video: {file.Name} ({basicProperties.Size / (1024.0 * 1024.0):0.00} MB)";
+            UpdateFileInfoPanel();
 
             UpdateSubtitlePlacementPreview();
             RefreshValidationAndState();
@@ -460,6 +463,7 @@ namespace Files_Tools.Pages
 
                 UpdateTrimUiState();
                 UpdateSubtitlePlacementPreview();
+                UpdateFileInfoPanel();
             });
         }
 
@@ -637,6 +641,52 @@ namespace Files_Tools.Pages
             MediaPanel.Visibility = selected == "Media" ? Visibility.Visible : Visibility.Collapsed;
             TransformPanel.Visibility = selected == "Transform" ? Visibility.Visible : Visibility.Collapsed;
             AdvancedPanel.Visibility = selected == "Advanced" ? Visibility.Visible : Visibility.Collapsed;
+            FileInfoPanel.Visibility = string.IsNullOrEmpty(selected) ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void UpdateFileInfoPanel()
+        {
+            if (_sourceVideoFile is null)
+            {
+                FileInfoPanel.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            FileInfoNameTextBlock.Text = _sourceVideoFile.Name;
+            FileInfoDimensionsTextBlock.Text = _previewVideoSize.Width > 0 && _previewVideoSize.Height > 0
+                ? $"{(int)_previewVideoSize.Width} × {(int)_previewVideoSize.Height} px"
+                : "—";
+            FileInfoDurationTextBlock.Text = _videoDuration.HasValue ? FormatDuration(_videoDuration.Value) : "—";
+            FileInfoFormatTextBlock.Text = _sourceVideoFile.FileType.TrimStart('.').ToUpperInvariant();
+            FileInfoSizeTextBlock.Text = _sourceVideoFileSizeBytes.HasValue ? FormatFileSize(_sourceVideoFileSizeBytes.Value) : "—";
+            FileInfoPanel.Visibility = Visibility.Visible;
+        }
+
+        private static string FormatFileSize(long bytes)
+        {
+            if (bytes >= 1_073_741_824)
+            {
+                return $"{bytes / 1_073_741_824.0:F1} GB";
+            }
+
+            if (bytes >= 1_048_576)
+            {
+                return $"{bytes / 1_048_576.0:F1} MB";
+            }
+
+            if (bytes >= 1024)
+            {
+                return $"{bytes / 1024.0:F1} KB";
+            }
+
+            return $"{bytes} B";
+        }
+
+        private static string FormatDuration(TimeSpan duration)
+        {
+            return duration.TotalHours >= 1
+                ? $"{(int)duration.TotalHours}:{duration.Minutes:D2}:{duration.Seconds:D2}"
+                : $"{duration.Minutes}:{duration.Seconds:D2}";
         }
 
         public void ApplyOptionSelection(string optionTag)

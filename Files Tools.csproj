@@ -17,6 +17,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="AppIcon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Assets\SplashScreen.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />

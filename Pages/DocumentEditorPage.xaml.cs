@@ -19,6 +19,7 @@ public sealed partial class DocumentEditorPage : Page
 {
     private DocumentService _documentService = new();
     private string? _loadedDocumentPath;
+    private long? _loadedDocumentSizeBytes;
     private string? _selectedOperation;
     private CancellationTokenSource? _currentOperation;
     private CancellationTokenSource? _libreofficeCts;
@@ -56,11 +57,49 @@ public sealed partial class DocumentEditorPage : Page
             _ => "Select an operation"
         };
 
+        var knownOperation = operation is "convert-to-pdf" or "repair" or "extract-images";
+        FileInfoPanel.Visibility = !knownOperation ? Visibility.Visible : Visibility.Collapsed;
         ConvertToPdfPanel.Visibility = operation == "convert-to-pdf" ? Visibility.Visible : Visibility.Collapsed;
         RepairPanel.Visibility = operation == "repair" ? Visibility.Visible : Visibility.Collapsed;
         ExtractImagesPanel.Visibility = operation == "extract-images" ? Visibility.Visible : Visibility.Collapsed;
 
         UpdateApplyButtonState();
+    }
+
+    private void UpdateFileInfoPanel()
+    {
+        if (_loadedDocumentPath is null)
+        {
+            FileInfoPanel.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        FileInfoNameTextBlock.Text = Path.GetFileName(_loadedDocumentPath);
+        FileInfoFormatTextBlock.Text = Path.GetExtension(_loadedDocumentPath).TrimStart('.').ToUpperInvariant();
+        FileInfoSizeTextBlock.Text = _loadedDocumentSizeBytes.HasValue ? FormatFileSize(_loadedDocumentSizeBytes.Value) : "—";
+
+        var knownOperation = _selectedOperation is "convert-to-pdf" or "repair" or "extract-images";
+        FileInfoPanel.Visibility = !knownOperation ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private static string FormatFileSize(long bytes)
+    {
+        if (bytes >= 1_073_741_824)
+        {
+            return $"{bytes / 1_073_741_824.0:F1} GB";
+        }
+
+        if (bytes >= 1_048_576)
+        {
+            return $"{bytes / 1_048_576.0:F1} MB";
+        }
+
+        if (bytes >= 1024)
+        {
+            return $"{bytes / 1024.0:F1} KB";
+        }
+
+        return $"{bytes} B";
     }
 
     private void UploadSurface_PointerPressed(object sender, PointerRoutedEventArgs e)
@@ -138,12 +177,14 @@ public sealed partial class DocumentEditorPage : Page
         var fileName = Path.GetFileName(path);
         var fileInfo = new FileInfo(path);
         var sizeKb = fileInfo.Length / 1024;
+        _loadedDocumentSizeBytes = fileInfo.Length;
 
         LoadedDocumentInfoTextBlock.Text = $"{fileName} • {sizeKb} KB";
         LoadedDocumentPreview.Text = fileName;
         LoadedDocumentPreview.Visibility = Visibility.Visible;
         DropHintPanel.Visibility = Visibility.Collapsed;
 
+        UpdateFileInfoPanel();
         UpdateApplyButtonState();
     }
 

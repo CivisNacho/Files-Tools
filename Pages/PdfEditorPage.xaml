@@ -317,6 +317,29 @@
                                 <StackPanel Spacing="2">
                                     <TextBlock x:Name="SelectedOptionHeaderTextBlock" x:Uid="PdfPage_SelectCategory" Margin="0,0,0,12" FontSize="16" FontWeight="SemiBold" Text="Select a category from the left" />
 
+                                    <Border x:Name="FileInfoPanel" Style="{StaticResource SettingsCardStyle}" Visibility="Collapsed">
+                                        <StackPanel Spacing="10">
+                                            <TextBlock x:Uid="PdfPage_FileInfoSection" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="File info" />
+                                            <Grid ColumnSpacing="10" RowSpacing="6">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <TextBlock x:Uid="PdfPage_FileInfoName" Opacity="0.72" Text="Name" VerticalAlignment="Top" />
+                                                <TextBlock x:Name="FileInfoNameTextBlock" Grid.Column="1" TextWrapping="Wrap" />
+                                                <TextBlock x:Uid="PdfPage_FileInfoPages" Grid.Row="1" Opacity="0.72" Text="Pages" />
+                                                <TextBlock x:Name="FileInfoPagesTextBlock" Grid.Row="1" Grid.Column="1" />
+                                                <TextBlock x:Uid="PdfPage_FileInfoSize" Grid.Row="2" Opacity="0.72" Text="Size" />
+                                                <TextBlock x:Name="FileInfoSizeTextBlock" Grid.Row="2" Grid.Column="1" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+
                                     <!-- Organization Panel -->
                                     <StackPanel x:Name="OrganizationPanel" Visibility="Collapsed" Spacing="12">
 

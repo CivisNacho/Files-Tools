@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
   <resheader name="version"><value>2.0</value></resheader>
@@ -482,4 +482,98 @@
   <data name="LicensesPage_Subtitle2.Text" xml:space="preserve"><value>所有列出的许可证均允许商业使用，须遵守其条款及任何再分发义务。</value></data>
   <data name="LicensesPage_ShowLicense.Content" xml:space="preserve"><value>查看许可证</value></data>
 
+
+  <data name="ImagePage_FileInfoSection.Text" xml:space="preserve"><value>文件信息</value></data>
+  <data name="ImagePage_FileInfoName.Text" xml:space="preserve"><value>文件名</value></data>
+  <data name="ImagePage_FileInfoDimensions.Text" xml:space="preserve"><value>尺寸</value></data>
+  <data name="ImagePage_FileInfoFormat.Text" xml:space="preserve"><value>格式</value></data>
+  <data name="ImagePage_FileInfoSize.Text" xml:space="preserve"><value>文件大小</value></data>
+  <data name="VideoPage_FileInfoSection.Text" xml:space="preserve"><value>文件信息</value></data>
+  <data name="VideoPage_FileInfoName.Text" xml:space="preserve"><value>文件名</value></data>
+  <data name="VideoPage_FileInfoDimensions.Text" xml:space="preserve"><value>尺寸</value></data>
+  <data name="VideoPage_FileInfoDuration.Text" xml:space="preserve"><value>时长</value></data>
+  <data name="VideoPage_FileInfoFormat.Text" xml:space="preserve"><value>格式</value></data>
+  <data name="VideoPage_FileInfoSize.Text" xml:space="preserve"><value>文件大小</value></data>
+  <data name="AudioPage_FileInfoSection.Text" xml:space="preserve"><value>文件信息</value></data>
+  <data name="AudioPage_FileInfoName.Text" xml:space="preserve"><value>文件名</value></data>
+  <data name="AudioPage_FileInfoDuration.Text" xml:space="preserve"><value>时长</value></data>
+  <data name="AudioPage_FileInfoFormat.Text" xml:space="preserve"><value>格式</value></data>
+  <data name="AudioPage_FileInfoSize.Text" xml:space="preserve"><value>文件大小</value></data>
+  <data name="PdfPage_FileInfoSection.Text" xml:space="preserve"><value>文件信息</value></data>
+  <data name="PdfPage_FileInfoName.Text" xml:space="preserve"><value>文件名</value></data>
+  <data name="PdfPage_FileInfoPages.Text" xml:space="preserve"><value>页数</value></data>
+  <data name="PdfPage_FileInfoSize.Text" xml:space="preserve"><value>文件大小</value></data>
+  <data name="DocPage_FileInfoSection.Text" xml:space="preserve"><value>文件信息</value></data>
+  <data name="DocPage_FileInfoName.Text" xml:space="preserve"><value>文件名</value></data>
+  <data name="DocPage_FileInfoFormat.Text" xml:space="preserve"><value>格式</value></data>
+  <data name="DocPage_FileInfoSize.Text" xml:space="preserve"><value>文件大小</value></data>
+  <data name="CB_Audio_GeneratingTranscription" xml:space="preserve"><value>正在生成转录...</value></data>
+  <data name="CB_Audio_TranscriptionReady" xml:space="preserve"><value>文字转录已就绪。</value></data>
+  <data name="CB_Audio_TranscriptionDownloaded" xml:space="preserve"><value>转录功能已下载。</value></data>
+  <data name="CB_Doc_DownloadCancelled" xml:space="preserve"><value>下载已取消。</value></data>
+  <data name="CB_Pdf_ProcessSuccess" xml:space="preserve"><value>PDF 处理成功！</value></data>
+  <data name="CB_Pdf_AllCompleted" xml:space="preserve"><value>所有操作已完成。</value></data>
+  <data name="CB_Pdf_ErrorProcessing" xml:space="preserve"><value>处理 PDF 时出错</value></data>
+  <data name="CB_Pdf_PreparingOps" xml:space="preserve"><value>正在准备操作...</value></data>
+  <data name="CB_Pdf_MergeMultiple" xml:space="preserve"><value>合并需要选择多个 PDF</value></data>
+  <data name="CB_Pdf_Splitting" xml:space="preserve"><value>正在拆分 PDF...</value></data>
+  <data name="CB_Pdf_Reordering" xml:space="preserve"><value>正在重新排序页面...</value></data>
+  <data name="CB_Pdf_PagesReordered" xml:space="preserve"><value>页面已重新排序</value></data>
+  <data name="CB_Pdf_Extracting" xml:space="preserve"><value>正在提取内容...</value></data>
+  <data name="CB_Pdf_Rotating" xml:space="preserve"><value>正在旋转页面...</value></data>
+  <data name="CB_Pdf_Encrypting" xml:space="preserve"><value>正在加密 PDF...</value></data>
+  <data name="CB_Pdf_Encrypted" xml:space="preserve"><value>PDF 已加密</value></data>
+  <data name="CB_Pdf_RemovingPassword" xml:space="preserve"><value>正在移除密码...</value></data>
+  <data name="CB_Pdf_PasswordRemoved" xml:space="preserve"><value>密码已移除</value></data>
+  <data name="CB_Pdf_ChangingPassword" xml:space="preserve"><value>正在更改密码...</value></data>
+  <data name="CB_Pdf_PasswordChanged" xml:space="preserve"><value>密码已更改</value></data>
+  <data name="CB_Pdf_UpdatingPermissions" xml:space="preserve"><value>正在更新权限...</value></data>
+  <data name="CB_Pdf_PermissionsConfigured" xml:space="preserve"><value>权限已配置</value></data>
+  <data name="CB_Pdf_RunningOCR" xml:space="preserve"><value>正在运行 OCR...</value></data>
+  <data name="CB_Pdf_OcrNeedsTesseract" xml:space="preserve"><value>OCR 需要配置 Tesseract</value></data>
+  <data name="CB_Pdf_UpdatingMetadata" xml:space="preserve"><value>正在更新元数据...</value></data>
+  <data name="CB_Pdf_MetadataUpdated" xml:space="preserve"><value>元数据已更新</value></data>
+  <data name="CB_Pdf_Repairing" xml:space="preserve"><value>正在修复 PDF...</value></data>
+  <data name="CB_Pdf_Repaired" xml:space="preserve"><value>PDF 已修复</value></data>
+  <data name="CB_Video_GeneratingSubtitles" xml:space="preserve"><value>正在生成字幕...</value></data>
+  <data name="CB_Video_AssEditingDisabled" xml:space="preserve"><value>高级流程中已禁用 ASS 文本编辑。请先生成字幕段落，然后在此处审阅并应用。</value></data>
+  <data name="CB_Batch_ReadyToProcess" xml:space="preserve"><value>准备处理。</value></data>
+  <data name="CB_Batch_DownloadingTranscription" xml:space="preserve"><value>正在下载转录功能...</value></data>
+  <data name="CB_Batch_ConfigureOperation" xml:space="preserve"><value>至少配置一个类型组操作。</value></data>
+  <data name="CB_Batch_Estimating" xml:space="preserve"><value>正在估算…</value></data>
+  <data name="CB_Batch_Cancelled" xml:space="preserve"><value>批处理已取消。</value></data>
+  <data name="CB_Batch_CreatingZip" xml:space="preserve"><value>正在创建 ZIP 存档…</value></data>
+  <data name="CB_Batch_Done" xml:space="preserve"><value>完成</value></data>
+  <data name="CB_Batch_NoFilesOfType" xml:space="preserve"><value>批次中没有此类文件</value></data>
+  <data name="CB_Batch_OneFile" xml:space="preserve"><value>批次中有 1 个文件</value></data>
+  <data name="CB_Batch_NFiles" xml:space="preserve"><value>批次中有 {0} 个文件</value></data>
+  <data name="CB_Batch_Succeeded" xml:space="preserve"><value>{0} 个成功</value></data>
+  <data name="CB_Batch_Failed" xml:space="preserve"><value>，{0} 个失败</value></data>
+  <data name="CB_Batch_Skipped" xml:space="preserve"><value>，{0} 个已跳过</value></data>
+  <data name="CB_Batch_ResultDone" xml:space="preserve"><value>完成。{0}。</value></data>
+  <data name="CB_Batch_ResultCancelled" xml:space="preserve"><value>已取消。{0}。</value></data>
+  <data name="CB_Batch_Elapsed" xml:space="preserve"><value>已用时 {0}</value></data>
+  <data name="CB_Batch_TimeLeft" xml:space="preserve"><value>剩余 {0}</value></data>
+  <data name="CB_Batch_FileProgress" xml:space="preserve"><value>文件 {0}/{1}</value></data>
+  <data name="CB_Batch_SectionLength" xml:space="preserve"><value>段落长度：最多 {0} 秒</value></data>
+  <data name="CB_Batch_Header_Output" xml:space="preserve"><value>输出设置</value></data>
+  <data name="CB_Batch_Header_AudioFormat" xml:space="preserve"><value>音频 · 格式</value></data>
+  <data name="CB_Batch_Header_AudioCompress" xml:space="preserve"><value>音频 · 压缩</value></data>
+  <data name="CB_Batch_Header_AudioNormalize" xml:space="preserve"><value>音频 · 规范化</value></data>
+  <data name="CB_Batch_Header_VideoContainer" xml:space="preserve"><value>视频 · 容器</value></data>
+  <data name="CB_Batch_Header_VideoCodec" xml:space="preserve"><value>视频 · 编解码器</value></data>
+  <data name="CB_Batch_Header_VideoCompress" xml:space="preserve"><value>视频 · 压缩</value></data>
+  <data name="CB_Batch_Header_VideoResize" xml:space="preserve"><value>视频 · 调整大小</value></data>
+  <data name="CB_Batch_Header_VideoExtractAudio" xml:space="preserve"><value>视频 · 提取音频</value></data>
+  <data name="CB_Batch_Header_VideoSubtitles" xml:space="preserve"><value>视频 · 字幕</value></data>
+  <data name="CB_Batch_Header_DocsConvert" xml:space="preserve"><value>文档 · 转换为 PDF</value></data>
+  <data name="CB_Batch_Header_PdfCompress" xml:space="preserve"><value>PDF · 压缩</value></data>
+  <data name="CB_Batch_Header_PdfRepair" xml:space="preserve"><value>PDF · 修复</value></data>
+  <data name="CB_Batch_Header_PdfOCR" xml:space="preserve"><value>PDF · OCR</value></data>
+  <data name="CB_Batch_Header_PdfMerge" xml:space="preserve"><value>PDF · 合并</value></data>
+  <data name="CB_Batch_Header_ImagesFormat" xml:space="preserve"><value>图像 · 格式</value></data>
+  <data name="CB_Batch_Header_ImagesCompress" xml:space="preserve"><value>图像 · 压缩</value></data>
+  <data name="CB_Batch_Header_ImagesResize" xml:space="preserve"><value>图像 · 调整大小</value></data>
+  <data name="CB_Batch_ImageQuality" xml:space="preserve"><value>质量：{0}%</value></data>
+  <data name="CB_Batch_AdvSubtitleSectionLength" xml:space="preserve"><value>高级字幕段落长度：最多 {0} 秒</value></data>
 </root>

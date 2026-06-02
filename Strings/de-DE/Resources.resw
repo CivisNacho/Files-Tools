@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
   <resheader name="version"><value>2.0</value></resheader>
@@ -482,4 +482,98 @@
   <data name="LicensesPage_Subtitle2.Text" xml:space="preserve"><value>Alle aufgeführten Lizenzen gestatten die kommerzielle Nutzung, vorbehaltlich ihrer Bedingungen und etwaiger Weitergabeverpflichtungen.</value></data>
   <data name="LicensesPage_ShowLicense.Content" xml:space="preserve"><value>Lizenz anzeigen</value></data>
 
+
+  <data name="ImagePage_FileInfoSection.Text" xml:space="preserve"><value>Dateiinfo</value></data>
+  <data name="ImagePage_FileInfoName.Text" xml:space="preserve"><value>Dateiname</value></data>
+  <data name="ImagePage_FileInfoDimensions.Text" xml:space="preserve"><value>Abmessungen</value></data>
+  <data name="ImagePage_FileInfoFormat.Text" xml:space="preserve"><value>Format</value></data>
+  <data name="ImagePage_FileInfoSize.Text" xml:space="preserve"><value>Dateigröße</value></data>
+  <data name="VideoPage_FileInfoSection.Text" xml:space="preserve"><value>Dateiinfo</value></data>
+  <data name="VideoPage_FileInfoName.Text" xml:space="preserve"><value>Dateiname</value></data>
+  <data name="VideoPage_FileInfoDimensions.Text" xml:space="preserve"><value>Abmessungen</value></data>
+  <data name="VideoPage_FileInfoDuration.Text" xml:space="preserve"><value>Dauer</value></data>
+  <data name="VideoPage_FileInfoFormat.Text" xml:space="preserve"><value>Format</value></data>
+  <data name="VideoPage_FileInfoSize.Text" xml:space="preserve"><value>Dateigröße</value></data>
+  <data name="AudioPage_FileInfoSection.Text" xml:space="preserve"><value>Dateiinfo</value></data>
+  <data name="AudioPage_FileInfoName.Text" xml:space="preserve"><value>Dateiname</value></data>
+  <data name="AudioPage_FileInfoDuration.Text" xml:space="preserve"><value>Dauer</value></data>
+  <data name="AudioPage_FileInfoFormat.Text" xml:space="preserve"><value>Format</value></data>
+  <data name="AudioPage_FileInfoSize.Text" xml:space="preserve"><value>Dateigröße</value></data>
+  <data name="PdfPage_FileInfoSection.Text" xml:space="preserve"><value>Dateiinfo</value></data>
+  <data name="PdfPage_FileInfoName.Text" xml:space="preserve"><value>Dateiname</value></data>
+  <data name="PdfPage_FileInfoPages.Text" xml:space="preserve"><value>Seiten</value></data>
+  <data name="PdfPage_FileInfoSize.Text" xml:space="preserve"><value>Dateigröße</value></data>
+  <data name="DocPage_FileInfoSection.Text" xml:space="preserve"><value>Dateiinfo</value></data>
+  <data name="DocPage_FileInfoName.Text" xml:space="preserve"><value>Dateiname</value></data>
+  <data name="DocPage_FileInfoFormat.Text" xml:space="preserve"><value>Format</value></data>
+  <data name="DocPage_FileInfoSize.Text" xml:space="preserve"><value>Dateigröße</value></data>
+  <data name="CB_Audio_GeneratingTranscription" xml:space="preserve"><value>Transkription wird erstellt...</value></data>
+  <data name="CB_Audio_TranscriptionReady" xml:space="preserve"><value>Texttranskription bereit.</value></data>
+  <data name="CB_Audio_TranscriptionDownloaded" xml:space="preserve"><value>Transkriptionsfunktion heruntergeladen.</value></data>
+  <data name="CB_Doc_DownloadCancelled" xml:space="preserve"><value>Download abgebrochen.</value></data>
+  <data name="CB_Pdf_ProcessSuccess" xml:space="preserve"><value>PDF erfolgreich verarbeitet!</value></data>
+  <data name="CB_Pdf_AllCompleted" xml:space="preserve"><value>Alle Vorgänge abgeschlossen.</value></data>
+  <data name="CB_Pdf_ErrorProcessing" xml:space="preserve"><value>Fehler beim Verarbeiten der PDF</value></data>
+  <data name="CB_Pdf_PreparingOps" xml:space="preserve"><value>Vorgänge werden vorbereitet...</value></data>
+  <data name="CB_Pdf_MergeMultiple" xml:space="preserve"><value>Zusammenführen erfordert mehrere PDFs</value></data>
+  <data name="CB_Pdf_Splitting" xml:space="preserve"><value>PDF wird aufgeteilt...</value></data>
+  <data name="CB_Pdf_Reordering" xml:space="preserve"><value>Seiten werden neu angeordnet...</value></data>
+  <data name="CB_Pdf_PagesReordered" xml:space="preserve"><value>Seiten neu angeordnet</value></data>
+  <data name="CB_Pdf_Extracting" xml:space="preserve"><value>Inhalt wird extrahiert...</value></data>
+  <data name="CB_Pdf_Rotating" xml:space="preserve"><value>Seiten werden gedreht...</value></data>
+  <data name="CB_Pdf_Encrypting" xml:space="preserve"><value>PDF wird verschlüsselt...</value></data>
+  <data name="CB_Pdf_Encrypted" xml:space="preserve"><value>PDF verschlüsselt</value></data>
+  <data name="CB_Pdf_RemovingPassword" xml:space="preserve"><value>Kennwort wird entfernt...</value></data>
+  <data name="CB_Pdf_PasswordRemoved" xml:space="preserve"><value>Kennwort entfernt</value></data>
+  <data name="CB_Pdf_ChangingPassword" xml:space="preserve"><value>Kennwort wird geändert...</value></data>
+  <data name="CB_Pdf_PasswordChanged" xml:space="preserve"><value>Kennwort geändert</value></data>
+  <data name="CB_Pdf_UpdatingPermissions" xml:space="preserve"><value>Berechtigungen werden aktualisiert...</value></data>
+  <data name="CB_Pdf_PermissionsConfigured" xml:space="preserve"><value>Berechtigungen konfiguriert</value></data>
+  <data name="CB_Pdf_RunningOCR" xml:space="preserve"><value>OCR wird ausgeführt...</value></data>
+  <data name="CB_Pdf_OcrNeedsTesseract" xml:space="preserve"><value>OCR erfordert Tesseract-Konfiguration</value></data>
+  <data name="CB_Pdf_UpdatingMetadata" xml:space="preserve"><value>Metadaten werden aktualisiert...</value></data>
+  <data name="CB_Pdf_MetadataUpdated" xml:space="preserve"><value>Metadaten aktualisiert</value></data>
+  <data name="CB_Pdf_Repairing" xml:space="preserve"><value>PDF wird repariert...</value></data>
+  <data name="CB_Pdf_Repaired" xml:space="preserve"><value>PDF repariert</value></data>
+  <data name="CB_Video_GeneratingSubtitles" xml:space="preserve"><value>Untertitel werden generiert...</value></data>
+  <data name="CB_Video_AssEditingDisabled" xml:space="preserve"><value>Die ASS-Textbearbeitung ist im erweiterten Ablauf deaktiviert. Generieren Sie zuerst Untertitelabschnitte und überprüfen und übernehmen Sie sie dann hier.</value></data>
+  <data name="CB_Batch_ReadyToProcess" xml:space="preserve"><value>Bereit zur Verarbeitung.</value></data>
+  <data name="CB_Batch_DownloadingTranscription" xml:space="preserve"><value>Transkriptionsfunktion wird heruntergeladen...</value></data>
+  <data name="CB_Batch_ConfigureOperation" xml:space="preserve"><value>Mindestens eine Typgruppenoperation konfigurieren.</value></data>
+  <data name="CB_Batch_Estimating" xml:space="preserve"><value>Schätze…</value></data>
+  <data name="CB_Batch_Cancelled" xml:space="preserve"><value>Stapel abgebrochen.</value></data>
+  <data name="CB_Batch_CreatingZip" xml:space="preserve"><value>ZIP-Archiv wird erstellt…</value></data>
+  <data name="CB_Batch_Done" xml:space="preserve"><value>Fertig</value></data>
+  <data name="CB_Batch_NoFilesOfType" xml:space="preserve"><value>Keine Dateien dieses Typs im Stapel</value></data>
+  <data name="CB_Batch_OneFile" xml:space="preserve"><value>1 Datei im Stapel</value></data>
+  <data name="CB_Batch_NFiles" xml:space="preserve"><value>{0} Dateien im Stapel</value></data>
+  <data name="CB_Batch_Succeeded" xml:space="preserve"><value>{0} erfolgreich</value></data>
+  <data name="CB_Batch_Failed" xml:space="preserve"><value>, {0} fehlgeschlagen</value></data>
+  <data name="CB_Batch_Skipped" xml:space="preserve"><value>, {0} übersprungen</value></data>
+  <data name="CB_Batch_ResultDone" xml:space="preserve"><value>Fertig. {0}.</value></data>
+  <data name="CB_Batch_ResultCancelled" xml:space="preserve"><value>Abgebrochen. {0}.</value></data>
+  <data name="CB_Batch_Elapsed" xml:space="preserve"><value>Vergangen {0}</value></data>
+  <data name="CB_Batch_TimeLeft" xml:space="preserve"><value>{0} verbleibend</value></data>
+  <data name="CB_Batch_FileProgress" xml:space="preserve"><value>Datei {0} von {1}</value></data>
+  <data name="CB_Batch_SectionLength" xml:space="preserve"><value>Abschnittslänge: max. {0} s</value></data>
+  <data name="CB_Batch_Header_Output" xml:space="preserve"><value>Ausgabeeinstellungen</value></data>
+  <data name="CB_Batch_Header_AudioFormat" xml:space="preserve"><value>Audio · Format</value></data>
+  <data name="CB_Batch_Header_AudioCompress" xml:space="preserve"><value>Audio · Komprimieren</value></data>
+  <data name="CB_Batch_Header_AudioNormalize" xml:space="preserve"><value>Audio · Normalisieren</value></data>
+  <data name="CB_Batch_Header_VideoContainer" xml:space="preserve"><value>Video · Container</value></data>
+  <data name="CB_Batch_Header_VideoCodec" xml:space="preserve"><value>Video · Codec</value></data>
+  <data name="CB_Batch_Header_VideoCompress" xml:space="preserve"><value>Video · Komprimieren</value></data>
+  <data name="CB_Batch_Header_VideoResize" xml:space="preserve"><value>Video · Größe ändern</value></data>
+  <data name="CB_Batch_Header_VideoExtractAudio" xml:space="preserve"><value>Video · Audio extrahieren</value></data>
+  <data name="CB_Batch_Header_VideoSubtitles" xml:space="preserve"><value>Video · Untertitel</value></data>
+  <data name="CB_Batch_Header_DocsConvert" xml:space="preserve"><value>Dokumente · In PDF konvertieren</value></data>
+  <data name="CB_Batch_Header_PdfCompress" xml:space="preserve"><value>PDF · Komprimieren</value></data>
+  <data name="CB_Batch_Header_PdfRepair" xml:space="preserve"><value>PDF · Reparieren</value></data>
+  <data name="CB_Batch_Header_PdfOCR" xml:space="preserve"><value>PDF · OCR</value></data>
+  <data name="CB_Batch_Header_PdfMerge" xml:space="preserve"><value>PDF · Zusammenführen</value></data>
+  <data name="CB_Batch_Header_ImagesFormat" xml:space="preserve"><value>Bilder · Format</value></data>
+  <data name="CB_Batch_Header_ImagesCompress" xml:space="preserve"><value>Bilder · Komprimieren</value></data>
+  <data name="CB_Batch_Header_ImagesResize" xml:space="preserve"><value>Bilder · Größe ändern</value></data>
+  <data name="CB_Batch_ImageQuality" xml:space="preserve"><value>Qualität: {0}%</value></data>
+  <data name="CB_Batch_AdvSubtitleSectionLength" xml:space="preserve"><value>Erweiterte Untertitelabschnittslänge: max. {0} s</value></data>
 </root>

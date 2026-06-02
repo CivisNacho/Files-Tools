@@ -155,6 +155,7 @@ namespace Files_Tools
             var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
             _appWindow = AppWindow.GetFromWindowId(windowId);
+            _appWindow.SetIcon("AppIcon.ico");
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
             _appWindow.TitleBar.IconShowOptions = IconShowOptions.HideIconAndSystemMenu;

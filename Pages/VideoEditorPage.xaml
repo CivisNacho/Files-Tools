@@ -368,6 +368,35 @@
                                 <StackPanel Spacing="2">
                                     <TextBlock x:Name="SelectedOptionHeaderTextBlock" x:Uid="SelectOptionHeader" Margin="0,0,0,12" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="Select an option" />
 
+                                    <Border x:Name="FileInfoPanel" Style="{StaticResource SettingsCardStyle}" Visibility="Collapsed">
+                                        <StackPanel Spacing="10">
+                                            <TextBlock x:Uid="VideoPage_FileInfoSection" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="File info" />
+                                            <Grid ColumnSpacing="10" RowSpacing="6">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <TextBlock x:Uid="VideoPage_FileInfoName" Opacity="0.72" Text="Name" VerticalAlignment="Top" />
+                                                <TextBlock x:Name="FileInfoNameTextBlock" Grid.Column="1" TextWrapping="Wrap" />
+                                                <TextBlock x:Uid="VideoPage_FileInfoDimensions" Grid.Row="1" Opacity="0.72" Text="Dimensions" />
+                                                <TextBlock x:Name="FileInfoDimensionsTextBlock" Grid.Row="1" Grid.Column="1" />
+                                                <TextBlock x:Uid="VideoPage_FileInfoDuration" Grid.Row="2" Opacity="0.72" Text="Duration" />
+                                                <TextBlock x:Name="FileInfoDurationTextBlock" Grid.Row="2" Grid.Column="1" />
+                                                <TextBlock x:Uid="VideoPage_FileInfoFormat" Grid.Row="3" Opacity="0.72" Text="Format" />
+                                                <TextBlock x:Name="FileInfoFormatTextBlock" Grid.Row="3" Grid.Column="1" />
+                                                <TextBlock x:Uid="VideoPage_FileInfoSize" Grid.Row="4" Opacity="0.72" Text="Size" />
+                                                <TextBlock x:Name="FileInfoSizeTextBlock" Grid.Row="4" Grid.Column="1" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+
                                     <StackPanel x:Name="MediaPanel" Visibility="Collapsed" Spacing="12">
 
                                         <StackPanel x:Name="MediaFormatPanel" Visibility="Visible">

@@ -43,6 +43,7 @@ namespace Files_Tools.Pages
         private readonly ISubtitlesService _subtitlesService;
 
         private StorageFile? _sourceAudioFile;
+        private long? _sourceAudioFileSizeBytes;
         private TimeSpan? _audioDuration;
         private TimeSpan _trimStart = TimeSpan.Zero;
         private TimeSpan _trimEnd = TimeSpan.Zero;
@@ -553,6 +554,7 @@ namespace Files_Tools.Pages
             }
 
             SelectedOptionHeaderTextBlock.Text = section;
+            FileInfoPanel.Visibility = string.IsNullOrEmpty(section) ? Visibility.Visible : Visibility.Collapsed;
             MediaPanel.Visibility = section == "Media" ? Visibility.Visible : Visibility.Collapsed;
             TransformPanel.Visibility = section == "Transform" ? Visibility.Visible : Visibility.Collapsed;
             AdjustPanel.Visibility = section == "Adjust" ? Visibility.Visible : Visibility.Collapsed;
@@ -666,10 +668,48 @@ namespace Files_Tools.Pages
             AudioPlayer.SetMediaPlayer(_audioPlayer);
             _audioPlayer.Source = MediaSource.CreateFromStorageFile(file);
             AudioPlayer.Visibility = Visibility.Visible;
+            var basicProps = await file.GetBasicPropertiesAsync();
+            _sourceAudioFileSizeBytes = (long)basicProps.Size;
             await UpdatePreviewInfoAsync(file.Path);
+            UpdateFileInfoPanel();
             EnsureTrimRangeInitialized();
             UpdateTrimUiState();
             RefreshValidationAndState();
+        }
+
+        private void UpdateFileInfoPanel()
+        {
+            if (_sourceAudioFile is null)
+            {
+                FileInfoPanel.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            FileInfoNameTextBlock.Text = _sourceAudioFile.Name;
+            FileInfoDurationTextBlock.Text = _audioDuration.HasValue ? FormatDuration(_audioDuration.Value) : "—";
+            FileInfoFormatTextBlock.Text = _sourceAudioFile.FileType.TrimStart('.').ToUpperInvariant();
+            FileInfoSizeTextBlock.Text = _sourceAudioFileSizeBytes.HasValue ? FormatFileSize(_sourceAudioFileSizeBytes.Value) : "—";
+            FileInfoPanel.Visibility = Visibility.Visible;
+        }
+
+        private static string FormatFileSize(long bytes)
+        {
+            if (bytes >= 1_073_741_824)
+            {
+                return $"{bytes / 1_073_741_824.0:F1} GB";
+            }
+
+            if (bytes >= 1_048_576)
+            {
+                return $"{bytes / 1_048_576.0:F1} MB";
+            }
+
+            if (bytes >= 1024)
+            {
+                return $"{bytes / 1024.0:F1} KB";
+            }
+
+            return $"{bytes} B";
         }
 
         private async Task UpdatePreviewInfoAsync(string path)
