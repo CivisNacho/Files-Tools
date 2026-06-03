@@ -1039,6 +1039,84 @@ public class SubtitlesServiceTests
         }
     }
 
+    [TestMethod]
+    public void RenderKaraokeAss_WithWordPop_NoTarget_KeepsFixedDesignResolution()
+    {
+        var draft = new SubtitleDraft(
+            [new SubtitleCue(1, TimeSpan.Zero, TimeSpan.FromSeconds(6), "one two three four five six")],
+            new SubtitlePostprocessingOptions(),
+            []);
+
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.WordPop);
+
+        // Without a target resolution the chunked style is unchanged: fixed 1920x1080 design space.
+        StringAssert.Contains(ass, "PlayResX: 1920");
+        StringAssert.Contains(ass, "PlayResY: 1080");
+        StringAssert.Contains(ass, "Style: WordPop,Montserrat,92,");
+    }
+
+    [TestMethod]
+    public void RenderKaraokeAss_WithWordPop_PortraitTarget_AdaptsCanvasAndFitsWidth()
+    {
+        var draft = new SubtitleDraft(
+            [new SubtitleCue(1, TimeSpan.Zero, TimeSpan.FromSeconds(6), "WONDERFUL EXTRAORDINARY MAGNIFICENT")],
+            new SubtitlePostprocessingOptions(),
+            []);
+
+        // 1080x1920 vertical/portrait video — the aspect that overflowed before.
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.WordPop, placement: null, target: new SubtitleRenderTarget(1080, 1920));
+
+        // The ASS is now written in the real frame's coordinate space.
+        StringAssert.Contains(ass, "PlayResX: 1080");
+        StringAssert.Contains(ass, "PlayResY: 1920");
+
+        var style = ass
+            .Split(["\r\n", "\n"], StringSplitOptions.None)
+            .Single(line => line.StartsWith("Style: WordPop,", StringComparison.Ordinal));
+
+        // Style: WordPop,<font>,<size>,...,<outline>,<shadow>,<align>,<L>,<R>,<V>,<border>
+        var fields = style.Substring("Style: ".Length).Split(',');
+        var fontSize = double.Parse(fields[2], System.Globalization.CultureInfo.InvariantCulture);
+        var marginL = int.Parse(fields[^4], System.Globalization.CultureInfo.InvariantCulture);
+        var marginR = int.Parse(fields[^3], System.Globalization.CultureInfo.InvariantCulture);
+
+        // Font is sized so a full line (22 chars, widened by the 1.18x active-word pop) fits the
+        // usable width — i.e. it never exceeds the available frame width.
+        var usableWidth = 1080 - marginL - marginR;
+        var widestLine = 22 * fontSize * 0.62d * 1.18d;
+        Assert.IsTrue(widestLine <= usableWidth + 1, $"Widest line {widestLine:0} must fit usable width {usableWidth}.");
+
+        // Horizontal margins scaled down from the 1920-wide design space (120 * 1080/1920 = 68).
+        Assert.AreEqual(68, marginL);
+        Assert.AreEqual(68, marginR);
+    }
+
+    [TestMethod]
+    public void RenderKaraokeAss_WithWordPop_LandscapeTarget_MatchesFrameAndStaysWithinWidth()
+    {
+        var draft = new SubtitleDraft(
+            [new SubtitleCue(1, TimeSpan.Zero, TimeSpan.FromSeconds(6), "WONDERFUL EXTRAORDINARY MAGNIFICENT")],
+            new SubtitlePostprocessingOptions(),
+            []);
+
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.WordPop, placement: null, target: new SubtitleRenderTarget(1920, 1080));
+
+        StringAssert.Contains(ass, "PlayResX: 1920");
+        StringAssert.Contains(ass, "PlayResY: 1080");
+
+        var style = ass
+            .Split(["\r\n", "\n"], StringSplitOptions.None)
+            .Single(line => line.StartsWith("Style: WordPop,", StringComparison.Ordinal));
+        var fields = style.Substring("Style: ".Length).Split(',');
+        var fontSize = double.Parse(fields[2], System.Globalization.CultureInfo.InvariantCulture);
+        var marginL = int.Parse(fields[^4], System.Globalization.CultureInfo.InvariantCulture);
+        var marginR = int.Parse(fields[^3], System.Globalization.CultureInfo.InvariantCulture);
+
+        var usableWidth = 1920 - marginL - marginR;
+        var widestLine = 22 * fontSize * 0.62d * 1.18d;
+        Assert.IsTrue(widestLine <= usableWidth + 1, $"Widest line {widestLine:0} must fit usable width {usableWidth}.");
+    }
+
     private static (TimeSpan Start, TimeSpan End) ParseDialogueSpan(string dialogueLine)
     {
         // "Dialogue: 0,H:MM:SS.cc,H:MM:SS.cc,Style,..."
