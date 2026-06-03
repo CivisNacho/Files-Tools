@@ -537,6 +537,12 @@ namespace Files_Tools.Pages
                     await _videoAudioDenoiseService.DenoiseVideoAudioAsync(processingOutputPath, outputPath, denoiseOptions, denoiseProgress);
                 }
 
+                // For SoftMux of a styled .ass that the container can't carry (e.g. MP4), drop the
+                // subtitle next to the FINAL output as a sidecar the player loads. Done here (not only
+                // in the service) so it lands beside the real output even when denoise re-routes the
+                // service output through a temporary file.
+                EnsureSoftMuxSubtitleSidecar(options.SubtitleMux, outputPath);
+
                 var doneDialog = new ContentDialog
                 {
                     Title = "Done",
@@ -1741,6 +1747,51 @@ namespace Files_Tools.Pages
             return _previewVideoSize.Width > 0 && _previewVideoSize.Height > 0
                 ? new SubtitleRenderTarget((int)_previewVideoSize.Width, (int)_previewVideoSize.Height)
                 : null;
+        }
+
+        /// <summary>
+        /// Ensures a SoftMux'd styled subtitle ends up as a sidecar file next to the final output video
+        /// for containers that can't carry ASS natively (anything but MKV). The video itself is left
+        /// untouched (never burned); players auto-load the matching-name sidecar. Best-effort.
+        /// </summary>
+        private static void EnsureSoftMuxSubtitleSidecar(MuxSubtitleOptions? subtitleMux, string finalOutputPath)
+        {
+            if (subtitleMux is not { Mode: SubtitleMode.SoftMux })
+            {
+                return;
+            }
+
+            var extension = Path.GetExtension(subtitleMux.SubtitlePath);
+            var isAss = extension.Equals(".ass", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".ssa", StringComparison.OrdinalIgnoreCase);
+            if (!isAss || Path.GetExtension(finalOutputPath).Equals(".mkv", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            var source = Path.GetFullPath(subtitleMux.SubtitlePath);
+            if (!File.Exists(source))
+            {
+                return;
+            }
+
+            var sidecar = Path.ChangeExtension(Path.GetFullPath(finalOutputPath), ".ass");
+            if (string.Equals(source, sidecar, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            try
+            {
+                File.Copy(source, sidecar, overwrite: true);
+            }
+            catch (IOException)
+            {
+                // Best effort: the video still rendered; a sidecar copy failure should not abort it.
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
         }
 
         private SubtitleStylePreset CreateAdvancedSubtitleStylePresetFromConfiguration()
