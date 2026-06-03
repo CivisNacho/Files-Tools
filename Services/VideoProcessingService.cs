@@ -2365,11 +2365,11 @@ public sealed class VideoProcessingService : IVideoProcessingService
             return false;
         }
 
-        if (outputFormat == VideoContainerFormat.Mkv)
-        {
-            return false;
-        }
-
+        // Always sidecar styled ASS rather than embedding it. Even where a container can carry an ASS
+        // track natively (MKV), many players render an EMBEDDED ass with a basic text renderer instead
+        // of libass — which mangles styled, one-event-per-word karaoke into unstyled flashing text.
+        // The same .ass loaded as an external sidecar renders correctly via libass, so we write it
+        // beside the video for every container and never embed (and never burn).
         var extension = Path.GetExtension(subtitleOptions.SubtitlePath);
         return extension.Equals(".ass", StringComparison.OrdinalIgnoreCase) ||
                extension.Equals(".ssa", StringComparison.OrdinalIgnoreCase);
