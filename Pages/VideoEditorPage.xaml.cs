@@ -2761,25 +2761,27 @@ namespace Files_Tools.Pages
 
         private AudioDenoiseMode ParseDenoiseMode()
         {
-            var mode = (AudioDenoiseModeComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
-            return mode switch
-            {
-                "Preserve stereo" => AudioDenoiseMode.StrongStereo,
-                "Stereo" => AudioDenoiseMode.StrongStereo,
-                _ => AudioDenoiseMode.Mono
-            };
+            // Items carry x:Uid, so their Content is localized — match by index.
+            // XAML order: 0 = Mono, 1 = Stereo.
+            return AudioDenoiseModeComboBox?.SelectedIndex == 1
+                ? AudioDenoiseMode.StrongStereo
+                : AudioDenoiseMode.Mono;
         }
 
         private bool IsRemoveAudioSelected()
         {
-            return (AudioCodecComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString() == "Remove audio";
+            // The "Remove audio" item carries x:Uid (localized Content) and is the last item in the
+            // combo box, so detect it by index rather than by comparing the English literal.
+            return AudioCodecComboBox is not null
+                && AudioCodecComboBox.SelectedIndex == AudioCodecComboBox.Items.Count - 1;
         }
 
         private int GetSignedAudioSyncOffsetMilliseconds()
         {
             var magnitude = Math.Clamp((int)Math.Round(AudioSyncOffsetSlider?.Value ?? 0), 0, MaximumAudioSyncOffsetMilliseconds);
-            var direction = (AudioSyncDirectionComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
-            return string.Equals(direction, "Later", StringComparison.Ordinal)
+            // Items carry x:Uid, so their Content is localized — match by index.
+            // XAML order: 0 = Earlier, 1 = Later.
+            return AudioSyncDirectionComboBox?.SelectedIndex == 1
                 ? magnitude
                 : -magnitude;
         }
@@ -3120,6 +3122,14 @@ namespace Files_Tools.Pages
 
         private static AudioCodec? ParseAudioCodec(ComboBox? comboBox)
         {
+            // The "Remove audio" item carries x:Uid, so its Content is localized — detect it by index
+            // (it is the last item; see IsRemoveAudioSelected). The codec items below have plain,
+            // non-localized Content, so matching them by text is safe.
+            if (comboBox is not null && comboBox.SelectedIndex == comboBox.Items.Count - 1)
+            {
+                return null;
+            }
+
             var content = (comboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
             return content switch
             {
@@ -3130,7 +3140,6 @@ namespace Files_Tools.Pages
                 "AC3" => AudioCodec.Ac3,
                 "FLAC" => AudioCodec.Flac,
                 "PCM_S16LE" => AudioCodec.PcmS16Le,
-                "Remove audio" => null,
                 _ => null
             };
         }
@@ -3150,11 +3159,12 @@ namespace Files_Tools.Pages
 
         private static ResizeMode ParseResizeMode(ComboBox? comboBox)
         {
-            var content = (comboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
-            return content switch
+            // Items carry x:Uid, so their Content is localized — match by index. XAML order:
+            // 0 = PadToFit, 1 = CropToFill, 2 = Stretch.
+            return comboBox?.SelectedIndex switch
             {
-                "Stretch" => ResizeMode.Stretch,
-                "CropToFill" => ResizeMode.CropToFill,
+                1 => ResizeMode.CropToFill,
+                2 => ResizeMode.Stretch,
                 _ => ResizeMode.PadToFit
             };
         }
@@ -3168,12 +3178,9 @@ namespace Files_Tools.Pages
 
         private static RepairMode ParseRepairMode(ComboBox? comboBox)
         {
-            var content = (comboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
-            return content switch
-            {
-                "Reencode" => RepairMode.Reencode,
-                _ => RepairMode.Remux
-            };
+            // Items carry x:Uid, so their Content is localized — match by index.
+            // XAML order: 0 = Remux, 1 = Reencode.
+            return comboBox?.SelectedIndex == 1 ? RepairMode.Reencode : RepairMode.Remux;
         }
 
         private static int ParseRotation(ComboBox? comboBox)
