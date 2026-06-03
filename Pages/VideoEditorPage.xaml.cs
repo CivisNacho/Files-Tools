@@ -1751,9 +1751,9 @@ namespace Files_Tools.Pages
 
         /// <summary>
         /// Ensures a SoftMux'd styled subtitle ends up as a sidecar file next to the final output video
-        /// for every container. The video is left untouched (never burned, never embedded); players
-        /// auto-load the matching-name sidecar and render it with libass (embedded ASS is rendered as
-        /// plain text by many players). Best-effort.
+        /// for containers that can't carry ASS natively (anything but MKV — MKV embeds it as a soft
+        /// track). The video is left untouched (never burned); players auto-load the matching-name
+        /// sidecar and render it with libass. Best-effort.
         /// </summary>
         private static void EnsureSoftMuxSubtitleSidecar(MuxSubtitleOptions? subtitleMux, string finalOutputPath)
         {
@@ -1765,7 +1765,8 @@ namespace Files_Tools.Pages
             var extension = Path.GetExtension(subtitleMux.SubtitlePath);
             var isAss = extension.Equals(".ass", StringComparison.OrdinalIgnoreCase)
                 || extension.Equals(".ssa", StringComparison.OrdinalIgnoreCase);
-            if (!isAss)
+            // MKV embeds the .ass as a soft track (self-contained), so no sidecar is written for it.
+            if (!isAss || Path.GetExtension(finalOutputPath).Equals(".mkv", StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }

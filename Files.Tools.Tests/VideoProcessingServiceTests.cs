@@ -370,6 +370,29 @@ public class VideoProcessingServiceTests
     }
 
     [TestMethod]
+    public async Task CombineWithSubtitlesAsync_SoftMux_AssIntoMkv_EmbedsAssTrackByStreamCopy()
+    {
+        var input = CreateSampleVideo("ass-mkv-source.mp4");
+        var subtitle = CreateAssSubtitleFile("styled.ass");
+        var output = Path.Combine(_tempRoot, "ass-mkv-output.mkv");
+
+        await _service.CombineWithSubtitlesAsync(input, output, new MuxSubtitleOptions
+        {
+            SubtitlePath = subtitle,
+            Mode = SubtitleMode.SoftMux
+        });
+
+        // MKV keeps the subtitle inside the file, and it must remain ASS (stream-copied, not
+        // transcoded) so the styling/karaoke survives.
+        var info = ProbeMedia(output);
+        Assert.HasCount(1, info.SubtitleStreams);
+        Assert.AreEqual("ass", info.SubtitleStreams[0].CodecName);
+
+        // No sidecar is written for MKV (it is self-contained).
+        Assert.IsFalse(File.Exists(Path.ChangeExtension(output, ".ass")), "MKV should not get a sidecar; it embeds the track.");
+    }
+
+    [TestMethod]
     public async Task CombineWithSubtitlesAsync_BurnInChangesPixelsAndDoesNotAddSubtitleStream()
     {
         var input = CreateSampleVideo("burn-subtitle-source.mp4");
@@ -593,6 +616,25 @@ public class VideoProcessingServiceTests
             Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             Dialogue: 0,0:00:00.00,0:00:02.00,KaraokeImpact,,0,0,0,,{\kf100}One{\kf100} two
             """.Replace("\n", Environment.NewLine, StringComparison.Ordinal));
+        return output;
+    }
+
+    private string CreateAssSubtitleFile(string fileName)
+    {
+        var output = Path.Combine(_tempRoot, fileName);
+        File.WriteAllText(output,
+            "[Script Info]" + Environment.NewLine +
+            "ScriptType: v4.00+" + Environment.NewLine +
+            "PlayResX: 1920" + Environment.NewLine +
+            "PlayResY: 1080" + Environment.NewLine +
+            Environment.NewLine +
+            "[V4+ Styles]" + Environment.NewLine +
+            "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding" + Environment.NewLine +
+            "Style: Default,Arial,72,&H00FFFFFF&,&H00FFFFFF&,&H00000000&,&H00000000&,-1,0,0,0,100,100,0,0,1,3,0,2,40,40,40,1" + Environment.NewLine +
+            Environment.NewLine +
+            "[Events]" + Environment.NewLine +
+            "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text" + Environment.NewLine +
+            "Dialogue: 0,0:00:00.00,0:00:01.50,Default,,0,0,0,,{\\fad(60,0)}Hello karaoke" + Environment.NewLine);
         return output;
     }
 

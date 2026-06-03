@@ -1529,7 +1529,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
         }
 
         args.Add("-c:s");
-        args.Add(plan.SubtitleCodec);
+        args.Add(ResolveSubtitleEmbedCodec(options.SubtitleMux.SubtitlePath, outputFormat, plan.SubtitleCodec));
 
         if (!string.IsNullOrWhiteSpace(options.SubtitleMux.Language))
         {
@@ -2365,14 +2365,42 @@ public sealed class VideoProcessingService : IVideoProcessingService
             return false;
         }
 
-        // Always sidecar styled ASS rather than embedding it. Even where a container can carry an ASS
-        // track natively (MKV), many players render an EMBEDDED ass with a basic text renderer instead
-        // of libass — which mangles styled, one-event-per-word karaoke into unstyled flashing text.
-        // The same .ass loaded as an external sidecar renders correctly via libass, so we write it
-        // beside the video for every container and never embed (and never burn).
+        // MKV carries an ASS track natively (and self-contained is the expected Matroska behaviour),
+        // so it is embedded — via a stream copy, see ResolveSubtitleEmbedCodec, to preserve styling.
+        // Containers that can't carry ASS styling (MP4/MOV/WebM) get a sidecar .ass beside the video
+        // instead of burning or lossily transcoding it.
+        if (outputFormat == VideoContainerFormat.Mkv)
+        {
+            return false;
+        }
+
         var extension = Path.GetExtension(subtitleOptions.SubtitlePath);
         return extension.Equals(".ass", StringComparison.OrdinalIgnoreCase) ||
                extension.Equals(".ssa", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Resolves the <c>-c:s</c> codec for embedding a SoftMux subtitle. When the source subtitle is
+    /// already in a format the container carries natively (e.g. <c>.ass</c>/<c>.srt</c> into MKV), it
+    /// is stream-copied (<c>copy</c>) so nothing is re-encoded — re-encoding ASS via <c>-c:s ass</c>
+    /// simplifies override tags and mangles styled, one-event-per-word karaoke. Otherwise the planned
+    /// transcode codec (e.g. <c>mov_text</c> for MP4) is used.
+    /// </summary>
+    private static string ResolveSubtitleEmbedCodec(string subtitlePath, VideoContainerFormat outputFormat, string plannedCodec)
+    {
+        var extension = Path.GetExtension(subtitlePath);
+        var isCopyNative = outputFormat switch
+        {
+            // Matroska carries ass/ssa/srt/vtt as-is.
+            VideoContainerFormat.Mkv => extension.Equals(".ass", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".ssa", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".srt", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".vtt", StringComparison.OrdinalIgnoreCase),
+            VideoContainerFormat.Webm => extension.Equals(".vtt", StringComparison.OrdinalIgnoreCase),
+            _ => false
+        };
+
+        return isCopyNative ? "copy" : plannedCodec;
     }
 
     /// <summary>
