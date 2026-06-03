@@ -475,7 +475,7 @@
     <value>Aplica un pase de normalización de sonido al audio de salida final.</value>
   </data>
   <data name="VideoPage_FixAudioSync.Content" xml:space="preserve">
-    <value>Corregir sincronía de audio</value>
+    <value>Corregir sincronización del audio</value>
   </data>
   <data name="VideoPage_MoveAudio.Header" xml:space="preserve">
     <value>Mover audio</value>
@@ -568,10 +568,10 @@
     <value>Los segundos limitan cuánto tiempo puede permanecer una sección en pantalla. El máximo de palabras limita cuántas palabras puede tener una sección cuando está activado.</value>
   </data>
   <data name="VideoPage_GenerateSubtitles.Content" xml:space="preserve">
-    <value>Generar subtítulos del vídeo</value>
+    <value>Generar subtítulos</value>
   </data>
   <data name="VideoPage_SubtitlesNotGenerated.Text" xml:space="preserve">
-    <value>Subtítulos no generados aún.</value>
+    <value>Aún no se han generado los subtítulos.</value>
   </data>
   <data name="VideoPage_AddSubtitles.Content" xml:space="preserve">
     <value>Añadir subtítulos</value>
@@ -586,7 +586,7 @@
     <value>Explorar archivo de subtítulos</value>
   </data>
   <data name="VideoPage_SubtitleMode.Header" xml:space="preserve">
-    <value>Modo de subtítulos</value>
+    <value>Tipo de subtítulos</value>
   </data>
   <data name="VideoPage_SoftMux.Content" xml:space="preserve">
     <value>SoftMux</value>
