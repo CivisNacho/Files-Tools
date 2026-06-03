@@ -1458,12 +1458,17 @@ namespace Files_Tools.Pages
 
         private bool IsAdvancedSubtitleModeSelected()
         {
-            return (SubtitleGenerationModeComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString() == "Advanced (ASS)";
+            // Compare by index, not by Content text: the item Content is localized via x:Uid, so a
+            // text comparison against the English literal silently fails in other languages (e.g.
+            // Spanish "Avanzado (ASS)"). Item order is fixed in XAML: 0 = Basic (SRT), 1 = Advanced (ASS).
+            return SubtitleGenerationModeComboBox?.SelectedIndex == 1;
         }
 
         private bool IsKaraokeAdvancedSubtitleTypeSelected()
         {
-            return (AdvancedSubtitleTypeComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString() == "Karaoke ASS";
+            // Item order is fixed in XAML: 0 = Styled ASS, 1 = Karaoke ASS. Compared by index so it is
+            // locale-independent (the Content is localized via x:Uid).
+            return AdvancedSubtitleTypeComboBox?.SelectedIndex == 1;
         }
 
         private async void ConfigureAdvancedSubtitlesButton_Click(object sender, RoutedEventArgs e)
@@ -3156,12 +3161,9 @@ namespace Files_Tools.Pages
 
         private static SubtitleMode ParseSubtitleMode(ComboBox? comboBox)
         {
-            var content = (comboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
-            return content switch
-            {
-                "BurnIn" => SubtitleMode.BurnIn,
-                _ => SubtitleMode.SoftMux
-            };
+            // Items carry x:Uid, so their Content is localized — match by index instead of text or
+            // BurnIn is never detected in non-English UIs. XAML order: 0 = SoftMux, 1 = BurnIn.
+            return comboBox?.SelectedIndex == 1 ? SubtitleMode.BurnIn : SubtitleMode.SoftMux;
         }
 
         private static RepairMode ParseRepairMode(ComboBox? comboBox)
