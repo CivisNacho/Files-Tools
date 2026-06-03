@@ -1115,6 +1115,34 @@ public class SubtitlesServiceTests
         var usableWidth = 1920 - marginL - marginR;
         var widestLine = 22 * fontSize * 0.62d * 1.18d;
         Assert.IsTrue(widestLine <= usableWidth + 1, $"Widest line {widestLine:0} must fit usable width {usableWidth}.");
+
+        // At the design resolution (1920x1080) the adaptation is a no-op: the tuned font/margins are kept.
+        Assert.AreEqual(92d, fontSize, 0.001, "Landscape 1920x1080 should keep WordPop's designed font size.");
+        Assert.AreEqual(120, marginL);
+        Assert.AreEqual(120, marginR);
+    }
+
+    [TestMethod]
+    public void RenderKaraokeAss_WithWordPop_SmallerLandscapeTarget_ScalesProportionally()
+    {
+        var draft = new SubtitleDraft(
+            [new SubtitleCue(1, TimeSpan.Zero, TimeSpan.FromSeconds(6), "WONDERFUL EXTRAORDINARY MAGNIFICENT")],
+            new SubtitlePostprocessingOptions(),
+            []);
+
+        // 1280x720 is the same 16:9 aspect at lower resolution -> font scales by the height ratio (720/1080).
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.WordPop, placement: null, target: new SubtitleRenderTarget(1280, 720));
+
+        StringAssert.Contains(ass, "PlayResX: 1280");
+        StringAssert.Contains(ass, "PlayResY: 720");
+
+        var style = ass
+            .Split(["\r\n", "\n"], StringSplitOptions.None)
+            .Single(line => line.StartsWith("Style: WordPop,", StringComparison.Ordinal));
+        var fontSize = double.Parse(style.Substring("Style: ".Length).Split(',')[2], System.Globalization.CultureInfo.InvariantCulture);
+
+        // 92 * (720/1080) = 61.33; height-scaled and well within the width-fit ceiling.
+        Assert.AreEqual(92d * 720d / 1080d, fontSize, 0.5, "Same-aspect landscape should scale the font by the height ratio.");
     }
 
     private static (TimeSpan Start, TimeSpan End) ParseDialogueSpan(string dialogueLine)

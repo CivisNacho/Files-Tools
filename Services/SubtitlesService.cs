@@ -2037,10 +2037,13 @@ public sealed class SubtitlesService : ISubtitlesService
         const double averageGlyphAdvance = 0.62d;
         var widthFitFont = usableWidth / (maxChars * averageGlyphAdvance * activeScale);
 
-        // Width fit is a hard ceiling (the line must not exceed the usable width), so only cap the
-        // upper bound — capping against frame height keeps text from getting absurdly large on very
-        // wide frames. Never raise the size past the width-fit value, or the line would overflow.
-        var fontSize = Math.Min(widthFitFont, targetHeight * 0.16d);
+        // Keep the preset's tuned look on frames whose aspect matches the design (and standard
+        // landscape): size the font by the height ratio, exactly like normal subtitle scaling. Then
+        // clamp to the width-fit ceiling so narrow/portrait frames shrink it enough to never overflow.
+        // At the design resolution this is a no-op (height ratio = 1 → designed font); on landscape it
+        // scales proportionally; only when the frame is too narrow does width-fit take over.
+        var heightScaledFont = preset.FontSize * scaleY;
+        var fontSize = Math.Min(heightScaledFont, widthFitFont);
 
         // Outline and shadow track the actual glyph size so contrast stays proportional.
         var fontRatio = preset.FontSize > 0 ? fontSize / preset.FontSize : 1d;
