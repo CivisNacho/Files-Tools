@@ -684,7 +684,7 @@ public sealed record SubtitleStyleCatalogEntry(string Id, string DisplayName, Su
 /// </summary>
 public static class SubtitleStyleCatalog
 {
-    private static readonly SubtitleStyleCatalogEntry[] EntriesInternal =
+    private static readonly SubtitleStyleCatalogEntry[] BuiltInEntries =
     [
         new("SocialImpact", "Social Impact", SubtitleStyleKind.Styled, StyledSubtitlePresets.CreateSocialImpact),
         new("CleanSans", "Clean Sans", SubtitleStyleKind.Styled, StyledSubtitlePresets.CreateCleanSans),
@@ -696,19 +696,104 @@ public static class SubtitleStyleCatalog
         new("WordPop", "Word Pop", SubtitleStyleKind.Karaoke, KaraokeSubtitlePresets.CreateWordPop)
     ];
 
-    /// <summary>All registered styles, in display order.</summary>
-    public static IReadOnlyList<SubtitleStyleCatalogEntry> Entries => EntriesInternal;
+    private static readonly object SyncRoot = new();
+
+    // Presets registered at runtime (typically loaded from JSON by SubtitlePresetLoader). Keyed by
+    // id; a registered entry overrides a built-in with the same id, keeping the built-in's position.
+    private static readonly Dictionary<string, SubtitleStyleCatalogEntry> RegisteredById = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly List<string> RegisteredOrder = new();
+
+    /// <summary>
+    /// Registers additional styles (e.g. loaded from JSON preset files), merging them over the
+    /// built-ins by id. Registering an id that matches a built-in replaces it in place; new ids are
+    /// appended after the built-ins in registration order. Safe to call more than once.
+    /// </summary>
+    public static void RegisterPresets(IEnumerable<SubtitleStyleCatalogEntry> entries)
+    {
+        ArgumentNullException.ThrowIfNull(entries);
+
+        lock (SyncRoot)
+        {
+            foreach (var entry in entries)
+            {
+                if (entry is null)
+                {
+                    continue;
+                }
+
+                if (!RegisteredById.ContainsKey(entry.Id))
+                {
+                    RegisteredOrder.Add(entry.Id);
+                }
+
+                RegisteredById[entry.Id] = entry;
+            }
+        }
+    }
+
+    /// <summary>Removes all runtime-registered presets, leaving only the built-ins. Intended for tests.</summary>
+    public static void ResetRegistrations()
+    {
+        lock (SyncRoot)
+        {
+            RegisteredById.Clear();
+            RegisteredOrder.Clear();
+        }
+    }
+
+    /// <summary>All registered styles, in display order: built-ins first, then user-only presets.</summary>
+    public static IReadOnlyList<SubtitleStyleCatalogEntry> Entries
+    {
+        get
+        {
+            lock (SyncRoot)
+            {
+                if (RegisteredById.Count == 0)
+                {
+                    return BuiltInEntries;
+                }
+
+                var merged = new List<SubtitleStyleCatalogEntry>(BuiltInEntries.Length + RegisteredOrder.Count);
+                var emittedBuiltInOverrides = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                // Built-ins keep their order; replaced in place when an override shares their id.
+                foreach (var builtIn in BuiltInEntries)
+                {
+                    if (RegisteredById.TryGetValue(builtIn.Id, out var overrideEntry))
+                    {
+                        merged.Add(overrideEntry);
+                        emittedBuiltInOverrides.Add(builtIn.Id);
+                    }
+                    else
+                    {
+                        merged.Add(builtIn);
+                    }
+                }
+
+                // Append registered presets that did not override a built-in, in registration order.
+                foreach (var id in RegisteredOrder)
+                {
+                    if (!emittedBuiltInOverrides.Contains(id))
+                    {
+                        merged.Add(RegisteredById[id]);
+                    }
+                }
+
+                return merged;
+            }
+        }
+    }
 
     /// <summary>Registered styles of a given kind, in display order.</summary>
     public static IEnumerable<SubtitleStyleCatalogEntry> ByKind(SubtitleStyleKind kind)
     {
-        return EntriesInternal.Where(entry => entry.Kind == kind);
+        return Entries.Where(entry => entry.Kind == kind);
     }
 
     /// <summary>Finds an entry by id, or null when it is not registered.</summary>
     public static SubtitleStyleCatalogEntry? Find(string id)
     {
-        return EntriesInternal.FirstOrDefault(entry => string.Equals(entry.Id, id, StringComparison.OrdinalIgnoreCase));
+        return Entries.FirstOrDefault(entry => string.Equals(entry.Id, id, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>Builds a preset by id, throwing when the id is unknown.</summary>

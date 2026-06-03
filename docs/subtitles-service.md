@@ -245,6 +245,39 @@ classic single-line `\k` sweep:
 
 The preset model remains separate from file export so future styled outputs can reuse the same readability pipeline.
 
+### JSON preset files
+
+Presets can also be defined as JSON files instead of (or in addition to) the hardcoded C# factories,
+so adding or tweaking a look is data, not code. The pieces live in `Services/Presets/`:
+
+- `SubtitlePresetDto` — the JSON shape. Every field maps 1:1 onto `SubtitleStylePreset`, with the
+  same defaults, so a minimal file (just `id` plus a few fields) still deserializes sensibly. Carries
+  `schemaVersion`, the catalog metadata (`id`, `displayName`, `kind`), and an optional composable
+  `effects` list mirroring `SubtitleEffect`.
+- `SubtitleColorJsonConverter` — (de)serializes `SubtitleColor` as `"#AARRGGBB"`. Alpha follows the
+  ASS/domain convention (`00` = opaque, `FF` = transparent); this converter is the single place that
+  documents and enforces it.
+- `SubtitlePresetJsonContext` — source-generated `System.Text.Json` context (trim/AOT safe, no
+  reflection). Enum-typed properties serialize **by name**, which makes enum member names part of the
+  preset file contract — renaming an enum member breaks existing preset files.
+- `SubtitlePresetMapper` — the only bridge between JSON and the renderer. `ToPreset` builds an
+  immutable `SubtitleStylePreset`; `ToCatalogEntry` wraps it in a `SubtitleStyleCatalogEntry` whose
+  factory returns the single pre-built (immutable) instance.
+- `SubtitlePresetLoader` — reads two directories and merges them by id, **user overrides built-in**:
+  1. built-ins shipped under `Assets/Presets/*.json` (resolved via `AppContext.BaseDirectory`, so it
+     works packaged or unpackaged), then
+  2. user presets under `%LOCALAPPDATA%\FilesTools\Presets\*.json`.
+
+  A file that fails to parse or lacks a required field is skipped and surfaced via
+  `SubtitlePresetLoadError` rather than aborting the whole load. The loader uses plain `System.IO`
+  (not WinRT `ApplicationData`), so it is unit-testable and packaging-agnostic.
+
+`SubtitleStyleCatalog.RegisterPresets(...)` merges loaded entries over the built-ins: an entry whose
+id matches a built-in replaces it **in place** (keeping display order); new ids are appended. The
+built-in C# factories remain as a guaranteed fallback if the JSON assets are missing or malformed.
+`App` calls the loader at startup (failures there are non-fatal). The eight built-in styles also ship
+as JSON under `Assets/Presets/` so they are the canonical, editable source going forward.
+
 ## Progress
 
 The service reuses `AudioTranscriptionProgress`.
