@@ -1315,7 +1315,7 @@ public sealed class SubtitlesService : ISubtitlesService
             }
             else if (isChunked)
             {
-                RenderChunkedKaraokeEvents(builder, cue, preset);
+                RenderChunkedKaraokeEvents(builder, cue, preset, layout);
             }
             else
             {
@@ -1996,7 +1996,9 @@ public sealed class SubtitlesService : ISubtitlesService
         double ShadowDepth,
         int MarginLeft,
         int MarginRight,
-        int MarginVertical);
+        int MarginVertical,
+        int? PositionX,
+        int? PositionY);
 
     /// <summary>
     /// Resolves the canvas and style geometry for karaoke output. For every style except the chunked
@@ -2016,7 +2018,7 @@ public sealed class SubtitlesService : ISubtitlesService
         {
             return new KaraokeLayout(
                 preset.PlayResX, preset.PlayResY, preset.FontSize, preset.OutlineWidth, preset.ShadowDepth,
-                preset.MarginLeft, preset.MarginRight, preset.MarginVertical);
+                preset.MarginLeft, preset.MarginRight, preset.MarginVertical, preset.PositionX, preset.PositionY);
         }
 
         var designWidth = Math.Max(1, preset.PlayResX);
@@ -2054,10 +2056,20 @@ public sealed class SubtitlesService : ISubtitlesService
         // for completeness so a non-centered chunked style would still behave.
         var marginVertical = (int)Math.Round(preset.MarginVertical * scaleY, MidpointRounding.AwayFromZero);
 
-        return new KaraokeLayout(targetWidth, targetHeight, fontSize, outlineWidth, shadowDepth, marginLeft, marginRight, marginVertical);
+        // Absolute placement coordinates were computed in the design space (e.g. \pos based on
+        // 1920x1080); they MUST be scaled into the real frame or the line lands off-screen (a 960px x
+        // on a 720-wide frame is past the right edge). Scale X by width, Y by height.
+        var positionX = preset.PositionX is int px
+            ? Math.Clamp((int)Math.Round(px * scaleX, MidpointRounding.AwayFromZero), 0, targetWidth)
+            : (int?)null;
+        var positionY = preset.PositionY is int py
+            ? Math.Clamp((int)Math.Round(py * scaleY, MidpointRounding.AwayFromZero), 0, targetHeight)
+            : (int?)null;
+
+        return new KaraokeLayout(targetWidth, targetHeight, fontSize, outlineWidth, shadowDepth, marginLeft, marginRight, marginVertical, positionX, positionY);
     }
 
-    private static void RenderChunkedKaraokeEvents(StringBuilder builder, KaraokeCue cue, KaraokeRenderPreset preset)
+    private static void RenderChunkedKaraokeEvents(StringBuilder builder, KaraokeCue cue, KaraokeRenderPreset preset, KaraokeLayout layout)
     {
         if (cue.Words.Count == 0)
         {
@@ -2068,7 +2080,10 @@ public sealed class SubtitlesService : ISubtitlesService
         var maxChars = Math.Max(1, preset.MaxCharsPerLine);
         var chunks = SplitWordsIntoChunks(cue.Words, chunkSize, maxChars);
 
-        var positionOverride = BuildAssPositionOverride(preset.Alignment, preset.PositionX, preset.PositionY);
+        // Use the layout's position, which is scaled into the real frame; preset.PositionX/Y are in the
+        // design space and would land off-screen when the canvas was adapted (e.g. \pos(960,...) on a
+        // 720-wide frame).
+        var positionOverride = BuildAssPositionOverride(preset.Alignment, layout.PositionX, layout.PositionY);
         var entryFade = Math.Clamp(preset.EntryFadeMilliseconds, 0, 5000);
         var exitFade = Math.Clamp(preset.ExitFadeMilliseconds, 0, 5000);
         var activeScale = preset.ActiveWordScale > 0 ? Math.Min(preset.ActiveWordScale, 1.4d) : 1d;

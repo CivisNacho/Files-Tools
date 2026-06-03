@@ -1145,6 +1145,34 @@ public class SubtitlesServiceTests
         Assert.AreEqual(92d * 720d / 1080d, fontSize, 0.5, "Same-aspect landscape should scale the font by the height ratio.");
     }
 
+    [TestMethod]
+    public void RenderKaraokeAss_WithWordPop_PortraitTargetAndPlacement_KeepsPosInsideFrame()
+    {
+        var draft = new SubtitleDraft(
+            [new SubtitleCue(1, TimeSpan.Zero, TimeSpan.FromSeconds(3), "alpha beta gamma")],
+            new SubtitlePostprocessingOptions(),
+            []);
+
+        // A placement makes the renderer emit an explicit \pos. With a 720x1280 portrait target, the
+        // coordinates must be scaled into that frame — not left in the 1920x1080 design space (which
+        // produced \pos(960,...), off the right edge of a 720-wide frame, so nothing showed).
+        var placement = new SubtitlePlacementOptions { NormalizedX = 0.5, NormalizedY = 0.88 };
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.WordPop, placement, new SubtitleRenderTarget(720, 1280));
+
+        var positions = System.Text.RegularExpressions.Regex.Matches(ass, @"\\pos\((\d+),(\d+)\)");
+        Assert.IsTrue(positions.Count > 0, "Expected explicit \\pos overrides when a placement is set.");
+        foreach (System.Text.RegularExpressions.Match match in positions)
+        {
+            var x = int.Parse(match.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
+            var y = int.Parse(match.Groups[2].Value, System.Globalization.CultureInfo.InvariantCulture);
+            Assert.IsTrue(x <= 720, $"\\pos x={x} must be within the 720px-wide frame.");
+            Assert.IsTrue(y <= 1280, $"\\pos y={y} must be within the 1280px-tall frame.");
+        }
+
+        // Centered horizontally in the real frame (0.5 * 720 = 360), not 960.
+        StringAssert.Contains(ass, @"\pos(360,");
+    }
+
     private static (TimeSpan Start, TimeSpan End) ParseDialogueSpan(string dialogueLine)
     {
         // "Dialogue: 0,H:MM:SS.cc,H:MM:SS.cc,Style,..."
