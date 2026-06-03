@@ -245,23 +245,25 @@ classic single-line `\k` sweep:
 
 #### Resolution-adaptive sizing
 
-The chunked style is big, single-line, and unwrapped (`WrapStyle 2`, `MaxLines 1`), so it is laid out in a
-fixed 1920×1080 design space and overflows a non-16:9 frame (e.g. a vertical/portrait short-form video).
-To make it adapt to any aspect ratio, `RenderKaraokeAss(...)` takes an optional `SubtitleRenderTarget`
-(the real video width/height); the video editor passes the source video's dimensions.
+Presets are authored in a fixed 1920×1080 design space. To render at a consistent, undistorted size on any
+resolution/aspect, `RenderKaraokeAss(...)`, `RenderStyledAss(...)` and `ApplyStylePreset(...)` take an
+optional `SubtitleRenderTarget` (the real video width/height); the video editor probes the source file for
+its true display dimensions (rotation-aware) and passes them.
 
-When a target is supplied, `ResolveKaraokeLayout(...)` (chunked path only):
+`ApplyTargetResolutionToPreset(...)` rewrites the (placement-applied) preset into the target frame's
+coordinate space — a single place that **all** styles flow through:
 
-- writes the ASS in the real frame's coordinate space (`PlayResX`/`PlayResY` = the video size), so libass
-  no longer scales the script non-uniformly,
-- scales the design-space horizontal margins by the width ratio, and
-- sizes the font so a full line (up to `MaxCharsPerLine`, widened by the active-word pop) fits the usable
-  frame width — a hard ceiling capped at 16% of frame height. Outline and shadow track the resulting glyph
-  size so contrast stays proportional.
+- `PlayResX`/`PlayResY` become the video size, so libass renders 1:1 (no non-uniform stretch),
+- font, outline, shadow and the vertical margin scale by the **height** ratio (standard subtitle scaling),
+- horizontal margins and the absolute `\pos` placement scale by the width/height ratios, so a placed
+  subtitle lands at the same relative spot (this is why a portrait frame's `\pos` is e.g. `360,1126`, not
+  the design-space `960,950` which would sit off a 720-wide frame),
+- for the **chunked** style only (which is single-line and cannot wrap), the font is additionally clamped to
+  fit the usable frame width (average-glyph-advance heuristic, since no font metrics are available).
 
-Only the chunked style adapts; every other style keeps its fixed design-space layout. With no target (or a
-16:9 target) the chunked output is unchanged from before. The font-fit uses an average-glyph-advance
-heuristic (no font metrics are available at render time) tuned to err toward fitting.
+A null target — or a target equal to the design resolution (16:9 1080p) — is a no-op, so existing output is
+unchanged. Wrapping styles (`WrapStyle 0`, `MaxLines 2`) reflow within the real frame; only the unwrapped
+chunked style needs the extra width clamp.
 
 The preset model remains separate from file export so future styled outputs can reuse the same readability pipeline.
 

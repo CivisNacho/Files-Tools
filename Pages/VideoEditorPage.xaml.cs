@@ -2560,7 +2560,10 @@ namespace Files_Tools.Pages
             }
             else
             {
-                ass = _subtitlesService.RenderStyledAss(reviewedDraft, preset, placement);
+                // Size styled subtitles to the real frame too, for consistent, undistorted output on
+                // any aspect ratio (matches the karaoke path).
+                var target = await ResolveSubtitleRenderTargetAsync();
+                ass = _subtitlesService.RenderStyledAss(reviewedDraft, preset, placement, target);
             }
             var directory = Path.GetDirectoryName(path);
             if (!string.IsNullOrWhiteSpace(directory))

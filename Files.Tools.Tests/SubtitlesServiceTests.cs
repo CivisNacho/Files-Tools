@@ -1173,6 +1173,70 @@ public class SubtitlesServiceTests
         StringAssert.Contains(ass, @"\pos(360,");
     }
 
+    [TestMethod]
+    public void RenderStyledAss_PortraitTarget_AdaptsCanvasFontAndPosition()
+    {
+        var draft = new SubtitleDraft(
+            [new SubtitleCue(1, TimeSpan.Zero, TimeSpan.FromSeconds(3), "hello world")],
+            new SubtitlePostprocessingOptions(),
+            []);
+
+        var placement = new SubtitlePlacementOptions { NormalizedX = 0.5, NormalizedY = 0.88 };
+        var ass = _service.RenderStyledAss(draft, StyledSubtitlePresets.SocialImpact, placement, new SubtitleRenderTarget(720, 1280));
+
+        // Styled subtitles now adapt to the frame too (not just karaoke).
+        StringAssert.Contains(ass, "PlayResX: 720");
+        StringAssert.Contains(ass, "PlayResY: 1280");
+
+        var fontSize = double.Parse(
+            ass.Split('\n').First(l => l.StartsWith("Style:", StringComparison.Ordinal)).Substring("Style: ".Length).Split(',')[2],
+            System.Globalization.CultureInfo.InvariantCulture);
+        // 86 * (1280/1080) = 101.9 (height-scaled; styled wraps so no width clamp).
+        Assert.AreEqual(86d * 1280d / 1080d, fontSize, 0.5);
+
+        // Placement \pos scaled into the real frame: centered (0.5*720=360), not 960.
+        var pos = System.Text.RegularExpressions.Regex.Match(ass, @"\\pos\((\d+),(\d+)\)");
+        Assert.IsTrue(pos.Success, "Expected a scaled \\pos for the placed styled subtitle.");
+        Assert.IsTrue(int.Parse(pos.Groups[1].Value) <= 720 && int.Parse(pos.Groups[2].Value) <= 1280, "\\pos must be inside the frame.");
+        Assert.AreEqual(360, int.Parse(pos.Groups[1].Value));
+    }
+
+    [TestMethod]
+    public void RenderStyledAss_DesignResolutionTarget_IsNoOp()
+    {
+        var draft = new SubtitleDraft(
+            [new SubtitleCue(1, TimeSpan.Zero, TimeSpan.FromSeconds(3), "hello world")],
+            new SubtitlePostprocessingOptions(),
+            []);
+
+        var ass = _service.RenderStyledAss(draft, StyledSubtitlePresets.SocialImpact, placement: null, target: new SubtitleRenderTarget(1920, 1080));
+
+        // A 16:9 1080p target equals the design space: unchanged font/canvas.
+        StringAssert.Contains(ass, "PlayResX: 1920");
+        StringAssert.Contains(ass, "PlayResY: 1080");
+        StringAssert.Contains(ass, "Style: SocialImpact,Impact,86,");
+    }
+
+    [TestMethod]
+    public void RenderKaraokeAss_NonChunked_PortraitTarget_AdaptsCanvasAndFont()
+    {
+        var draft = new SubtitleDraft(
+            [new SubtitleCue(1, TimeSpan.Zero, TimeSpan.FromSeconds(3), "alpha beta gamma")],
+            new SubtitlePostprocessingOptions(),
+            []);
+
+        // NeonKaraoke is non-chunked karaoke; it should now adapt to the frame as well.
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.NeonKaraoke, placement: null, target: new SubtitleRenderTarget(720, 1280));
+
+        StringAssert.Contains(ass, "PlayResX: 720");
+        StringAssert.Contains(ass, "PlayResY: 1280");
+        var fontSize = double.Parse(
+            ass.Split('\n').First(l => l.StartsWith("Style:", StringComparison.Ordinal)).Substring("Style: ".Length).Split(',')[2],
+            System.Globalization.CultureInfo.InvariantCulture);
+        // 64 * (1280/1080) = 75.85 (height-scaled, no width clamp for the wrapping line style).
+        Assert.AreEqual(64d * 1280d / 1080d, fontSize, 0.5);
+    }
+
     private static (TimeSpan Start, TimeSpan End) ParseDialogueSpan(string dialogueLine)
     {
         // "Dialogue: 0,H:MM:SS.cc,H:MM:SS.cc,Style,..."
