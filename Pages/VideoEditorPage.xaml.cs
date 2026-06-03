@@ -2465,7 +2465,12 @@ namespace Files_Tools.Pages
             string ass;
             if (_pendingAdvancedSubtitleKind == PendingAdvancedSubtitleKind.Karaoke)
             {
-                ass = _subtitlesService.RenderKaraokeAss(reviewedDraft, preset, placement);
+                // Pass the real video resolution so the chunked "viral" karaoke style is sized to the
+                // actual frame and stays on-screen on any aspect ratio (e.g. vertical/portrait video).
+                var target = _previewVideoSize.Width > 0 && _previewVideoSize.Height > 0
+                    ? new SubtitleRenderTarget((int)_previewVideoSize.Width, (int)_previewVideoSize.Height)
+                    : null;
+                ass = _subtitlesService.RenderKaraokeAss(reviewedDraft, preset, placement, target);
             }
             else
             {
