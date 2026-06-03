@@ -303,6 +303,15 @@
   <data name="PdfPage_OcrHint.Text" xml:space="preserve"><value>テキストを認識してスキャンした PDF を検索可能にします。</value></data>
   <data name="PdfPage_OcrLanguage.Header" xml:space="preserve"><value>言語</value></data>
   <data name="PdfPage_OcrAutoDetect.Content" xml:space="preserve"><value>自動検出</value></data>
+  <data name="PdfPage_OcrTessDataLabel.Text" xml:space="preserve">
+    <value>Tessdata ディレクトリ</value>
+  </data>
+  <data name="PdfPage_OcrBrowse.Content" xml:space="preserve">
+    <value>参照</value>
+  </data>
+  <data name="PdfPage_OcrTessDataHint.Text" xml:space="preserve">
+    <value>.traineddata 言語パックが格納されたフォルダー。存在する場合は %LOCALAPPDATA%\FilesTools\tessdata から自動検出されます。</value>
+  </data>
   <data name="PdfPage_Metadata.Text" xml:space="preserve"><value>メタデータ</value></data>
   <data name="PdfPage_MetadataTitle.Header" xml:space="preserve"><value>タイトル</value></data>
   <data name="PdfPage_MetadataTitle.PlaceholderText" xml:space="preserve"><value>ドキュメントのタイトル</value></data>

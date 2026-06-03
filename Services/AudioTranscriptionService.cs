@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Whisper.net;
@@ -111,7 +112,15 @@ public sealed class AudioTranscriptionInstallProgress
 /// <summary>
 /// Single Whisper transcription segment with start and end timestamps.
 /// </summary>
-public sealed record AudioTranscriptionSegment(TimeSpan Start, TimeSpan End, string Text);
+public sealed record AudioTranscriptionSegment(TimeSpan Start, TimeSpan End, string Text)
+{
+    /// <summary>
+    /// Real word-level timings produced from Whisper token timestamps, when available.
+    /// Null when the transcriber did not produce usable word timing, in which case callers
+    /// fall back to synthesizing word timing from the segment envelope.
+    /// </summary>
+    public IReadOnlyList<AudioTranscriptionWord>? Words { get; init; }
+}
 
 /// <summary>
 /// Single word-level transcription unit with start and end timestamps.
@@ -359,6 +368,20 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
         var output = new List<AudioTranscriptionWord>();
         foreach (var segment in segments)
         {
+            if (segment.Words is { Count: > 0 } realWords)
+            {
+                foreach (var word in realWords)
+                {
+                    var wordText = word.Text?.Trim();
+                    if (!string.IsNullOrEmpty(wordText))
+                    {
+                        output.Add(string.Equals(wordText, word.Text, StringComparison.Ordinal) ? word : word with { Text = wordText });
+                    }
+                }
+
+                continue;
+            }
+
             var trimmed = segment.Text?.Trim();
             if (string.IsNullOrEmpty(trimmed))
             {
@@ -579,6 +602,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             using var whisperFactory = WhisperFactory.FromPath(modelPath);
             using var processor = whisperFactory.CreateBuilder()
                 .WithLanguageDetection()
+                .WithTokenTimestamps()
                 .WithProgressHandler(value => progress?.Report(Math.Clamp(value / 100d, 0d, 1d)))
                 .Build();
             await using var audioStream = File.OpenRead(audioPath);
@@ -588,7 +612,11 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             {
                 try
                 {
-                    segments.Add(new AudioTranscriptionSegment(segment.Start, segment.End, segment.Text ?? string.Empty));
+                    var words = BuildWordsFromTokens(segment);
+                    segments.Add(new AudioTranscriptionSegment(segment.Start, segment.End, segment.Text ?? string.Empty)
+                    {
+                        Words = words
+                    });
                 }
                 finally
                 {
@@ -597,6 +625,121 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             }
 
             return segments;
+        }
+
+        // Whisper token timestamps come in centiseconds (the same units the segment t0/t1
+        // are scaled from). Reconstruct whole words by concatenating sub-word token pieces:
+        // a piece that begins with whitespace starts a new word.
+        private static IReadOnlyList<AudioTranscriptionWord>? BuildWordsFromTokens(SegmentData segment)
+        {
+            var tokens = segment.Tokens;
+            if (tokens is null || tokens.Length == 0)
+            {
+                return null;
+            }
+
+            var words = new List<AudioTranscriptionWord>();
+            var builder = new StringBuilder();
+            var wordStart = TimeSpan.Zero;
+            var wordEnd = TimeSpan.Zero;
+            var hasContent = false;
+            var sawTiming = false;
+
+            void Flush()
+            {
+                if (!hasContent)
+                {
+                    return;
+                }
+
+                var text = builder.ToString().Trim();
+                if (text.Length > 0)
+                {
+                    words.Add(new AudioTranscriptionWord(wordStart, wordEnd, text));
+                }
+
+                builder.Clear();
+                hasContent = false;
+            }
+
+            foreach (var token in tokens)
+            {
+                var raw = token.Text;
+                if (string.IsNullOrEmpty(raw) || raw.StartsWith("[_", StringComparison.Ordinal))
+                {
+                    // Skip empty pieces and special tokens such as [_BEG_] or [_TT_750].
+                    continue;
+                }
+
+                if (char.IsWhiteSpace(raw[0]) && hasContent)
+                {
+                    Flush();
+                }
+
+                var pieceStart = TimeSpan.FromMilliseconds(Math.Max(0L, token.Start) * 10d);
+                var pieceEnd = TimeSpan.FromMilliseconds(Math.Max(0L, token.End) * 10d);
+                if (token.End > 0L)
+                {
+                    sawTiming = true;
+                }
+
+                if (!hasContent)
+                {
+                    wordStart = pieceStart;
+                    hasContent = true;
+                }
+
+                wordEnd = pieceEnd > wordStart ? pieceEnd : wordStart;
+                builder.Append(raw);
+            }
+
+            Flush();
+
+            if (words.Count == 0 || !sawTiming)
+            {
+                // No usable timing (e.g. token timestamps unavailable): let the caller synthesize.
+                return null;
+            }
+
+            return SanitizeWordTimings(words, segment.Start, segment.End);
+        }
+
+        private static IReadOnlyList<AudioTranscriptionWord> SanitizeWordTimings(List<AudioTranscriptionWord> words, TimeSpan segmentStart, TimeSpan segmentEnd)
+        {
+            var lower = segmentStart < TimeSpan.Zero ? TimeSpan.Zero : segmentStart;
+            var upper = segmentEnd > lower ? segmentEnd : lower + MinimumWordDuration;
+            var result = new List<AudioTranscriptionWord>(words.Count);
+            var cursor = lower;
+
+            foreach (var word in words)
+            {
+                var start = word.Start;
+                if (start < cursor)
+                {
+                    start = cursor;
+                }
+
+                if (start > upper)
+                {
+                    start = upper;
+                }
+
+                var end = word.End;
+                if (end <= start)
+                {
+                    end = start + MinimumWordDuration;
+                }
+
+                if (end > upper && upper > start)
+                {
+                    end = upper;
+                }
+
+                result.Add(new AudioTranscriptionWord(start, end, word.Text));
+                cursor = end;
+            }
+
+            return result;
         }
     }
 

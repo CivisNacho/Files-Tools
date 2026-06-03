@@ -303,6 +303,15 @@
   <data name="PdfPage_OcrHint.Text" xml:space="preserve"><value>텍스트를 인식하여 스캔된 PDF를 검색 가능하게 만듭니다.</value></data>
   <data name="PdfPage_OcrLanguage.Header" xml:space="preserve"><value>언어</value></data>
   <data name="PdfPage_OcrAutoDetect.Content" xml:space="preserve"><value>자동 감지</value></data>
+  <data name="PdfPage_OcrTessDataLabel.Text" xml:space="preserve">
+    <value>Tessdata 디렉터리</value>
+  </data>
+  <data name="PdfPage_OcrBrowse.Content" xml:space="preserve">
+    <value>찾아보기</value>
+  </data>
+  <data name="PdfPage_OcrTessDataHint.Text" xml:space="preserve">
+    <value>.traineddata 언어 팩이 있는 폴더입니다. %LOCALAPPDATA%\FilesTools\tessdata에 있으면 자동으로 감지됩니다.</value>
+  </data>
   <data name="PdfPage_Metadata.Text" xml:space="preserve"><value>메타데이터</value></data>
   <data name="PdfPage_MetadataTitle.Header" xml:space="preserve"><value>제목</value></data>
   <data name="PdfPage_MetadataTitle.PlaceholderText" xml:space="preserve"><value>문서 제목</value></data>

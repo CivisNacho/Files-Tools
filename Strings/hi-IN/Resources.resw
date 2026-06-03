@@ -303,6 +303,15 @@
   <data name="PdfPage_OcrHint.Text" xml:space="preserve"><value>टेक्स्ट पहचानकर स्कैन की गई PDF को खोज योग्य बनाएँ।</value></data>
   <data name="PdfPage_OcrLanguage.Header" xml:space="preserve"><value>भाषा</value></data>
   <data name="PdfPage_OcrAutoDetect.Content" xml:space="preserve"><value>स्वतः-पहचान</value></data>
+  <data name="PdfPage_OcrTessDataLabel.Text" xml:space="preserve">
+    <value>Tessdata निर्देशिका</value>
+  </data>
+  <data name="PdfPage_OcrBrowse.Content" xml:space="preserve">
+    <value>ब्राउज़ करें</value>
+  </data>
+  <data name="PdfPage_OcrTessDataHint.Text" xml:space="preserve">
+    <value>.traineddata भाषा पैक वाला फ़ोल्डर। यदि मौजूद हो तो %LOCALAPPDATA%\FilesTools\tessdata से स्वतः पहचाना जाता है।</value>
+  </data>
   <data name="PdfPage_Metadata.Text" xml:space="preserve"><value>मेटाडेटा</value></data>
   <data name="PdfPage_MetadataTitle.Header" xml:space="preserve"><value>शीर्षक</value></data>
   <data name="PdfPage_MetadataTitle.PlaceholderText" xml:space="preserve"><value>दस्तावेज़ का शीर्षक</value></data>

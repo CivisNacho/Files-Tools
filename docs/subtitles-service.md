@@ -46,11 +46,11 @@ This service complements `AudioTranscriptionService`.
 - `TranscriptionDraft`
   - raw timestamped transcription segments for review before ASS rendering
 - `TranscriptionSegment`
-  - segment id, start, end, and text
+  - segment id, start, end, text, and optional real word-level timings (`Words`)
 - `TranscriptionSegmentCorrection`
   - user text correction payload for a transcription segment
 - `SubtitleDraft`
-  - processed subtitle cues plus validation issues
+  - processed subtitle cues plus validation issues, and the preserved real word timeline (`SourceWords`)
 - `StyledSubtitleDraft`
   - processed cues with a selected visual preset
 - `SubtitleCue`
@@ -115,26 +115,68 @@ There are now two karaoke paths:
 
 The review-based karaoke path used by the video editor uses this pipeline:
 
-1. timestamped transcription segments
+1. timestamped transcription segments (with real word timing when available)
 2. per-segment user corrections
-3. synthetic aligned words distributed across reviewed segment timing
+3. per-cue word timing resolved against the real word timeline (synthetic fallback)
 4. karaoke cue grouping and line layout
 5. ASS rendering
 
-The one-shot karaoke generation path calls `AudioTranscriptionService.TranscribeToSegmentsAsync(...)` and synthesizes per-word timing from segment envelopes (duration distributed proportional to word character count).
+The one-shot karaoke generation path calls `AudioTranscriptionService.TranscribeToSegmentsAsync(...)` and reuses the real per-word timing those segments now carry.
+
+### Word-level timing
+
+Whisper transcription now runs with token timestamps enabled, so each `AudioTranscriptionSegment` can
+carry real word-level timings (`AudioTranscriptionSegment.Words`). These flow through the pipeline so the
+karaoke highlight tracks the actually spoken word:
+
+- `TranscriptionSegment.Words` carries the real timing into the review draft.
+- `SubtitleDraft.SourceWords` preserves the real word timeline across postprocessing (merge/split/reflow)
+  so the editor's `RenderKaraokeAss(SubtitleDraft, ...)` path can still use it.
+- a cue uses real timing only when the overlapping real words line up one-to-one with the cue's tokens;
+  editing a cue's text (or a model without usable token timestamps) falls back to distributing word timing
+  across the cue envelope by character weight.
 
 The renderer behavior is:
 
 - output path is normalized to `.ass`
 - output is UTF-8 without BOM
-- one base dialogue event per cue shows the full cue text
-- one overlay dialogue event per word highlights only the active word
-- past and future words remain visible through the base event, while the overlay event keeps non-active words transparent
+- one dialogue event per cue carries the line text with per-word `\k`/`\kf` karaoke tags
+- each word is anchored to its absolute timing, rounded relative to the cue's centisecond line start, so
+  per-word rounding never accumulates into drift
+- silence before the first word and gaps between words are bridged with empty filler syllables so a word
+  never highlights early
+- entry "pop" scale is capped so it cannot push glyphs past the safe area and clip at the frame edge
 - default visual style is bold bottom-centered text with white fill, black outline, and a yellow active-word highlight
 
 ## Styling Layer
 
 `ApplyStylePreset(...)` is a separate layer on top of `SubtitleDraft`.
+
+### Composable effects
+
+Animation is described by a list of composable `SubtitleEffect` values rather than a fixed enum, so a new
+look is data, not renderer code:
+
+- `SubtitleEffectKind` — `EntryFade`, `ExitFade`, `EntryPop`, `KaraokeColorSweep`, `KaraokeColorInstant`, `DropIn`.
+- `SubtitleEffects` — factory helpers (`EntryFade(ms)`, `EntryPop(scale)`, `KaraokeColorInstant()`, …).
+- `SubtitleStylePreset.Effects` — when set, drives rendering directly. When null, the renderer derives an
+  equivalent list from the legacy `PresentationAnimation` + fade/scale fields, so existing presets are
+  unchanged. A single compiler (`BuildLineOverrideTags`) turns the effect list into ASS override tags, and
+  the karaoke fill mode (`\k` / `\kf` / drop-in) is resolved from the same effects.
+- entry pop scale is capped to a safe ceiling (125%) so it cannot clip at the frame edge.
+
+### Style catalog
+
+`SubtitleStyleCatalog` is the single registry of built-in styles. Each `SubtitleStyleCatalogEntry` carries
+an id, display name, `SubtitleStyleKind` (`Styled` / `Karaoke`), and a factory. Adding a style means adding
+one catalog entry plus its factory — the renderer needs no changes. `SubtitleStyleCatalog.Entries`,
+`ByKind(...)`, `Find(id)`, and `Create(id)` (case-insensitive) let a UI enumerate styles instead of
+hard-coding names.
+
+The advanced-subtitle pickers in `VideoEditorPage` and `BatchEditorPage` are driven entirely by this
+catalog: they populate the preset combo box from `SubtitleStyleCatalog.ByKind(...)` and store the
+selected entry's `Id`. Registering a new catalog entry makes it appear in both pickers automatically,
+with no UI code changes.
 
 Recommended advanced app pipeline:
 
@@ -144,6 +186,10 @@ Recommended advanced app pipeline:
 4. apply styling with `ApplyStylePreset(...)`
 5. render final `.ass` with `RenderStyledAss(...)`
 6. use the rendered `.ass` for mux/burn
+
+All built-in presets were tuned for on-screen legibility: larger type, outline widths kept roughly
+proportional to font size for contrast on any background, and bottom margins lifted into a ~10% safe
+area so captions clear platform UI chrome.
 
 ### Styled ASS Subtitle Presets
 
@@ -177,6 +223,25 @@ Built-in presets for karaoke `.ass` subtitle output (`KaraokeSubtitlePresets`). 
   - instant fill (no animation) — highlights entire word at once
   - 10px outline, 1.5px black shadow for depth
   - optimized for emphasizing individual words with full-word coloring
+
+- `KaraokeSubtitlePresets.WordPop` — autosubtitles-style chunked karaoke
+  - **default font**: `Montserrat` (fallbacks `Arial Black`, `Segoe UI Black`)
+  - big, centered, uppercase; at most 3 words on screen at once (`MaxWordsPerChunk = 3`)
+  - the active word pops in (scale 118% → 100%) and switches to a vivid yellow highlight
+  - rendered as one dialogue event per word (see chunked rendering below)
+
+### Chunked karaoke rendering
+
+When a preset sets `MaxWordsPerChunk`, karaoke is rendered in the chunked "viral" style instead of the
+classic single-line `\k` sweep:
+
+- words are grouped into chunks of at most `MaxWordsPerChunk` words (and within `MaxCharsPerLine`)
+- each word becomes active in **its own dialogue event**, which draws the whole chunk with that word in
+  the highlight colour and an optional scale pop (`ActiveWordPop`), the rest in the base colour
+- events are contiguous and non-overlapping, so exactly one chunk is visible at a time and the highlight
+  advances word by word with no flicker; fades are applied only at a chunk's outer edges
+- this path is glitch-free across burners because it uses explicit per-event `\t` transforms rather than
+  karaoke templates
 
 The preset model remains separate from file export so future styled outputs can reuse the same readability pipeline.
 

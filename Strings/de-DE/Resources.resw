@@ -303,6 +303,15 @@
   <data name="PdfPage_OcrHint.Text" xml:space="preserve"><value>Gescannte PDFs durch Texterkennung durchsuchbar machen.</value></data>
   <data name="PdfPage_OcrLanguage.Header" xml:space="preserve"><value>Sprache</value></data>
   <data name="PdfPage_OcrAutoDetect.Content" xml:space="preserve"><value>Automatisch erkennen</value></data>
+  <data name="PdfPage_OcrTessDataLabel.Text" xml:space="preserve">
+    <value>Tessdata-Verzeichnis</value>
+  </data>
+  <data name="PdfPage_OcrBrowse.Content" xml:space="preserve">
+    <value>Durchsuchen</value>
+  </data>
+  <data name="PdfPage_OcrTessDataHint.Text" xml:space="preserve">
+    <value>Ordner mit .traineddata-Sprachpaketen. Wird automatisch unter %LOCALAPPDATA%\FilesTools\tessdata erkannt, wenn vorhanden.</value>
+  </data>
   <data name="PdfPage_Metadata.Text" xml:space="preserve"><value>Metadaten</value></data>
   <data name="PdfPage_MetadataTitle.Header" xml:space="preserve"><value>Titel</value></data>
   <data name="PdfPage_MetadataTitle.PlaceholderText" xml:space="preserve"><value>Dokumenttitel</value></data>

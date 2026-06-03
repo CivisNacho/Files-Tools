@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -917,6 +917,15 @@
   </data>
   <data name="PdfPage_OcrAutoDetect.Content" xml:space="preserve">
     <value>Auto-detect</value>
+  </data>
+  <data name="PdfPage_OcrTessDataLabel.Text" xml:space="preserve">
+    <value>Tessdata directory</value>
+  </data>
+  <data name="PdfPage_OcrBrowse.Content" xml:space="preserve">
+    <value>Browse</value>
+  </data>
+  <data name="PdfPage_OcrTessDataHint.Text" xml:space="preserve">
+    <value>Folder with .traineddata language packs. Auto-detected from %LOCALAPPDATA%\FilesTools\tessdata if present.</value>
   </data>
   <data name="PdfPage_Metadata.Text" xml:space="preserve">
     <value>Metadata</value>

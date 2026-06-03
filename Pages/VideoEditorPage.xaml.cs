@@ -129,21 +129,6 @@ namespace Files_Tools.Pages
             Karaoke
         }
 
-        private enum StyledSubtitleBasePreset
-        {
-            SocialImpact,
-            CleanSans,
-            CaptionBox,
-            BroadcastLowerThird
-        }
-
-        private enum KaraokeSubtitleBasePreset
-        {
-            NeonKaraoke,
-            Punch,
-            Bubbly
-        }
-
         private sealed class SubtitleEditableRow : INotifyPropertyChanged
         {
             public int CueNumber { get; init; }
@@ -182,9 +167,10 @@ namespace Files_Tools.Pages
 
         private sealed class SubtitlePresetConfiguration
         {
-            public StyledSubtitleBasePreset StyledPreset { get; set; } = StyledSubtitleBasePreset.SocialImpact;
+            // Ids reference SubtitleStyleCatalog entries, so adding a catalog style needs no UI changes.
+            public string StyledPresetId { get; set; } = "SocialImpact";
 
-            public KaraokeSubtitleBasePreset KaraokePreset { get; set; } = KaraokeSubtitleBasePreset.NeonKaraoke;
+            public string KaraokePresetId { get; set; } = "NeonKaraoke";
 
             public string FontFamily { get; set; } = "Impact";
 
@@ -204,8 +190,8 @@ namespace Files_Tools.Pages
             {
                 return new SubtitlePresetConfiguration
                 {
-                    StyledPreset = StyledSubtitleBasePreset.SocialImpact,
-                    KaraokePreset = KaraokeSubtitleBasePreset.NeonKaraoke,
+                    StyledPresetId = "SocialImpact",
+                    KaraokePresetId = "NeonKaraoke",
                     FontFamily = "Impact",
                     KaraokeHighlightColor = new SubtitleColor(0, 255, 110, 0)
                 };
@@ -1484,37 +1470,27 @@ namespace Files_Tools.Pages
         {
             var isKaraokeMode = IsKaraokeAdvancedSubtitleTypeSelected();
 
+            // The picker is driven entirely by the style catalog: registering a new style there makes
+            // it appear here automatically, with no further UI changes required.
+            var presetEntries = SubtitleStyleCatalog
+                .ByKind(isKaraokeMode ? SubtitleStyleKind.Karaoke : SubtitleStyleKind.Styled)
+                .ToList();
+            var configuredPresetId = isKaraokeMode
+                ? _advancedSubtitlePresetConfiguration.KaraokePresetId
+                : _advancedSubtitlePresetConfiguration.StyledPresetId;
+
             var basePresetComboBox = new ComboBox
             {
                 Header = "Base preset"
             };
 
-            if (isKaraokeMode)
+            foreach (var entry in presetEntries)
             {
-                basePresetComboBox.Items.Add(new ComboBoxItem { Content = "NeonKaraoke" });
-                basePresetComboBox.Items.Add(new ComboBoxItem { Content = "Punch" });
-                basePresetComboBox.Items.Add(new ComboBoxItem { Content = "Bubbly" });
-                basePresetComboBox.SelectedIndex = _advancedSubtitlePresetConfiguration.KaraokePreset switch
-                {
-                    KaraokeSubtitleBasePreset.Punch => 1,
-                    KaraokeSubtitleBasePreset.Bubbly => 2,
-                    _ => 0
-                };
+                basePresetComboBox.Items.Add(new ComboBoxItem { Content = entry.DisplayName });
             }
-            else
-            {
-                basePresetComboBox.Items.Add(new ComboBoxItem { Content = "SocialImpact" });
-                basePresetComboBox.Items.Add(new ComboBoxItem { Content = "CleanSans" });
-                basePresetComboBox.Items.Add(new ComboBoxItem { Content = "CaptionBox" });
-                basePresetComboBox.Items.Add(new ComboBoxItem { Content = "BroadcastLowerThird" });
-                basePresetComboBox.SelectedIndex = _advancedSubtitlePresetConfiguration.StyledPreset switch
-                {
-                    StyledSubtitleBasePreset.CleanSans => 1,
-                    StyledSubtitleBasePreset.CaptionBox => 2,
-                    StyledSubtitleBasePreset.BroadcastLowerThird => 3,
-                    _ => 0
-                };
-            }
+
+            var configuredIndex = presetEntries.FindIndex(entry => string.Equals(entry.Id, configuredPresetId, StringComparison.OrdinalIgnoreCase));
+            basePresetComboBox.SelectedIndex = configuredIndex >= 0 ? configuredIndex : 0;
 
             var fontSizeNumberBox = new NumberBox
             {
@@ -1592,26 +1568,19 @@ namespace Files_Tools.Pages
 
             basePresetComboBox.SelectionChanged += (_, _) =>
             {
-                var defaultFont = GetDefaultFontFamilyForPreset(basePresetComboBox.SelectedIndex, isKaraokeMode);
+                var selectedIndex = basePresetComboBox.SelectedIndex;
+                if (selectedIndex < 0 || selectedIndex >= presetEntries.Count)
+                {
+                    return;
+                }
+
+                var defaults = presetEntries[selectedIndex].Factory();
+
+                var defaultFont = defaults.PrimaryFontFamily;
                 if (_installedFontFamilies.Contains(defaultFont, StringComparer.OrdinalIgnoreCase))
                 {
                     fontFamilyComboBox.SelectedItem = _installedFontFamilies.First(name => string.Equals(name, defaultFont, StringComparison.OrdinalIgnoreCase));
                 }
-
-                SubtitleStylePreset defaults = isKaraokeMode
-                    ? basePresetComboBox.SelectedIndex switch
-                    {
-                        1 => KaraokeSubtitlePresets.CreatePunch(),
-                        2 => KaraokeSubtitlePresets.CreateBubbly(),
-                        _ => KaraokeSubtitlePresets.CreateNeonKaraoke()
-                    }
-                    : basePresetComboBox.SelectedIndex switch
-                    {
-                        1 => StyledSubtitlePresets.CreateCleanSans(),
-                        2 => StyledSubtitlePresets.CreateCaptionBox(),
-                        3 => StyledSubtitlePresets.CreateBroadcastLowerThird(),
-                        _ => StyledSubtitlePresets.CreateSocialImpact()
-                    };
 
                 fontSizeNumberBox.Value = defaults.FontSize;
                 outlineNumberBox.Value = defaults.OutlineWidth;
@@ -1677,8 +1646,16 @@ namespace Files_Tools.Pages
                 return;
             }
 
+            var savedIndex = basePresetComboBox.SelectedIndex;
+            var selectedEntry = savedIndex >= 0 && savedIndex < presetEntries.Count
+                ? presetEntries[savedIndex]
+                : presetEntries.FirstOrDefault();
+
             var newConfig = SubtitlePresetConfiguration.CreateDefault();
-            newConfig.FontFamily = (fontFamilyComboBox.SelectedItem as string) ?? GetDefaultFontFamilyForPreset(basePresetComboBox.SelectedIndex, isKaraokeMode);
+            // Preserve the unselected mode's choice; only the mode being edited is overwritten below.
+            newConfig.StyledPresetId = _advancedSubtitlePresetConfiguration.StyledPresetId;
+            newConfig.KaraokePresetId = _advancedSubtitlePresetConfiguration.KaraokePresetId;
+            newConfig.FontFamily = (fontFamilyComboBox.SelectedItem as string) ?? selectedEntry?.Factory().PrimaryFontFamily ?? "Arial";
             newConfig.FontSize = Math.Clamp(double.IsNaN(fontSizeNumberBox.Value) ? 72d : fontSizeNumberBox.Value, 24d, 160d);
             newConfig.OutlineWidth = Math.Clamp(double.IsNaN(outlineNumberBox.Value) ? 5d : outlineNumberBox.Value, 0d, 20d);
             newConfig.MarginVertical = Math.Clamp(double.IsNaN(marginVerticalNumberBox.Value) ? 90 : (int)Math.Round(marginVerticalNumberBox.Value), 0, 400);
@@ -1691,24 +1668,16 @@ namespace Files_Tools.Pages
             };
             newConfig.KaraokeHighlightColor = FromUiColor(karaokeAccentColorPicker.Color);
 
-            if (isKaraokeMode)
+            if (selectedEntry is not null)
             {
-                newConfig.KaraokePreset = basePresetComboBox.SelectedIndex switch
+                if (isKaraokeMode)
                 {
-                    1 => KaraokeSubtitleBasePreset.Punch,
-                    2 => KaraokeSubtitleBasePreset.Bubbly,
-                    _ => KaraokeSubtitleBasePreset.NeonKaraoke
-                };
-            }
-            else
-            {
-                newConfig.StyledPreset = basePresetComboBox.SelectedIndex switch
+                    newConfig.KaraokePresetId = selectedEntry.Id;
+                }
+                else
                 {
-                    1 => StyledSubtitleBasePreset.CleanSans,
-                    2 => StyledSubtitleBasePreset.CaptionBox,
-                    3 => StyledSubtitleBasePreset.BroadcastLowerThird,
-                    _ => StyledSubtitleBasePreset.SocialImpact
-                };
+                    newConfig.StyledPresetId = selectedEntry.Id;
+                }
             }
 
             _advancedSubtitlePresetConfiguration = newConfig;
@@ -1724,20 +1693,12 @@ namespace Files_Tools.Pages
             }
 
             var isKaraokeMode = IsKaraokeAdvancedSubtitleTypeSelected();
-            var (presetName, presentation) = isKaraokeMode
-                ? (_advancedSubtitlePresetConfiguration.KaraokePreset.ToString(), _advancedSubtitlePresetConfiguration.KaraokePreset switch
-                {
-                    KaraokeSubtitleBasePreset.Punch => "Punch karaoke",
-                    KaraokeSubtitleBasePreset.Bubbly => "Bubbly karaoke",
-                    _ => "Neon karaoke"
-                })
-                : (_advancedSubtitlePresetConfiguration.StyledPreset.ToString(), _advancedSubtitlePresetConfiguration.StyledPreset switch
-                {
-                    StyledSubtitleBasePreset.CaptionBox => "Boxed caption",
-                    StyledSubtitleBasePreset.BroadcastLowerThird => "Lower third",
-                    StyledSubtitleBasePreset.CleanSans => "Clean fade",
-                    _ => "Impact pop"
-                });
+            var presetId = isKaraokeMode
+                ? _advancedSubtitlePresetConfiguration.KaraokePresetId
+                : _advancedSubtitlePresetConfiguration.StyledPresetId;
+            var catalogEntry = SubtitleStyleCatalog.Find(presetId);
+            var presetName = catalogEntry?.DisplayName ?? presetId;
+            var presentation = isKaraokeMode ? "karaoke" : "styled";
             var textTransform = _advancedSubtitlePresetConfiguration.TextTransform switch
             {
                 SubtitleTextTransform.Uppercase => "Uppercase",
@@ -1752,20 +1713,13 @@ namespace Files_Tools.Pages
         private SubtitleStylePreset CreateAdvancedSubtitleStylePresetFromConfiguration()
         {
             var isKaraokeMode = IsKaraokeAdvancedSubtitleTypeSelected();
-            var basePreset = isKaraokeMode
-                ? _advancedSubtitlePresetConfiguration.KaraokePreset switch
-                {
-                    KaraokeSubtitleBasePreset.Punch => KaraokeSubtitlePresets.CreatePunch(),
-                    KaraokeSubtitleBasePreset.Bubbly => KaraokeSubtitlePresets.CreateBubbly(),
-                    _ => KaraokeSubtitlePresets.CreateNeonKaraoke()
-                }
-                : _advancedSubtitlePresetConfiguration.StyledPreset switch
-                {
-                    StyledSubtitleBasePreset.CleanSans => StyledSubtitlePresets.CreateCleanSans(),
-                    StyledSubtitleBasePreset.CaptionBox => StyledSubtitlePresets.CreateCaptionBox(),
-                    StyledSubtitleBasePreset.BroadcastLowerThird => StyledSubtitlePresets.CreateBroadcastLowerThird(),
-                    _ => StyledSubtitlePresets.CreateSocialImpact()
-                };
+            var presetId = isKaraokeMode
+                ? _advancedSubtitlePresetConfiguration.KaraokePresetId
+                : _advancedSubtitlePresetConfiguration.StyledPresetId;
+
+            // Resolve from the catalog, falling back to the kind's default if the id is unknown.
+            var basePreset = (SubtitleStyleCatalog.Find(presetId)
+                ?? SubtitleStyleCatalog.Find(isKaraokeMode ? "NeonKaraoke" : "SocialImpact")!).Factory();
 
             return new SubtitleStylePreset
             {
@@ -1791,6 +1745,7 @@ namespace Files_Tools.Pages
                 EntryFadeMilliseconds = basePreset.EntryFadeMilliseconds,
                 ExitFadeMilliseconds = basePreset.ExitFadeMilliseconds,
                 IntroScale = basePreset.IntroScale,
+                Effects = basePreset.Effects,
                 OutlineWidth = _advancedSubtitlePresetConfiguration.OutlineWidth,
                 ShadowDepth = basePreset.ShadowDepth,
                 Alignment = basePreset.Alignment,
@@ -1800,28 +1755,8 @@ namespace Files_Tools.Pages
                 PositionX = basePreset.PositionX,
                 PositionY = basePreset.PositionY,
                 MaxLines = basePreset.MaxLines,
-                MaxCharsPerLine = basePreset.MaxCharsPerLine
-            };
-        }
-
-        private static string GetDefaultFontFamilyForPreset(int basePresetIndex, bool isKaraokeMode)
-        {
-            if (isKaraokeMode)
-            {
-                return basePresetIndex switch
-                {
-                    1 => "Arial Black",
-                    2 => "Bahnschrift",
-                    _ => "Segoe UI Semibold"
-                };
-            }
-
-            return basePresetIndex switch
-            {
-                1 => "Segoe UI",
-                2 => "Arial",
-                3 => "Segoe UI Semibold",
-                _ => "Impact"
+                MaxCharsPerLine = basePreset.MaxCharsPerLine,
+                MaxWordsPerChunk = basePreset.MaxWordsPerChunk
             };
         }
 

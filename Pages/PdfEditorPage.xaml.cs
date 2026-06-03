@@ -13,6 +13,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Files_Tools.Services;
 
@@ -29,11 +31,17 @@ namespace Files_Tools.Pages
         private double _currentZoom = 1.0;
         private double _naturalPageWidth;
         private double _naturalPageHeight;
+        private readonly List<string> _mergeFilePaths = new();
+        private string? _tessDataPath;
+        private bool _isTessDataDownloading;
+        private CancellationTokenSource? _tessDataDownloadCts;
+        private static readonly HttpClient _httpClient = new();
 
         public PdfEditorPage()
         {
             this.InitializeComponent();
             _pdfService = new PdfService();
+            LoadSavedTessDataPath();
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -45,6 +53,12 @@ namespace Files_Tools.Pages
             {
                 await LoadPdfFile(request.File);
             }
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            base.OnNavigatedFrom(e);
+            _tessDataDownloadCts?.Cancel();
         }
 
         private void InitializeNavigation()
@@ -271,6 +285,7 @@ namespace Files_Tools.Pages
         {
             try
             {
+                _mergeFilePaths.Clear();
                 _currentPdfFile = file;
                 _currentPdf = await PdfDocument.LoadFromFileAsync(file);
                 _currentPageIndex = 0;
@@ -300,6 +315,7 @@ namespace Files_Tools.Pages
                 }
 
                 UpdateNavigationButtons();
+                RefreshMergeFilesList();
                 ValidateInputs();
             }
             catch (Exception ex)
@@ -524,6 +540,12 @@ namespace Files_Tools.Pages
             // Validate Organization inputs
             if (OrganizationPanel.Visibility == Visibility.Visible)
             {
+                if (MergePanel.Visibility == Visibility.Visible && _mergeFilePaths.Count == 0)
+                {
+                    OrganizationValidationTextBlock.Text = "Add at least one PDF to merge with the loaded file.";
+                    isValid = false;
+                }
+
                 if (SplitPanel.Visibility == Visibility.Visible && SplitModeComboBox.SelectedIndex == 1)
                 {
                     var splitError = ValidateSplitRanges(SplitRangesTextBox.Text);
@@ -584,13 +606,28 @@ namespace Files_Tools.Pages
             }
 
             // Validate Content inputs
-            if (ContentPanel.Visibility == Visibility.Visible && MetadataPanel.Visibility == Visibility.Visible)
+            if (ContentPanel.Visibility == Visibility.Visible)
             {
-                var metadataError = ValidateMetadata();
-                if (!string.IsNullOrEmpty(metadataError))
+                if (OcrPanel.Visibility == Visibility.Visible)
                 {
-                    ContentValidationTextBlock.Text = metadataError;
-                    isValid = false;
+                    RefreshOcrDownloadPanel();
+
+                    var ocrError = ValidateOcrInputs();
+                    if (!string.IsNullOrEmpty(ocrError))
+                    {
+                        ContentValidationTextBlock.Text = ocrError;
+                        isValid = false;
+                    }
+                }
+
+                if (MetadataPanel.Visibility == Visibility.Visible)
+                {
+                    var metadataError = ValidateMetadata();
+                    if (!string.IsNullOrEmpty(metadataError))
+                    {
+                        ContentValidationTextBlock.Text = metadataError;
+                        isValid = false;
+                    }
                 }
             }
 
@@ -865,10 +902,16 @@ namespace Files_Tools.Pages
                 // Organization operations
                 if (OrganizationPanel.Visibility == Visibility.Visible)
                 {
-                    if (MergePanel.Visibility == Visibility.Visible)
+                    if (MergePanel.Visibility == Visibility.Visible && _mergeFilePaths.Count > 0)
                     {
-                        // TODO: Merge requires additional files
-                        ProcessingDetailTextBlock.Text = "Merge requires selecting multiple PDFs";
+                        ProcessingStatusTextBlock.Text = "Merging PDFs...";
+                        var allPaths = new List<string> { workingPath };
+                        allPaths.AddRange(_mergeFilePaths);
+
+                        outputPath = Path.Combine(outputDir, "merged.pdf");
+                        await _pdfService.MergeAsync(allPaths, outputPath);
+                        workingPath = outputPath;
+                        ProcessingDetailTextBlock.Text = $"Merged {allPaths.Count} PDFs";
                     }
 
                     if (SplitPanel.Visibility == Visibility.Visible && SplitModeComboBox.SelectedIndex >= 0)
@@ -1011,11 +1054,20 @@ namespace Files_Tools.Pages
                 {
                     if (OcrPanel.Visibility == Visibility.Visible && OcrLanguageComboBox.SelectedIndex >= 0)
                     {
-                        ProcessingStatusTextBlock.Text = "Running OCR...";
-                        string language = OcrLanguageComboBox.SelectedItem?.ToString() ?? "eng";
+                        ProcessingStatusTextBlock.Text = "Running OCR…";
+                        ProcessingDetailTextBlock.Text = "Rasterizing pages and recognizing text…";
 
-                        // OCR requires Tesseract data path - would need to be configured
-                        ProcessingDetailTextBlock.Text = "OCR requires Tesseract configuration";
+                        var ocrOptions = new PdfOcrOptions
+                        {
+                            TessDataPath = _tessDataPath ?? DefaultTessDataPath,
+                            Languages    = GetOcrLanguageCode(),
+                            Dpi          = 300,
+                        };
+
+                        outputPath = Path.Combine(outputDir, "ocr.pdf");
+                        await _pdfService.OcrAsync(workingPath, outputPath, ocrOptions);
+                        workingPath = outputPath;
+                        ProcessingDetailTextBlock.Text = "OCR complete";
                     }
 
                     if (MetadataPanel.Visibility == Visibility.Visible)
@@ -1060,14 +1112,348 @@ namespace Files_Tools.Pages
             }
         }
 
-        private void RepairButton_Click(object sender, RoutedEventArgs e)
+        // ── OCR helpers ──────────────────────────────────────────────────────────
+
+        private static readonly string DefaultTessDataPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "FilesTools", "tessdata");
+
+        private void LoadSavedTessDataPath()
         {
-            // TODO: Implement repair functionality
+            // 1. Prefer an explicit user choice stored across sessions.
+            var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+            if (localSettings.Values.TryGetValue("OcrTessDataPath", out var saved) &&
+                saved is string savedPath &&
+                Directory.Exists(savedPath))
+            {
+                _tessDataPath = savedPath;
+                OcrTessDataTextBox.Text = savedPath;
+                return;
+            }
+
+            // 2. Auto-detect the well-known app-local location.
+            if (Directory.Exists(DefaultTessDataPath) &&
+                Directory.GetFiles(DefaultTessDataPath, "*.traineddata").Length > 0)
+            {
+                _tessDataPath = DefaultTessDataPath;
+                OcrTessDataTextBox.Text = DefaultTessDataPath;
+            }
         }
 
-        private void AddPdfToMergeButton_Click(object sender, RoutedEventArgs e)
+        private async void BrowseTessData_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Implement adding PDFs to merge list
+            if (App.MainWindow is null) return;
+
+            var picker = new FolderPicker();
+            picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            picker.FileTypeFilter.Add("*");
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+
+            var folder = await picker.PickSingleFolderAsync();
+            if (folder is null) return;
+
+            _tessDataPath = folder.Path;
+            OcrTessDataTextBox.Text = folder.Path;
+            Windows.Storage.ApplicationData.Current.LocalSettings.Values["OcrTessDataPath"] = folder.Path;
+            ValidateInputs();
+        }
+
+        private string GetOcrLanguageCode()
+        {
+            if (OcrLanguageComboBox.SelectedItem is not ComboBoxItem item) return "eng";
+
+            return item.Content?.ToString() switch
+            {
+                "English"     => "eng",
+                "Spanish"     => "spa",
+                "French"      => "fra",
+                "German"      => "deu",
+                "Chinese"     => "chi_sim",
+                "Japanese"    => "jpn",
+                "Auto-detect" => GetAutoDetectLanguages(),
+                _             => "eng"
+            };
+        }
+
+        private string GetAutoDetectLanguages()
+        {
+            if (string.IsNullOrEmpty(_tessDataPath) || !Directory.Exists(_tessDataPath))
+                return "eng";
+
+            var codes = Directory
+                .GetFiles(_tessDataPath, "*.traineddata")
+                .Select(f => Path.GetFileNameWithoutExtension(f))
+                .Where(n => !n.Equals("osd", StringComparison.OrdinalIgnoreCase) &&
+                            !n.Equals("equ", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+
+            return codes.Length > 0 ? string.Join("+", codes) : "eng";
+        }
+
+        private string ValidateOcrInputs()
+        {
+            if (OcrLanguageComboBox.SelectedIndex < 0)
+                return "Select a language for OCR.";
+
+            var selectedContent = (OcrLanguageComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString();
+
+            if (selectedContent == "Auto-detect")
+            {
+                if (string.IsNullOrEmpty(_tessDataPath) || !Directory.Exists(_tessDataPath))
+                    return "Select a tessdata directory containing .traineddata language files.";
+
+                bool hasAny = Directory
+                    .GetFiles(_tessDataPath, "*.traineddata")
+                    .Any(f => !Path.GetFileNameWithoutExtension(f).Equals("osd", StringComparison.OrdinalIgnoreCase) &&
+                              !Path.GetFileNameWithoutExtension(f).Equals("equ", StringComparison.OrdinalIgnoreCase));
+                if (!hasAny)
+                    return "No .traineddata language files found in the tessdata directory.";
+            }
+            else
+            {
+                // Specific language — check for the pack, show inline download prompt if missing.
+                var langCode = GetOcrLanguageCode();
+                var tessDir  = !string.IsNullOrEmpty(_tessDataPath) ? _tessDataPath : DefaultTessDataPath;
+                var trainedData = Path.Combine(tessDir, langCode + ".traineddata");
+
+                if (!File.Exists(trainedData))
+                    return "Language pack not found. Click Download below to get it automatically.";
+            }
+
+            return "";
+        }
+
+        private void RefreshOcrDownloadPanel()
+        {
+            if (OcrDownloadPanel is null) return;
+
+            // Show only when a specific (non-auto) language is selected and its pack is absent.
+            bool isSpecific = IsSpecificLanguageSelected();
+            bool packMissing = isSpecific && !IsSelectedLanguagePackPresent();
+
+            OcrDownloadPanel.Visibility = (packMissing && !_isTessDataDownloading)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+
+            if (packMissing && isSpecific && DownloadTessDataButton is not null)
+            {
+                var langName = (OcrLanguageComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "language";
+                DownloadTessDataButton.Content = $"Download {langName} language pack";
+            }
+        }
+
+        private bool IsSpecificLanguageSelected()
+        {
+            var content = (OcrLanguageComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString();
+            return !string.IsNullOrEmpty(content) && content != "Auto-detect";
+        }
+
+        private bool IsSelectedLanguagePackPresent()
+        {
+            var dir = !string.IsNullOrEmpty(_tessDataPath) ? _tessDataPath : DefaultTessDataPath;
+            if (!Directory.Exists(dir)) return false;
+            return File.Exists(Path.Combine(dir, GetOcrLanguageCode() + ".traineddata"));
+        }
+
+        private const string TessDataFastBaseUrl =
+            "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/main/";
+
+        private async void DownloadTessData_Click(object sender, RoutedEventArgs e)
+        {
+            if (OcrLanguageComboBox.SelectedItem is not ComboBoxItem item) return;
+
+            var langCode = GetOcrLanguageCode();
+            var langName = item.Content?.ToString() ?? langCode;
+            var targetDir = !string.IsNullOrEmpty(_tessDataPath) ? _tessDataPath : DefaultTessDataPath;
+            var destFile  = Path.Combine(targetDir, langCode + ".traineddata");
+            var url       = TessDataFastBaseUrl + langCode + ".traineddata";
+
+            _tessDataDownloadCts?.Cancel();
+            _tessDataDownloadCts = new CancellationTokenSource();
+            var cts = _tessDataDownloadCts;
+
+            _isTessDataDownloading = true;
+            DownloadTessDataButton.IsEnabled = false;
+            OcrDownloadProgressBar.Visibility = Visibility.Visible;
+            OcrDownloadStatusTextBlock.Text = $"Downloading {langName} language pack…";
+
+            try
+            {
+                Directory.CreateDirectory(targetDir);
+
+                using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+                response.EnsureSuccessStatusCode();
+
+                var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+
+                await using var src  = await response.Content.ReadAsStreamAsync(cts.Token);
+                await using var dest = new FileStream(destFile, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true);
+
+                var buf       = new byte[81920];
+                long received = 0;
+                int  chunk;
+
+                while ((chunk = await src.ReadAsync(buf, cts.Token)) > 0)
+                {
+                    await dest.WriteAsync(buf.AsMemory(0, chunk), cts.Token);
+                    received += chunk;
+
+                    OcrDownloadStatusTextBlock.Text = totalBytes > 0
+                        ? $"Downloading… {received / 1024:N0} KB / {totalBytes / 1024:N0} KB"
+                        : $"Downloading… {received / 1024:N0} KB";
+                }
+
+                // Set tessdata path to the download dir if not already pointing there.
+                if (_tessDataPath != targetDir)
+                {
+                    _tessDataPath = targetDir;
+                    OcrTessDataTextBox.Text = targetDir;
+                    Windows.Storage.ApplicationData.Current.LocalSettings.Values["OcrTessDataPath"] = targetDir;
+                }
+
+                OcrDownloadStatusTextBlock.Text = $"{langName} language pack downloaded successfully.";
+                OcrDownloadProgressBar.Visibility = Visibility.Collapsed;
+                OcrDownloadPanel.Visibility = Visibility.Collapsed;
+            }
+            catch (OperationCanceledException)
+            {
+                try { if (File.Exists(destFile)) File.Delete(destFile); } catch { /* best-effort cleanup */ }
+            }
+            catch (Exception ex)
+            {
+                OcrDownloadStatusTextBlock.Text = $"Download failed: {ex.Message}";
+                OcrDownloadProgressBar.Visibility = Visibility.Collapsed;
+                try { if (File.Exists(destFile)) File.Delete(destFile); } catch { /* best-effort cleanup */ }
+            }
+            finally
+            {
+                _isTessDataDownloading = false;
+                if (!cts.IsCancellationRequested)
+                {
+                    DownloadTessDataButton.IsEnabled = true;
+                    ValidateInputs();
+                }
+                cts.Dispose();
+            }
+        }
+
+        private async void RepairButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentPdfFile == null || _isProcessing || App.MainWindow is null) return;
+
+            var picker = new FileSavePicker
+            {
+                SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+                SuggestedFileName = $"{Path.GetFileNameWithoutExtension(_currentPdfFile.Name)}_repaired"
+            };
+            picker.FileTypeChoices.Add("PDF document", new List<string> { ".pdf" });
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+
+            var saveFile = await picker.PickSaveFileAsync();
+            if (saveFile is null) return;
+
+            _isProcessing = true;
+            ApplyButton.IsEnabled = false;
+            RepairStatusTextBlock.Text = "Repairing…";
+
+            try
+            {
+                await _pdfService.RepairAsync(_currentPdfFile.Path, saveFile.Path);
+                RepairStatusTextBlock.Text = $"Repaired successfully → {saveFile.Name}";
+            }
+            catch (Exception ex)
+            {
+                RepairStatusTextBlock.Text = $"Repair failed: {ex.Message}";
+            }
+            finally
+            {
+                _isProcessing = false;
+                ValidateInputs();
+            }
+        }
+
+        private async void AddPdfToMergeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (App.MainWindow is null) return;
+
+            var picker = new FileOpenPicker();
+            picker.FileTypeFilter.Add(".pdf");
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+
+            var files = await picker.PickMultipleFilesAsync();
+            foreach (var file in files)
+            {
+                if (!_mergeFilePaths.Any(p => p.Equals(file.Path, StringComparison.OrdinalIgnoreCase)))
+                    _mergeFilePaths.Add(file.Path);
+            }
+
+            RefreshMergeFilesList();
+            ValidateInputs();
+        }
+
+        private void RemoveMergeFile_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is int index && index >= 0 && index < _mergeFilePaths.Count)
+            {
+                _mergeFilePaths.RemoveAt(index);
+                RefreshMergeFilesList();
+                ValidateInputs();
+            }
+        }
+
+        private void RefreshMergeFilesList()
+        {
+            MergeFilesList.Children.Clear();
+
+            if (_currentPdfFile != null)
+            {
+                var primaryRow = BuildMergeRow(_currentPdfFile.Name, _currentPdfFile.Path, isPrimary: true, index: -1);
+                MergeFilesList.Children.Add(primaryRow);
+            }
+
+            for (int i = 0; i < _mergeFilePaths.Count; i++)
+            {
+                var row = BuildMergeRow(Path.GetFileName(_mergeFilePaths[i]), _mergeFilePaths[i], isPrimary: false, index: i);
+                MergeFilesList.Children.Add(row);
+            }
+        }
+
+        private Grid BuildMergeRow(string name, string fullPath, bool isPrimary, int index)
+        {
+            var grid = new Grid { ColumnSpacing = 8 };
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            var label = new TextBlock
+            {
+                Text = name,
+                VerticalAlignment = VerticalAlignment.Center,
+                TextTrimming = TextTrimming.CharacterEllipsis,
+                Opacity = isPrimary ? 1.0 : 0.88
+            };
+            ToolTipService.SetToolTip(label, fullPath);
+            Grid.SetColumn(label, 0);
+            grid.Children.Add(label);
+
+            if (!isPrimary)
+            {
+                var removeBtn = new Button
+                {
+                    Width = 32,
+                    Height = 32,
+                    Padding = new Thickness(0),
+                    Content = new FontIcon { Glyph = "", FontSize = 12 },
+                    Tag = index
+                };
+                removeBtn.Click += RemoveMergeFile_Click;
+                Grid.SetColumn(removeBtn, 1);
+                grid.Children.Add(removeBtn);
+            }
+
+            return grid;
         }
     }
 }

@@ -35,7 +35,7 @@ namespace Files_Tools.Pages
         private const double TrimHandleTop = 6;
         private const double MinimumTrimGapMilliseconds = 100;
 
-        private static readonly string[] SupportedAudioExtensions = [".mp3", ".aac", ".m4a", ".wav", ".flac", ".opus", ".ogg", ".ac3"];
+        private static readonly string[] SupportedAudioExtensions = [".mp3", ".aac", ".m4a", ".wav", ".flac", ".opus", ".ogg"];
 
         private readonly IAudioProcessingService _audioProcessingService;
         private readonly IVideoAudioDenoiseService _videoAudioDenoiseService;

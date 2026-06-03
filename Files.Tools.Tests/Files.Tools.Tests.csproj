@@ -23,6 +23,7 @@
   <ItemGroup>
     <Compile Include="..\Services\ImageProcessingService.cs" Link="Services\ImageProcessingService.cs" />
     <Compile Include="..\Services\AudioProcessingService.cs" Link="Services\AudioProcessingService.cs" />
+    <Compile Include="..\Services\FfmpegLocator.cs" Link="Services\FfmpegLocator.cs" />
     <Compile Include="..\Services\AudioTranscriptionService.cs" Link="Services\AudioTranscriptionService.cs" />
     <Compile Include="..\Services\SubtitlesService.cs" Link="Services\SubtitlesService.cs" />
     <Compile Include="..\Services\VideoProcessingService.cs" Link="Services\VideoProcessingService.cs" />

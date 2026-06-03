@@ -498,6 +498,52 @@
                                                         <ComboBoxItem Content="Japanese" />
                                                         <ComboBoxItem x:Uid="PdfPage_OcrAutoDetect" Content="Auto-detect" />
                                                     </ComboBox>
+
+                                                    <StackPanel Spacing="4">
+                                                        <TextBlock x:Uid="PdfPage_OcrTessDataLabel" FontSize="12" Opacity="0.72" Text="Tessdata directory" />
+                                                        <Grid ColumnSpacing="8">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBox
+                                                                x:Name="OcrTessDataTextBox"
+                                                                IsReadOnly="True"
+                                                                PlaceholderText="Not set — click Browse"
+                                                                VerticalAlignment="Center" />
+                                                            <Button
+                                                                x:Name="BrowseTessDataButton"
+                                                                x:Uid="PdfPage_OcrBrowse"
+                                                                Grid.Column="1"
+                                                                Content="Browse"
+                                                                Click="BrowseTessData_Click" />
+                                                        </Grid>
+                                                        <TextBlock
+                                                            x:Uid="PdfPage_OcrTessDataHint"
+                                                            FontSize="12"
+                                                            Opacity="0.72"
+                                                            Text="Folder with .traineddata language packs. Auto-detected from %LOCALAPPDATA%\FilesTools\tessdata if present."
+                                                            TextWrapping="Wrap" />
+                                                    </StackPanel>
+
+                                                    <!--  Appears when the chosen language pack is absent; hides on success  -->
+                                                    <StackPanel x:Name="OcrDownloadPanel" Visibility="Collapsed" Spacing="6">
+                                                        <Button
+                                                            x:Name="DownloadTessDataButton"
+                                                            HorizontalAlignment="Left"
+                                                            Content="Download language pack"
+                                                            Click="DownloadTessData_Click" />
+                                                        <ProgressBar
+                                                            x:Name="OcrDownloadProgressBar"
+                                                            Height="4"
+                                                            IsIndeterminate="True"
+                                                            Visibility="Collapsed" />
+                                                        <TextBlock
+                                                            x:Name="OcrDownloadStatusTextBlock"
+                                                            FontSize="12"
+                                                            Opacity="0.76"
+                                                            TextWrapping="Wrap" />
+                                                    </StackPanel>
                                                 </StackPanel>
                                             </Border>
                                         </StackPanel>

@@ -303,6 +303,15 @@
   <data name="PdfPage_OcrHint.Text" xml:space="preserve"><value>Сделайте отсканированные PDF доступными для поиска путём распознавания текста.</value></data>
   <data name="PdfPage_OcrLanguage.Header" xml:space="preserve"><value>Язык</value></data>
   <data name="PdfPage_OcrAutoDetect.Content" xml:space="preserve"><value>Автоопределение</value></data>
+  <data name="PdfPage_OcrTessDataLabel.Text" xml:space="preserve">
+    <value>Каталог Tessdata</value>
+  </data>
+  <data name="PdfPage_OcrBrowse.Content" xml:space="preserve">
+    <value>Обзор</value>
+  </data>
+  <data name="PdfPage_OcrTessDataHint.Text" xml:space="preserve">
+    <value>Папка с языковыми пакетами .traineddata. Автоматически обнаруживается по пути %LOCALAPPDATA%\FilesTools\tessdata, если присутствует.</value>
+  </data>
   <data name="PdfPage_Metadata.Text" xml:space="preserve"><value>Метаданные</value></data>
   <data name="PdfPage_MetadataTitle.Header" xml:space="preserve"><value>Заголовок</value></data>
   <data name="PdfPage_MetadataTitle.PlaceholderText" xml:space="preserve"><value>Заголовок документа</value></data>

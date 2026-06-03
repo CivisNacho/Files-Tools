@@ -24,7 +24,14 @@ public sealed class TranscriptionDraft
 /// <summary>
 /// Single editable transcription segment from Whisper.
 /// </summary>
-public sealed record TranscriptionSegment(int Id, TimeSpan Start, TimeSpan End, string Text);
+public sealed record TranscriptionSegment(int Id, TimeSpan Start, TimeSpan End, string Text)
+{
+    /// <summary>
+    /// Real word-level timings carried from transcription, when available. Used to drive
+    /// accurate karaoke highlighting; ignored once the segment text is edited.
+    /// </summary>
+    public IReadOnlyList<AudioTranscriptionWord>? Words { get; init; }
+}
 
 /// <summary>
 /// User-authored text corrections to apply to a transcription segment.
@@ -48,6 +55,12 @@ public sealed class SubtitleDraft
     public SubtitlePostprocessingOptions Options { get; }
 
     public IReadOnlyList<SubtitleValidationIssue> Issues { get; }
+
+    /// <summary>
+    /// Real word-level timings from the source transcription, preserved so karaoke rendering
+    /// can map each cue back to accurate per-word timing. Null when no word timing is available.
+    /// </summary>
+    public IReadOnlyList<AudioTranscriptionWord>? SourceWords { get; init; }
 }
 
 /// <summary>
@@ -192,6 +205,13 @@ public sealed class SubtitleStylePreset
 
     public double IntroScale { get; init; } = 1d;
 
+    /// <summary>
+    /// Composable animation effects. When set, these drive rendering directly; when null the
+    /// renderer derives an equivalent effect list from <see cref="PresentationAnimation"/> and the
+    /// fade/scale fields, so existing presets keep working unchanged.
+    /// </summary>
+    public IReadOnlyList<SubtitleEffect>? Effects { get; init; }
+
     public double OutlineWidth { get; init; } = 5;
 
     public double ShadowDepth { get; init; }
@@ -211,6 +231,13 @@ public sealed class SubtitleStylePreset
     public int MaxLines { get; init; } = 2;
 
     public int MaxCharsPerLine { get; init; } = 28;
+
+    /// <summary>
+    /// When set, karaoke rendering shows at most this many words on screen at once (the
+    /// autosubtitles-style "chunked" look) and emits one dialogue event per word so the active
+    /// word can be emphasised individually. Null keeps the classic full-line karaoke rendering.
+    /// </summary>
+    public int? MaxWordsPerChunk { get; init; }
 }
 
 /// <summary>
@@ -222,6 +249,79 @@ public enum SubtitlePresentationAnimation
     Fade,
     Pop,
     FadePop,
+    DropIn
+}
+
+/// <summary>
+/// A single composable subtitle animation effect. New visual styles are expressed as a list of
+/// these, so adding a look means describing effects rather than editing the renderer.
+/// </summary>
+public enum SubtitleEffectKind
+{
+    /// <summary>Fade the line in over <see cref="SubtitleEffect.DurationMs"/>.</summary>
+    EntryFade,
+
+    /// <summary>Fade the line out over <see cref="SubtitleEffect.DurationMs"/>.</summary>
+    ExitFade,
+
+    /// <summary>Scale the whole line down to 100% from <see cref="SubtitleEffect.Scale"/> on entry.</summary>
+    EntryPop,
+
+    /// <summary>Karaoke fill: each word sweeps from base to highlight colour (<c>\kf</c>).</summary>
+    KaraokeColorSweep,
+
+    /// <summary>Karaoke fill: each word switches to the highlight colour instantly (<c>\k</c>).</summary>
+    KaraokeColorInstant,
+
+    /// <summary>Karaoke fill: words appear one by one from transparent (drop-in).</summary>
+    DropIn,
+
+    /// <summary>
+    /// Chunked karaoke: the active word scales from <see cref="SubtitleEffect.Scale"/> down to 100%
+    /// as it becomes active. Rendered as one dialogue event per word.
+    /// </summary>
+    ActiveWordPop
+}
+
+/// <summary>
+/// A composable animation effect with its parameters. Unused parameters keep their defaults.
+/// </summary>
+public sealed record SubtitleEffect(SubtitleEffectKind Kind)
+{
+    /// <summary>Duration in milliseconds, used by fade effects.</summary>
+    public int DurationMs { get; init; }
+
+    /// <summary>Starting scale factor (e.g. 1.12 = 112%), used by pop effects.</summary>
+    public double Scale { get; init; } = 1d;
+}
+
+/// <summary>
+/// Convenience factories for <see cref="SubtitleEffect"/> values.
+/// </summary>
+public static class SubtitleEffects
+{
+    public static SubtitleEffect EntryFade(int durationMs) => new(SubtitleEffectKind.EntryFade) { DurationMs = durationMs };
+
+    public static SubtitleEffect ExitFade(int durationMs) => new(SubtitleEffectKind.ExitFade) { DurationMs = durationMs };
+
+    public static SubtitleEffect EntryPop(double scale) => new(SubtitleEffectKind.EntryPop) { Scale = scale };
+
+    public static SubtitleEffect KaraokeColorSweep() => new(SubtitleEffectKind.KaraokeColorSweep);
+
+    public static SubtitleEffect KaraokeColorInstant() => new(SubtitleEffectKind.KaraokeColorInstant);
+
+    public static SubtitleEffect DropIn() => new(SubtitleEffectKind.DropIn);
+
+    public static SubtitleEffect ActiveWordPop(double scale) => new(SubtitleEffectKind.ActiveWordPop) { Scale = scale };
+}
+
+/// <summary>
+/// Karaoke fill behaviour resolved from a preset's effects.
+/// </summary>
+internal enum KaraokeFill
+{
+    Sweep,
+    Instant,
     DropIn
 }
 
@@ -251,7 +351,7 @@ public static class StyledSubtitlePresets
             ScaledBorderAndShadow = true,
             PrimaryFontFamily = "Impact",
             FontFamilyFallbacks = ["Impact", "Anton", "Bebas Neue", "Arial Black"],
-            FontSize = 72,
+            FontSize = 86,
             Bold = true,
             Italic = false,
             TextTransform = SubtitleTextTransform.Uppercase,
@@ -262,15 +362,15 @@ public static class StyledSubtitlePresets
             PresentationAnimation = SubtitlePresentationAnimation.FadePop,
             EntryFadeMilliseconds = 120,
             ExitFadeMilliseconds = 120,
-            IntroScale = 1.08d,
-            OutlineWidth = 6,
-            ShadowDepth = 1.5,
+            IntroScale = 1.12d,
+            OutlineWidth = 8,
+            ShadowDepth = 2,
             Alignment = SubtitleVisualAlignment.BottomCenter,
-            MarginLeft = 80,
-            MarginRight = 80,
-            MarginVertical = 90,
+            MarginLeft = 100,
+            MarginRight = 100,
+            MarginVertical = 120,
             MaxLines = 2,
-            MaxCharsPerLine = 28
+            MaxCharsPerLine = 26
         };
     }
 
@@ -287,7 +387,7 @@ public static class StyledSubtitlePresets
             ScaledBorderAndShadow = true,
             PrimaryFontFamily = "Segoe UI",
             FontFamilyFallbacks = ["Segoe UI", "Arial", "Helvetica", "Noto Sans"],
-            FontSize = 62,
+            FontSize = 66,
             Bold = true,
             Italic = false,
             TextTransform = SubtitleTextTransform.None,
@@ -299,14 +399,14 @@ public static class StyledSubtitlePresets
             EntryFadeMilliseconds = 100,
             ExitFadeMilliseconds = 100,
             IntroScale = 1d,
-            OutlineWidth = 4,
+            OutlineWidth = 5,
             ShadowDepth = 1,
             Alignment = SubtitleVisualAlignment.BottomCenter,
             MarginLeft = 80,
             MarginRight = 80,
-            MarginVertical = 96,
+            MarginVertical = 110,
             MaxLines = 2,
-            MaxCharsPerLine = 34
+            MaxCharsPerLine = 32
         };
     }
 
@@ -323,7 +423,7 @@ public static class StyledSubtitlePresets
             ScaledBorderAndShadow = true,
             PrimaryFontFamily = "Arial",
             FontFamilyFallbacks = ["Arial", "Helvetica", "Segoe UI"],
-            FontSize = 58,
+            FontSize = 62,
             Bold = true,
             Italic = false,
             TextTransform = SubtitleTextTransform.None,
@@ -335,14 +435,14 @@ public static class StyledSubtitlePresets
             EntryFadeMilliseconds = 140,
             ExitFadeMilliseconds = 140,
             IntroScale = 1d,
-            OutlineWidth = 2.5,
+            OutlineWidth = 3,
             ShadowDepth = 0.5,
             Alignment = SubtitleVisualAlignment.BottomCenter,
             MarginLeft = 88,
             MarginRight = 88,
-            MarginVertical = 114,
+            MarginVertical = 110,
             MaxLines = 2,
-            MaxCharsPerLine = 34
+            MaxCharsPerLine = 32
         };
     }
 
@@ -359,7 +459,7 @@ public static class StyledSubtitlePresets
             ScaledBorderAndShadow = true,
             PrimaryFontFamily = "Segoe UI Semibold",
             FontFamilyFallbacks = ["Segoe UI Semibold", "Segoe UI", "Arial"],
-            FontSize = 52,
+            FontSize = 56,
             Bold = true,
             Italic = false,
             TextTransform = SubtitleTextTransform.Uppercase,
@@ -371,12 +471,12 @@ public static class StyledSubtitlePresets
             EntryFadeMilliseconds = 100,
             ExitFadeMilliseconds = 120,
             IntroScale = 1.1d,
-            OutlineWidth = 3.5,
+            OutlineWidth = 4,
             ShadowDepth = 1,
             Alignment = SubtitleVisualAlignment.BottomLeft,
             MarginLeft = 96,
             MarginRight = 96,
-            MarginVertical = 82,
+            MarginVertical = 96,
             MaxLines = 2,
             MaxCharsPerLine = 30
         };
@@ -417,15 +517,15 @@ public static class KaraokeSubtitlePresets
             PresentationAnimation = SubtitlePresentationAnimation.FadePop,
             EntryFadeMilliseconds = 80,
             ExitFadeMilliseconds = 80,
-            IntroScale = 1.12d,
-            OutlineWidth = 7,
-            ShadowDepth = 1,
+            IntroScale = 1.15d,
+            OutlineWidth = 9,
+            ShadowDepth = 1.5,
             Alignment = SubtitleVisualAlignment.BottomCenter,
-            MarginLeft = 80,
-            MarginRight = 80,
-            MarginVertical = 92,
+            MarginLeft = 100,
+            MarginRight = 100,
+            MarginVertical = 120,
             MaxLines = 2,
-            MaxCharsPerLine = 30
+            MaxCharsPerLine = 26
         };
     }
 
@@ -442,7 +542,7 @@ public static SubtitleStylePreset CreatePunch()
             ScaledBorderAndShadow = true,
             PrimaryFontFamily = "Arial Black",
             FontFamilyFallbacks = ["Arial Black", "Impact", "Arial"],
-            FontSize = 72,
+            FontSize = 84,
             Bold = true,
             Italic = false,
             TextTransform = SubtitleTextTransform.None,
@@ -452,17 +552,24 @@ public static SubtitleStylePreset CreatePunch()
             KaraokeHighlightColor = new SubtitleColor(0, 255, 130, 0),
             UseBackgroundBox = false,
             PresentationAnimation = SubtitlePresentationAnimation.None,
+            // Add a per-cue entry pop while keeping the instant per-word fill (\k, not \kf):
+            // KaraokeColorInstant pins the fill mode, EntryPop supplies the scale punch.
+            Effects =
+            [
+                SubtitleEffects.EntryPop(1.12d),
+                SubtitleEffects.KaraokeColorInstant()
+            ],
             EntryFadeMilliseconds = 0,
             ExitFadeMilliseconds = 0,
             IntroScale = 1d,
             OutlineWidth = 12,
             ShadowDepth = 2,
             Alignment = SubtitleVisualAlignment.BottomCenter,
-            MarginLeft = 80,
-            MarginRight = 80,
-            MarginVertical = 92,
+            MarginLeft = 100,
+            MarginRight = 100,
+            MarginVertical = 120,
             MaxLines = 2,
-            MaxCharsPerLine = 28
+            MaxCharsPerLine = 26
         };
     }
 
@@ -481,7 +588,7 @@ public static SubtitleStylePreset CreatePunch()
             ScaledBorderAndShadow = true,
             PrimaryFontFamily = "Bahnschrift",
             FontFamilyFallbacks = ["Bahnschrift", "Segoe UI", "Arial"],
-            FontSize = 68,
+            FontSize = 74,
             Bold = true,
             Italic = false,
             TextTransform = SubtitleTextTransform.Lowercase,
@@ -491,18 +598,124 @@ public static SubtitleStylePreset CreatePunch()
             KaraokeHighlightColor = new SubtitleColor(0, 255, 230, 80),
             UseBackgroundBox = false,
             PresentationAnimation = SubtitlePresentationAnimation.DropIn,
-            EntryFadeMilliseconds = 400,
+            EntryFadeMilliseconds = 200,
             ExitFadeMilliseconds = 100,
             IntroScale = 1d,
             OutlineWidth = 12,
             ShadowDepth = 0,
             Alignment = SubtitleVisualAlignment.BottomLeft,
-            MarginLeft = 80,
-            MarginRight = 80,
-            MarginVertical = 92,
+            MarginLeft = 96,
+            MarginRight = 96,
+            MarginVertical = 110,
             MaxLines = 2,
-            MaxCharsPerLine = 30
+            MaxCharsPerLine = 28
         };
+    }
+
+    public static SubtitleStylePreset WordPop => CreateWordPop();
+
+    /// <summary>
+    /// Autosubtitles-style chunked karaoke: a few big, centered words on screen at a time, with the
+    /// active word popping in a vivid highlight colour. Rendered one event per word.
+    /// </summary>
+    public static SubtitleStylePreset CreateWordPop()
+    {
+        return new SubtitleStylePreset
+        {
+            Name = "WordPop",
+            AssStyleName = "WordPop",
+            ScriptTitle = "Karaoke subtitles",
+            PlayResX = 1920,
+            PlayResY = 1080,
+            WrapStyle = 2,
+            ScaledBorderAndShadow = true,
+            PrimaryFontFamily = "Montserrat",
+            FontFamilyFallbacks = ["Montserrat", "Arial Black", "Segoe UI Black", "Arial"],
+            FontSize = 92,
+            Bold = true,
+            Italic = false,
+            TextTransform = SubtitleTextTransform.Uppercase,
+            FillColor = SubtitleColor.White,
+            OutlineColor = SubtitleColor.Black,
+            ShadowColor = new SubtitleColor(160, 0, 0, 0),
+            KaraokeHighlightColor = new SubtitleColor(0, 255, 216, 0),
+            UseBackgroundBox = false,
+            PresentationAnimation = SubtitlePresentationAnimation.None,
+            Effects =
+            [
+                SubtitleEffects.EntryFade(60),
+                SubtitleEffects.ActiveWordPop(1.18d)
+            ],
+            EntryFadeMilliseconds = 60,
+            ExitFadeMilliseconds = 0,
+            IntroScale = 1d,
+            OutlineWidth = 8,
+            ShadowDepth = 1.5,
+            Alignment = SubtitleVisualAlignment.Center,
+            MarginLeft = 120,
+            MarginRight = 120,
+            MarginVertical = 0,
+            MaxLines = 1,
+            MaxCharsPerLine = 22,
+            MaxWordsPerChunk = 3
+        };
+    }
+}
+
+/// <summary>
+/// Whether a catalog entry produces styled (whole-line) or karaoke (per-word) subtitles.
+/// </summary>
+public enum SubtitleStyleKind
+{
+    Styled,
+    Karaoke
+}
+
+/// <summary>
+/// A single selectable subtitle style, with the metadata a UI needs to list it and a factory
+/// that builds its <see cref="SubtitleStylePreset"/>.
+/// </summary>
+public sealed record SubtitleStyleCatalogEntry(string Id, string DisplayName, SubtitleStyleKind Kind, Func<SubtitleStylePreset> Factory);
+
+/// <summary>
+/// Single registry of every built-in subtitle style. Adding a new look means adding one entry
+/// here (and a factory) — the renderer needs no changes. A UI can enumerate this to populate a
+/// picker instead of hard-coding names.
+/// </summary>
+public static class SubtitleStyleCatalog
+{
+    private static readonly SubtitleStyleCatalogEntry[] EntriesInternal =
+    [
+        new("SocialImpact", "Social Impact", SubtitleStyleKind.Styled, StyledSubtitlePresets.CreateSocialImpact),
+        new("CleanSans", "Clean Sans", SubtitleStyleKind.Styled, StyledSubtitlePresets.CreateCleanSans),
+        new("CaptionBox", "Caption Box", SubtitleStyleKind.Styled, StyledSubtitlePresets.CreateCaptionBox),
+        new("BroadcastLowerThird", "Broadcast Lower Third", SubtitleStyleKind.Styled, StyledSubtitlePresets.CreateBroadcastLowerThird),
+        new("NeonKaraoke", "Neon Karaoke", SubtitleStyleKind.Karaoke, KaraokeSubtitlePresets.CreateNeonKaraoke),
+        new("Punch", "Punch", SubtitleStyleKind.Karaoke, KaraokeSubtitlePresets.CreatePunch),
+        new("Bubbly", "Bubbly", SubtitleStyleKind.Karaoke, KaraokeSubtitlePresets.CreateBubbly),
+        new("WordPop", "Word Pop", SubtitleStyleKind.Karaoke, KaraokeSubtitlePresets.CreateWordPop)
+    ];
+
+    /// <summary>All registered styles, in display order.</summary>
+    public static IReadOnlyList<SubtitleStyleCatalogEntry> Entries => EntriesInternal;
+
+    /// <summary>Registered styles of a given kind, in display order.</summary>
+    public static IEnumerable<SubtitleStyleCatalogEntry> ByKind(SubtitleStyleKind kind)
+    {
+        return EntriesInternal.Where(entry => entry.Kind == kind);
+    }
+
+    /// <summary>Finds an entry by id, or null when it is not registered.</summary>
+    public static SubtitleStyleCatalogEntry? Find(string id)
+    {
+        return EntriesInternal.FirstOrDefault(entry => string.Equals(entry.Id, id, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>Builds a preset by id, throwing when the id is unknown.</summary>
+    public static SubtitleStylePreset Create(string id)
+    {
+        var entry = Find(id) ?? throw new ArgumentException($"Unknown subtitle style id '{id}'.", nameof(id));
+        return entry.Factory();
     }
 }
 
@@ -714,7 +927,10 @@ public sealed class SubtitlesService : ISubtitlesService
             .Select((segment, index) => (segment.Id, index))
             .ToDictionary(item => item.Id, item => item.index);
         var segments = draft.Segments
-            .Select(segment => new AudioTranscriptionSegment(segment.Start, segment.End, segment.Text))
+            .Select(segment => new AudioTranscriptionSegment(segment.Start, segment.End, segment.Text)
+            {
+                Words = WordsMatchText(segment.Words, segment.Text) ? segment.Words : null
+            })
             .ToList();
 
         foreach (var correction in corrections)
@@ -727,7 +943,9 @@ public sealed class SubtitlesService : ISubtitlesService
             if (correction.Text is not null)
             {
                 var existing = segments[segmentIndex];
-                segments[segmentIndex] = existing with { Text = correction.Text };
+                // The edited text no longer matches the original word timing, so drop it and
+                // let the pipeline synthesize word timing from the cue envelope instead.
+                segments[segmentIndex] = existing with { Text = correction.Text, Words = null };
             }
         }
 
@@ -777,7 +995,10 @@ public sealed class SubtitlesService : ISubtitlesService
         ReindexCues(cues);
 
         var issues = ValidateCues(cues, effectiveOptions);
-        return new SubtitleDraft(ToImmutableCues(cues), effectiveOptions, issues);
+        return new SubtitleDraft(ToImmutableCues(cues), effectiveOptions, issues)
+        {
+            SourceWords = draft.SourceWords
+        };
     }
 
     /// <inheritdoc />
@@ -814,7 +1035,10 @@ public sealed class SubtitlesService : ISubtitlesService
 
         var effectiveOptions = NormalizeOptions(options);
         var segments = draft.Segments
-            .Select(segment => new AudioTranscriptionSegment(segment.Start, segment.End, segment.Text))
+            .Select(segment => new AudioTranscriptionSegment(segment.Start, segment.End, segment.Text)
+            {
+                Words = segment.Words
+            })
             .ToArray();
         var words = BuildWordsFromSegments(segments);
         var cues = BuildKaraokeCues(words, effectiveOptions);
@@ -826,7 +1050,7 @@ public sealed class SubtitlesService : ISubtitlesService
     {
         ArgumentNullException.ThrowIfNull(draft);
 
-        var cues = BuildKaraokeCuesFromSubtitleDraft(draft.Cues);
+        var cues = BuildKaraokeCuesFromSubtitleDraft(draft.Cues, draft.SourceWords);
         return BuildKaraokeAss(cues, CreateDefaultKaraokePreset(preset, placement));
     }
 
@@ -942,7 +1166,8 @@ public sealed class SubtitlesService : ISubtitlesService
             }
         }
 
-        var isDropIn = preset.PresentationAnimation == SubtitlePresentationAnimation.DropIn;
+        var isDropIn = preset.Fill == KaraokeFill.DropIn;
+        var isChunked = preset is { MaxWordsPerChunk: > 0 } && !isDropIn;
 
         var builder = new StringBuilder();
         builder.AppendLine("[Script Info]");
@@ -960,7 +1185,7 @@ public sealed class SubtitlesService : ISubtitlesService
             .Append(preset.StyleName).Append(',')
             .Append(preset.FontFamily).Append(',')
             .Append(preset.FontSize.ToString(System.Globalization.CultureInfo.InvariantCulture)).Append(',')
-            .Append(ToAssColor(isDropIn ? preset.BaseColor : preset.HighlightColor)).Append(',')
+            .Append(ToAssColor(isDropIn || isChunked ? preset.BaseColor : preset.HighlightColor)).Append(',')
             .Append(isDropIn ? "&HFF000000&" : ToAssColor(preset.BaseColor)).Append(',')
             .Append(ToAssColor(preset.OutlineColor)).Append(',')
             .Append(ToAssColor(preset.ShadowColor)).Append(',')
@@ -989,6 +1214,10 @@ public sealed class SubtitlesService : ISubtitlesService
             {
                 RenderDropInKaraokeEvents(builder, cue, preset);
             }
+            else if (isChunked)
+            {
+                RenderChunkedKaraokeEvents(builder, cue, preset);
+            }
             else
             {
                 builder.AppendLine(BuildAssDialogueLine(0, cue.Start, cue.End, preset.StyleName, BuildAssCueOverrides(preset, cue.Start, cue.End) + RenderKaraokeCueText(cue, preset)));
@@ -1012,28 +1241,28 @@ public sealed class SubtitlesService : ISubtitlesService
         return cues;
     }
 
-    private static IReadOnlyList<KaraokeCue> BuildKaraokeCuesFromSubtitleDraft(IReadOnlyList<SubtitleCue> cues)
+    private static IReadOnlyList<KaraokeCue> BuildKaraokeCuesFromSubtitleDraft(IReadOnlyList<SubtitleCue> cues, IReadOnlyList<AudioTranscriptionWord>? sourceWords)
     {
         var karaokeCues = new List<KaraokeCue>();
         foreach (var cue in cues.OrderBy(cue => cue.Start).ThenBy(cue => cue.Id))
         {
-            var words = BuildCueWordsFromSubtitleCue(cue);
+            var words = BuildCueWordsFromSubtitleCue(cue, sourceWords);
             if (words.Count == 0)
             {
                 continue;
             }
 
-            karaokeCues.Add(new KaraokeCue(
-                karaokeCues.Count + 1,
-                words[0].Start,
-                Max(words[^1].End, words[0].Start + MinimumPositiveDuration),
-                words));
+            // The reviewed cue boundaries are authoritative: the line is shown for the full
+            // [Start, End] window while words highlight at their own (real) timing inside it.
+            var cueStart = cue.Start < TimeSpan.Zero ? TimeSpan.Zero : cue.Start;
+            var cueEnd = cue.End > cueStart ? cue.End : cueStart + MinimumPositiveDuration;
+            karaokeCues.Add(new KaraokeCue(karaokeCues.Count + 1, cueStart, cueEnd, words));
         }
 
         return karaokeCues;
     }
 
-    private static List<KaraokeCueWord> BuildCueWordsFromSubtitleCue(SubtitleCue cue)
+    private static List<KaraokeCueWord> BuildCueWordsFromSubtitleCue(SubtitleCue cue, IReadOnlyList<AudioTranscriptionWord>? sourceWords)
     {
         var normalizedText = cue.Text.Replace("\r\n", "\n", StringComparison.Ordinal);
         var lines = normalizedText.Split('\n');
@@ -1054,6 +1283,60 @@ public sealed class SubtitlesService : ISubtitlesService
 
         var cueStart = cue.Start < TimeSpan.Zero ? TimeSpan.Zero : cue.Start;
         var cueEnd = cue.End > cueStart ? cue.End : cueStart + MinimumPositiveDuration;
+
+        // When real word timing overlaps this cue and lines up one-to-one with the cue tokens,
+        // use it directly so the karaoke highlight tracks the actually spoken word. Otherwise
+        // (no timing available, or the text was edited) fall back to weight-based distribution.
+        if (sourceWords is not null)
+        {
+            var overlapping = new List<AudioTranscriptionWord>();
+            foreach (var word in sourceWords)
+            {
+                if (word.Start < cueEnd && word.End > cueStart)
+                {
+                    overlapping.Add(word);
+                }
+            }
+
+            if (overlapping.Count == weightedTokens.Count)
+            {
+                var realOutput = new List<KaraokeCueWord>(weightedTokens.Count);
+                var cursor = cueStart;
+                for (var index = 0; index < weightedTokens.Count; index++)
+                {
+                    var start = overlapping[index].Start;
+                    if (start < cursor)
+                    {
+                        start = cursor;
+                    }
+
+                    if (start > cueEnd)
+                    {
+                        start = cueEnd;
+                    }
+
+                    var end = overlapping[index].End;
+                    if (end <= start)
+                    {
+                        end = start + MinimumPositiveDuration;
+                    }
+
+                    if (end > cueEnd && cueEnd > start)
+                    {
+                        end = cueEnd;
+                    }
+
+                    realOutput.Add(new KaraokeCueWord(weightedTokens[index].Text, start, end)
+                    {
+                        BreakBefore = weightedTokens[index].BreakBefore
+                    });
+                    cursor = end;
+                }
+
+                return realOutput;
+            }
+        }
+
         var totalTicks = Math.Max(MinimumPositiveDuration.Ticks, (cueEnd - cueStart).Ticks);
         var totalWeight = Math.Max(1, weightedTokens.Sum(token => token.Weight));
         long consumedTicks = 0;
@@ -1577,10 +1860,13 @@ public sealed class SubtitlesService : ISubtitlesService
             PositionX = basePreset.PositionX,
             PositionY = basePreset.PositionY,
             UseBackgroundBox = basePreset.UseBackgroundBox,
-            PresentationAnimation = basePreset.PresentationAnimation,
-            EntryFadeMilliseconds = basePreset.EntryFadeMilliseconds,
+            LineEffects = ResolveLineEffects(basePreset),
+            Fill = ResolveKaraokeFill(basePreset),
             ExitFadeMilliseconds = basePreset.ExitFadeMilliseconds,
-            IntroScale = basePreset.IntroScale,
+            EntryFadeMilliseconds = basePreset.EntryFadeMilliseconds,
+            MaxWordsPerChunk = basePreset.MaxWordsPerChunk,
+            ActiveWordScale = ResolveActiveWordScale(basePreset),
+            MaxCharsPerLine = basePreset.MaxCharsPerLine,
             TextTransform = basePreset.TextTransform,
             BaseColor = basePreset.FillColor,
             HighlightColor = basePreset.KaraokeHighlightColor,
@@ -1594,35 +1880,196 @@ public sealed class SubtitlesService : ISubtitlesService
         return $"Dialogue: {layer},{FormatAssTimestamp(start)},{FormatAssTimestamp(end > start ? end : start + MinimumPositiveDuration)},{styleName},,0,0,0,,{text}";
     }
 
+    /// <summary>
+    /// Renders a cue in the chunked "autosubtitles" style: at most <c>MaxWordsPerChunk</c> words are on
+    /// screen at once, and each word becomes active in its own dialogue event so it can be emphasised
+    /// (highlight colour plus an optional scale pop) while the rest of the chunk stays in the base colour.
+    /// Events are contiguous and non-overlapping, so exactly one chunk is visible at any moment.
+    /// </summary>
+    private static void RenderChunkedKaraokeEvents(StringBuilder builder, KaraokeCue cue, KaraokeRenderPreset preset)
+    {
+        if (cue.Words.Count == 0)
+        {
+            return;
+        }
+
+        var chunkSize = Math.Max(1, preset.MaxWordsPerChunk ?? 1);
+        var maxChars = Math.Max(1, preset.MaxCharsPerLine);
+        var chunks = SplitWordsIntoChunks(cue.Words, chunkSize, maxChars);
+
+        var positionOverride = BuildAssPositionOverride(preset.Alignment, preset.PositionX, preset.PositionY);
+        var entryFade = Math.Clamp(preset.EntryFadeMilliseconds, 0, 5000);
+        var exitFade = Math.Clamp(preset.ExitFadeMilliseconds, 0, 5000);
+        var activeScale = preset.ActiveWordScale > 0 ? Math.Min(preset.ActiveWordScale, 1.4d) : 1d;
+        var hasPop = Math.Abs(activeScale - 1d) > 0.01d;
+        var activeScalePercent = Math.Max(1, (int)Math.Round(activeScale * 100d, MidpointRounding.AwayFromZero));
+        var highlightColor = ToAssColor(preset.HighlightColor);
+
+        for (var chunkIndex = 0; chunkIndex < chunks.Count; chunkIndex++)
+        {
+            var chunk = chunks[chunkIndex];
+
+            // The chunk is shown from the cue start (first chunk) or its first word, until the next
+            // chunk begins (or the cue end for the last chunk).
+            var chunkStart = chunkIndex == 0 ? cue.Start : Max(cue.Start, chunk[0].Start);
+            var chunkEnd = chunkIndex == chunks.Count - 1
+                ? cue.End
+                : Max(chunkStart + MinimumPositiveDuration, chunks[chunkIndex + 1][0].Start);
+            if (chunkEnd <= chunkStart)
+            {
+                chunkEnd = chunkStart + MinimumPositiveDuration;
+            }
+
+            for (var activeIndex = 0; activeIndex < chunk.Count; activeIndex++)
+            {
+                var wordStart = activeIndex == 0 ? chunkStart : Max(chunkStart, chunk[activeIndex].Start);
+                var wordEnd = activeIndex == chunk.Count - 1
+                    ? chunkEnd
+                    : Max(wordStart + MinimumPositiveDuration, chunk[activeIndex + 1].Start);
+                if (wordEnd > chunkEnd)
+                {
+                    wordEnd = chunkEnd;
+                }
+
+                if (wordEnd <= wordStart)
+                {
+                    wordEnd = Min(wordStart + MinimumPositiveDuration, chunkEnd);
+                    if (wordEnd <= wordStart)
+                    {
+                        wordEnd = wordStart + MinimumPositiveDuration;
+                    }
+                }
+
+                var line = new StringBuilder();
+
+                // Line-level tags: position always; fade only at the chunk's outer edges so the active
+                // word does not flicker as the highlight advances within a chunk.
+                var leading = new StringBuilder();
+                if (positionOverride.Length > 0)
+                {
+                    leading.Append(positionOverride);
+                }
+
+                var thisEntry = activeIndex == 0 ? entryFade : 0;
+                var thisExit = activeIndex == chunk.Count - 1 ? exitFade : 0;
+                if (thisEntry > 0 || thisExit > 0)
+                {
+                    leading.Append(FormattableString.Invariant($@"\fad({thisEntry},{thisExit})"));
+                }
+
+                if (leading.Length > 0)
+                {
+                    line.Append('{').Append(leading).Append('}');
+                }
+
+                for (var wordIndex = 0; wordIndex < chunk.Count; wordIndex++)
+                {
+                    var word = chunk[wordIndex];
+                    if (wordIndex > 0)
+                    {
+                        line.Append(word.BreakBefore ? @"\N" : " ");
+                    }
+
+                    if (wordIndex == activeIndex)
+                    {
+                        line.Append(@"{\1c").Append(highlightColor);
+                        if (hasPop)
+                        {
+                            line.Append(@"\fscx").Append(activeScalePercent)
+                                .Append(@"\fscy").Append(activeScalePercent)
+                                .Append(@"\t(0,120,\fscx100\fscy100)");
+                        }
+
+                        line.Append('}')
+                            .Append(EscapeAssText(word.Text))
+                            .Append(@"{\r}"); // reset to the style (base colour, 100% scale) for the rest
+                    }
+                    else
+                    {
+                        line.Append(EscapeAssText(word.Text));
+                    }
+                }
+
+                builder.AppendLine(BuildAssDialogueLine(0, wordStart, wordEnd, preset.StyleName, line.ToString()));
+            }
+        }
+    }
+
+    private static List<List<KaraokeCueWord>> SplitWordsIntoChunks(IReadOnlyList<KaraokeCueWord> words, int maxWords, int maxChars)
+    {
+        var chunks = new List<List<KaraokeCueWord>>();
+        var current = new List<KaraokeCueWord>();
+        var currentLength = 0;
+
+        foreach (var word in words)
+        {
+            var addition = (current.Count > 0 ? 1 : 0) + word.Text.Length;
+            if (current.Count > 0 && (current.Count >= maxWords || currentLength + addition > maxChars))
+            {
+                chunks.Add(current);
+                current = [];
+                currentLength = 0;
+                addition = word.Text.Length;
+            }
+
+            current.Add(word);
+            currentLength += addition;
+        }
+
+        if (current.Count > 0)
+        {
+            chunks.Add(current);
+        }
+
+        return chunks;
+    }
+
     private static string RenderKaraokeCueText(KaraokeCue cue, KaraokeRenderPreset preset)
     {
         var builder = new StringBuilder();
-        var useInstantFill = preset.PresentationAnimation == SubtitlePresentationAnimation.None;
+        var useInstantFill = preset.Fill == KaraokeFill.Instant;
+        AppendKaraokeSyllables(builder, cue, useInstantFill);
+        return builder.ToString();
+    }
+
+    /// <summary>
+    /// Emits the karaoke syllable run for a cue. Each word is anchored to its absolute timing
+    /// (rounded relative to the cue's centisecond line start), so per-word rounding never
+    /// accumulates into drift. Silence before the first word and between words is bridged with
+    /// empty filler syllables so highlighting never fires early.
+    /// </summary>
+    private static void AppendKaraokeSyllables(StringBuilder builder, KaraokeCue cue, bool useInstantFill)
+    {
+        var fillTag = useInstantFill ? @"\k" : @"\kf";
+
+        // The Dialogue line start is truncated to centiseconds (see FormatAssTimestamp), so the
+        // karaoke clock is measured relative to that same floored value.
+        var lineStartCs = (long)Math.Floor(cue.Start.TotalMilliseconds / 10d);
+        long emittedCs = 0;
 
         for (var index = 0; index < cue.Words.Count; index++)
         {
             var word = cue.Words[index];
-            var durationCentiseconds = Math.Max(1, (int)Math.Round((word.End - word.Start).TotalMilliseconds / 10d, MidpointRounding.AwayFromZero));
+            var wordStartCs = Math.Max(0L, (long)Math.Round(word.Start.TotalMilliseconds / 10d, MidpointRounding.AwayFromZero) - lineStartCs);
+            var wordEndCs = Math.Max(wordStartCs + 1L, (long)Math.Round(word.End.TotalMilliseconds / 10d, MidpointRounding.AwayFromZero) - lineStartCs);
+
+            if (wordStartCs > emittedCs)
+            {
+                builder.Append('{').Append(fillTag)
+                    .Append((wordStartCs - emittedCs).ToString(System.Globalization.CultureInfo.InvariantCulture))
+                    .Append('}');
+                emittedCs = wordStartCs;
+            }
+
+            var durationCs = Math.Max(1L, wordEndCs - emittedCs);
             var prefix = word.BreakBefore ? @"\N" : index > 0 ? " " : string.Empty;
-
-            if (useInstantFill)
-            {
-                builder.Append(@"{\k")
-                    .Append(durationCentiseconds.ToString(System.Globalization.CultureInfo.InvariantCulture))
-                    .Append('}');
-            }
-            else
-            {
-                builder.Append(@"{\kf")
-                    .Append(durationCentiseconds.ToString(System.Globalization.CultureInfo.InvariantCulture))
-                    .Append('}');
-            }
-
-            builder.Append(prefix)
+            builder.Append('{').Append(fillTag)
+                .Append(durationCs.ToString(System.Globalization.CultureInfo.InvariantCulture))
+                .Append('}')
+                .Append(prefix)
                 .Append(EscapeAssText(word.Text));
+            emittedCs += durationCs;
         }
-
-        return builder.ToString();
     }
 
     private static void RenderDropInKaraokeEvents(StringBuilder builder, KaraokeCue cue, KaraokeRenderPreset preset)
@@ -1630,35 +2077,25 @@ public sealed class SubtitlesService : ISubtitlesService
         // DropIn uses standard \kf karaoke tags with SecondaryColour set to fully transparent
         // in the style definition. Words gradually fill from transparent to PrimaryColour as
         // karaoke progresses, creating the "words appearing one by one" effect.
-        // Position and fade-out are handled by BuildAssCueOverrides (same as other karaoke modes).
 
         // Build position override — reuse the same logic as normal karaoke.
         var posOverride = BuildAssPositionOverride(preset.Alignment, preset.PositionX, preset.PositionY);
 
-        // Build exit fade only (no entry fade — \kf handles per-word appearance).
+        // A short entry fade softens the line's appearance as its words drop in; the exit fade
+        // carries it back out. Both are clamped, and the whole-line \fad composes with the per-word \kf.
+        var entryFade = Math.Clamp(preset.EntryFadeMilliseconds, 0, 5000);
         var exitFade = Math.Clamp(preset.ExitFadeMilliseconds, 0, 5000);
         var overrideTags = new StringBuilder();
         if (posOverride.Length > 0)
             overrideTags.Append(posOverride);
-        if (exitFade > 0)
-            overrideTags.Append(FormattableString.Invariant($@"\fad(0,{exitFade})"));
+        if (entryFade > 0 || exitFade > 0)
+            overrideTags.Append(FormattableString.Invariant($@"\fad({entryFade},{exitFade})"));
 
         var overridePrefix = overrideTags.Length > 0 ? $"{{{overrideTags}}}" : string.Empty;
 
-        // Build karaoke text with \kf tags (gradual fill per word).
+        // Build karaoke text with \kf tags (gradual fill per word), drift-free and gap-aware.
         var textBuilder = new StringBuilder();
-        for (var index = 0; index < cue.Words.Count; index++)
-        {
-            var word = cue.Words[index];
-            var durationCentiseconds = Math.Max(1, (int)Math.Round((word.End - word.Start).TotalMilliseconds / 10d, MidpointRounding.AwayFromZero));
-            var prefix = word.BreakBefore ? @"\N" : index > 0 ? " " : string.Empty;
-
-            textBuilder.Append(@"{\kf")
-                .Append(durationCentiseconds.ToString(System.Globalization.CultureInfo.InvariantCulture))
-                .Append('}');
-            textBuilder.Append(prefix);
-            textBuilder.Append(EscapeAssText(word.Text));
-        }
+        AppendKaraokeSyllables(textBuilder, cue, useInstantFill: false);
 
         builder.AppendLine(BuildAssDialogueLine(0, cue.Start, cue.End, preset.StyleName, overridePrefix + textBuilder.ToString()));
     }
@@ -1698,7 +2135,7 @@ public sealed class SubtitlesService : ISubtitlesService
             tags.Add(positionOverride);
         }
 
-        var animationOverride = BuildAssAnimationOverride(preset, start, end);
+        var animationOverride = BuildLineOverrideTags(ResolveLineEffects(preset), start, end);
         if (animationOverride.Length > 0)
         {
             tags.Add(animationOverride);
@@ -1718,7 +2155,7 @@ public sealed class SubtitlesService : ISubtitlesService
             tags.Add(positionOverride);
         }
 
-        var animationOverride = BuildAssAnimationOverride(preset.PresentationAnimation, preset.EntryFadeMilliseconds, preset.ExitFadeMilliseconds, preset.IntroScale, start, end);
+        var animationOverride = BuildLineOverrideTags(preset.LineEffects, start, end);
         if (animationOverride.Length > 0)
         {
             tags.Add(animationOverride);
@@ -1737,17 +2174,122 @@ public sealed class SubtitlesService : ISubtitlesService
         return FormattableString.Invariant($@"\an{GetAssAlignmentCode(alignment)}\pos({positionX.Value},{positionY.Value})");
     }
 
-    private static string BuildAssAnimationOverride(SubtitleStylePreset preset, TimeSpan start, TimeSpan end)
+    /// <summary>
+    /// Returns the effect list a styled preset should render with: its explicit
+    /// <see cref="SubtitleStylePreset.Effects"/> when set, otherwise an equivalent list derived
+    /// from the legacy animation fields.
+    /// </summary>
+    private static IReadOnlyList<SubtitleEffect> ResolveLineEffects(SubtitleStylePreset preset)
     {
-        return BuildAssAnimationOverride(preset.PresentationAnimation, preset.EntryFadeMilliseconds, preset.ExitFadeMilliseconds, preset.IntroScale, start, end);
+        return preset.Effects is { Count: > 0 }
+            ? preset.Effects
+            : DeriveLegacyEffects(preset.PresentationAnimation, preset.EntryFadeMilliseconds, preset.ExitFadeMilliseconds, preset.IntroScale);
     }
 
-    private static string BuildAssAnimationOverride(SubtitlePresentationAnimation presentationAnimation, int entryFadeMilliseconds, int exitFadeMilliseconds, double introScale, TimeSpan start, TimeSpan end)
+    private static IReadOnlyList<SubtitleEffect> DeriveLegacyEffects(SubtitlePresentationAnimation animation, int entryFadeMilliseconds, int exitFadeMilliseconds, double introScale)
     {
-        var builder = new StringBuilder();
+        var effects = new List<SubtitleEffect>();
+        if (entryFadeMilliseconds > 0)
+        {
+            effects.Add(SubtitleEffects.EntryFade(entryFadeMilliseconds));
+        }
 
-        var entryFade = Math.Clamp(entryFadeMilliseconds, 0, 5000);
-        var exitFade = Math.Clamp(exitFadeMilliseconds, 0, 5000);
+        if (exitFadeMilliseconds > 0)
+        {
+            effects.Add(SubtitleEffects.ExitFade(exitFadeMilliseconds));
+        }
+
+        switch (animation)
+        {
+            case SubtitlePresentationAnimation.Pop:
+            case SubtitlePresentationAnimation.FadePop:
+                effects.Add(SubtitleEffects.EntryPop(introScale));
+                break;
+            case SubtitlePresentationAnimation.DropIn:
+                effects.Add(SubtitleEffects.DropIn());
+                break;
+        }
+
+        return effects;
+    }
+
+    /// <summary>
+    /// Resolves the karaoke fill behaviour from a preset's effects, falling back to the legacy
+    /// presentation animation when no explicit fill effect is present.
+    /// </summary>
+    private static KaraokeFill ResolveKaraokeFill(SubtitleStylePreset preset)
+    {
+        if (preset.Effects is { Count: > 0 } effects)
+        {
+            foreach (var effect in effects)
+            {
+                switch (effect.Kind)
+                {
+                    case SubtitleEffectKind.DropIn:
+                        return KaraokeFill.DropIn;
+                    case SubtitleEffectKind.KaraokeColorInstant:
+                        return KaraokeFill.Instant;
+                    case SubtitleEffectKind.KaraokeColorSweep:
+                        return KaraokeFill.Sweep;
+                }
+            }
+        }
+
+        return preset.PresentationAnimation switch
+        {
+            SubtitlePresentationAnimation.DropIn => KaraokeFill.DropIn,
+            SubtitlePresentationAnimation.None => KaraokeFill.Instant,
+            _ => KaraokeFill.Sweep
+        };
+    }
+
+    /// <summary>
+    /// Resolves the active-word entry scale (for chunked karaoke) from an ActiveWordPop effect,
+    /// or 1 when there is none.
+    /// </summary>
+    private static double ResolveActiveWordScale(SubtitleStylePreset preset)
+    {
+        if (preset.Effects is { Count: > 0 } effects)
+        {
+            foreach (var effect in effects)
+            {
+                if (effect.Kind == SubtitleEffectKind.ActiveWordPop)
+                {
+                    return effect.Scale > 0 ? Math.Min(effect.Scale, 1.4d) : 1d;
+                }
+            }
+        }
+
+        return 1d;
+    }
+
+    /// <summary>
+    /// Compiles a list of effects into the line-level ASS override tags (fade and entry pop).
+    /// This is the single place effects become ASS, so new looks need no renderer changes.
+    /// </summary>
+    private static string BuildLineOverrideTags(IReadOnlyList<SubtitleEffect> effects, TimeSpan start, TimeSpan end)
+    {
+        var entryFade = 0;
+        var exitFade = 0;
+        double? popScale = null;
+
+        foreach (var effect in effects)
+        {
+            switch (effect.Kind)
+            {
+                case SubtitleEffectKind.EntryFade:
+                    entryFade = Math.Max(entryFade, Math.Clamp(effect.DurationMs, 0, 5000));
+                    break;
+                case SubtitleEffectKind.ExitFade:
+                    exitFade = Math.Max(exitFade, Math.Clamp(effect.DurationMs, 0, 5000));
+                    break;
+                case SubtitleEffectKind.EntryPop:
+                    popScale = effect.Scale;
+                    break;
+            }
+        }
+
+        var builder = new StringBuilder();
         if (entryFade > 0 || exitFade > 0)
         {
             builder.Append(@"\fad(")
@@ -1757,20 +2299,19 @@ public sealed class SubtitlesService : ISubtitlesService
                 .Append(')');
         }
 
-        var wantsScaleAnimation = presentationAnimation is SubtitlePresentationAnimation.Pop or SubtitlePresentationAnimation.FadePop;
-        introScale = introScale > 0 ? introScale : 1d;
-        if (wantsScaleAnimation && Math.Abs(introScale - 1d) > 0.01d)
+        if (popScale is double scale)
         {
-            var scalePercent = Math.Max(1, (int)Math.Round(introScale * 100d, MidpointRounding.AwayFromZero));
+            scale = scale > 0 ? scale : 1d;
+            // Cap the entry pop so it cannot push glyphs past the safe area and clip at the frame edge.
+            scale = Math.Min(scale, 1.25d);
+            var scalePercent = Math.Abs(scale - 1d) > 0.01d
+                ? Math.Max(1, (int)Math.Round(scale * 100d, MidpointRounding.AwayFromZero))
+                : 108;
             builder.Append(@"\fscx")
                 .Append(scalePercent)
                 .Append(@"\fscy")
                 .Append(scalePercent)
                 .Append(@"\t(0,160,\fscx100\fscy100)");
-        }
-        else if (wantsScaleAnimation)
-        {
-            builder.Append(@"\fscx108\fscy108\t(0,160,\fscx100\fscy100)");
         }
 
         if (builder.Length > 0 && start >= end)
@@ -1812,7 +2353,10 @@ public sealed class SubtitlesService : ISubtitlesService
                 continue;
             }
 
-            normalizedSegments.Add(new TranscriptionSegment(segmentId++, start, end, text));
+            normalizedSegments.Add(new TranscriptionSegment(segmentId++, start, end, text)
+            {
+                Words = segment.Words
+            });
         }
 
         return new TranscriptionDraft(normalizedSegments);
@@ -1832,7 +2376,62 @@ public sealed class SubtitlesService : ISubtitlesService
         ReindexCues(cues);
 
         var issues = ValidateCues(cues, options);
-        return new SubtitleDraft(ToImmutableCues(cues), options, issues);
+        return new SubtitleDraft(ToImmutableCues(cues), options, issues)
+        {
+            SourceWords = ExtractRealWords(segments)
+        };
+    }
+
+    /// <summary>
+    /// Flattens the real word-level timings carried by the segments, or returns null when none
+    /// are present so callers fall back to synthesizing word timing.
+    /// </summary>
+    private static IReadOnlyList<AudioTranscriptionWord>? ExtractRealWords(IReadOnlyList<AudioTranscriptionSegment> segments)
+    {
+        List<AudioTranscriptionWord>? words = null;
+        foreach (var segment in segments)
+        {
+            if (segment.Words is not { Count: > 0 } realWords)
+            {
+                continue;
+            }
+
+            words ??= [];
+            foreach (var word in realWords)
+            {
+                var text = NormalizeSegmentText(word.Text);
+                if (text.Length == 0)
+                {
+                    continue;
+                }
+
+                var start = word.Start < TimeSpan.Zero ? TimeSpan.Zero : word.Start;
+                var end = word.End > start ? word.End : start + MinimumPositiveDuration;
+                words.Add(new AudioTranscriptionWord(start, end, text));
+            }
+        }
+
+        return words is { Count: > 0 } ? words : null;
+    }
+
+    /// <summary>
+    /// Returns true when the supplied word timings reconstruct exactly to the segment text,
+    /// so it is safe to keep them for accurate highlighting.
+    /// </summary>
+    private static bool WordsMatchText(IReadOnlyList<AudioTranscriptionWord>? words, string text)
+    {
+        if (words is not { Count: > 0 })
+        {
+            return false;
+        }
+
+        var joined = JoinWords(words.Select(word => word.Text));
+        return string.Equals(joined, NormalizeSegmentText(text), StringComparison.Ordinal);
+    }
+
+    private static string JoinWords(IEnumerable<string> words)
+    {
+        return string.Join(" ", words.Select(NormalizeSegmentText).Where(text => text.Length > 0));
     }
 
     private static List<WorkingCue> BuildProvisionalCues(IReadOnlyList<AudioTranscriptionSegment> segments, SubtitlePostprocessingOptions options)
@@ -1860,6 +2459,24 @@ public sealed class SubtitlesService : ISubtitlesService
 
         foreach (var segment in segments)
         {
+            if (WordsMatchText(segment.Words, segment.Text))
+            {
+                foreach (var word in segment.Words!)
+                {
+                    var realText = NormalizeSegmentText(word.Text);
+                    if (realText.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    var realStart = word.Start < TimeSpan.Zero ? TimeSpan.Zero : word.Start;
+                    var realEnd = word.End > realStart ? word.End : realStart + MinimumPositiveDuration;
+                    output.Add(new AudioTranscriptionWord(realStart, realEnd, realText));
+                }
+
+                continue;
+            }
+
             var tokens = SplitWords(segment.Text);
             if (tokens.Count == 0)
             {
@@ -1963,6 +2580,7 @@ public sealed class SubtitlesService : ISubtitlesService
             EntryFadeMilliseconds = Math.Max(0, source.EntryFadeMilliseconds),
             ExitFadeMilliseconds = Math.Max(0, source.ExitFadeMilliseconds),
             IntroScale = source.IntroScale > 0 ? source.IntroScale : 1d,
+            Effects = source.Effects,
             OutlineWidth = Math.Max(0, source.OutlineWidth),
             ShadowDepth = Math.Max(0, source.ShadowDepth),
             Alignment = source.Alignment,
@@ -1972,7 +2590,8 @@ public sealed class SubtitlesService : ISubtitlesService
             PositionX = source.PositionX,
             PositionY = source.PositionY,
             MaxLines = Math.Max(1, source.MaxLines),
-            MaxCharsPerLine = Math.Max(1, source.MaxCharsPerLine)
+            MaxCharsPerLine = Math.Max(1, source.MaxCharsPerLine),
+            MaxWordsPerChunk = source.MaxWordsPerChunk is int chunk ? Math.Max(1, chunk) : null
         };
     }
 
@@ -2017,6 +2636,7 @@ public sealed class SubtitlesService : ISubtitlesService
             EntryFadeMilliseconds = preset.EntryFadeMilliseconds,
             ExitFadeMilliseconds = preset.ExitFadeMilliseconds,
             IntroScale = preset.IntroScale,
+            Effects = preset.Effects,
             OutlineWidth = preset.OutlineWidth,
             ShadowDepth = preset.ShadowDepth,
             Alignment = alignment,
@@ -2037,7 +2657,8 @@ public sealed class SubtitlesService : ISubtitlesService
             PositionX = Math.Clamp((int)Math.Round(normalizedX * width, MidpointRounding.AwayFromZero), 0, width),
             PositionY = Math.Clamp((int)Math.Round(normalizedY * height, MidpointRounding.AwayFromZero), 0, height),
             MaxLines = preset.MaxLines,
-            MaxCharsPerLine = preset.MaxCharsPerLine
+            MaxCharsPerLine = preset.MaxCharsPerLine,
+            MaxWordsPerChunk = preset.MaxWordsPerChunk
         };
     }
 
@@ -2978,13 +3599,21 @@ public sealed class SubtitlesService : ISubtitlesService
 
         public bool UseBackgroundBox { get; init; }
 
-        public SubtitlePresentationAnimation PresentationAnimation { get; init; }
+        public IReadOnlyList<SubtitleEffect> LineEffects { get; init; } = [];
 
-        public int EntryFadeMilliseconds { get; init; }
+        public KaraokeFill Fill { get; init; }
 
         public int ExitFadeMilliseconds { get; init; }
 
-        public double IntroScale { get; init; } = 1d;
+        public int EntryFadeMilliseconds { get; init; }
+
+        /// <summary>When set, render chunked (at most this many words on screen, one event per word).</summary>
+        public int? MaxWordsPerChunk { get; init; }
+
+        /// <summary>Active-word entry scale for chunked rendering (1 = no pop).</summary>
+        public double ActiveWordScale { get; init; } = 1d;
+
+        public int MaxCharsPerLine { get; init; } = 28;
 
         public SubtitleTextTransform TextTransform { get; init; }
 

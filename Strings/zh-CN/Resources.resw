@@ -303,6 +303,15 @@
   <data name="PdfPage_OcrHint.Text" xml:space="preserve"><value>通过识别文字使扫描版 PDF 可搜索。</value></data>
   <data name="PdfPage_OcrLanguage.Header" xml:space="preserve"><value>语言</value></data>
   <data name="PdfPage_OcrAutoDetect.Content" xml:space="preserve"><value>自动检测</value></data>
+  <data name="PdfPage_OcrTessDataLabel.Text" xml:space="preserve">
+    <value>Tessdata 目录</value>
+  </data>
+  <data name="PdfPage_OcrBrowse.Content" xml:space="preserve">
+    <value>浏览</value>
+  </data>
+  <data name="PdfPage_OcrTessDataHint.Text" xml:space="preserve">
+    <value>包含 .traineddata 语言包的文件夹。如果存在，将自动从 %LOCALAPPDATA%\FilesTools\tessdata 检测。</value>
+  </data>
   <data name="PdfPage_Metadata.Text" xml:space="preserve"><value>元数据</value></data>
   <data name="PdfPage_MetadataTitle.Header" xml:space="preserve"><value>标题</value></data>
   <data name="PdfPage_MetadataTitle.PlaceholderText" xml:space="preserve"><value>文档标题</value></data>

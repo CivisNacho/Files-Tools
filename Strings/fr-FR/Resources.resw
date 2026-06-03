@@ -303,6 +303,15 @@
   <data name="PdfPage_OcrHint.Text" xml:space="preserve"><value>Rendez les PDF numérisés consultables en reconnaissant le texte.</value></data>
   <data name="PdfPage_OcrLanguage.Header" xml:space="preserve"><value>Langue</value></data>
   <data name="PdfPage_OcrAutoDetect.Content" xml:space="preserve"><value>Détection automatique</value></data>
+  <data name="PdfPage_OcrTessDataLabel.Text" xml:space="preserve">
+    <value>Répertoire Tessdata</value>
+  </data>
+  <data name="PdfPage_OcrBrowse.Content" xml:space="preserve">
+    <value>Parcourir</value>
+  </data>
+  <data name="PdfPage_OcrTessDataHint.Text" xml:space="preserve">
+    <value>Dossier contenant les packs de langue .traineddata. Détecté automatiquement dans %LOCALAPPDATA%\FilesTools\tessdata si présent.</value>
+  </data>
   <data name="PdfPage_Metadata.Text" xml:space="preserve"><value>Métadonnées</value></data>
   <data name="PdfPage_MetadataTitle.Header" xml:space="preserve"><value>Titre</value></data>
   <data name="PdfPage_MetadataTitle.PlaceholderText" xml:space="preserve"><value>Titre du document</value></data>

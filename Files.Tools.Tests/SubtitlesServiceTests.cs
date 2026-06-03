@@ -456,7 +456,7 @@ public class SubtitlesServiceTests
         StringAssert.Contains(ass, "Style: NeonKaraoke");
         StringAssert.Contains(ass, "Dialogue: 0,");
         Assert.IsFalse(ass.Contains("Dialogue: 1,", StringComparison.Ordinal));
-        StringAssert.Contains(ass, @"{\fad(80,80)\fscx112\fscy112\t(0,160,\fscx100\fscy100)}");
+        StringAssert.Contains(ass, @"{\fad(80,80)\fscx115\fscy115\t(0,160,\fscx100\fscy100)}");
     }
 
     [TestMethod]
@@ -612,10 +612,10 @@ public class SubtitlesServiceTests
         CollectionAssert.AreEqual(new[] { "Impact", "Anton", "Bebas Neue", "Arial Black" }, preset.FontFamilyFallbacks.ToArray());
         Assert.AreEqual(SubtitleTextTransform.Uppercase, preset.TextTransform);
         Assert.AreEqual(SubtitleVisualAlignment.BottomCenter, preset.Alignment);
-        Assert.AreEqual(28, preset.MaxCharsPerLine);
+        Assert.AreEqual(26, preset.MaxCharsPerLine);
         Assert.AreEqual(2, preset.MaxLines);
-        Assert.AreEqual(6d, preset.OutlineWidth);
-        Assert.AreEqual(1.5d, preset.ShadowDepth);
+        Assert.AreEqual(8d, preset.OutlineWidth);
+        Assert.AreEqual(2d, preset.ShadowDepth);
         Assert.IsFalse(preset.UseBackgroundBox);
     }
 
@@ -641,7 +641,7 @@ public class SubtitlesServiceTests
         Assert.AreEqual(SubtitlePresentationAnimation.FadePop, preset.PresentationAnimation);
         Assert.AreEqual(80, preset.EntryFadeMilliseconds);
         Assert.AreEqual(80, preset.ExitFadeMilliseconds);
-        Assert.AreEqual(1.12d, preset.IntroScale, 0.0001d);
+        Assert.AreEqual(1.15d, preset.IntroScale, 0.0001d);
         Assert.AreEqual(new SubtitleColor(0, 255, 220, 20), preset.KaraokeHighlightColor);
     }
 
@@ -710,7 +710,7 @@ public class SubtitlesServiceTests
         var draft = await _service.GenerateAdvancedDraftAsync(CreateInputFile());
         var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.NeonKaraoke);
 
-        StringAssert.Contains(ass, @"{\fad(80,80)\fscx112\fscy112\t(0,160,\fscx100\fscy100)}");
+        StringAssert.Contains(ass, @"{\fad(80,80)\fscx115\fscy115\t(0,160,\fscx100\fscy100)}");
         StringAssert.Contains(ass, "Style: NeonKaraoke");
         StringAssert.Contains(ass, "&H00FFFFFF&"); // White base color
         StringAssert.Contains(ass, "&H0014DCFF&"); // Vibrant cyan/yellow highlight for NeonKaraoke (RGB 255,220,20)
@@ -731,8 +731,10 @@ public class SubtitlesServiceTests
         StringAssert.Contains(ass, "&H00FFFFFF&"); // White base color
         StringAssert.Contains(ass, "&H000082FF&"); // Vibrant orange highlight color for Punch (RGB 255,130,0)
         StringAssert.Contains(ass, "Arial Black"); // Punch uses Arial Black font
-        // Punch uses instant fill, so should have {\k tags, not {\kf
+        // Punch keeps instant fill (\k) but now adds a per-cue entry pop (\fscx) via effects.
         StringAssert.Contains(ass, @"{\k");
+        StringAssert.Contains(ass, @"\fscx112\fscy112\t(0,160,\fscx100\fscy100)");
+        Assert.IsFalse(ass.Contains(@"\kf", StringComparison.Ordinal)); // instant fill preserved
     }
 
     [TestMethod]
@@ -754,6 +756,9 @@ public class SubtitlesServiceTests
         // SecondaryColour should be fully transparent for DropIn
         StringAssert.Contains(ass, "&HFF000000&");
 
+        // The line now softly fades in (entry) and out (exit) while words drop in.
+        StringAssert.Contains(ass, @"\fad(200,100)");
+
         // Should be a single Dialogue line per cue
         var dialogueLines = ass.Split(["\r\n", "\n"], StringSplitOptions.None)
             .Where(line => line.StartsWith("Dialogue:", StringComparison.Ordinal))
@@ -762,6 +767,336 @@ public class SubtitlesServiceTests
 
         // Text should be lowercase (Bubbly uses Lowercase text transform)
         StringAssert.Contains(ass, "bubbly");
+    }
+
+    [TestMethod]
+    public void RenderKaraokeAss_WithRealWordTiming_AnchorsHighlightsAndBridgesSilence()
+    {
+        // alpha is spoken at the very start; beta only at 3.0s, leaving 2.5s of silence between.
+        var draft = new SubtitleDraft(
+            [new SubtitleCue(1, TimeSpan.Zero, TimeSpan.FromSeconds(4), "alpha beta")],
+            new SubtitlePostprocessingOptions(),
+            [])
+        {
+            SourceWords =
+            [
+                new AudioTranscriptionWord(TimeSpan.Zero, TimeSpan.FromSeconds(0.5), "alpha"),
+                new AudioTranscriptionWord(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(3.5), "beta")
+            ]
+        };
+
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.NeonKaraoke);
+        var durations = ExtractKaraokeDurations(GetFirstKaraokeDialogue(ass));
+
+        // alpha (50cs), an empty filler syllable bridging the silence (250cs), then beta (50cs).
+        CollectionAssert.AreEqual(new[] { 50, 250, 50 }, durations);
+    }
+
+    [TestMethod]
+    public void RenderKaraokeAss_WithoutRealWordTiming_FallsBackToDriftFreeSyntheticDistribution()
+    {
+        var draft = new SubtitleDraft(
+            [new SubtitleCue(1, TimeSpan.Zero, TimeSpan.FromSeconds(4), "alpha beta")],
+            new SubtitlePostprocessingOptions(),
+            []);
+
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.NeonKaraoke);
+        var durations = ExtractKaraokeDurations(GetFirstKaraokeDialogue(ass));
+
+        // No silence filler is synthesized, and the karaoke clock spans exactly the 4s cue.
+        Assert.AreEqual(2, durations.Count);
+        Assert.AreEqual(400, durations.Sum());
+    }
+
+    [TestMethod]
+    public void RenderKaraokeAss_WithLeadingSilence_EmitsPreRollFiller_WithoutDrift()
+    {
+        var draft = new SubtitleDraft(
+            [new SubtitleCue(1, TimeSpan.Zero, TimeSpan.FromSeconds(3), "one two three")],
+            new SubtitlePostprocessingOptions(),
+            [])
+        {
+            SourceWords =
+            [
+                new AudioTranscriptionWord(TimeSpan.FromSeconds(0.4), TimeSpan.FromSeconds(0.9), "one"),
+                new AudioTranscriptionWord(TimeSpan.FromSeconds(0.9), TimeSpan.FromSeconds(1.4), "two"),
+                new AudioTranscriptionWord(TimeSpan.FromSeconds(1.4), TimeSpan.FromSeconds(1.9), "three")
+            ]
+        };
+
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.NeonKaraoke);
+        var durations = ExtractKaraokeDurations(GetFirstKaraokeDialogue(ass));
+
+        // 0.4s pre-roll filler, then three contiguous 0.5s words, never overrunning the cue.
+        CollectionAssert.AreEqual(new[] { 40, 50, 50, 50 }, durations);
+        Assert.IsTrue(durations.Sum() <= 300);
+    }
+
+    [TestMethod]
+    public async Task GenerateAdvancedDraftAsync_CarriesRealWordTiming_IntoEditorKaraoke()
+    {
+        _audioTranscriptionService.Segments =
+        [
+            new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(4), "alpha beta")
+            {
+                Words =
+                [
+                    new AudioTranscriptionWord(TimeSpan.Zero, TimeSpan.FromSeconds(0.5), "alpha"),
+                    new AudioTranscriptionWord(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(3.5), "beta")
+                ]
+            }
+        ];
+
+        var draft = await _service.GenerateAdvancedDraftAsync(CreateInputFile());
+        Assert.IsNotNull(draft.SourceWords);
+
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.NeonKaraoke);
+        var durations = ExtractKaraokeDurations(GetFirstKaraokeDialogue(ass));
+
+        // Three syllables (word, silence filler, word) prove the real timing reached the output.
+        CollectionAssert.AreEqual(new[] { 50, 250, 50 }, durations);
+    }
+
+    [TestMethod]
+    public async Task BuildSubtitleDraftFromTranscription_DropsRealWordTiming_WhenTextEdited()
+    {
+        _audioTranscriptionService.Segments =
+        [
+            new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(4), "alpha beta")
+            {
+                Words =
+                [
+                    new AudioTranscriptionWord(TimeSpan.Zero, TimeSpan.FromSeconds(0.5), "alpha"),
+                    new AudioTranscriptionWord(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(3.5), "beta")
+                ]
+            }
+        ];
+
+        var transcription = await _service.GenerateAdvancedTranscriptionDraftAsync(CreateInputFile());
+        var corrected = _service.BuildSubtitleDraftFromTranscription(
+            transcription,
+            [new TranscriptionSegmentCorrection(transcription.Segments[0].Id, "gamma delta")]);
+
+        // Edited text invalidates the original word alignment, so it is not kept.
+        Assert.IsNull(corrected.SourceWords);
+    }
+
+    [TestMethod]
+    public void RenderStyledAss_WithExplicitEffects_CompilesToTags_AndOverridesLegacyFields()
+    {
+        var draft = new SubtitleDraft(
+            [new SubtitleCue(1, TimeSpan.Zero, TimeSpan.FromSeconds(2), "hello")],
+            new SubtitlePostprocessingOptions(),
+            []);
+
+        // Legacy fields say "no animation", but the explicit effect list must win.
+        var preset = new SubtitleStylePreset
+        {
+            Name = "Custom",
+            AssStyleName = "Custom",
+            ScriptTitle = "Custom",
+            PrimaryFontFamily = "Arial",
+            PresentationAnimation = SubtitlePresentationAnimation.None,
+            EntryFadeMilliseconds = 0,
+            ExitFadeMilliseconds = 0,
+            IntroScale = 1d,
+            Effects =
+            [
+                SubtitleEffects.EntryFade(200),
+                SubtitleEffects.ExitFade(150),
+                SubtitleEffects.EntryPop(1.2d)
+            ]
+        };
+
+        var ass = _service.RenderStyledAss(draft, preset);
+
+        StringAssert.Contains(ass, @"{\fad(200,150)\fscx120\fscy120\t(0,160,\fscx100\fscy100)}");
+    }
+
+    [TestMethod]
+    public void RenderStyledAss_EntryPop_IsCappedToSafeArea()
+    {
+        var draft = new SubtitleDraft(
+            [new SubtitleCue(1, TimeSpan.Zero, TimeSpan.FromSeconds(2), "hello")],
+            new SubtitlePostprocessingOptions(),
+            []);
+
+        var preset = new SubtitleStylePreset
+        {
+            Name = "Custom",
+            AssStyleName = "Custom",
+            ScriptTitle = "Custom",
+            PrimaryFontFamily = "Arial",
+            Effects = [SubtitleEffects.EntryPop(2.0d)]
+        };
+
+        var ass = _service.RenderStyledAss(draft, preset);
+
+        // 200% is clamped to the 125% safe-area ceiling.
+        StringAssert.Contains(ass, @"\fscx125\fscy125");
+        Assert.IsFalse(ass.Contains(@"\fscx200", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
+    public void RenderKaraokeAss_WithExplicitInstantFillEffect_OverridesLegacySweep()
+    {
+        var draft = new SubtitleDraft(
+            [new SubtitleCue(1, TimeSpan.Zero, TimeSpan.FromSeconds(2), "hello world")],
+            new SubtitlePostprocessingOptions(),
+            []);
+
+        // Legacy FadePop would sweep (\kf); the explicit instant-fill effect must force \k.
+        var preset = new SubtitleStylePreset
+        {
+            Name = "Custom",
+            AssStyleName = "Custom",
+            ScriptTitle = "Custom",
+            PrimaryFontFamily = "Arial",
+            PresentationAnimation = SubtitlePresentationAnimation.FadePop,
+            Effects = [SubtitleEffects.KaraokeColorInstant()]
+        };
+
+        var ass = _service.RenderKaraokeAss(draft, preset);
+
+        StringAssert.Contains(ass, @"{\k");
+        Assert.IsFalse(ass.Contains(@"\kf", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
+    public void SubtitleStyleCatalog_ListsEveryBuiltInStyle_AndBuildsByIdCaseInsensitively()
+    {
+        var ids = SubtitleStyleCatalog.Entries.Select(entry => entry.Id).ToArray();
+        CollectionAssert.AreEquivalent(
+            new[] { "SocialImpact", "CleanSans", "CaptionBox", "BroadcastLowerThird", "NeonKaraoke", "Punch", "Bubbly", "WordPop" },
+            ids);
+
+        Assert.AreEqual(4, SubtitleStyleCatalog.ByKind(SubtitleStyleKind.Styled).Count());
+        Assert.AreEqual(4, SubtitleStyleCatalog.ByKind(SubtitleStyleKind.Karaoke).Count());
+
+        Assert.AreEqual("NeonKaraoke", SubtitleStyleCatalog.Create("neonkaraoke").AssStyleName);
+        Assert.IsNull(SubtitleStyleCatalog.Find("does-not-exist"));
+        Assert.ThrowsExactly<ArgumentException>(() => SubtitleStyleCatalog.Create("does-not-exist"));
+    }
+
+    [TestMethod]
+    public void RenderKaraokeAss_WithWordPop_EmitsOneEventPerWord_AndChunksToThreeWords()
+    {
+        // Six words in one cue, chunk size 3 → two chunks of 3 → 6 dialogue events (one per word).
+        var draft = new SubtitleDraft(
+            [new SubtitleCue(1, TimeSpan.Zero, TimeSpan.FromSeconds(6), "one two three four five six")],
+            new SubtitlePostprocessingOptions(),
+            []);
+
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.WordPop);
+        var dialogueLines = ass
+            .Split(["\r\n", "\n"], StringSplitOptions.None)
+            .Where(line => line.StartsWith("Dialogue:", StringComparison.Ordinal))
+            .ToArray();
+
+        Assert.AreEqual(6, dialogueLines.Length);
+
+        // Each event highlights exactly one word with a colour swap + scale pop that settles to 100%.
+        foreach (var line in dialogueLines)
+        {
+            StringAssert.Contains(line, @"\t(0,120,\fscx100\fscy100)");
+            StringAssert.Contains(line, @"{\r}");
+        }
+
+        // The chunked style draws the active word in the highlight colour (RGB 255,216,0).
+        StringAssert.Contains(ass, "&H0000D8FF&");
+    }
+
+    [TestMethod]
+    public void RenderKaraokeAss_WithWordPop_EventsAreContiguousAndCoverTheCue()
+    {
+        var draft = new SubtitleDraft(
+            [new SubtitleCue(1, TimeSpan.Zero, TimeSpan.FromSeconds(4), "alpha beta gamma")],
+            new SubtitlePostprocessingOptions(),
+            [])
+        {
+            SourceWords =
+            [
+                new AudioTranscriptionWord(TimeSpan.FromSeconds(0.5), TimeSpan.FromSeconds(1.5), "alpha"),
+                new AudioTranscriptionWord(TimeSpan.FromSeconds(1.5), TimeSpan.FromSeconds(2.5), "beta"),
+                new AudioTranscriptionWord(TimeSpan.FromSeconds(2.5), TimeSpan.FromSeconds(3.5), "gamma")
+            ]
+        };
+
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.WordPop);
+        var spans = ass
+            .Split(["\r\n", "\n"], StringSplitOptions.None)
+            .Where(line => line.StartsWith("Dialogue: 0,", StringComparison.Ordinal))
+            .Select(ParseDialogueSpan)
+            .ToArray();
+
+        Assert.AreEqual(3, spans.Length);
+        // First event starts at the cue start, the last ends at the cue end, and events are contiguous.
+        Assert.AreEqual(TimeSpan.Zero, spans[0].Start);
+        Assert.AreEqual(TimeSpan.FromSeconds(4), spans[^1].End);
+        for (var i = 0; i < spans.Length - 1; i++)
+        {
+            Assert.AreEqual(spans[i].End, spans[i + 1].Start);
+        }
+    }
+
+    private static (TimeSpan Start, TimeSpan End) ParseDialogueSpan(string dialogueLine)
+    {
+        // "Dialogue: 0,H:MM:SS.cc,H:MM:SS.cc,Style,..."
+        var parts = dialogueLine.Split(',');
+        return (ParseAssTime(parts[1]), ParseAssTime(parts[2]));
+    }
+
+    private static TimeSpan ParseAssTime(string value)
+    {
+        var segments = value.Split(':');
+        var hours = int.Parse(segments[0], System.Globalization.CultureInfo.InvariantCulture);
+        var minutes = int.Parse(segments[1], System.Globalization.CultureInfo.InvariantCulture);
+        var secondParts = segments[2].Split('.');
+        var seconds = int.Parse(secondParts[0], System.Globalization.CultureInfo.InvariantCulture);
+        var centiseconds = int.Parse(secondParts[1], System.Globalization.CultureInfo.InvariantCulture);
+        return new TimeSpan(0, hours, minutes, seconds, centiseconds * 10);
+    }
+
+    private static string GetFirstKaraokeDialogue(string ass)
+    {
+        return ass
+            .Split(["\r\n", "\n"], StringSplitOptions.None)
+            .First(line => line.StartsWith("Dialogue: 0,", StringComparison.Ordinal));
+    }
+
+    private static List<int> ExtractKaraokeDurations(string dialogueText)
+    {
+        var durations = new List<int>();
+        var index = 0;
+        while (true)
+        {
+            var found = dialogueText.IndexOf("\\k", index, StringComparison.Ordinal);
+            if (found < 0)
+            {
+                break;
+            }
+
+            var cursor = found + 2;
+            if (cursor < dialogueText.Length && dialogueText[cursor] == 'f')
+            {
+                cursor++;
+            }
+
+            var start = cursor;
+            while (cursor < dialogueText.Length && char.IsDigit(dialogueText[cursor]))
+            {
+                cursor++;
+            }
+
+            if (cursor > start)
+            {
+                durations.Add(int.Parse(dialogueText[start..cursor], System.Globalization.CultureInfo.InvariantCulture));
+            }
+
+            index = cursor;
+        }
+
+        return durations;
     }
 
     [TestMethod]
