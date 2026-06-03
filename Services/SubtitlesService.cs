@@ -819,14 +819,6 @@ public enum SubtitleValidationSeverity
 public sealed record SubtitleValidationIssue(int CueId, SubtitleValidationSeverity Severity, string Code, string Message);
 
 /// <summary>
-/// Actual target video resolution for subtitle rendering. When supplied to the chunked karaoke
-/// renderer, the ASS is written in this coordinate space and the chunked "viral" word style is sized
-/// to fit the real frame width, so it adapts to any aspect ratio instead of overflowing a non-16:9
-/// frame. Ignored by the other styles, which keep their fixed design-space layout.
-/// </summary>
-public sealed record SubtitleRenderTarget(int Width, int Height);
-
-/// <summary>
 /// Generates subtitle files from timestamped audio transcription segments.
 /// </summary>
 public interface ISubtitlesService
@@ -884,12 +876,12 @@ public interface ISubtitlesService
     /// <summary>
     /// Renders a reviewed transcription draft to karaoke ASS text.
     /// </summary>
-    string RenderKaraokeAss(TranscriptionDraft draft, SubtitlePostprocessingOptions? options = null, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null, SubtitleRenderTarget? target = null);
+    string RenderKaraokeAss(TranscriptionDraft draft, SubtitlePostprocessingOptions? options = null, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null);
 
     /// <summary>
     /// Renders a processed subtitle draft to karaoke ASS text while preserving reviewed cue boundaries.
     /// </summary>
-    string RenderKaraokeAss(SubtitleDraft draft, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null, SubtitleRenderTarget? target = null);
+    string RenderKaraokeAss(SubtitleDraft draft, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null);
 }
 
 /// <summary>
@@ -1122,7 +1114,7 @@ public sealed class SubtitlesService : ISubtitlesService
     }
 
     /// <inheritdoc />
-    public string RenderKaraokeAss(TranscriptionDraft draft, SubtitlePostprocessingOptions? options = null, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null, SubtitleRenderTarget? target = null)
+    public string RenderKaraokeAss(TranscriptionDraft draft, SubtitlePostprocessingOptions? options = null, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null)
     {
         ArgumentNullException.ThrowIfNull(draft);
 
@@ -1135,16 +1127,16 @@ public sealed class SubtitlesService : ISubtitlesService
             .ToArray();
         var words = BuildWordsFromSegments(segments);
         var cues = BuildKaraokeCues(words, effectiveOptions);
-        return BuildKaraokeAss(cues, CreateDefaultKaraokePreset(preset, placement, target));
+        return BuildKaraokeAss(cues, CreateDefaultKaraokePreset(preset, placement));
     }
 
     /// <inheritdoc />
-    public string RenderKaraokeAss(SubtitleDraft draft, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null, SubtitleRenderTarget? target = null)
+    public string RenderKaraokeAss(SubtitleDraft draft, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null)
     {
         ArgumentNullException.ThrowIfNull(draft);
 
         var cues = BuildKaraokeCuesFromSubtitleDraft(draft.Cues, draft.SourceWords);
-        return BuildKaraokeAss(cues, CreateDefaultKaraokePreset(preset, placement, target));
+        return BuildKaraokeAss(cues, CreateDefaultKaraokePreset(preset, placement));
     }
 
     internal static string BuildSrt(IReadOnlyList<AudioTranscriptionSegment> segments)
@@ -1262,18 +1254,12 @@ public sealed class SubtitlesService : ISubtitlesService
         var isDropIn = preset.Fill == KaraokeFill.DropIn;
         var isChunked = preset is { MaxWordsPerChunk: > 0 } && !isDropIn;
 
-        // For the chunked "viral" style, render in the real frame's coordinate space and size the
-        // line to the actual frame width so a few big words always fit on any aspect ratio. Without
-        // this the line is laid out in a fixed 1920x1080 space and overflows non-16:9 frames. Only
-        // the chunked path adapts; every other style keeps its existing fixed-resolution layout.
-        var layout = ResolveKaraokeLayout(preset, isChunked);
-
         var builder = new StringBuilder();
         builder.AppendLine("[Script Info]");
         builder.Append("Title: ").AppendLine(preset.ScriptTitle);
         builder.AppendLine("ScriptType: v4.00+");
-        builder.Append("PlayResX: ").AppendLine(layout.PlayResX.ToString());
-        builder.Append("PlayResY: ").AppendLine(layout.PlayResY.ToString());
+        builder.Append("PlayResX: ").AppendLine(preset.PlayResX.ToString());
+        builder.Append("PlayResY: ").AppendLine(preset.PlayResY.ToString());
         builder.Append("WrapStyle: ").AppendLine(preset.WrapStyle.ToString());
         builder.Append("ScaledBorderAndShadow: ").AppendLine(preset.ScaledBorderAndShadow ? "yes" : "no");
         builder.AppendLine();
@@ -1283,7 +1269,7 @@ public sealed class SubtitlesService : ISubtitlesService
         builder.Append("Style: ")
             .Append(preset.StyleName).Append(',')
             .Append(preset.FontFamily).Append(',')
-            .Append(layout.FontSize.ToString(System.Globalization.CultureInfo.InvariantCulture)).Append(',')
+            .Append(preset.FontSize.ToString(System.Globalization.CultureInfo.InvariantCulture)).Append(',')
             .Append(ToAssColor(isDropIn || isChunked ? preset.BaseColor : preset.HighlightColor)).Append(',')
             .Append(isDropIn ? "&HFF000000&" : ToAssColor(preset.BaseColor)).Append(',')
             .Append(ToAssColor(preset.OutlineColor)).Append(',')
@@ -1291,12 +1277,12 @@ public sealed class SubtitlesService : ISubtitlesService
             .Append(preset.Bold ? "-1" : "0").Append(',')
             .Append(preset.Italic ? "-1" : "0").Append(',')
             .Append("0,0,100,100,0,0,1,")
-            .Append(layout.OutlineWidth.ToString(System.Globalization.CultureInfo.InvariantCulture)).Append(',')
-            .Append(layout.ShadowDepth.ToString(System.Globalization.CultureInfo.InvariantCulture)).Append(',')
+            .Append(preset.OutlineWidth.ToString(System.Globalization.CultureInfo.InvariantCulture)).Append(',')
+            .Append(preset.ShadowDepth.ToString(System.Globalization.CultureInfo.InvariantCulture)).Append(',')
             .Append(GetAssAlignmentCode(preset.Alignment)).Append(',')
-            .Append(layout.MarginLeft).Append(',')
-            .Append(layout.MarginRight).Append(',')
-            .Append(layout.MarginVertical).Append(',')
+            .Append(preset.MarginLeft).Append(',')
+            .Append(preset.MarginRight).Append(',')
+            .Append(preset.MarginVertical).Append(',')
             .AppendLine(preset.UseBackgroundBox ? "3" : "1");
         builder.AppendLine();
 
@@ -1935,13 +1921,11 @@ public sealed class SubtitlesService : ISubtitlesService
         return string.Join(" ", words.Select(word => NormalizeSegmentText(word.Text)).Where(text => text.Length > 0));
     }
 
-    private static KaraokeRenderPreset CreateDefaultKaraokePreset(SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null, SubtitleRenderTarget? target = null)
+    private static KaraokeRenderPreset CreateDefaultKaraokePreset(SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null)
     {
         var basePreset = ApplyPlacementToPreset(NormalizePreset(preset ?? KaraokeSubtitlePresets.NeonKaraoke), placement);
         return new KaraokeRenderPreset
         {
-            TargetWidth = target is { Width: > 0 } ? target.Width : null,
-            TargetHeight = target is { Height: > 0 } ? target.Height : null,
             ScriptTitle = "Karaoke subtitles",
             StyleName = basePreset.AssStyleName,
             PlayResX = basePreset.PlayResX,
@@ -1987,73 +1971,6 @@ public sealed class SubtitlesService : ISubtitlesService
     /// (highlight colour plus an optional scale pop) while the rest of the chunk stays in the base colour.
     /// Events are contiguous and non-overlapping, so exactly one chunk is visible at any moment.
     /// </summary>
-    /// <summary>Effective ASS canvas + style geometry after optional resolution adaptation.</summary>
-    private readonly record struct KaraokeLayout(
-        int PlayResX,
-        int PlayResY,
-        double FontSize,
-        double OutlineWidth,
-        double ShadowDepth,
-        int MarginLeft,
-        int MarginRight,
-        int MarginVertical);
-
-    /// <summary>
-    /// Resolves the canvas and style geometry for karaoke output. For every style except the chunked
-    /// "viral" look (or when no target resolution is supplied) this returns the preset's values
-    /// unchanged. For the chunked look with a target resolution, it renders in the real frame's
-    /// coordinate space and sizes the font so a full line (up to <see cref="KaraokeRenderPreset.MaxCharsPerLine"/>,
-    /// widened by the active-word pop) fits the usable frame width — so the style fills the width
-    /// similarly on any aspect ratio instead of running off a non-16:9 frame.
-    /// </summary>
-    private static KaraokeLayout ResolveKaraokeLayout(KaraokeRenderPreset preset, bool isChunked)
-    {
-        if (!isChunked
-            || preset.TargetWidth is not int targetWidth
-            || preset.TargetHeight is not int targetHeight
-            || targetWidth <= 0
-            || targetHeight <= 0)
-        {
-            return new KaraokeLayout(
-                preset.PlayResX, preset.PlayResY, preset.FontSize, preset.OutlineWidth, preset.ShadowDepth,
-                preset.MarginLeft, preset.MarginRight, preset.MarginVertical);
-        }
-
-        var designWidth = Math.Max(1, preset.PlayResX);
-        var designHeight = Math.Max(1, preset.PlayResY);
-        var scaleX = targetWidth / (double)designWidth;
-        var scaleY = targetHeight / (double)designHeight;
-
-        var marginLeft = (int)Math.Round(preset.MarginLeft * scaleX, MidpointRounding.AwayFromZero);
-        var marginRight = (int)Math.Round(preset.MarginRight * scaleX, MidpointRounding.AwayFromZero);
-        var usableWidth = Math.Max(1, targetWidth - marginLeft - marginRight);
-
-        var maxChars = Math.Max(1, preset.MaxCharsPerLine);
-        var activeScale = preset.ActiveWordScale > 0 ? Math.Min(preset.ActiveWordScale, 1.4d) : 1d;
-
-        // Conservative average glyph advance for bold uppercase text, widened by the active-word pop
-        // so the popped word never spills past the edge. Heuristic (no font metrics are available
-        // here), tuned to err toward fitting.
-        const double averageGlyphAdvance = 0.62d;
-        var widthFitFont = usableWidth / (maxChars * averageGlyphAdvance * activeScale);
-
-        // Width fit is a hard ceiling (the line must not exceed the usable width), so only cap the
-        // upper bound — capping against frame height keeps text from getting absurdly large on very
-        // wide frames. Never raise the size past the width-fit value, or the line would overflow.
-        var fontSize = Math.Min(widthFitFont, targetHeight * 0.16d);
-
-        // Outline and shadow track the actual glyph size so contrast stays proportional.
-        var fontRatio = preset.FontSize > 0 ? fontSize / preset.FontSize : 1d;
-        var outlineWidth = preset.OutlineWidth * fontRatio;
-        var shadowDepth = preset.ShadowDepth * fontRatio;
-
-        // Chunked styles are vertically centered (\an5), so the vertical margin is unused; scale it
-        // for completeness so a non-centered chunked style would still behave.
-        var marginVertical = (int)Math.Round(preset.MarginVertical * scaleY, MidpointRounding.AwayFromZero);
-
-        return new KaraokeLayout(targetWidth, targetHeight, fontSize, outlineWidth, shadowDepth, marginLeft, marginRight, marginVertical);
-    }
-
     private static void RenderChunkedKaraokeEvents(StringBuilder builder, KaraokeCue cue, KaraokeRenderPreset preset)
     {
         if (cue.Words.Count == 0)
@@ -3777,12 +3694,6 @@ public sealed class SubtitlesService : ISubtitlesService
 
         /// <summary>When set, render chunked (at most this many words on screen, one event per word).</summary>
         public int? MaxWordsPerChunk { get; init; }
-
-        /// <summary>Actual target frame width; when set with <see cref="TargetHeight"/>, the chunked style adapts to it.</summary>
-        public int? TargetWidth { get; init; }
-
-        /// <summary>Actual target frame height; when set with <see cref="TargetWidth"/>, the chunked style adapts to it.</summary>
-        public int? TargetHeight { get; init; }
 
         /// <summary>Active-word entry scale for chunked rendering (1 = no pop).</summary>
         public double ActiveWordScale { get; init; } = 1d;

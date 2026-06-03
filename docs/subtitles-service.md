@@ -243,26 +243,6 @@ classic single-line `\k` sweep:
 - this path is glitch-free across burners because it uses explicit per-event `\t` transforms rather than
   karaoke templates
 
-#### Resolution-adaptive sizing
-
-The chunked style is big, single-line, and unwrapped (`WrapStyle 2`, `MaxLines 1`), so it is laid out in a
-fixed 1920×1080 design space and overflows a non-16:9 frame (e.g. a vertical/portrait short-form video).
-To make it adapt to any aspect ratio, `RenderKaraokeAss(...)` takes an optional `SubtitleRenderTarget`
-(the real video width/height); the video editor passes the source video's dimensions.
-
-When a target is supplied, `ResolveKaraokeLayout(...)` (chunked path only):
-
-- writes the ASS in the real frame's coordinate space (`PlayResX`/`PlayResY` = the video size), so libass
-  no longer scales the script non-uniformly,
-- scales the design-space horizontal margins by the width ratio, and
-- sizes the font so a full line (up to `MaxCharsPerLine`, widened by the active-word pop) fits the usable
-  frame width — a hard ceiling capped at 16% of frame height. Outline and shadow track the resulting glyph
-  size so contrast stays proportional.
-
-Only the chunked style adapts; every other style keeps its fixed design-space layout. With no target (or a
-16:9 target) the chunked output is unchanged from before. The font-fit uses an average-glyph-advance
-heuristic (no font metrics are available at render time) tuned to err toward fitting.
-
 The preset model remains separate from file export so future styled outputs can reuse the same readability pipeline.
 
 ### JSON preset files
