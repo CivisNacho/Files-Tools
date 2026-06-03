@@ -610,6 +610,12 @@ public sealed class VideoSourceInfo
 {
     public string? VideoCodecName { get; init; }
     public string? AudioCodecName { get; init; }
+
+    /// <summary>Display width of the primary video stream (rotation applied), or 0 if unknown.</summary>
+    public int Width { get; init; }
+
+    /// <summary>Display height of the primary video stream (rotation applied), or 0 if unknown.</summary>
+    public int Height { get; init; }
 }
 
 /// <summary>
@@ -736,11 +742,41 @@ public sealed class VideoProcessingService : IVideoProcessingService
         ValidateInputPath(inputPath);
         var ffprobeCandidates = FfmpegLocator.ResolveExecutableCandidates("ffprobe");
         var (info, _) = await ProbeAsync(ffprobeCandidates, inputPath, cancellationToken).ConfigureAwait(false);
+        var (displayWidth, displayHeight) = GetDisplayDimensions(info.PrimaryVideoStream);
         return new VideoSourceInfo
         {
             VideoCodecName = MapVideoCodecToUiName(info.PrimaryVideoStream?.CodecName),
-            AudioCodecName = MapAudioCodecToUiName(info.PrimaryAudioStream?.CodecName)
+            AudioCodecName = MapAudioCodecToUiName(info.PrimaryAudioStream?.CodecName),
+            Width = displayWidth,
+            Height = displayHeight
         };
+    }
+
+    /// <summary>
+    /// Returns the on-screen (display) dimensions of a video stream, swapping width/height when a
+    /// rotation tag of 90/270 is present so callers get the dimensions the video actually plays at.
+    /// </summary>
+    private static (int Width, int Height) GetDisplayDimensions(MediaStreamInfo? stream)
+    {
+        if (stream is null)
+        {
+            return (0, 0);
+        }
+
+        var width = stream.Width ?? 0;
+        var height = stream.Height ?? 0;
+
+        if (stream.Tags is not null && stream.Tags.TryGetValue("rotate", out var rotateValue)
+            && int.TryParse(rotateValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out var rotation))
+        {
+            var normalized = ((rotation % 360) + 360) % 360;
+            if (normalized is 90 or 270)
+            {
+                return (height, width);
+            }
+        }
+
+        return (width, height);
     }
 
     /// <inheritdoc />

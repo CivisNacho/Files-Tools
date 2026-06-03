@@ -1715,6 +1715,34 @@ namespace Files_Tools.Pages
                 $"Preset: {presetName} ({presentation}) | {_advancedSubtitlePresetConfiguration.FontFamily} {_advancedSubtitlePresetConfiguration.FontSize:0.#} | {fontWeight} | {textTransform} | Outline {_advancedSubtitlePresetConfiguration.OutlineWidth:0.#}";
         }
 
+        /// <summary>
+        /// Resolves the true display resolution of the source video for subtitle sizing. Probes the
+        /// file (rotation-aware, deterministic) and falls back to the preview size only if probing
+        /// yields nothing. Returns null when no reliable dimensions are available.
+        /// </summary>
+        private async Task<SubtitleRenderTarget?> ResolveSubtitleRenderTargetAsync()
+        {
+            if (_sourceVideoFile is not null)
+            {
+                try
+                {
+                    var info = await _videoProcessingService.ProbeSourceAsync(_sourceVideoFile.Path);
+                    if (info.Width > 0 && info.Height > 0)
+                    {
+                        return new SubtitleRenderTarget(info.Width, info.Height);
+                    }
+                }
+                catch
+                {
+                    // Fall back to the preview size below if probing fails.
+                }
+            }
+
+            return _previewVideoSize.Width > 0 && _previewVideoSize.Height > 0
+                ? new SubtitleRenderTarget((int)_previewVideoSize.Width, (int)_previewVideoSize.Height)
+                : null;
+        }
+
         private SubtitleStylePreset CreateAdvancedSubtitleStylePresetFromConfiguration()
         {
             var isKaraokeMode = IsKaraokeAdvancedSubtitleTypeSelected();
@@ -2470,11 +2498,11 @@ namespace Files_Tools.Pages
             string ass;
             if (_pendingAdvancedSubtitleKind == PendingAdvancedSubtitleKind.Karaoke)
             {
-                // Pass the real video resolution so the chunked "viral" karaoke style is sized to the
-                // actual frame and stays on-screen on any aspect ratio (e.g. vertical/portrait video).
-                var target = _previewVideoSize.Width > 0 && _previewVideoSize.Height > 0
-                    ? new SubtitleRenderTarget((int)_previewVideoSize.Width, (int)_previewVideoSize.Height)
-                    : null;
+                // Size the chunked "viral" karaoke style to the actual frame so it stays on-screen on any
+                // aspect ratio (e.g. vertical/portrait video). Probe the source for true display
+                // dimensions rather than trusting the preview size, which defaults to 1920x1080 and may
+                // not reflect the real file when subtitles are generated before playback starts.
+                var target = await ResolveSubtitleRenderTargetAsync();
                 ass = _subtitlesService.RenderKaraokeAss(reviewedDraft, preset, placement, target);
             }
             else
