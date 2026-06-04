@@ -267,6 +267,8 @@
   <data name="PdfPage_Extract.Text" xml:space="preserve"><value>추출</value></data>
   <data name="PdfPage_ExtractImages.Content" xml:space="preserve"><value>이미지 추출</value></data>
   <data name="PdfPage_ExtractAttachments.Content" xml:space="preserve"><value>첨부 파일 추출</value></data>
+  <data name="PdfPage_ImagesFolderName" xml:space="preserve"><value>이미지</value></data>
+  <data name="PdfPage_AttachmentsFolderName" xml:space="preserve"><value>첨부 파일</value></data>
   <data name="PdfPage_ExtractHint.Text" xml:space="preserve"><value>추출된 파일은 별도의 폴더에 저장됩니다.</value></data>
   <data name="PdfPage_Rotate.Text" xml:space="preserve"><value>회전</value></data>
   <data name="PdfPage_Rotation.Header" xml:space="preserve"><value>회전</value></data>

@@ -267,6 +267,8 @@
   <data name="PdfPage_Extract.Text" xml:space="preserve"><value>提取</value></data>
   <data name="PdfPage_ExtractImages.Content" xml:space="preserve"><value>提取图像</value></data>
   <data name="PdfPage_ExtractAttachments.Content" xml:space="preserve"><value>提取附件</value></data>
+  <data name="PdfPage_ImagesFolderName" xml:space="preserve"><value>图片</value></data>
+  <data name="PdfPage_AttachmentsFolderName" xml:space="preserve"><value>附件</value></data>
   <data name="PdfPage_ExtractHint.Text" xml:space="preserve"><value>提取的文件将保存到单独的文件夹中。</value></data>
   <data name="PdfPage_Rotate.Text" xml:space="preserve"><value>旋转</value></data>
   <data name="PdfPage_Rotation.Header" xml:space="preserve"><value>旋转</value></data>

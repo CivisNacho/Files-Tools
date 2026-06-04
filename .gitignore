@@ -12,3 +12,6 @@ artifacts/
 
 # Logs / diagnostics
 build_diag.txt
+
+# Bundled native dependencies (e.g. ffmpeg) — fetched/installed locally, not tracked
+Binaries/

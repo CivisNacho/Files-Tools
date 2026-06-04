@@ -26,6 +26,11 @@
     <Compile Include="..\Services\FfmpegLocator.cs" Link="Services\FfmpegLocator.cs" />
     <Compile Include="..\Services\AudioTranscriptionService.cs" Link="Services\AudioTranscriptionService.cs" />
     <Compile Include="..\Services\SubtitlesService.cs" Link="Services\SubtitlesService.cs" />
+    <Compile Include="..\Services\Presets\SubtitlePresetDto.cs" Link="Services\Presets\SubtitlePresetDto.cs" />
+    <Compile Include="..\Services\Presets\SubtitleColorJsonConverter.cs" Link="Services\Presets\SubtitleColorJsonConverter.cs" />
+    <Compile Include="..\Services\Presets\SubtitlePresetJsonContext.cs" Link="Services\Presets\SubtitlePresetJsonContext.cs" />
+    <Compile Include="..\Services\Presets\SubtitlePresetMapper.cs" Link="Services\Presets\SubtitlePresetMapper.cs" />
+    <Compile Include="..\Services\Presets\SubtitlePresetLoader.cs" Link="Services\Presets\SubtitlePresetLoader.cs" />
     <Compile Include="..\Services\VideoProcessingService.cs" Link="Services\VideoProcessingService.cs" />
     <Compile Include="..\Services\VideoAudioDenoise.cs" Link="Services\VideoAudioDenoise.cs" />
     <Compile Include="..\Services\DocumentProcessingService.cs" Link="Services\DocumentProcessingService.cs" />

@@ -537,6 +537,12 @@ namespace Files_Tools.Pages
                     await _videoAudioDenoiseService.DenoiseVideoAudioAsync(processingOutputPath, outputPath, denoiseOptions, denoiseProgress);
                 }
 
+                // For SoftMux of a styled .ass that the container can't carry (e.g. MP4), drop the
+                // subtitle next to the FINAL output as a sidecar the player loads. Done here (not only
+                // in the service) so it lands beside the real output even when denoise re-routes the
+                // service output through a temporary file.
+                EnsureSoftMuxSubtitleSidecar(options.SubtitleMux, outputPath);
+
                 var doneDialog = new ContentDialog
                 {
                     Title = "Done",
@@ -1458,12 +1464,17 @@ namespace Files_Tools.Pages
 
         private bool IsAdvancedSubtitleModeSelected()
         {
-            return (SubtitleGenerationModeComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString() == "Advanced (ASS)";
+            // Compare by index, not by Content text: the item Content is localized via x:Uid, so a
+            // text comparison against the English literal silently fails in other languages (e.g.
+            // Spanish "Avanzado (ASS)"). Item order is fixed in XAML: 0 = Basic (SRT), 1 = Advanced (ASS).
+            return SubtitleGenerationModeComboBox?.SelectedIndex == 1;
         }
 
         private bool IsKaraokeAdvancedSubtitleTypeSelected()
         {
-            return (AdvancedSubtitleTypeComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString() == "Karaoke ASS";
+            // Item order is fixed in XAML: 0 = Styled ASS, 1 = Karaoke ASS. Compared by index so it is
+            // locale-independent (the Content is localized via x:Uid).
+            return AdvancedSubtitleTypeComboBox?.SelectedIndex == 1;
         }
 
         private async void ConfigureAdvancedSubtitlesButton_Click(object sender, RoutedEventArgs e)
@@ -1708,6 +1719,81 @@ namespace Files_Tools.Pages
             var fontWeight = _advancedSubtitlePresetConfiguration.Bold ? "Bold" : "Regular";
             AdvancedSubtitlePresetSummaryTextBlock.Text =
                 $"Preset: {presetName} ({presentation}) | {_advancedSubtitlePresetConfiguration.FontFamily} {_advancedSubtitlePresetConfiguration.FontSize:0.#} | {fontWeight} | {textTransform} | Outline {_advancedSubtitlePresetConfiguration.OutlineWidth:0.#}";
+        }
+
+        /// <summary>
+        /// Resolves the true display resolution of the source video for subtitle sizing. Probes the
+        /// file (rotation-aware, deterministic) and falls back to the preview size only if probing
+        /// yields nothing. Returns null when no reliable dimensions are available.
+        /// </summary>
+        private async Task<SubtitleRenderTarget?> ResolveSubtitleRenderTargetAsync()
+        {
+            if (_sourceVideoFile is not null)
+            {
+                try
+                {
+                    var info = await _videoProcessingService.ProbeSourceAsync(_sourceVideoFile.Path);
+                    if (info.Width > 0 && info.Height > 0)
+                    {
+                        return new SubtitleRenderTarget(info.Width, info.Height);
+                    }
+                }
+                catch
+                {
+                    // Fall back to the preview size below if probing fails.
+                }
+            }
+
+            return _previewVideoSize.Width > 0 && _previewVideoSize.Height > 0
+                ? new SubtitleRenderTarget((int)_previewVideoSize.Width, (int)_previewVideoSize.Height)
+                : null;
+        }
+
+        /// <summary>
+        /// Ensures a SoftMux'd styled subtitle ends up as a sidecar file next to the final output video
+        /// for containers that can't carry ASS natively (anything but MKV — MKV embeds it as a soft
+        /// track). The video is left untouched (never burned); players auto-load the matching-name
+        /// sidecar and render it with libass. Best-effort.
+        /// </summary>
+        private static void EnsureSoftMuxSubtitleSidecar(MuxSubtitleOptions? subtitleMux, string finalOutputPath)
+        {
+            if (subtitleMux is not { Mode: SubtitleMode.SoftMux })
+            {
+                return;
+            }
+
+            var extension = Path.GetExtension(subtitleMux.SubtitlePath);
+            var isAss = extension.Equals(".ass", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".ssa", StringComparison.OrdinalIgnoreCase);
+            // MKV embeds the .ass as a soft track (self-contained), so no sidecar is written for it.
+            if (!isAss || Path.GetExtension(finalOutputPath).Equals(".mkv", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            var source = Path.GetFullPath(subtitleMux.SubtitlePath);
+            if (!File.Exists(source))
+            {
+                return;
+            }
+
+            var sidecar = Path.ChangeExtension(Path.GetFullPath(finalOutputPath), ".ass");
+            if (string.Equals(source, sidecar, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            try
+            {
+                File.Copy(source, sidecar, overwrite: true);
+            }
+            catch (IOException)
+            {
+                // Best effort: the video still rendered; a sidecar copy failure should not abort it.
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
         }
 
         private SubtitleStylePreset CreateAdvancedSubtitleStylePresetFromConfiguration()
@@ -2465,11 +2551,19 @@ namespace Files_Tools.Pages
             string ass;
             if (_pendingAdvancedSubtitleKind == PendingAdvancedSubtitleKind.Karaoke)
             {
-                ass = _subtitlesService.RenderKaraokeAss(reviewedDraft, preset, placement);
+                // Size the chunked "viral" karaoke style to the actual frame so it stays on-screen on any
+                // aspect ratio (e.g. vertical/portrait video). Probe the source for true display
+                // dimensions rather than trusting the preview size, which defaults to 1920x1080 and may
+                // not reflect the real file when subtitles are generated before playback starts.
+                var target = await ResolveSubtitleRenderTargetAsync();
+                ass = _subtitlesService.RenderKaraokeAss(reviewedDraft, preset, placement, target);
             }
             else
             {
-                ass = _subtitlesService.RenderStyledAss(reviewedDraft, preset, placement);
+                // Size styled subtitles to the real frame too, for consistent, undistorted output on
+                // any aspect ratio (matches the karaoke path).
+                var target = await ResolveSubtitleRenderTargetAsync();
+                ass = _subtitlesService.RenderStyledAss(reviewedDraft, preset, placement, target);
             }
             var directory = Path.GetDirectoryName(path);
             if (!string.IsNullOrWhiteSpace(directory))
@@ -2751,25 +2845,27 @@ namespace Files_Tools.Pages
 
         private AudioDenoiseMode ParseDenoiseMode()
         {
-            var mode = (AudioDenoiseModeComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
-            return mode switch
-            {
-                "Preserve stereo" => AudioDenoiseMode.StrongStereo,
-                "Stereo" => AudioDenoiseMode.StrongStereo,
-                _ => AudioDenoiseMode.Mono
-            };
+            // Items carry x:Uid, so their Content is localized — match by index.
+            // XAML order: 0 = Mono, 1 = Stereo.
+            return AudioDenoiseModeComboBox?.SelectedIndex == 1
+                ? AudioDenoiseMode.StrongStereo
+                : AudioDenoiseMode.Mono;
         }
 
         private bool IsRemoveAudioSelected()
         {
-            return (AudioCodecComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString() == "Remove audio";
+            // The "Remove audio" item carries x:Uid (localized Content) and is the last item in the
+            // combo box, so detect it by index rather than by comparing the English literal.
+            return AudioCodecComboBox is not null
+                && AudioCodecComboBox.SelectedIndex == AudioCodecComboBox.Items.Count - 1;
         }
 
         private int GetSignedAudioSyncOffsetMilliseconds()
         {
             var magnitude = Math.Clamp((int)Math.Round(AudioSyncOffsetSlider?.Value ?? 0), 0, MaximumAudioSyncOffsetMilliseconds);
-            var direction = (AudioSyncDirectionComboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
-            return string.Equals(direction, "Later", StringComparison.Ordinal)
+            // Items carry x:Uid, so their Content is localized — match by index.
+            // XAML order: 0 = Earlier, 1 = Later.
+            return AudioSyncDirectionComboBox?.SelectedIndex == 1
                 ? magnitude
                 : -magnitude;
         }
@@ -3110,6 +3206,14 @@ namespace Files_Tools.Pages
 
         private static AudioCodec? ParseAudioCodec(ComboBox? comboBox)
         {
+            // The "Remove audio" item carries x:Uid, so its Content is localized — detect it by index
+            // (it is the last item; see IsRemoveAudioSelected). The codec items below have plain,
+            // non-localized Content, so matching them by text is safe.
+            if (comboBox is not null && comboBox.SelectedIndex == comboBox.Items.Count - 1)
+            {
+                return null;
+            }
+
             var content = (comboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
             return content switch
             {
@@ -3120,7 +3224,6 @@ namespace Files_Tools.Pages
                 "AC3" => AudioCodec.Ac3,
                 "FLAC" => AudioCodec.Flac,
                 "PCM_S16LE" => AudioCodec.PcmS16Le,
-                "Remove audio" => null,
                 _ => null
             };
         }
@@ -3140,33 +3243,28 @@ namespace Files_Tools.Pages
 
         private static ResizeMode ParseResizeMode(ComboBox? comboBox)
         {
-            var content = (comboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
-            return content switch
+            // Items carry x:Uid, so their Content is localized — match by index. XAML order:
+            // 0 = PadToFit, 1 = CropToFill, 2 = Stretch.
+            return comboBox?.SelectedIndex switch
             {
-                "Stretch" => ResizeMode.Stretch,
-                "CropToFill" => ResizeMode.CropToFill,
+                1 => ResizeMode.CropToFill,
+                2 => ResizeMode.Stretch,
                 _ => ResizeMode.PadToFit
             };
         }
 
         private static SubtitleMode ParseSubtitleMode(ComboBox? comboBox)
         {
-            var content = (comboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
-            return content switch
-            {
-                "BurnIn" => SubtitleMode.BurnIn,
-                _ => SubtitleMode.SoftMux
-            };
+            // Items carry x:Uid, so their Content is localized — match by index instead of text or
+            // BurnIn is never detected in non-English UIs. XAML order: 0 = SoftMux, 1 = BurnIn.
+            return comboBox?.SelectedIndex == 1 ? SubtitleMode.BurnIn : SubtitleMode.SoftMux;
         }
 
         private static RepairMode ParseRepairMode(ComboBox? comboBox)
         {
-            var content = (comboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
-            return content switch
-            {
-                "Reencode" => RepairMode.Reencode,
-                _ => RepairMode.Remux
-            };
+            // Items carry x:Uid, so their Content is localized — match by index.
+            // XAML order: 0 = Remux, 1 = Reencode.
+            return comboBox?.SelectedIndex == 1 ? RepairMode.Reencode : RepairMode.Remux;
         }
 
         private static int ParseRotation(ComboBox? comboBox)

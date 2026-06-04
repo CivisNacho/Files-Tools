@@ -41,6 +41,10 @@
     <Content Include="Assets\Fonts\*.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <!--  Built-in subtitle style presets, loaded at startup by SubtitlePresetLoader.  -->
+    <Content Include="Assets\Presets\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

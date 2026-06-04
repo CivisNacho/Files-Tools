@@ -684,7 +684,7 @@ public sealed record SubtitleStyleCatalogEntry(string Id, string DisplayName, Su
 /// </summary>
 public static class SubtitleStyleCatalog
 {
-    private static readonly SubtitleStyleCatalogEntry[] EntriesInternal =
+    private static readonly SubtitleStyleCatalogEntry[] BuiltInEntries =
     [
         new("SocialImpact", "Social Impact", SubtitleStyleKind.Styled, StyledSubtitlePresets.CreateSocialImpact),
         new("CleanSans", "Clean Sans", SubtitleStyleKind.Styled, StyledSubtitlePresets.CreateCleanSans),
@@ -696,19 +696,104 @@ public static class SubtitleStyleCatalog
         new("WordPop", "Word Pop", SubtitleStyleKind.Karaoke, KaraokeSubtitlePresets.CreateWordPop)
     ];
 
-    /// <summary>All registered styles, in display order.</summary>
-    public static IReadOnlyList<SubtitleStyleCatalogEntry> Entries => EntriesInternal;
+    private static readonly object SyncRoot = new();
+
+    // Presets registered at runtime (typically loaded from JSON by SubtitlePresetLoader). Keyed by
+    // id; a registered entry overrides a built-in with the same id, keeping the built-in's position.
+    private static readonly Dictionary<string, SubtitleStyleCatalogEntry> RegisteredById = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly List<string> RegisteredOrder = new();
+
+    /// <summary>
+    /// Registers additional styles (e.g. loaded from JSON preset files), merging them over the
+    /// built-ins by id. Registering an id that matches a built-in replaces it in place; new ids are
+    /// appended after the built-ins in registration order. Safe to call more than once.
+    /// </summary>
+    public static void RegisterPresets(IEnumerable<SubtitleStyleCatalogEntry> entries)
+    {
+        ArgumentNullException.ThrowIfNull(entries);
+
+        lock (SyncRoot)
+        {
+            foreach (var entry in entries)
+            {
+                if (entry is null)
+                {
+                    continue;
+                }
+
+                if (!RegisteredById.ContainsKey(entry.Id))
+                {
+                    RegisteredOrder.Add(entry.Id);
+                }
+
+                RegisteredById[entry.Id] = entry;
+            }
+        }
+    }
+
+    /// <summary>Removes all runtime-registered presets, leaving only the built-ins. Intended for tests.</summary>
+    public static void ResetRegistrations()
+    {
+        lock (SyncRoot)
+        {
+            RegisteredById.Clear();
+            RegisteredOrder.Clear();
+        }
+    }
+
+    /// <summary>All registered styles, in display order: built-ins first, then user-only presets.</summary>
+    public static IReadOnlyList<SubtitleStyleCatalogEntry> Entries
+    {
+        get
+        {
+            lock (SyncRoot)
+            {
+                if (RegisteredById.Count == 0)
+                {
+                    return BuiltInEntries;
+                }
+
+                var merged = new List<SubtitleStyleCatalogEntry>(BuiltInEntries.Length + RegisteredOrder.Count);
+                var emittedBuiltInOverrides = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                // Built-ins keep their order; replaced in place when an override shares their id.
+                foreach (var builtIn in BuiltInEntries)
+                {
+                    if (RegisteredById.TryGetValue(builtIn.Id, out var overrideEntry))
+                    {
+                        merged.Add(overrideEntry);
+                        emittedBuiltInOverrides.Add(builtIn.Id);
+                    }
+                    else
+                    {
+                        merged.Add(builtIn);
+                    }
+                }
+
+                // Append registered presets that did not override a built-in, in registration order.
+                foreach (var id in RegisteredOrder)
+                {
+                    if (!emittedBuiltInOverrides.Contains(id))
+                    {
+                        merged.Add(RegisteredById[id]);
+                    }
+                }
+
+                return merged;
+            }
+        }
+    }
 
     /// <summary>Registered styles of a given kind, in display order.</summary>
     public static IEnumerable<SubtitleStyleCatalogEntry> ByKind(SubtitleStyleKind kind)
     {
-        return EntriesInternal.Where(entry => entry.Kind == kind);
+        return Entries.Where(entry => entry.Kind == kind);
     }
 
     /// <summary>Finds an entry by id, or null when it is not registered.</summary>
     public static SubtitleStyleCatalogEntry? Find(string id)
     {
-        return EntriesInternal.FirstOrDefault(entry => string.Equals(entry.Id, id, StringComparison.OrdinalIgnoreCase));
+        return Entries.FirstOrDefault(entry => string.Equals(entry.Id, id, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>Builds a preset by id, throwing when the id is unknown.</summary>
@@ -732,6 +817,14 @@ public enum SubtitleValidationSeverity
 /// Validation issue raised while checking a subtitle draft.
 /// </summary>
 public sealed record SubtitleValidationIssue(int CueId, SubtitleValidationSeverity Severity, string Code, string Message);
+
+/// <summary>
+/// Actual target video resolution for subtitle rendering. When supplied to the chunked karaoke
+/// renderer, the ASS is written in this coordinate space and the chunked "viral" word style is sized
+/// to fit the real frame width, so it adapts to any aspect ratio instead of overflowing a non-16:9
+/// frame. Ignored by the other styles, which keep their fixed design-space layout.
+/// </summary>
+public sealed record SubtitleRenderTarget(int Width, int Height);
 
 /// <summary>
 /// Generates subtitle files from timestamped audio transcription segments.
@@ -781,22 +874,22 @@ public interface ISubtitlesService
     /// <summary>
     /// Applies a visual subtitle preset to a processed subtitle draft.
     /// </summary>
-    StyledSubtitleDraft ApplyStylePreset(SubtitleDraft draft, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null);
+    StyledSubtitleDraft ApplyStylePreset(SubtitleDraft draft, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null, SubtitleRenderTarget? target = null);
 
     /// <summary>
     /// Renders a processed subtitle draft to styled ASS text.
     /// </summary>
-    string RenderStyledAss(SubtitleDraft draft, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null);
+    string RenderStyledAss(SubtitleDraft draft, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null, SubtitleRenderTarget? target = null);
 
     /// <summary>
     /// Renders a reviewed transcription draft to karaoke ASS text.
     /// </summary>
-    string RenderKaraokeAss(TranscriptionDraft draft, SubtitlePostprocessingOptions? options = null, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null);
+    string RenderKaraokeAss(TranscriptionDraft draft, SubtitlePostprocessingOptions? options = null, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null, SubtitleRenderTarget? target = null);
 
     /// <summary>
     /// Renders a processed subtitle draft to karaoke ASS text while preserving reviewed cue boundaries.
     /// </summary>
-    string RenderKaraokeAss(SubtitleDraft draft, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null);
+    string RenderKaraokeAss(SubtitleDraft draft, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null, SubtitleRenderTarget? target = null);
 }
 
 /// <summary>
@@ -1002,11 +1095,11 @@ public sealed class SubtitlesService : ISubtitlesService
     }
 
     /// <inheritdoc />
-    public StyledSubtitleDraft ApplyStylePreset(SubtitleDraft draft, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null)
+    public StyledSubtitleDraft ApplyStylePreset(SubtitleDraft draft, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null, SubtitleRenderTarget? target = null)
     {
         ArgumentNullException.ThrowIfNull(draft);
 
-        var effectivePreset = ApplyPlacementToPreset(NormalizePreset(preset), placement);
+        var effectivePreset = ApplyTargetResolutionToPreset(ApplyPlacementToPreset(NormalizePreset(preset), placement), target);
         var cues = draft.Cues
             .Select(cue => new WorkingCue(cue.Id, cue.Start, cue.End, cue.Text))
             .ToList();
@@ -1020,16 +1113,16 @@ public sealed class SubtitlesService : ISubtitlesService
     }
 
     /// <inheritdoc />
-    public string RenderStyledAss(SubtitleDraft draft, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null)
+    public string RenderStyledAss(SubtitleDraft draft, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null, SubtitleRenderTarget? target = null)
     {
         ArgumentNullException.ThrowIfNull(draft);
 
-        var styled = ApplyStylePreset(draft, preset, placement);
+        var styled = ApplyStylePreset(draft, preset, placement, target);
         return BuildStyledAss(styled);
     }
 
     /// <inheritdoc />
-    public string RenderKaraokeAss(TranscriptionDraft draft, SubtitlePostprocessingOptions? options = null, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null)
+    public string RenderKaraokeAss(TranscriptionDraft draft, SubtitlePostprocessingOptions? options = null, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null, SubtitleRenderTarget? target = null)
     {
         ArgumentNullException.ThrowIfNull(draft);
 
@@ -1042,16 +1135,16 @@ public sealed class SubtitlesService : ISubtitlesService
             .ToArray();
         var words = BuildWordsFromSegments(segments);
         var cues = BuildKaraokeCues(words, effectiveOptions);
-        return BuildKaraokeAss(cues, CreateDefaultKaraokePreset(preset, placement));
+        return BuildKaraokeAss(cues, CreateDefaultKaraokePreset(preset, placement, target));
     }
 
     /// <inheritdoc />
-    public string RenderKaraokeAss(SubtitleDraft draft, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null)
+    public string RenderKaraokeAss(SubtitleDraft draft, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null, SubtitleRenderTarget? target = null)
     {
         ArgumentNullException.ThrowIfNull(draft);
 
         var cues = BuildKaraokeCuesFromSubtitleDraft(draft.Cues, draft.SourceWords);
-        return BuildKaraokeAss(cues, CreateDefaultKaraokePreset(preset, placement));
+        return BuildKaraokeAss(cues, CreateDefaultKaraokePreset(preset, placement, target));
     }
 
     internal static string BuildSrt(IReadOnlyList<AudioTranscriptionSegment> segments)
@@ -1169,6 +1262,9 @@ public sealed class SubtitlesService : ISubtitlesService
         var isDropIn = preset.Fill == KaraokeFill.DropIn;
         var isChunked = preset is { MaxWordsPerChunk: > 0 } && !isDropIn;
 
+        // The preset has already been rewritten into the target frame's coordinate space (PlayRes,
+        // font, margins and placement scaled) by ApplyTargetResolutionToPreset, so the values below
+        // are used as-is.
         var builder = new StringBuilder();
         builder.AppendLine("[Script Info]");
         builder.Append("Title: ").AppendLine(preset.ScriptTitle);
@@ -1836,9 +1932,11 @@ public sealed class SubtitlesService : ISubtitlesService
         return string.Join(" ", words.Select(word => NormalizeSegmentText(word.Text)).Where(text => text.Length > 0));
     }
 
-    private static KaraokeRenderPreset CreateDefaultKaraokePreset(SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null)
+    private static KaraokeRenderPreset CreateDefaultKaraokePreset(SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null, SubtitleRenderTarget? target = null)
     {
-        var basePreset = ApplyPlacementToPreset(NormalizePreset(preset ?? KaraokeSubtitlePresets.NeonKaraoke), placement);
+        var basePreset = ApplyTargetResolutionToPreset(
+            ApplyPlacementToPreset(NormalizePreset(preset ?? KaraokeSubtitlePresets.NeonKaraoke), placement),
+            target);
         return new KaraokeRenderPreset
         {
             ScriptTitle = "Karaoke subtitles",
@@ -2656,6 +2754,95 @@ public sealed class SubtitlesService : ISubtitlesService
             },
             PositionX = Math.Clamp((int)Math.Round(normalizedX * width, MidpointRounding.AwayFromZero), 0, width),
             PositionY = Math.Clamp((int)Math.Round(normalizedY * height, MidpointRounding.AwayFromZero), 0, height),
+            MaxLines = preset.MaxLines,
+            MaxCharsPerLine = preset.MaxCharsPerLine,
+            MaxWordsPerChunk = preset.MaxWordsPerChunk
+        };
+    }
+
+    /// <summary>
+    /// Rewrites a preset into the real frame's coordinate space so subtitles render at a consistent,
+    /// undistorted size on any resolution/aspect. PlayRes becomes the target size; font, outline,
+    /// shadow and the vertical margin scale by the height ratio (standard subtitle scaling); the
+    /// horizontal margins and the absolute placement scale by the width/height ratios so a \pos lands
+    /// at the same relative spot. For the chunked "viral" style (which cannot wrap) the font is
+    /// additionally clamped to fit the usable width. A null/invalid target, or a target equal to the
+    /// design resolution, returns the preset unchanged (a no-op for 16:9 output).
+    /// </summary>
+    private static SubtitleStylePreset ApplyTargetResolutionToPreset(SubtitleStylePreset preset, SubtitleRenderTarget? target)
+    {
+        ArgumentNullException.ThrowIfNull(preset);
+
+        if (target is not { Width: > 0, Height: > 0 } size
+            || (size.Width == preset.PlayResX && size.Height == preset.PlayResY))
+        {
+            return preset;
+        }
+
+        var designWidth = Math.Max(1, preset.PlayResX);
+        var designHeight = Math.Max(1, preset.PlayResY);
+        var scaleX = size.Width / (double)designWidth;
+        var scaleY = size.Height / (double)designHeight;
+
+        var marginLeft = (int)Math.Round(preset.MarginLeft * scaleX, MidpointRounding.AwayFromZero);
+        var marginRight = (int)Math.Round(preset.MarginRight * scaleX, MidpointRounding.AwayFromZero);
+        var marginVertical = (int)Math.Round(preset.MarginVertical * scaleY, MidpointRounding.AwayFromZero);
+
+        // Standard subtitle sizing: scale the font by the height ratio.
+        var fontSize = preset.FontSize * scaleY;
+
+        // The chunked style is single-line and cannot wrap, so additionally clamp the font so a full
+        // line (up to MaxCharsPerLine, widened by the active-word pop) fits the usable width.
+        if (preset.MaxWordsPerChunk is > 0)
+        {
+            var usableWidth = Math.Max(1, size.Width - marginLeft - marginRight);
+            var maxChars = Math.Max(1, preset.MaxCharsPerLine);
+            var activeScale = ResolveActiveWordScale(preset);
+            activeScale = activeScale > 0 ? Math.Min(activeScale, 1.4d) : 1d;
+            const double averageGlyphAdvance = 0.62d;
+            var widthFitFont = usableWidth / (maxChars * averageGlyphAdvance * activeScale);
+            fontSize = Math.Min(fontSize, widthFitFont);
+        }
+
+        var fontRatio = preset.FontSize > 0 ? fontSize / preset.FontSize : 1d;
+
+        return new SubtitleStylePreset
+        {
+            Name = preset.Name,
+            AssStyleName = preset.AssStyleName,
+            ScriptTitle = preset.ScriptTitle,
+            PlayResX = size.Width,
+            PlayResY = size.Height,
+            WrapStyle = preset.WrapStyle,
+            ScaledBorderAndShadow = preset.ScaledBorderAndShadow,
+            PrimaryFontFamily = preset.PrimaryFontFamily,
+            FontFamilyFallbacks = preset.FontFamilyFallbacks,
+            FontSize = fontSize,
+            Bold = preset.Bold,
+            Italic = preset.Italic,
+            TextTransform = preset.TextTransform,
+            FillColor = preset.FillColor,
+            OutlineColor = preset.OutlineColor,
+            ShadowColor = preset.ShadowColor,
+            KaraokeHighlightColor = preset.KaraokeHighlightColor,
+            UseBackgroundBox = preset.UseBackgroundBox,
+            PresentationAnimation = preset.PresentationAnimation,
+            EntryFadeMilliseconds = preset.EntryFadeMilliseconds,
+            ExitFadeMilliseconds = preset.ExitFadeMilliseconds,
+            IntroScale = preset.IntroScale,
+            Effects = preset.Effects,
+            OutlineWidth = preset.OutlineWidth * fontRatio,
+            ShadowDepth = preset.ShadowDepth * fontRatio,
+            Alignment = preset.Alignment,
+            MarginLeft = marginLeft,
+            MarginRight = marginRight,
+            MarginVertical = marginVertical,
+            PositionX = preset.PositionX is int px
+                ? Math.Clamp((int)Math.Round(px * scaleX, MidpointRounding.AwayFromZero), 0, size.Width)
+                : null,
+            PositionY = preset.PositionY is int py
+                ? Math.Clamp((int)Math.Round(py * scaleY, MidpointRounding.AwayFromZero), 0, size.Height)
+                : null,
             MaxLines = preset.MaxLines,
             MaxCharsPerLine = preset.MaxCharsPerLine,
             MaxWordsPerChunk = preset.MaxWordsPerChunk

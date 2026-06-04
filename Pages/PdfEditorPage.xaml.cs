@@ -16,6 +16,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Files_Tools.Helpers;
 using Files_Tools.Services;
 
 namespace Files_Tools.Pages
@@ -33,6 +34,7 @@ namespace Files_Tools.Pages
         private double _naturalPageHeight;
         private readonly List<string> _mergeFilePaths = new();
         private string? _tessDataPath;
+        private PdfMetadata? _loadedMetadata;
         private bool _isTessDataDownloading;
         private CancellationTokenSource? _tessDataDownloadCts;
         private static readonly HttpClient _httpClient = new();
@@ -249,7 +251,7 @@ namespace Files_Tools.Pages
             }
         }
 
-        private async void UploadSurface_DragOver(object sender, DragEventArgs e)
+        private void UploadSurface_DragOver(object sender, DragEventArgs e)
         {
             e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Copy;
             e.DragUIOverride.IsContentVisible = true;
@@ -316,6 +318,7 @@ namespace Files_Tools.Pages
 
                 UpdateNavigationButtons();
                 RefreshMergeFilesList();
+                await LoadMetadataIntoForm(file.Path);
                 ValidateInputs();
             }
             catch (Exception ex)
@@ -546,14 +549,30 @@ namespace Files_Tools.Pages
                     isValid = false;
                 }
 
-                if (SplitPanel.Visibility == Visibility.Visible && SplitModeComboBox.SelectedIndex == 1)
+                if (SplitPanel.Visibility == Visibility.Visible)
                 {
-                    var splitError = ValidateSplitRanges(SplitRangesTextBox.Text);
-                    if (!string.IsNullOrEmpty(splitError))
+                    if (SplitModeComboBox.SelectedIndex < 0)
                     {
-                        OrganizationValidationTextBlock.Text = splitError;
+                        OrganizationValidationTextBlock.Text = "Choose a split mode.";
                         isValid = false;
                     }
+                    else if (SplitModeComboBox.SelectedIndex == 1)
+                    {
+                        var splitError = ValidateSplitRanges(SplitRangesTextBox.Text);
+                        if (!string.IsNullOrEmpty(splitError))
+                        {
+                            OrganizationValidationTextBlock.Text = splitError;
+                            isValid = false;
+                        }
+                    }
+                }
+
+                if (ExtractPanel.Visibility == Visibility.Visible &&
+                    ExtractImagesCheckBox.IsChecked != true &&
+                    ExtractAttachmentsCheckBox.IsChecked != true)
+                {
+                    OrganizationValidationTextBlock.Text = "Select images, attachments, or both to extract.";
+                    isValid = false;
                 }
 
                 if (ReorderPanel.Visibility == Visibility.Visible && !string.IsNullOrWhiteSpace(ReorderSequenceTextBox.Text))
@@ -698,8 +717,7 @@ namespace Files_Tools.Pages
                 if (_currentPdf != null && pages.Any(p => p < 1 || p > _currentPdf.PageCount))
                     return $"Page numbers must be between 1 and {_currentPdf.PageCount}";
 
-                if (pages.Count != pages.Distinct().Count())
-                    return "Duplicate page numbers are not allowed";
+                // Duplicates are allowed — repeating a page number duplicates that page in the output.
 
                 return "";
             }
@@ -846,32 +864,127 @@ namespace Files_Tools.Pages
             return "";
         }
 
+        private async Task LoadMetadataIntoForm(string pdfPath)
+        {
+            try
+            {
+                _loadedMetadata = await _pdfService.ReadMetadataAsync(pdfPath);
+            }
+            catch
+            {
+                // Encrypted or unreadable Info dictionary — start from a blank form.
+                _loadedMetadata = new PdfMetadata();
+            }
+
+            MetadataTitleTextBox.Text    = _loadedMetadata.Title    ?? "";
+            MetadataAuthorTextBox.Text   = _loadedMetadata.Author   ?? "";
+            MetadataSubjectTextBox.Text  = _loadedMetadata.Subject  ?? "";
+            MetadataKeywordsTextBox.Text = _loadedMetadata.Keywords ?? "";
+            MetadataCreatorTextBox.Text  = _loadedMetadata.Creator  ?? "";
+            MetadataProducerTextBox.Text = _loadedMetadata.Producer ?? "";
+        }
+
+        /// <summary>
+        /// Builds a metadata patch limited to the editable fields the user actually changed.
+        /// Returns <c>null</c> when nothing changed. For each field: unchanged → not written
+        /// (null, left as-is), cleared → empty string (drops the key), edited → the new value.
+        /// </summary>
+        private PdfMetadata? BuildMetadataPatch()
+        {
+            var loaded = _loadedMetadata ?? new PdfMetadata();
+
+            string? Diff(string current, string? original)
+            {
+                original ??= "";
+                if (current == original) return null;     // unchanged → leave untouched
+                return current;                            // edited (empty current → clear)
+            }
+
+            var title    = Diff(MetadataTitleTextBox.Text,    loaded.Title);
+            var author   = Diff(MetadataAuthorTextBox.Text,   loaded.Author);
+            var subject  = Diff(MetadataSubjectTextBox.Text,  loaded.Subject);
+            var keywords = Diff(MetadataKeywordsTextBox.Text, loaded.Keywords);
+
+            if (title is null && author is null && subject is null && keywords is null)
+                return null;
+
+            return new PdfMetadata
+            {
+                Title    = title,
+                Author   = author,
+                Subject  = subject,
+                Keywords = keywords,
+            };
+        }
+
+        /// <summary>
+        /// True when the active operation writes multiple files / a folder of results rather than
+        /// a single output PDF, so the user must pick a destination folder instead of a file.
+        /// </summary>
+        private bool IsFolderOutputOperation()
+        {
+            return OrganizationPanel.Visibility == Visibility.Visible &&
+                   (SplitPanel.Visibility == Visibility.Visible ||
+                    ExtractPanel.Visibility == Visibility.Visible);
+        }
+
+        private void ShowProcessing(bool active)
+        {
+            ProcessingStatusPanel.Visibility = Visibility.Visible;
+            ProcessingProgressBar.IsIndeterminate = active;
+            if (!active)
+                ProcessingProgressBar.Value = ProcessingProgressBar.Maximum;
+        }
+
         private async void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
             if (_currentPdfFile == null || _isProcessing || App.MainWindow is null)
                 return;
 
-            var picker = new FileSavePicker
-            {
-                SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
-                SuggestedFileName = $"{Path.GetFileNameWithoutExtension(_currentPdfFile.Name)}_processed"
-            };
-            picker.FileTypeChoices.Add("PDF document", new List<string> { ".pdf" });
+            bool folderOutput = IsFolderOutputOperation();
             var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
-            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
 
-            var saveFile = await picker.PickSaveFileAsync();
-            if (saveFile is null) return;
+            string destination;
+            string destinationName;
+
+            if (folderOutput)
+            {
+                var folderPicker = new FolderPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
+                folderPicker.FileTypeFilter.Add("*");
+                WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, hwnd);
+
+                var folder = await folderPicker.PickSingleFolderAsync();
+                if (folder is null) return;
+                destination = folder.Path;
+                destinationName = folder.Name;
+            }
+            else
+            {
+                var picker = new FileSavePicker
+                {
+                    SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+                    SuggestedFileName = $"{Path.GetFileNameWithoutExtension(_currentPdfFile.Name)}_processed"
+                };
+                picker.FileTypeChoices.Add("PDF document", new List<string> { ".pdf" });
+                WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+
+                var saveFile = await picker.PickSaveFileAsync();
+                if (saveFile is null) return;
+                destination = saveFile.Path;
+                destinationName = saveFile.Name;
+            }
 
             _isProcessing = true;
             ApplyButton.IsEnabled = false;
-            ProcessingStatusPanel.Visibility = Visibility.Visible;
+            ShowProcessing(true);
 
             try
             {
-                await ProcessPdfOperations(saveFile.Path);
+                await ProcessPdfOperations(destination, folderOutput);
                 ProcessingStatusTextBlock.Text = "PDF processed successfully!";
-                ProcessingDetailTextBlock.Text = $"Saved to: {saveFile.Name}";
+                ProcessingDetailTextBlock.Text = folderOutput
+                    ? $"Saved to folder: {destinationName}"
+                    : $"Saved to: {destinationName}";
             }
             catch (Exception ex)
             {
@@ -881,21 +994,22 @@ namespace Files_Tools.Pages
             finally
             {
                 _isProcessing = false;
+                ShowProcessing(false);
                 ApplyButton.IsEnabled = true;
             }
         }
 
-        private async Task ProcessPdfOperations(string finalOutputPath)
+        private async Task ProcessPdfOperations(string destination, bool folderOutput)
         {
             ProcessingStatusTextBlock.Text = "Processing PDF...";
             ProcessingDetailTextBlock.Text = "Preparing operations...";
 
+            var inputPath = _currentPdfFile.Path;
+            var outputDir = Path.Combine(Path.GetTempPath(), $"ft_pdf_{Guid.NewGuid():N}");
+            Directory.CreateDirectory(outputDir);
+
             try
             {
-                var inputPath = _currentPdfFile.Path;
-                var outputDir = Path.Combine(Path.GetTempPath(), $"ft_pdf_{Guid.NewGuid():N}");
-                Directory.CreateDirectory(outputDir);
-
                 string outputPath = Path.Combine(outputDir, Path.GetFileName(inputPath));
                 string workingPath = inputPath;
 
@@ -916,19 +1030,21 @@ namespace Files_Tools.Pages
 
                     if (SplitPanel.Visibility == Visibility.Visible && SplitModeComboBox.SelectedIndex >= 0)
                     {
+                        // Split produces multiple files; write them straight into the chosen folder.
                         ProcessingStatusTextBlock.Text = "Splitting PDF...";
                         var options = SplitModeComboBox.SelectedIndex == 0
-                            ? new PdfSplitOptions { OnePagePerFile = true }
+                            ? new PdfSplitOptions { OnePagePerFile = true, OutputPrefix = Path.GetFileNameWithoutExtension(inputPath) }
                             : new PdfSplitOptions
                             {
+                                OutputPrefix = Path.GetFileNameWithoutExtension(inputPath),
                                 Ranges = SplitRangesTextBox.Text.Split(',', StringSplitOptions.RemoveEmptyEntries)
                                     .Select(r => r.Trim())
                                     .ToList()
                             };
 
-                        var parts = await _pdfService.SplitAsync(workingPath, outputDir, options);
+                        var parts = await _pdfService.SplitAsync(workingPath, destination, options);
                         ProcessingDetailTextBlock.Text = $"Split into {parts.Count} files";
-                        workingPath = parts.FirstOrDefault() ?? inputPath;
+                        return;
                     }
 
                     if (ReorderPanel.Visibility == Visibility.Visible && !string.IsNullOrWhiteSpace(ReorderSequenceTextBox.Text))
@@ -948,9 +1064,15 @@ namespace Files_Tools.Pages
                     if (ExtractPanel.Visibility == Visibility.Visible &&
                         (ExtractImagesCheckBox.IsChecked == true || ExtractAttachmentsCheckBox.IsChecked == true))
                     {
+                        // Extract writes images/ and attachments/ folders into the chosen folder.
                         ProcessingStatusTextBlock.Text = "Extracting content...";
-                        var (imageCount, attachmentCount) = await _pdfService.ExtractAsync(workingPath, outputDir);
+                        var (imageCount, attachmentCount) = await _pdfService.ExtractAsync(
+                            workingPath,
+                            destination,
+                            Strings.Get("PdfPage_ImagesFolderName"),
+                            Strings.Get("PdfPage_AttachmentsFolderName"));
                         ProcessingDetailTextBlock.Text = $"Extracted {imageCount} images, {attachmentCount} attachments";
+                        return;
                     }
                 }
 
@@ -1030,11 +1152,16 @@ namespace Files_Tools.Pages
                     if (PermissionsPanel.Visibility == Visibility.Visible)
                     {
                         ProcessingStatusTextBlock.Text = "Updating permissions...";
+                        bool allowPrint = AllowPrintingCheckBox.IsChecked == true;
+                        bool allowEdit = AllowEditingCheckBox.IsChecked == true;
                         var permissions = new PdfPermissions
                         {
-                            AllowPrint = AllowPrintingCheckBox.IsChecked == true,
+                            AllowPrint = allowPrint,
+                            AllowHighResPrint = allowPrint,
                             AllowExtract = AllowCopyingCheckBox.IsChecked == true,
-                            AllowModify = AllowEditingCheckBox.IsChecked == true,
+                            AllowModify = allowEdit,
+                            AllowAssemble = allowEdit,
+                            AllowFormFill = allowEdit,
                             AllowAnnotate = AllowAnnotationsCheckBox.IsChecked == true
                         };
 
@@ -1072,19 +1199,15 @@ namespace Files_Tools.Pages
 
                     if (MetadataPanel.Visibility == Visibility.Visible)
                     {
-                        ProcessingStatusTextBlock.Text = "Updating metadata...";
-                        var metadata = new PdfMetadata
+                        var metadata = BuildMetadataPatch();
+                        if (metadata is not null)
                         {
-                            Title = string.IsNullOrWhiteSpace(MetadataTitleTextBox.Text) ? null : MetadataTitleTextBox.Text,
-                            Author = string.IsNullOrWhiteSpace(MetadataAuthorTextBox.Text) ? null : MetadataAuthorTextBox.Text,
-                            Subject = string.IsNullOrWhiteSpace(MetadataSubjectTextBox.Text) ? null : MetadataSubjectTextBox.Text,
-                            Keywords = string.IsNullOrWhiteSpace(MetadataKeywordsTextBox.Text) ? null : MetadataKeywordsTextBox.Text
-                        };
-
-                        outputPath = Path.Combine(outputDir, "metadata_updated.pdf");
-                        await _pdfService.UpdateMetadataAsync(workingPath, outputPath, metadata);
-                        workingPath = outputPath;
-                        ProcessingDetailTextBlock.Text = "Metadata updated";
+                            ProcessingStatusTextBlock.Text = "Updating metadata...";
+                            outputPath = Path.Combine(outputDir, "metadata_updated.pdf");
+                            await _pdfService.UpdateMetadataAsync(workingPath, outputPath, metadata);
+                            workingPath = outputPath;
+                            ProcessingDetailTextBlock.Text = "Metadata updated";
+                        }
                     }
                 }
 
@@ -1098,9 +1221,10 @@ namespace Files_Tools.Pages
                     ProcessingDetailTextBlock.Text = "PDF repaired";
                 }
 
-                // Copy final output to the user's chosen location
-                if (workingPath != inputPath && File.Exists(workingPath))
-                    File.Copy(workingPath, finalOutputPath, overwrite: true);
+                // Copy final output to the user's chosen location. If no operation ran, fall back
+                // to copying the original so the user still gets the file they asked to save.
+                var sourcePath = (workingPath != inputPath && File.Exists(workingPath)) ? workingPath : inputPath;
+                File.Copy(sourcePath, destination, overwrite: true);
 
                 ProcessingStatusTextBlock.Text = "PDF processed successfully!";
             }
@@ -1109,6 +1233,10 @@ namespace Files_Tools.Pages
                 ProcessingStatusTextBlock.Text = "Error processing PDF";
                 ProcessingDetailTextBlock.Text = ex.Message;
                 throw;
+            }
+            finally
+            {
+                try { Directory.Delete(outputDir, recursive: true); } catch { /* best-effort temp cleanup */ }
             }
         }
 

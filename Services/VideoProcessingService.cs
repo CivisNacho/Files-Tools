@@ -610,6 +610,12 @@ public sealed class VideoSourceInfo
 {
     public string? VideoCodecName { get; init; }
     public string? AudioCodecName { get; init; }
+
+    /// <summary>Display width of the primary video stream (rotation applied), or 0 if unknown.</summary>
+    public int Width { get; init; }
+
+    /// <summary>Display height of the primary video stream (rotation applied), or 0 if unknown.</summary>
+    public int Height { get; init; }
 }
 
 /// <summary>
@@ -736,11 +742,41 @@ public sealed class VideoProcessingService : IVideoProcessingService
         ValidateInputPath(inputPath);
         var ffprobeCandidates = FfmpegLocator.ResolveExecutableCandidates("ffprobe");
         var (info, _) = await ProbeAsync(ffprobeCandidates, inputPath, cancellationToken).ConfigureAwait(false);
+        var (displayWidth, displayHeight) = GetDisplayDimensions(info.PrimaryVideoStream);
         return new VideoSourceInfo
         {
             VideoCodecName = MapVideoCodecToUiName(info.PrimaryVideoStream?.CodecName),
-            AudioCodecName = MapAudioCodecToUiName(info.PrimaryAudioStream?.CodecName)
+            AudioCodecName = MapAudioCodecToUiName(info.PrimaryAudioStream?.CodecName),
+            Width = displayWidth,
+            Height = displayHeight
         };
+    }
+
+    /// <summary>
+    /// Returns the on-screen (display) dimensions of a video stream, swapping width/height when a
+    /// rotation tag of 90/270 is present so callers get the dimensions the video actually plays at.
+    /// </summary>
+    private static (int Width, int Height) GetDisplayDimensions(MediaStreamInfo? stream)
+    {
+        if (stream is null)
+        {
+            return (0, 0);
+        }
+
+        var width = stream.Width ?? 0;
+        var height = stream.Height ?? 0;
+
+        if (stream.Tags is not null && stream.Tags.TryGetValue("rotate", out var rotateValue)
+            && int.TryParse(rotateValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out var rotation))
+        {
+            var normalized = ((rotation % 360) + 360) % 360;
+            if (normalized is 90 or 270)
+            {
+                return (height, width);
+            }
+        }
+
+        return (width, height);
     }
 
     /// <inheritdoc />
@@ -946,6 +982,10 @@ public sealed class VideoProcessingService : IVideoProcessingService
             var progressObserver = CreateProgressObserver(EstimateOutputDuration(inputInfo, options), progress);
 
             await RunProcessWithFallbackAsync(ffmpegCandidates, ffmpegArgs, cancellationToken, probeJson, progressObserver).ConfigureAwait(false);
+
+            // SoftMux into a container that can't carry .ass natively: leave the video untouched and
+            // drop the styled subtitle next to it as a sidecar the player loads automatically.
+            WriteSidecarSubtitleIfNeeded(finalOutputPath, options, outputFormat);
         }
         catch (VideoProcessingException)
         {
@@ -1009,9 +1049,9 @@ public sealed class VideoProcessingService : IVideoProcessingService
             args.Add(Path.GetFullPath(options.AudioMux.AudioPath));
         }
 
-        var shouldBurnInAssFallback = ShouldBurnInAssSubtitleFallback(options, outputFormat);
+        var shouldSidecarSubtitle = ShouldSidecarAssSubtitle(options, outputFormat);
 
-        if (options.SubtitleMux is { Mode: SubtitleMode.SoftMux } && !shouldBurnInAssFallback)
+        if (options.SubtitleMux is { Mode: SubtitleMode.SoftMux } && !shouldSidecarSubtitle)
         {
             args.Add("-i");
             args.Add(Path.GetFullPath(options.SubtitleMux.SubtitlePath));
@@ -1027,11 +1067,11 @@ public sealed class VideoProcessingService : IVideoProcessingService
         var videoFilterChain = BuildVideoFilter(options, outputFormat, inputInfo);
         var audioFilterChain = BuildAudioFilter(options);
         var audioStreamIndex = options.AudioMux is not null ? 1 : -1;
-        var subtitleStreamIndex = options.SubtitleMux is { Mode: SubtitleMode.SoftMux } && !shouldBurnInAssFallback
+        var subtitleStreamIndex = options.SubtitleMux is { Mode: SubtitleMode.SoftMux } && !shouldSidecarSubtitle
             ? (options.AudioMux is not null ? 2 : 1)
             : -1;
 
-        AddMappingArguments(args, options, inputInfo, audioStreamIndex, subtitleStreamIndex, shouldBurnInAssFallback);
+        AddMappingArguments(args, options, inputInfo, audioStreamIndex, subtitleStreamIndex, shouldSidecarSubtitle);
 
         if (!string.IsNullOrWhiteSpace(videoFilterChain))
         {
@@ -1060,7 +1100,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
         return args;
     }
 
-    private static void AddMappingArguments(List<string> args, ProcessVideoOptions options, MediaInfo inputInfo, int audioMuxInputIndex, int subtitleInputIndex, bool shouldBurnInAssFallback)
+    private static void AddMappingArguments(List<string> args, ProcessVideoOptions options, MediaInfo inputInfo, int audioMuxInputIndex, int subtitleInputIndex, bool shouldSidecarSubtitle)
     {
         args.Add("-map");
         args.Add("0:v:0");
@@ -1082,7 +1122,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
             args.Add("0:a?");
         }
 
-        if (options.SubtitleMux is { Mode: SubtitleMode.SoftMux } && !shouldBurnInAssFallback)
+        if (options.SubtitleMux is { Mode: SubtitleMode.SoftMux } && !shouldSidecarSubtitle)
         {
             args.Add("-map");
             args.Add($"{subtitleInputIndex}:s:0");
@@ -1098,8 +1138,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
     {
         var filters = new List<string>();
 
-        var shouldBurnInAssFallback = ShouldBurnInAssSubtitleFallback(options, outputFormat);
-        if (options.SubtitleMux is { } subtitleOptions && (subtitleOptions.Mode == SubtitleMode.BurnIn || shouldBurnInAssFallback))
+        if (options.SubtitleMux is { Mode: SubtitleMode.BurnIn } subtitleOptions)
         {
             var (estimatedWidth, estimatedHeight) = EstimateOutputDimensions(inputInfo, options);
             filters.Add(BuildSubtitleFilter(subtitleOptions, estimatedWidth, estimatedHeight));
@@ -1307,7 +1346,6 @@ public sealed class VideoProcessingService : IVideoProcessingService
 
         var requiresVideoEncode =
             options.RequiresVideoFiltering ||
-            ShouldBurnInAssSubtitleFallback(options, outputFormat) ||
             options.Trim is not null ||
             options.Compression is not null ||
             requestedVideoCodec.HasValue;
@@ -1381,7 +1419,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
             SubtitleCodec = ResolveSubtitleCodec(options.SubtitleMux, outputFormat),
             VideoNeedsEncoding = requiresVideoEncode || !string.Equals(inputInfo.PrimaryVideoStream?.CodecName, GetProbeCodecName(desiredVideoCodec), StringComparison.OrdinalIgnoreCase),
             AudioNeedsEncoding = desiredAudioCodec.HasValue && (requiresAudioEncode || options.AudioMux is not null || !string.Equals(inputInfo.PrimaryAudioStream?.CodecName, GetProbeCodecName(desiredAudioCodec.Value), StringComparison.OrdinalIgnoreCase)),
-            SubtitleNeedsEncoding = options.SubtitleMux is { Mode: SubtitleMode.SoftMux } || (inputInfo.SubtitleStreams.Count > 0 && !ShouldDropSubtitleStreams(options)),
+            SubtitleNeedsEncoding = (options.SubtitleMux is { Mode: SubtitleMode.SoftMux } && !ShouldSidecarAssSubtitle(options, outputFormat)) || (inputInfo.SubtitleStreams.Count > 0 && !ShouldDropSubtitleStreams(options)),
             VideoCrf = options.Compression is not null ? GetCrf(options.Compression.Preset, desiredVideoCodec) : null
         };
     }
@@ -1477,8 +1515,10 @@ public sealed class VideoProcessingService : IVideoProcessingService
             return;
         }
 
-        if (options.SubtitleMux.Mode == SubtitleMode.BurnIn || ShouldBurnInAssSubtitleFallback(options, outputFormat))
+        if (options.SubtitleMux.Mode == SubtitleMode.BurnIn || ShouldSidecarAssSubtitle(options, outputFormat))
         {
+            // BurnIn paints into the pixels; sidecar writes a separate .ass after render. Either way the
+            // output video carries no subtitle stream.
             args.Add("-sn");
             return;
         }
@@ -1489,7 +1529,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
         }
 
         args.Add("-c:s");
-        args.Add(plan.SubtitleCodec);
+        args.Add(ResolveSubtitleEmbedCodec(options.SubtitleMux.SubtitlePath, outputFormat, plan.SubtitleCodec));
 
         if (!string.IsNullOrWhiteSpace(options.SubtitleMux.Language))
         {
@@ -1719,6 +1759,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
         }
 
         if (options.SubtitleMux is { Mode: SubtitleMode.SoftMux } &&
+            !ShouldSidecarAssSubtitle(options, outputFormat) &&
             ResolveSubtitleCodec(options.SubtitleMux, outputFormat) is null)
         {
             throw new NotSupportedException($"Soft subtitle muxing is not supported for {outputFormat} with subtitle file '{options.SubtitleMux.SubtitlePath}'.");
@@ -2310,14 +2351,25 @@ public sealed class VideoProcessingService : IVideoProcessingService
         };
     }
 
-    private static bool ShouldBurnInAssSubtitleFallback(ProcessVideoOptions options, VideoContainerFormat outputFormat)
+    /// <summary>
+    /// True when a SoftMux request targets an <c>.ass</c>/<c>.ssa</c> subtitle whose styling cannot be
+    /// carried natively by the output container (anything but MKV). In that case we neither burn the
+    /// subtitle into the pixels nor transcode it to a lossy soft codec (which would drop the styling);
+    /// instead the subtitle is written as a sidecar <c>.ass</c> file beside the output video, which
+    /// players load automatically. MKV embeds <c>.ass</c> natively, so it is muxed as a soft track.
+    /// </summary>
+    private static bool ShouldSidecarAssSubtitle(ProcessVideoOptions options, VideoContainerFormat outputFormat)
     {
         if (options.SubtitleMux is not { Mode: SubtitleMode.SoftMux } subtitleOptions)
         {
             return false;
         }
 
-        if (outputFormat is not (VideoContainerFormat.Mp4 or VideoContainerFormat.Mov))
+        // MKV carries an ASS track natively (and self-contained is the expected Matroska behaviour),
+        // so it is embedded — via a stream copy, see ResolveSubtitleEmbedCodec, to preserve styling.
+        // Containers that can't carry ASS styling (MP4/MOV/WebM) get a sidecar .ass beside the video
+        // instead of burning or lossily transcoding it.
+        if (outputFormat == VideoContainerFormat.Mkv)
         {
             return false;
         }
@@ -2325,6 +2377,62 @@ public sealed class VideoProcessingService : IVideoProcessingService
         var extension = Path.GetExtension(subtitleOptions.SubtitlePath);
         return extension.Equals(".ass", StringComparison.OrdinalIgnoreCase) ||
                extension.Equals(".ssa", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Resolves the <c>-c:s</c> codec for embedding a SoftMux subtitle. When the source subtitle is
+    /// already in a format the container carries natively (e.g. <c>.ass</c>/<c>.srt</c> into MKV), it
+    /// is stream-copied (<c>copy</c>) so nothing is re-encoded — re-encoding ASS via <c>-c:s ass</c>
+    /// simplifies override tags and mangles styled, one-event-per-word karaoke. Otherwise the planned
+    /// transcode codec (e.g. <c>mov_text</c> for MP4) is used.
+    /// </summary>
+    private static string ResolveSubtitleEmbedCodec(string subtitlePath, VideoContainerFormat outputFormat, string plannedCodec)
+    {
+        var extension = Path.GetExtension(subtitlePath);
+        var isCopyNative = outputFormat switch
+        {
+            // Matroska carries ass/ssa/srt/vtt as-is.
+            VideoContainerFormat.Mkv => extension.Equals(".ass", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".ssa", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".srt", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".vtt", StringComparison.OrdinalIgnoreCase),
+            VideoContainerFormat.Webm => extension.Equals(".vtt", StringComparison.OrdinalIgnoreCase),
+            _ => false
+        };
+
+        return isCopyNative ? "copy" : plannedCodec;
+    }
+
+    /// <summary>
+    /// Writes the SoftMux subtitle next to the produced video as a sidecar <c>.ass</c> (matching base
+    /// name) when the container cannot carry ASS natively. Best-effort: a copy failure must not fail
+    /// the whole video render.
+    /// </summary>
+    private static void WriteSidecarSubtitleIfNeeded(string finalOutputPath, ProcessVideoOptions options, VideoContainerFormat outputFormat)
+    {
+        if (!ShouldSidecarAssSubtitle(options, outputFormat) || options.SubtitleMux is null)
+        {
+            return;
+        }
+
+        var source = Path.GetFullPath(options.SubtitleMux.SubtitlePath);
+        var sidecar = Path.ChangeExtension(Path.GetFullPath(finalOutputPath), ".ass");
+        if (string.Equals(source, sidecar, StringComparison.OrdinalIgnoreCase) || !File.Exists(source))
+        {
+            return;
+        }
+
+        try
+        {
+            File.Copy(source, sidecar, overwrite: true);
+        }
+        catch (IOException)
+        {
+            // Best effort: the video still rendered; a sidecar copy failure should not abort it.
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
     }
 
     private static VideoCodec? MapVideoCodec(string? codecName)

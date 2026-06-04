@@ -36,6 +36,26 @@ namespace Files_Tools
         public App()
         {
             InitializeComponent();
+            LoadSubtitlePresets();
+        }
+
+        /// <summary>
+        /// Loads JSON subtitle presets from <c>Assets/Presets</c> and the user preset folder and
+        /// registers them into <see cref="Services.SubtitleStyleCatalog"/> so the editors' style
+        /// pickers list them alongside the built-ins. Failures are non-fatal: the app still has its
+        /// built-in presets, so a malformed preset file must never block launch.
+        /// </summary>
+        private static void LoadSubtitlePresets()
+        {
+            try
+            {
+                var entries = new Services.Presets.SubtitlePresetLoader().Load();
+                Services.SubtitleStyleCatalog.RegisterPresets(entries);
+            }
+            catch
+            {
+                // Built-in presets remain available; ignore preset-loading failures at startup.
+            }
         }
 
         /// <summary>

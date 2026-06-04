@@ -267,6 +267,8 @@
   <data name="PdfPage_Extract.Text" xml:space="preserve"><value>निकालें</value></data>
   <data name="PdfPage_ExtractImages.Content" xml:space="preserve"><value>इमेज निकालें</value></data>
   <data name="PdfPage_ExtractAttachments.Content" xml:space="preserve"><value>अटैचमेंट निकालें</value></data>
+  <data name="PdfPage_ImagesFolderName" xml:space="preserve"><value>छवियाँ</value></data>
+  <data name="PdfPage_AttachmentsFolderName" xml:space="preserve"><value>अनुलग्नक</value></data>
   <data name="PdfPage_ExtractHint.Text" xml:space="preserve"><value>निकाली गई फ़ाइलें अलग-अलग फ़ोल्डर में सहेजी जाएँगी।</value></data>
   <data name="PdfPage_Rotate.Text" xml:space="preserve"><value>घुमाएँ</value></data>
   <data name="PdfPage_Rotation.Header" xml:space="preserve"><value>रोटेशन</value></data>

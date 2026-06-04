@@ -267,6 +267,8 @@
   <data name="PdfPage_Extract.Text" xml:space="preserve"><value>Extrahieren</value></data>
   <data name="PdfPage_ExtractImages.Content" xml:space="preserve"><value>Bilder extrahieren</value></data>
   <data name="PdfPage_ExtractAttachments.Content" xml:space="preserve"><value>Anhänge extrahieren</value></data>
+  <data name="PdfPage_ImagesFolderName" xml:space="preserve"><value>Bilder</value></data>
+  <data name="PdfPage_AttachmentsFolderName" xml:space="preserve"><value>Anhänge</value></data>
   <data name="PdfPage_ExtractHint.Text" xml:space="preserve"><value>Extrahierte Dateien werden in separaten Ordnern gespeichert.</value></data>
   <data name="PdfPage_Rotate.Text" xml:space="preserve"><value>Drehen</value></data>
   <data name="PdfPage_Rotation.Header" xml:space="preserve"><value>Drehung</value></data>
