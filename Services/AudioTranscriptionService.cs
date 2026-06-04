@@ -134,6 +134,7 @@ public enum AudioTranscriptionStage
 {
     PreparingAudio,
     Transcribing,
+    Aligning,
     WritingSubtitles,
     Completed
 }
@@ -167,6 +168,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
     private readonly IWhisperModelInstaller _modelInstaller;
     private readonly IWhisperTranscriber _transcriber;
     private readonly IMediaPreparationService _mediaPreparationService;
+    private readonly IWordAligner? _wordAligner;
 
     /// <summary>
     /// Creates the service with default local media preparation and Whisper adapters.
@@ -176,7 +178,8 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             ResolveDefaultModelPath(),
             new WhisperModelInstaller(),
             new WhisperNetTranscriber(),
-            new MediaPreparationService(new AudioProcessingService(), new VideoProcessingService()))
+            new MediaPreparationService(new AudioProcessingService(), new VideoProcessingService()),
+            new Wav2Vec2AlignmentService())
     {
     }
 
@@ -184,18 +187,21 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
         string modelPath,
         IWhisperModelInstaller modelInstaller,
         IWhisperTranscriber transcriber,
-        IMediaPreparationService mediaPreparationService)
+        IMediaPreparationService mediaPreparationService,
+        IWordAligner? wordAligner = null)
     {
         _modelPath = modelPath ?? throw new ArgumentNullException(nameof(modelPath));
         _modelInstaller = modelInstaller ?? throw new ArgumentNullException(nameof(modelInstaller));
         _transcriber = transcriber ?? throw new ArgumentNullException(nameof(transcriber));
         _mediaPreparationService = mediaPreparationService ?? throw new ArgumentNullException(nameof(mediaPreparationService));
+        _wordAligner = wordAligner;
     }
 
     /// <inheritdoc />
     public bool IsInstalled()
     {
-        return File.Exists(_modelPath);
+        // The transcription feature needs both the Whisper model and the forced-alignment model.
+        return File.Exists(_modelPath) && (_wordAligner?.IsInstalled() ?? true);
     }
 
     /// <inheritdoc />
@@ -230,19 +236,46 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
         });
 
         Directory.CreateDirectory(modelDirectory);
-        var copyProgress = progress is null
-            ? null
-            : new ThrottledProgress<double>(value =>
-            {
-                var fraction = Math.Clamp(value, 0d, 1d);
-                progress.Report(new AudioTranscriptionInstallProgress
-                {
-                    Stage = fraction >= 1d ? "Transcription feature downloaded." : "Downloading transcription feature...",
-                    FractionComplete = fraction
-                });
-            }, throttleMilliseconds: 200);
 
-        await _modelInstaller.InstallBaseModelAsync(_modelPath, copyProgress, cancellationToken).ConfigureAwait(false);
+        // Whisper (speech-to-text) downloads first and maps to the first 80% of overall progress;
+        // the forced-alignment model fills the remaining 20%. The Whisper model is far larger, so
+        // this split keeps the bar moving roughly in line with bytes downloaded.
+        const double WhisperShare = 0.8d;
+
+        if (!File.Exists(_modelPath))
+        {
+            var copyProgress = progress is null
+                ? null
+                : new ThrottledProgress<double>(value =>
+                {
+                    var fraction = Math.Clamp(value, 0d, 1d) * WhisperShare;
+                    progress.Report(new AudioTranscriptionInstallProgress
+                    {
+                        Stage = "Downloading transcription model...",
+                        FractionComplete = fraction
+                    });
+                }, throttleMilliseconds: 200);
+
+            await _modelInstaller.InstallBaseModelAsync(_modelPath, copyProgress, cancellationToken).ConfigureAwait(false);
+        }
+
+        if (_wordAligner is not null && !_wordAligner.IsInstalled())
+        {
+            var alignerProgress = progress is null
+                ? null
+                : new ThrottledProgress<double>(value =>
+                {
+                    var fraction = WhisperShare + (Math.Clamp(value, 0d, 1d) * (1d - WhisperShare));
+                    progress.Report(new AudioTranscriptionInstallProgress
+                    {
+                        Stage = "Downloading alignment model...",
+                        FractionComplete = fraction
+                    });
+                }, throttleMilliseconds: 200);
+
+            await _wordAligner.InstallAsync(alignerProgress, cancellationToken).ConfigureAwait(false);
+        }
+
         progress?.Report(new AudioTranscriptionInstallProgress
         {
             Stage = "Transcription feature downloaded.",
@@ -339,7 +372,37 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             var transcriptionProgress = progress is null
                 ? null
                 : new CallbackProgress<double>(value => Report(progress, progressState, AudioTranscriptionStage.Transcribing, value, "Transcribing audio"));
-            return await _transcriber.TranscribeAsync(_modelPath, preparedAudio.AudioPath, transcriptionProgress, cancellationToken).ConfigureAwait(false);
+            var segments = await _transcriber.TranscribeAsync(_modelPath, preparedAudio.AudioPath, transcriptionProgress, cancellationToken).ConfigureAwait(false);
+            System.Diagnostics.Debug.WriteLine($"[Transcription] Whisper produced {segments.Count} segments from '{System.IO.Path.GetFileName(inputPath)}'.");
+
+            // Refine word timing with forced alignment. The Whisper model/session is fully released
+            // by TranscribeAsync above before this runs, so only one acoustic model is resident at a
+            // time. Alignment is best-effort: on any failure we keep Whisper's token timings.
+            var alignerInstalled = _wordAligner is not null && _wordAligner.IsInstalled();
+            System.Diagnostics.Debug.WriteLine($"[Transcription] Word aligner {(alignerInstalled ? "available -> refining word timings" : "unavailable -> using Whisper token timings")}.");
+            if (alignerInstalled)
+            {
+                var alignmentProgress = progress is null
+                    ? null
+                    : new CallbackProgress<double>(value => Report(progress, progressState, AudioTranscriptionStage.Aligning, value, "Aligning word timings"));
+                try
+                {
+                    segments = await Task.Run(
+                        () => _wordAligner!.Align(preparedAudio.AudioPath, segments, alignmentProgress, cancellationToken),
+                        cancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    // Keep the unaligned segments; karaoke falls back to Whisper/synthesized timing.
+                    System.Diagnostics.Debug.WriteLine($"[Transcription] Alignment failed ({ex.GetType().Name}: {ex.Message}); falling back to Whisper token timings.");
+                }
+            }
+
+            return segments;
         }
         catch (AudioTranscriptionException)
         {
@@ -865,8 +928,9 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
 
         var overallPercent = stage switch
         {
-            AudioTranscriptionStage.PreparingAudio => stagePercent * 0.2d,
-            AudioTranscriptionStage.Transcribing => 0.2d + (stagePercent * 0.75d),
+            AudioTranscriptionStage.PreparingAudio => stagePercent * 0.15d,
+            AudioTranscriptionStage.Transcribing => 0.15d + (stagePercent * 0.6d),
+            AudioTranscriptionStage.Aligning => 0.75d + (stagePercent * 0.2d),
             AudioTranscriptionStage.WritingSubtitles => 0.95d + (stagePercent * 0.04d),
             AudioTranscriptionStage.Completed => 1d,
             _ => stagePercent
