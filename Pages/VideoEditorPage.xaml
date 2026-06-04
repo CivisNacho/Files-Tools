@@ -115,6 +115,9 @@
                                             AreTransportControlsEnabled="True"
                                             Stretch="Uniform"
                                             Visibility="Collapsed" />
+                                        <!--  Live subtitle preview overlay (approximate libass look in plain XAML, synced to
+                                              playback). The rendered subtitle is draggable to set placement.  -->
+                                        <Canvas x:Name="SubtitlePreviewCanvas" />
                                         <Canvas x:Name="SubtitlePlacementCanvas">
                                             <Primitives:Thumb
                                                 x:Name="SubtitlePlacementMarker"
@@ -692,12 +695,6 @@
                                                                 Text="ETA calculating..."
                                                                 TextWrapping="Wrap"
                                                                 Visibility="Collapsed" />
-                                                            <TextBlock
-                                                                x:Name="TranscriptionReadyStatusTextBlock"
-                                                                x:Uid="VideoPage_SubtitlesNotGenerated"
-                                                                Opacity="0.76"
-                                                                Text="Subtitles not generated yet."
-                                                                TextWrapping="Wrap" />
                                                         </StackPanel>
                                                     </Border>
 

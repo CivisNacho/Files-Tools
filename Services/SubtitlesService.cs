@@ -890,6 +890,13 @@ public interface ISubtitlesService
     /// Renders a processed subtitle draft to karaoke ASS text while preserving reviewed cue boundaries.
     /// </summary>
     string RenderKaraokeAss(SubtitleDraft draft, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null, SubtitleRenderTarget? target = null);
+
+    /// <summary>
+    /// Rewrites a preset into the given target frame's coordinate space (the same font/margin scaling
+    /// the renderers apply), so a live preview can size text exactly like the burned output — including
+    /// the chunked karaoke fit-to-frame clamp. Returns the preset unchanged when target is null/equal.
+    /// </summary>
+    SubtitleStylePreset ApplyRenderTarget(SubtitleStylePreset preset, SubtitleRenderTarget? target);
 }
 
 /// <summary>
@@ -1092,6 +1099,13 @@ public sealed class SubtitlesService : ISubtitlesService
         {
             SourceWords = draft.SourceWords
         };
+    }
+
+    /// <inheritdoc />
+    public SubtitleStylePreset ApplyRenderTarget(SubtitleStylePreset preset, SubtitleRenderTarget? target)
+    {
+        ArgumentNullException.ThrowIfNull(preset);
+        return ApplyTargetResolutionToPreset(NormalizePreset(preset), target);
     }
 
     /// <inheritdoc />
