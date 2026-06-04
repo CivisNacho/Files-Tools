@@ -583,6 +583,18 @@
                                                                     <ComboBoxItem x:Uid="VideoPage_StyledASS" Content="Styled ASS" />
                                                                     <ComboBoxItem x:Uid="VideoPage_KaraokeASS" Content="Karaoke ASS" />
                                                                 </ComboBox>
+                                                                <ComboBox
+                                                                    x:Name="AdvancedSubtitleStyleComboBox"
+                                                                    x:Uid="VideoPage_SubtitleStyle"
+                                                                    HorizontalAlignment="Stretch"
+                                                                    Header="Subtitle style"
+                                                                    SelectionChanged="AdvancedSubtitleStyleComboBox_SelectionChanged" />
+                                                                <TextBlock
+                                                                    x:Name="AdvancedSubtitleStyleHintTextBlock"
+                                                                    x:Uid="VideoPage_SubtitleStyleHint"
+                                                                    Opacity="0.76"
+                                                                    Text="Pick a style to restyle generated subtitles instantly — no need to generate them again."
+                                                                    TextWrapping="Wrap" />
                                                                 <Button
                                                                     x:Name="ConfigureAdvancedSubtitlesButton"
                                                                     x:Uid="VideoPage_ConfigureAdvanced"

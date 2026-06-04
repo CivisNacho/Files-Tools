@@ -101,6 +101,8 @@ namespace Files_Tools.Pages
         private SubtitleDraft? _advancedSubtitleDraft;
         private SubtitlePresetConfiguration _advancedSubtitlePresetConfiguration = SubtitlePresetConfiguration.CreateDefault();
         private readonly IReadOnlyList<string> _installedFontFamilies = LoadInstalledFontFamilies();
+        private bool _isSyncingAdvancedStylePicker;
+        private bool _isRestylingAdvancedSubtitles;
 
         private enum TrimDragHandle
         {
@@ -251,6 +253,7 @@ namespace Files_Tools.Pages
             UpdateAudioSyncOffsetText();
             UpdateAudioDenoiseStrengthText();
             UpdateCodecOptionsForSelectedContainer();
+            PopulateAdvancedStylePicker();
             UpdateAdvancedSubtitlePresetSummary();
         }
 
@@ -814,9 +817,14 @@ namespace Files_Tools.Pages
             RefreshValidationAndState();
         }
 
-        private void AdvancedSubtitleTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void AdvancedSubtitleTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // Switching Styled <-> Karaoke changes which catalog presets apply; refresh the picker and
+            // restyle the existing draft (if any) to the newly selected kind without regenerating.
+            PopulateAdvancedStylePicker();
+            UpdateAdvancedSubtitlePresetSummary();
             RefreshValidationAndState();
+            await ReRenderAdvancedSubtitlesIfReadyAsync();
         }
 
         private void OutputContainerComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1648,7 +1656,9 @@ namespace Files_Tools.Pages
             if (result == ContentDialogResult.Secondary)
             {
                 _advancedSubtitlePresetConfiguration = SubtitlePresetConfiguration.CreateDefault();
+                PopulateAdvancedStylePicker();
                 UpdateAdvancedSubtitlePresetSummary();
+                await ReRenderAdvancedSubtitlesIfReadyAsync();
                 return;
             }
 
@@ -1693,7 +1703,9 @@ namespace Files_Tools.Pages
 
             _advancedSubtitlePresetConfiguration = newConfig;
 
+            PopulateAdvancedStylePicker();
             UpdateAdvancedSubtitlePresetSummary();
+            await ReRenderAdvancedSubtitlesIfReadyAsync();
         }
 
         private void UpdateAdvancedSubtitlePresetSummary()
@@ -2546,30 +2558,34 @@ namespace Files_Tools.Pages
             var reviewedDraft = corrections.Count == 0
                 ? _advancedSubtitleDraft
                 : _subtitlesService.ApplyCorrections(_advancedSubtitleDraft, corrections, _advancedSubtitleDraft.Options);
+
+            await RenderAndStoreAdvancedAssAsync(reviewedDraft, path);
+            return true;
+        }
+
+        /// <summary>
+        /// Renders <paramref name="reviewedDraft"/> to the styled or karaoke ASS chosen in the UI and
+        /// writes it to <paramref name="path"/>, then refreshes editor/state. Shared by the "Apply
+        /// changes" review flow and the live restyle flow, so both stay in sync.
+        /// </summary>
+        private async Task RenderAndStoreAdvancedAssAsync(SubtitleDraft reviewedDraft, string path)
+        {
             var placement = CreateSubtitlePlacementOptionsFromUi();
             var preset = CreateAdvancedSubtitleStylePresetFromConfiguration();
-            string ass;
-            if (_pendingAdvancedSubtitleKind == PendingAdvancedSubtitleKind.Karaoke)
-            {
-                // Size the chunked "viral" karaoke style to the actual frame so it stays on-screen on any
-                // aspect ratio (e.g. vertical/portrait video). Probe the source for true display
-                // dimensions rather than trusting the preview size, which defaults to 1920x1080 and may
-                // not reflect the real file when subtitles are generated before playback starts.
-                var target = await ResolveSubtitleRenderTargetAsync();
-                ass = _subtitlesService.RenderKaraokeAss(reviewedDraft, preset, placement, target);
-            }
-            else
-            {
-                // Size styled subtitles to the real frame too, for consistent, undistorted output on
-                // any aspect ratio (matches the karaoke path).
-                var target = await ResolveSubtitleRenderTargetAsync();
-                ass = _subtitlesService.RenderStyledAss(reviewedDraft, preset, placement, target);
-            }
+
+            // Size to the real frame so styles stay undistorted on any aspect ratio (e.g. vertical
+            // video). Probe the source rather than trusting the 1920x1080 preview default.
+            var target = await ResolveSubtitleRenderTargetAsync();
+            var ass = IsKaraokeAdvancedSubtitleTypeSelected()
+                ? _subtitlesService.RenderKaraokeAss(reviewedDraft, preset, placement, target)
+                : _subtitlesService.RenderStyledAss(reviewedDraft, preset, placement, target);
+
             var directory = Path.GetDirectoryName(path);
             if (!string.IsNullOrWhiteSpace(directory))
             {
                 Directory.CreateDirectory(directory);
             }
+
             await File.WriteAllTextAsync(path, ass);
             _advancedSubtitleDraft = reviewedDraft;
             _generatedSubtitlePath = path;
@@ -2578,7 +2594,153 @@ namespace Files_Tools.Pages
             SubtitlePathTextBox.Text = path;
             LoadAdvancedSubtitleEditor(reviewedDraft);
             RefreshValidationAndState();
-            return true;
+        }
+
+        /// <summary>
+        /// Re-renders the already-generated advanced subtitles with the current style/typography,
+        /// preserving any in-progress text edits. Does nothing when no draft exists yet. This is what
+        /// lets the user switch styles without regenerating (re-transcribing) the subtitles.
+        /// </summary>
+        private async Task ReRenderAdvancedSubtitlesIfReadyAsync()
+        {
+            if (_advancedSubtitleDraft is null || _sourceVideoFile is null || _isRestylingAdvancedSubtitles
+                || _isGeneratingSubtitles || _isProcessing)
+            {
+                return;
+            }
+
+            _isRestylingAdvancedSubtitles = true;
+            try
+            {
+                // Fold any unsaved text edits from the review editor into the draft before restyling
+                // so a style change never discards them.
+                var reviewedDraft = _advancedSubtitleDraft;
+                SyncSubtitleRowsFromEditors();
+                var cues = _advancedSubtitleDraft.Cues;
+                if (_subtitleEditableRows.Count == cues.Count)
+                {
+                    var corrections = new List<SubtitleSegmentCorrection>();
+                    for (var index = 0; index < cues.Count; index++)
+                    {
+                        var normalizedText = (_subtitleEditableRows[index].Text ?? string.Empty).Replace("\r\n", "\n").Trim();
+                        if (!string.Equals(normalizedText, cues[index].Text, StringComparison.Ordinal))
+                        {
+                            corrections.Add(new SubtitleSegmentCorrection(cues[index].Id, normalizedText, Start: null, End: null));
+                        }
+                    }
+
+                    if (corrections.Count > 0)
+                    {
+                        reviewedDraft = _subtitlesService.ApplyCorrections(_advancedSubtitleDraft, corrections, _advancedSubtitleDraft.Options);
+                    }
+                }
+
+                var path = SubtitlesService.EnsureAssExtension(
+                    _generatedSubtitlePath
+                    ?? _pendingAdvancedSubtitleOutputPath
+                    ?? CreateGeneratedSubtitlePath(_sourceVideoFile, ".ass"));
+
+                await RenderAndStoreAdvancedAssAsync(reviewedDraft, path);
+                EnableSubtitleMuxCheckBox.IsChecked = true;
+                if (TranscriptionReadyStatusTextBlock is not null)
+                {
+                    TranscriptionReadyStatusTextBlock.Text = "Subtitle style updated — no regeneration needed.";
+                }
+            }
+            catch (Exception ex)
+            {
+                await ShowSimpleDialogAsync("Subtitle style", $"Could not update the subtitle style: {ex.Message}");
+            }
+            finally
+            {
+                _isRestylingAdvancedSubtitles = false;
+            }
+        }
+
+        /// <summary>
+        /// Fills the inline style picker from the style catalog for the currently selected output
+        /// kind (Styled/Karaoke) and selects the configured preset. Catalog-driven, so registering a
+        /// new style makes it appear here with no further UI changes.
+        /// </summary>
+        private void PopulateAdvancedStylePicker()
+        {
+            if (AdvancedSubtitleStyleComboBox is null)
+            {
+                return;
+            }
+
+            var isKaraoke = IsKaraokeAdvancedSubtitleTypeSelected();
+            var entries = SubtitleStyleCatalog
+                .ByKind(isKaraoke ? SubtitleStyleKind.Karaoke : SubtitleStyleKind.Styled)
+                .ToList();
+            var configuredId = isKaraoke
+                ? _advancedSubtitlePresetConfiguration.KaraokePresetId
+                : _advancedSubtitlePresetConfiguration.StyledPresetId;
+
+            _isSyncingAdvancedStylePicker = true;
+            try
+            {
+                AdvancedSubtitleStyleComboBox.Items.Clear();
+                foreach (var entry in entries)
+                {
+                    AdvancedSubtitleStyleComboBox.Items.Add(new ComboBoxItem { Content = entry.DisplayName });
+                }
+
+                var index = entries.FindIndex(entry => string.Equals(entry.Id, configuredId, StringComparison.OrdinalIgnoreCase));
+                AdvancedSubtitleStyleComboBox.SelectedIndex = index >= 0 ? index : (entries.Count > 0 ? 0 : -1);
+            }
+            finally
+            {
+                _isSyncingAdvancedStylePicker = false;
+            }
+        }
+
+        private async void AdvancedSubtitleStyleComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isSyncingAdvancedStylePicker)
+            {
+                return;
+            }
+
+            var isKaraoke = IsKaraokeAdvancedSubtitleTypeSelected();
+            var entries = SubtitleStyleCatalog
+                .ByKind(isKaraoke ? SubtitleStyleKind.Karaoke : SubtitleStyleKind.Styled)
+                .ToList();
+            var index = AdvancedSubtitleStyleComboBox.SelectedIndex;
+            if (index < 0 || index >= entries.Count)
+            {
+                return;
+            }
+
+            ApplyStylePresetToConfiguration(entries[index]);
+            UpdateAdvancedSubtitlePresetSummary();
+            await ReRenderAdvancedSubtitlesIfReadyAsync();
+        }
+
+        /// <summary>
+        /// Adopts a catalog preset's full look (font, size, outline, margin, weight, transform, and
+        /// karaoke accent) into the active configuration, keyed to the preset's kind.
+        /// </summary>
+        private void ApplyStylePresetToConfiguration(SubtitleStyleCatalogEntry entry)
+        {
+            var preset = entry.Factory();
+            var configuration = _advancedSubtitlePresetConfiguration;
+            if (entry.Kind == SubtitleStyleKind.Karaoke)
+            {
+                configuration.KaraokePresetId = entry.Id;
+                configuration.KaraokeHighlightColor = preset.KaraokeHighlightColor;
+            }
+            else
+            {
+                configuration.StyledPresetId = entry.Id;
+            }
+
+            configuration.FontFamily = preset.PrimaryFontFamily;
+            configuration.FontSize = preset.FontSize;
+            configuration.OutlineWidth = preset.OutlineWidth;
+            configuration.MarginVertical = preset.MarginVertical;
+            configuration.Bold = preset.Bold;
+            configuration.TextTransform = preset.TextTransform;
         }
 
         private void CleanupPreviewFiles()
