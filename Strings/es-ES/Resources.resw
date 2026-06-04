@@ -810,6 +810,12 @@
   <data name="PdfPage_ExtractAttachments.Content" xml:space="preserve">
     <value>Extraer adjuntos</value>
   </data>
+  <data name="PdfPage_ImagesFolderName" xml:space="preserve">
+    <value>Imágenes</value>
+  </data>
+  <data name="PdfPage_AttachmentsFolderName" xml:space="preserve">
+    <value>Adjuntos</value>
+  </data>
   <data name="PdfPage_ExtractHint.Text" xml:space="preserve">
     <value>Los archivos extraídos se guardarán en carpetas separadas.</value>
   </data>

@@ -267,6 +267,8 @@
   <data name="PdfPage_Extract.Text" xml:space="preserve"><value>Извлечение</value></data>
   <data name="PdfPage_ExtractImages.Content" xml:space="preserve"><value>Извлечь изображения</value></data>
   <data name="PdfPage_ExtractAttachments.Content" xml:space="preserve"><value>Извлечь вложения</value></data>
+  <data name="PdfPage_ImagesFolderName" xml:space="preserve"><value>Изображения</value></data>
+  <data name="PdfPage_AttachmentsFolderName" xml:space="preserve"><value>Вложения</value></data>
   <data name="PdfPage_ExtractHint.Text" xml:space="preserve"><value>Извлечённые файлы будут сохранены в отдельные папки.</value></data>
   <data name="PdfPage_Rotate.Text" xml:space="preserve"><value>Поворот</value></data>
   <data name="PdfPage_Rotation.Header" xml:space="preserve"><value>Поворот</value></data>

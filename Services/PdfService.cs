@@ -60,11 +60,17 @@ public interface IPdfService
     /// <para>
     /// Embedded attachments are written under <c>attachments/</c> using their original names.
     /// </para>
+    /// <para>
+    /// The image and attachment sub-folder names can be overridden (e.g. for localization) via
+    /// <paramref name="imagesFolderName"/> and <paramref name="attachmentsFolderName"/>.
+    /// </para>
     /// </summary>
     /// <returns>The number of images and attachments extracted, in that order.</returns>
     Task<(int Images, int Attachments)> ExtractAsync(
         string inputPath,
         string outputDirectory,
+        string imagesFolderName = "images",
+        string attachmentsFolderName = "attachments",
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -97,6 +103,13 @@ public interface IPdfService
         string inputPath,
         string outputPath,
         PdfMetadata metadata,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Reads the current PDF Info dictionary metadata. Missing fields are returned as <c>null</c>.
+    /// </summary>
+    Task<PdfMetadata> ReadMetadataAsync(
+        string inputPath,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -406,18 +419,23 @@ public sealed class PdfService : IPdfService
     public Task<(int Images, int Attachments)> ExtractAsync(
         string inputPath,
         string outputDirectory,
+        string imagesFolderName = "images",
+        string attachmentsFolderName = "attachments",
         CancellationToken cancellationToken = default)
     {
         ValidateInputPath(inputPath);
         if (string.IsNullOrWhiteSpace(outputDirectory))
             throw new ArgumentException("Output directory cannot be null or whitespace.", nameof(outputDirectory));
 
+        var imagesFolder = string.IsNullOrWhiteSpace(imagesFolderName) ? "images" : SafeFileName(imagesFolderName);
+        var attachmentsFolder = string.IsNullOrWhiteSpace(attachmentsFolderName) ? "attachments" : SafeFileName(attachmentsFolderName);
+
         return Task.Run(() =>
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var imagesDir = Path.Combine(outputDirectory, "images");
-            var attachmentsDir = Path.Combine(outputDirectory, "attachments");
+            var imagesDir = Path.Combine(outputDirectory, imagesFolder);
+            var attachmentsDir = Path.Combine(outputDirectory, attachmentsFolder);
             Directory.CreateDirectory(imagesDir);
             Directory.CreateDirectory(attachmentsDir);
 
@@ -706,6 +724,86 @@ public sealed class PdfService : IPdfService
     {
         if (value is null || value.Length == 0 || seen.Contains(key)) return;
         writer.WriteString(key, "u:" + value);
+    }
+
+    /// <inheritdoc />
+    public Task<PdfMetadata> ReadMetadataAsync(
+        string inputPath,
+        CancellationToken cancellationToken = default)
+    {
+        ValidateInputPath(inputPath);
+
+        return Task.Run(() =>
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var fullInput = Path.GetFullPath(inputPath);
+            var jsonBytes = ExecuteAndCaptureBinaryOutput(new Job()
+                .InputFile(fullInput)
+                .Json(JsonVersion.Version2));
+            var structureJson = Encoding.UTF8.GetString(jsonBytes);
+            return ParseInfoMetadata(structureJson);
+        }, cancellationToken);
+    }
+
+    private static PdfMetadata ParseInfoMetadata(string structureJson)
+    {
+        using var doc = JsonDocument.Parse(structureJson);
+        var root = doc.RootElement;
+
+        if (!root.TryGetProperty("qpdf", out var qpdfArr) ||
+            qpdfArr.ValueKind != JsonValueKind.Array ||
+            qpdfArr.GetArrayLength() < 2)
+            return new PdfMetadata();
+
+        var objects = qpdfArr[1];
+
+        string? infoObjKey = null;
+        if (objects.TryGetProperty("trailer", out var trailer) &&
+            trailer.TryGetProperty("value", out var trailerValue) &&
+            trailerValue.TryGetProperty("/Info", out var infoRef) &&
+            infoRef.ValueKind == JsonValueKind.String)
+        {
+            infoObjKey = "obj:" + infoRef.GetString();
+        }
+
+        if (infoObjKey is null ||
+            !objects.TryGetProperty(infoObjKey, out var infoObj) ||
+            !infoObj.TryGetProperty("value", out var info) ||
+            info.ValueKind != JsonValueKind.Object)
+            return new PdfMetadata();
+
+        return new PdfMetadata
+        {
+            Title    = ReadInfoString(info, "/Title"),
+            Author   = ReadInfoString(info, "/Author"),
+            Subject  = ReadInfoString(info, "/Subject"),
+            Keywords = ReadInfoString(info, "/Keywords"),
+            Creator  = ReadInfoString(info, "/Creator"),
+            Producer = ReadInfoString(info, "/Producer"),
+        };
+    }
+
+    private static string? ReadInfoString(JsonElement info, string key)
+    {
+        if (!info.TryGetProperty(key, out var el) || el.ValueKind != JsonValueKind.String) return null;
+        return DecodeQpdfString(el.GetString());
+    }
+
+    /// <summary>
+    /// Decodes a qpdf JSON v2 string value. qpdf prefixes strings with "u:" (UTF-8 text) or
+    /// "b:" (hex-encoded raw bytes).
+    /// </summary>
+    private static string? DecodeQpdfString(string? raw)
+    {
+        if (raw is null) return null;
+        if (raw.StartsWith("u:", StringComparison.Ordinal)) return raw[2..];
+        if (raw.StartsWith("b:", StringComparison.Ordinal))
+        {
+            try { return Encoding.UTF8.GetString(Convert.FromHexString(raw[2..])); }
+            catch { return raw[2..]; }
+        }
+        return raw;
     }
 
     // ── Encryption ───────────────────────────────────────────────────────────
@@ -1074,10 +1172,14 @@ public sealed class PdfService : IPdfService
     private static bool IsSuccess(ExitCode code) =>
         code == ExitCode.Success || code == ExitCode.WarningsWereFoundFileProcessed;
 
-    // ── Image extraction (qpdf JSON walker) ──────────────────────────────────
+    // ── Image extraction (qpdf JSON image enumeration) ───────────────────────
 
     /// <summary>
-    /// Walks the qpdf JSON tree to find Image XObjects and writes their raw stream data to disk.
+    /// Enumerates the images qpdf reports under <c>pages[].images[]</c> and writes each one to disk
+    /// as a viewable file. JPEG/JPEG2000 streams are written verbatim (their raw bytes already are a
+    /// standalone image); other rasters are decoded with qpdf's filtered-stream-data and rebuilt into
+    /// a PNG/TIFF via libvips using the reported width/height/colorspace. Anything that can't be
+    /// reconstructed is written as raw <c>.bin</c> so nothing is silently dropped.
     /// </summary>
     private static int ExtractImagesFromJson(
         string inputPath,
@@ -1088,68 +1190,127 @@ public sealed class PdfService : IPdfService
         if (string.IsNullOrWhiteSpace(json)) return 0;
 
         using var doc = JsonDocument.Parse(json);
-        if (!doc.RootElement.TryGetProperty("qpdf", out var qpdfArray)) return 0;
-        if (qpdfArray.ValueKind != JsonValueKind.Array || qpdfArray.GetArrayLength() < 2) return 0;
+        if (!doc.RootElement.TryGetProperty("pages", out var pages) || pages.ValueKind != JsonValueKind.Array)
+            return 0;
 
-        var objects = qpdfArray[1]; // The second entry contains the object map.
-        if (objects.ValueKind != JsonValueKind.Object) return 0;
-
+        var seen = new HashSet<int>();
         int count = 0;
-        foreach (var prop in objects.EnumerateObject())
+
+        foreach (var page in pages.EnumerateArray())
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (!prop.Value.TryGetProperty("value", out var value)) continue;
-            if (value.ValueKind != JsonValueKind.Object) continue;
+            if (!page.TryGetProperty("images", out var images) || images.ValueKind != JsonValueKind.Array)
+                continue;
 
-            // Image XObjects have /Type=/XObject and /Subtype=/Image.
-            if (!IsImageXObject(value)) continue;
-
-            // prop.Name looks like "obj:12 0 R" — peel out the object id.
-            var objId = ParseObjectId(prop.Name);
-            if (objId is null) continue;
-
-            var filterName = TryGetFilterName(value);
-            var ext = FilterToExtension(filterName);
-            var outPath = Path.Combine(outputDir, $"image_{objId.Value}{ext}");
-
-            var dumpJob = new Job()
-                .InputFile(inputPath)
-                .ShowObject($"{objId.Value},0")
-                .RawStreamData();
-
-            try
+            foreach (var image in images.EnumerateArray())
             {
-                var bytes = ExecuteAndCaptureBinaryOutput(dumpJob);
-                File.WriteAllBytes(outPath, bytes);
-                count++;
-            }
-            catch (PdfOperationException)
-            {
-                // Skip objects qpdf refuses to dump (encrypted streams, malformed entries).
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (!image.TryGetProperty("object", out var objRef) || objRef.ValueKind != JsonValueKind.String)
+                    continue;
+
+                var objId = ParseObjectRef(objRef.GetString());
+                if (objId is null || !seen.Add(objId.Value)) continue; // de-dupe shared images
+
+                if (TryExtractImage(inputPath, image, objId.Value, outputDir))
+                    count++;
             }
         }
 
         return count;
     }
 
-    private static bool IsImageXObject(JsonElement value)
+    private static bool TryExtractImage(string inputPath, JsonElement image, int objId, string outputDir)
     {
-        if (!value.TryGetProperty("/Type", out var type) || type.ValueKind != JsonValueKind.String) return false;
-        if (!string.Equals(type.GetString(), "/XObject", StringComparison.Ordinal)) return false;
-        if (!value.TryGetProperty("/Subtype", out var subtype) || subtype.ValueKind != JsonValueKind.String) return false;
-        return string.Equals(subtype.GetString(), "/Image", StringComparison.Ordinal);
+        var lastFilter = LastFilterName(image);
+
+        try
+        {
+            // DCTDecode / JPXDecode streams are already complete image files — copy the raw bytes.
+            if (lastFilter is "/DCTDecode" or "/JPXDecode")
+            {
+                var ext = lastFilter == "/DCTDecode" ? ".jpg" : ".jp2";
+                var raw = DumpStream(inputPath, objId, filtered: false);
+                File.WriteAllBytes(Path.Combine(outputDir, $"image_{objId}{ext}"), raw);
+                return true;
+            }
+
+            int width  = GetInt(image, "width");
+            int height = GetInt(image, "height");
+            int bpc    = GetInt(image, "bitspercomponent");
+
+            // Try to rebuild a viewable raster from decoded samples.
+            if (width > 0 && height > 0 && bpc == 8)
+            {
+                var decoded = DumpStream(inputPath, objId, filtered: true);
+                long pixels = (long)width * height;
+                int? bands = ResolveBands(image, decoded.Length, pixels);
+
+                if (bands is 1 or 3)
+                {
+                    using var img = Image.NewFromMemory(decoded, width, height, bands.Value, NetVips.Enums.BandFormat.Uchar);
+                    img.Pngsave(Path.Combine(outputDir, $"image_{objId}.png"));
+                    return true;
+                }
+                if (bands is 4)
+                {
+                    using var img = Image.NewFromMemory(decoded, width, height, 4, NetVips.Enums.BandFormat.Uchar);
+                    img.Tiffsave(Path.Combine(outputDir, $"image_{objId}.tif"));
+                    return true;
+                }
+            }
+
+            // Fallback: write the raw stream so the image is at least recoverable.
+            var rawFallback = DumpStream(inputPath, objId, filtered: false);
+            File.WriteAllBytes(Path.Combine(outputDir, $"image_{objId}.bin"), rawFallback);
+            return true;
+        }
+        catch (Exception)
+        {
+            // Encrypted, malformed, or undecodable stream — skip it rather than fail the whole export.
+            return false;
+        }
     }
 
-    private static string? TryGetFilterName(JsonElement value)
+    private static byte[] DumpStream(string inputPath, int objId, bool filtered)
     {
-        if (!value.TryGetProperty("/Filter", out var filter)) return null;
+        var job = new Job().InputFile(inputPath).ShowObject($"{objId},0");
+        job = filtered ? job.FilteredStreamData() : job.RawStreamData();
+        return ExecuteAndCaptureBinaryOutput(job);
+    }
+
+    /// <summary>Picks the band count from the colorspace name, or infers it from the decoded length.</summary>
+    private static int? ResolveBands(JsonElement image, int decodedLength, long pixels)
+    {
+        if (image.TryGetProperty("colorspace", out var cs) && cs.ValueKind == JsonValueKind.String)
+        {
+            switch (cs.GetString())
+            {
+                case "/DeviceGray": return 1;
+                case "/DeviceRGB":  return 3;
+                case "/DeviceCMYK": return 4;
+            }
+        }
+
+        // Unknown/ICC colorspace: infer bands when the decoded buffer divides evenly into the pixels.
+        if (pixels > 0 && decodedLength % pixels == 0)
+        {
+            long b = decodedLength / pixels;
+            if (b is 1 or 3 or 4) return (int)b;
+        }
+
+        return null;
+    }
+
+    private static string? LastFilterName(JsonElement image)
+    {
+        if (!image.TryGetProperty("filter", out var filter)) return null;
 
         if (filter.ValueKind == JsonValueKind.String) return filter.GetString();
 
         if (filter.ValueKind == JsonValueKind.Array && filter.GetArrayLength() > 0)
         {
-            // Compound filter chain — the last filter determines the on-disk format.
             var last = filter[filter.GetArrayLength() - 1];
             if (last.ValueKind == JsonValueKind.String) return last.GetString();
         }
@@ -1157,27 +1318,18 @@ public sealed class PdfService : IPdfService
         return null;
     }
 
-    private static string FilterToExtension(string? filter) => filter switch
+    private static int GetInt(JsonElement element, string property) =>
+        element.TryGetProperty(property, out var v) && v.ValueKind == JsonValueKind.Number && v.TryGetInt32(out var i)
+            ? i
+            : 0;
+
+    private static int? ParseObjectRef(string? objRef)
     {
-        "/DCTDecode"      => ".jpg",
-        "/JPXDecode"      => ".jp2",
-        "/CCITTFaxDecode" => ".tif",
-        "/FlateDecode"    => ".png",
-        "/LZWDecode"      => ".tif",
-        _                 => ".bin"
-    };
-
-    private static int? ParseObjectId(string objKey)
-    {
-        // Format is "obj:<num> <gen> R" — extract the numeric id.
-        const string prefix = "obj:";
-        if (!objKey.StartsWith(prefix, StringComparison.Ordinal)) return null;
-
-        var rest = objKey.AsSpan(prefix.Length);
-        var space = rest.IndexOf(' ');
-        if (space < 0) return null;
-
-        return int.TryParse(rest[..space], NumberStyles.Integer, CultureInfo.InvariantCulture, out var id) ? id : null;
+        // Format is "<num> <gen> R" (e.g. "12 0 R").
+        if (string.IsNullOrEmpty(objRef)) return null;
+        var space = objRef.IndexOf(' ');
+        var head = space < 0 ? objRef : objRef[..space];
+        return int.TryParse(head, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id) ? id : null;
     }
 
     // ── Attachment listing parser ────────────────────────────────────────────
