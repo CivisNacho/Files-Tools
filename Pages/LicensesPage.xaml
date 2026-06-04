@@ -79,8 +79,8 @@
                         <StackPanel Spacing="2">
                             <TextBlock FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="libvips" />
                             <TextBlock Opacity="0.82" Text="License: LGPL-3.0-or-later" />
-                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Attribution: libvips project, packaged via NetVips.Native.win-x64 / win-x86 / win-arm64" />
-                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Usage: image conversion, compression and resize" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Attribution: libvips project, packaged via NetVips.Native.win-x64 / win-arm64" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Usage: image conversion, compression, resize, PDF page rasterization, and PDF image extraction" />
                         </StackPanel>
 
                         <Button
