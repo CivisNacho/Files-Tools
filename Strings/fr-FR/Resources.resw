@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
   <resheader name="version"><value>2.0</value></resheader>
@@ -177,6 +177,12 @@
   <data name="VideoPage_AdvancedOutputType.Header" xml:space="preserve"><value>Type de sortie avancé</value></data>
   <data name="VideoPage_StyledASS.Content" xml:space="preserve"><value>ASS stylisé</value></data>
   <data name="VideoPage_KaraokeASS.Content" xml:space="preserve"><value>ASS karaoké</value></data>
+  <data name="VideoPage_SubtitleStyle.Header" xml:space="preserve">
+    <value>Style des sous-titres</value>
+  </data>
+  <data name="VideoPage_SubtitleStyleHint.Text" xml:space="preserve">
+    <value>Choisissez un style pour restyliser instantanément les sous-titres générés, sans avoir à les régénérer.</value>
+  </data>
   <data name="VideoPage_ConfigureAdvanced.Content" xml:space="preserve"><value>Configurer les sous-titres avancés</value></data>
   <data name="VideoPage_SecondsMax.Header" xml:space="preserve"><value>Secondes max</value></data>
   <data name="VideoPage_LimitWords.Content" xml:space="preserve"><value>Limiter les mots par section</value></data>

@@ -720,6 +720,24 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             }
 
             progress?.Report(1d);
+
+            // Reclaim disk from the superseded medium-tier model now that the new tier is installed.
+            try
+            {
+                var directory = Path.GetDirectoryName(modelPath);
+                if (!string.IsNullOrEmpty(directory))
+                {
+                    var legacy = Path.Combine(directory, "ggml-medium.bin");
+                    if (File.Exists(legacy) && !string.Equals(legacy, modelPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        File.Delete(legacy);
+                    }
+                }
+            }
+            catch
+            {
+                // Best-effort cleanup only.
+            }
         }
     }
 

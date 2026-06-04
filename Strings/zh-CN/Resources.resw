@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
   <resheader name="version"><value>2.0</value></resheader>
@@ -177,6 +177,12 @@
   <data name="VideoPage_AdvancedOutputType.Header" xml:space="preserve"><value>高级输出类型</value></data>
   <data name="VideoPage_StyledASS.Content" xml:space="preserve"><value>样式 ASS</value></data>
   <data name="VideoPage_KaraokeASS.Content" xml:space="preserve"><value>卡拉OK ASS</value></data>
+  <data name="VideoPage_SubtitleStyle.Header" xml:space="preserve">
+    <value>字幕样式</value>
+  </data>
+  <data name="VideoPage_SubtitleStyleHint.Text" xml:space="preserve">
+    <value>选择一种样式即可立即为已生成的字幕重新设置样式，无需重新生成。</value>
+  </data>
   <data name="VideoPage_ConfigureAdvanced.Content" xml:space="preserve"><value>配置高级字幕</value></data>
   <data name="VideoPage_SecondsMax.Header" xml:space="preserve"><value>最长秒数</value></data>
   <data name="VideoPage_LimitWords.Content" xml:space="preserve"><value>限制每段词数</value></data>

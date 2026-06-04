@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
   <resheader name="version"><value>2.0</value></resheader>
@@ -177,6 +177,12 @@
   <data name="VideoPage_AdvancedOutputType.Header" xml:space="preserve"><value>詳細出力タイプ</value></data>
   <data name="VideoPage_StyledASS.Content" xml:space="preserve"><value>スタイル付き ASS</value></data>
   <data name="VideoPage_KaraokeASS.Content" xml:space="preserve"><value>カラオケ ASS</value></data>
+  <data name="VideoPage_SubtitleStyle.Header" xml:space="preserve">
+    <value>字幕スタイル</value>
+  </data>
+  <data name="VideoPage_SubtitleStyleHint.Text" xml:space="preserve">
+    <value>スタイルを選ぶだけで、生成済みの字幕を再生成せずにすぐにスタイルを変更できます。</value>
+  </data>
   <data name="VideoPage_ConfigureAdvanced.Content" xml:space="preserve"><value>詳細字幕を設定</value></data>
   <data name="VideoPage_SecondsMax.Header" xml:space="preserve"><value>最大秒数</value></data>
   <data name="VideoPage_LimitWords.Content" xml:space="preserve"><value>セクションあたりの単語数を制限</value></data>

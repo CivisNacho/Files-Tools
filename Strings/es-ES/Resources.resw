@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -551,6 +551,12 @@
   </data>
   <data name="VideoPage_KaraokeASS.Content" xml:space="preserve">
     <value>ASS karaoke</value>
+  </data>
+  <data name="VideoPage_SubtitleStyle.Header" xml:space="preserve">
+    <value>Estilo de subtítulos</value>
+  </data>
+  <data name="VideoPage_SubtitleStyleHint.Text" xml:space="preserve">
+    <value>Elige un estilo para volver a aplicarlo a los subtítulos generados al instante, sin necesidad de generarlos de nuevo.</value>
   </data>
   <data name="VideoPage_ConfigureAdvanced.Content" xml:space="preserve">
     <value>Configurar subtítulos avanzados</value>

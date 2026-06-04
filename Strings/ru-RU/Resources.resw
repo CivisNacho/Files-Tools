@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
   <resheader name="version"><value>2.0</value></resheader>
@@ -177,6 +177,12 @@
   <data name="VideoPage_AdvancedOutputType.Header" xml:space="preserve"><value>Тип расширенного вывода</value></data>
   <data name="VideoPage_StyledASS.Content" xml:space="preserve"><value>Стилизованный ASS</value></data>
   <data name="VideoPage_KaraokeASS.Content" xml:space="preserve"><value>Karaoke ASS</value></data>
+  <data name="VideoPage_SubtitleStyle.Header" xml:space="preserve">
+    <value>Стиль субтитров</value>
+  </data>
+  <data name="VideoPage_SubtitleStyleHint.Text" xml:space="preserve">
+    <value>Выберите стиль, чтобы мгновенно изменить оформление созданных субтитров без повторной генерации.</value>
+  </data>
   <data name="VideoPage_ConfigureAdvanced.Content" xml:space="preserve"><value>Настроить расширенные субтитры</value></data>
   <data name="VideoPage_SecondsMax.Header" xml:space="preserve"><value>Макс. секунд</value></data>
   <data name="VideoPage_LimitWords.Content" xml:space="preserve"><value>Ограничить слова в секции</value></data>
