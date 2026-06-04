@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -160,7 +161,9 @@ public sealed class AudioTranscriptionProgress
 /// </summary>
 public sealed class AudioTranscriptionService : IAudioTranscriptionService
 {
-    private const string BaseModelFileName = "ggml-medium.bin";
+    // The Whisper model is chosen automatically by installed RAM: Large-v3 (~3 GB) on capable machines
+    // for best accuracy, and the lighter Large-v3-Turbo (~1.5 GB) on lower-RAM machines.
+    private const long LargeModelRamThresholdBytes = 8L * 1024 * 1024 * 1024;
     private static readonly TimeSpan MinimumWordDuration = TimeSpan.FromMilliseconds(1);
     private static readonly string[] SupportedVideoExtensions = [".mp4", ".mov", ".mkv", ".avi", ".wmv", ".webm", ".m4v", ".gif"];
 
@@ -507,7 +510,69 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             "Media Tools",
             "Whisper");
 
-        return Path.Combine(root, BaseModelFileName);
+        return Path.Combine(root, ResolveModelTier().FileName);
+    }
+
+    /// <summary>
+    /// Selects the Whisper model for this machine by installed RAM: Large-v3 at or above 8 GB,
+    /// Large-v3-Turbo below. The file name is model-specific so a machine downloads only its tier's
+    /// model, and switching tiers re-downloads rather than reusing the wrong model.
+    /// </summary>
+    internal static (GgmlType Type, string FileName) ResolveModelTier()
+    {
+        return SystemMemory.TotalPhysicalBytes() >= LargeModelRamThresholdBytes
+            ? (GgmlType.LargeV3, "ggml-large-v3.bin")
+            : (GgmlType.LargeV3Turbo, "ggml-large-v3-turbo.bin");
+    }
+
+    /// <summary>Total installed physical RAM probe used to pick the Whisper model tier.</summary>
+    private static class SystemMemory
+    {
+        public static long TotalPhysicalBytes()
+        {
+            // GlobalMemoryStatusEx reports true installed physical RAM. GC.GetGCMemoryInfo's
+            // TotalAvailableMemoryBytes is the GC heap budget (can be a fraction of RAM), so it is
+            // only a last-resort fallback.
+            try
+            {
+                var status = new MemoryStatusEx();
+                if (GlobalMemoryStatusEx(status))
+                {
+                    return (long)status.ullTotalPhys;
+                }
+            }
+            catch
+            {
+                // Fall through to the managed estimate.
+            }
+
+            try
+            {
+                return GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private sealed class MemoryStatusEx
+        {
+            public uint dwLength = (uint)Marshal.SizeOf(typeof(MemoryStatusEx));
+            public uint dwMemoryLoad;
+            public ulong ullTotalPhys;
+            public ulong ullAvailPhys;
+            public ulong ullTotalPageFile;
+            public ulong ullAvailPageFile;
+            public ulong ullTotalVirtual;
+            public ulong ullAvailVirtual;
+            public ulong ullAvailExtendedVirtual;
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool GlobalMemoryStatusEx([In, Out] MemoryStatusEx lpBuffer);
     }
 
     private static void ValidateInputPath(string path)
@@ -623,7 +688,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
                 return;
             }
 
-            await using var sourceStream = await WhisperGgmlDownloader.Default.GetGgmlModelAsync(GgmlType.Medium, QuantizationType.NoQuantization, cancellationToken).ConfigureAwait(false);
+            await using var sourceStream = await WhisperGgmlDownloader.Default.GetGgmlModelAsync(ResolveModelTier().Type, QuantizationType.NoQuantization, cancellationToken).ConfigureAwait(false);
             var totalLength = sourceStream.CanSeek ? sourceStream.Length : -1L;
             await using var targetStream = File.Create(modelPath);
             var buffer = new byte[81920];
