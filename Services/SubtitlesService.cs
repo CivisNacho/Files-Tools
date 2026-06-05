@@ -2805,14 +2805,21 @@ public sealed class SubtitlesService : ISubtitlesService
         // Standard subtitle sizing: scale the font by the height ratio.
         var fontSize = preset.FontSize * scaleY;
 
-        // The chunked style is single-line and cannot wrap, so additionally clamp the font so a full
-        // line (up to MaxCharsPerLine, widened by the active-word pop) fits the usable width.
-        if (preset.MaxWordsPerChunk is > 0)
+        // Fit-to-frame: clamp the font so a full line (MaxCharsPerLine) fits the usable width. This
+        // keeps every preset readable and proportionate on narrow/vertical frames instead of
+        // overflowing or dominating the frame. On wide 16:9 frames the height-based size already fits,
+        // so the clamp is a no-op there. The chunked "viral" style is single-line and additionally
+        // reserves room for the active-word pop.
         {
             var usableWidth = Math.Max(1, size.Width - marginLeft - marginRight);
             var maxChars = Math.Max(1, preset.MaxCharsPerLine);
-            var activeScale = ResolveActiveWordScale(preset);
-            activeScale = activeScale > 0 ? Math.Min(activeScale, 1.4d) : 1d;
+            var activeScale = 1d;
+            if (preset.MaxWordsPerChunk is > 0)
+            {
+                activeScale = ResolveActiveWordScale(preset);
+                activeScale = activeScale > 0 ? Math.Min(activeScale, 1.4d) : 1d;
+            }
+
             const double averageGlyphAdvance = 0.62d;
             var widthFitFont = usableWidth / (maxChars * averageGlyphAdvance * activeScale);
             fontSize = Math.Min(fontSize, widthFitFont);

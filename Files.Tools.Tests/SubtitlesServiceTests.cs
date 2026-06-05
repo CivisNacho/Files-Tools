@@ -1191,8 +1191,10 @@ public class SubtitlesServiceTests
         var fontSize = double.Parse(
             ass.Split('\n').First(l => l.StartsWith("Style:", StringComparison.Ordinal)).Substring("Style: ".Length).Split(',')[2],
             System.Globalization.CultureInfo.InvariantCulture);
-        // 86 * (1280/1080) = 101.9 (height-scaled; styled wraps so no width clamp).
-        Assert.AreEqual(86d * 1280d / 1080d, fontSize, 0.5);
+        // Fit-to-frame now clamps every preset so a full MaxCharsPerLine line fits the usable width on
+        // a narrow portrait frame (below the height-scaled 101.9). usableWidth 644 / (26 * 0.62) ~= 40.
+        Assert.IsTrue(fontSize < 86d * 1280d / 1080d, $"Expected a fit-to-frame clamp on portrait, got {fontSize}.");
+        Assert.AreEqual(644d / (26d * 0.62d), fontSize, 0.5);
 
         // Placement \pos scaled into the real frame: centered (0.5*720=360), not 960.
         var pos = System.Text.RegularExpressions.Regex.Match(ass, @"\\pos\((\d+),(\d+)\)");
@@ -1233,8 +1235,10 @@ public class SubtitlesServiceTests
         var fontSize = double.Parse(
             ass.Split('\n').First(l => l.StartsWith("Style:", StringComparison.Ordinal)).Substring("Style: ".Length).Split(',')[2],
             System.Globalization.CultureInfo.InvariantCulture);
-        // 64 * (1280/1080) = 75.85 (height-scaled, no width clamp for the wrapping line style).
-        Assert.AreEqual(64d * 1280d / 1080d, fontSize, 0.5);
+        // Non-chunked karaoke now fits-to-frame too: clamped below the height-scaled 75.85 to fit the
+        // usable width (644 / (26 * 0.62) ~= 40).
+        Assert.IsTrue(fontSize < 64d * 1280d / 1080d, $"Expected a fit-to-frame clamp on portrait, got {fontSize}.");
+        Assert.AreEqual(644d / (26d * 0.62d), fontSize, 0.5);
     }
 
     private static (TimeSpan Start, TimeSpan End) ParseDialogueSpan(string dialogueLine)
