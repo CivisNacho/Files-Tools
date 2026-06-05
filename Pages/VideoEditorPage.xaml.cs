@@ -114,7 +114,19 @@ namespace Files_Tools.Pages
         private bool _isDraggingPreview;
         private Point _previewDragLastPoint;
         private SubtitleRenderTarget? _previewRenderTarget;
-        private int _previewCodedHeight;   // raw stream height (before rotation); 0 = unknown
+        private Microsoft.UI.Xaml.Media.Animation.Storyboard? _runningPreviewStoryboard;
+        private Microsoft.UI.Xaml.Media.Animation.Storyboard? _runningWordPopStoryboard;
+        private KaraokeFill _previewKaraokeFill = KaraokeFill.Instant;
+        private double _previewActiveWordPopScale = 1d;
+        private int _previewActiveWordIndex = -1;
+        private TimeSpan _previewCueEnd = TimeSpan.Zero;
+        private Microsoft.UI.Xaml.Media.SolidColorBrush? _cachedPreviewBaseBrush;
+        private Microsoft.UI.Xaml.Media.SolidColorBrush? _cachedPreviewHighlightBrush;
+        private static readonly Microsoft.UI.Xaml.Media.SolidColorBrush TransparentBrush = new(Microsoft.UI.Colors.Transparent);
+        // Tracks whether the last SRT-path build used the ASS preset; forces a rebuild on mode switch
+        // even if _previewCueKey was not reset (e.g. when RefreshValidationAndState throws before
+        // RefreshSubtitlePreview can run).
+        private bool _previewSrtIsAssMode = false;
 
         private enum TrimDragHandle
         {
@@ -1245,9 +1257,7 @@ namespace Files_Tools.Pages
                 _generatedSubtitlePath = isAdvancedReview
                     ? null
                     : generatedPath;
-                SubtitlePathTextBox.Text = isAdvancedReview
-                    ? string.Empty
-                    : generatedPath;
+                SubtitlePathTextBox.Text = generatedPath;
                 EnableSubtitleMuxCheckBox.IsChecked = true;
                 if (!isAdvancedReview)
                 {
@@ -2043,12 +2053,16 @@ namespace Files_Tools.Pages
                 return false;
             }
 
-            if (_advancedSubtitleDraft is not null && IsAdvancedSubtitleModeSelected())
+            var hasSrtRows = _subtitleEditorKind == SubtitleEditorKind.Srt && _subtitleEditableRows.Count > 0;
+
+            if (IsAdvancedSubtitleModeSelected())
             {
-                return true;
+                // ASS mode: prefer the real draft; fall back to SRT cues so the preset styling is
+                // visible immediately after switching without having to re-generate.
+                return _advancedSubtitleDraft is not null || hasSrtRows;
             }
 
-            return _subtitleEditorKind == SubtitleEditorKind.Srt && _subtitleEditableRows.Count > 0;
+            return hasSrtRows;
         }
 
         // Caches the same render target the burn uses (probed encoded size) so the preview can size
@@ -2063,7 +2077,6 @@ namespace Files_Tools.Pages
                     if (info.Width > 0 && info.Height > 0)
                     {
                         _previewRenderTarget = new SubtitleRenderTarget(info.Width, info.Height);
-                        _previewCodedHeight = info.CodedHeight;
                         RefreshSubtitlePreview();
                         return;
                     }
@@ -2072,12 +2085,10 @@ namespace Files_Tools.Pages
                 _previewRenderTarget = _previewVideoSize.Width > 0 && _previewVideoSize.Height > 0
                     ? new SubtitleRenderTarget((int)_previewVideoSize.Width, (int)_previewVideoSize.Height)
                     : null;
-                _previewCodedHeight = 0;
             }
             catch
             {
                 _previewRenderTarget = null;
-                _previewCodedHeight = 0;
             }
 
             RefreshSubtitlePreview();
@@ -2151,10 +2162,16 @@ namespace Files_Tools.Pages
 
         private void ClearSubtitlePreview()
         {
+            _runningPreviewStoryboard?.Stop();
+            _runningPreviewStoryboard = null;
+            _runningWordPopStoryboard?.Stop();
+            _runningWordPopStoryboard = null;
             SubtitlePreviewCanvas?.Children.Clear();
             _previewKaraokeRuns.Clear();
             _previewContent = null;
             _previewCueKey = int.MinValue;
+            _previewActiveWordIndex = -1;
+            _previewSrtIsAssMode = false;
         }
 
         private void UpdateSubtitlePreview(TimeSpan position)
@@ -2179,7 +2196,9 @@ namespace Files_Tools.Pages
                     ? new SubtitleRenderTarget((int)Math.Round(_previewVideoSize.Width), (int)Math.Round(_previewVideoSize.Height))
                     : null);
 
-            // SRT path: no word timestamps, no karaoke — use a plain default style.
+            // SRT path: no word timestamps, no karaoke.
+            // In SRT mode use the plain default preset; in ASS mode use the configured preset so
+            // switching modes immediately shows the styling without needing to re-generate.
             if (_subtitleEditorKind == SubtitleEditorKind.Srt)
             {
                 var row = PickPreviewSrtRow(position, out var srtActive);
@@ -2193,13 +2212,30 @@ namespace Files_Tools.Pages
                     return;
                 }
 
-                var srtPreset = _subtitlesService.ApplyRenderTarget(CreateSrtPreviewPreset(), target);
-                var srtWords = new[] { StripSrtTags(row.Text).Replace('\n', ' ').Trim() };
-                var srtKey = srtActive ? row.CueNumber : -(row.CueNumber + 1);
-                if (srtKey != _previewCueKey)
+                var isAssMode = IsAdvancedSubtitleModeSelected();
+                var srtPreset = _subtitlesService.ApplyRenderTarget(
+                    isAssMode ? CreateAdvancedSubtitleStylePresetFromConfiguration() : CreateSrtPreviewPreset(),
+                    target);
+
+                var rawText = StripSrtTags(row.Text).Replace('\n', ' ').Trim();
+                // Apply the preset's text transform (e.g. UPPERCASE) when showing with ASS styling.
+                var srtWords = isAssMode
+                    ? TransformPreviewText(rawText, srtPreset.TextTransform)
+                    : new[] { rawText };
+
+                // In ASS mode the purpose of the SRT fallback is to show the full styling, not to
+                // position a subtitle — always present cues at full opacity with entry animations.
+                // Ghost-dimming (isActive=false) is only useful in SRT positioning mode.
+                var effectiveActive = srtActive || isAssMode;
+                var srtKey = effectiveActive ? row.CueNumber : -(row.CueNumber + 1);
+
+                // Also rebuild when the mode changes even if the cue key is the same (guards against
+                // _previewCueKey not being reset before this path runs).
+                if (srtKey != _previewCueKey || _previewSrtIsAssMode != isAssMode)
                 {
+                    _previewSrtIsAssMode = isAssMode;
                     _previewIsKaraoke = false;
-                    BuildSubtitlePreviewContent(srtPreset, srtWords, [TimeSpan.Zero], srtActive);
+                    BuildSubtitlePreviewContent(srtPreset, srtWords, [TimeSpan.Zero], effectiveActive);
                     _previewCueKey = srtKey;
                 }
 
@@ -2232,7 +2268,7 @@ namespace Files_Tools.Pages
             var key = isActive ? unitKey : -(unitKey + 1);
             if (key != _previewCueKey)
             {
-                BuildSubtitlePreviewContent(preset, words, starts, isActive);
+                BuildSubtitlePreviewContent(preset, words, starts, isActive, cue.End);
                 _previewCueKey = key;
             }
 
@@ -2373,11 +2409,17 @@ namespace Files_Tools.Pages
             MarginVertical = 60,
         };
 
-        private void BuildSubtitlePreviewContent(SubtitleStylePreset preset, string[] words, TimeSpan[] wordStarts, bool isActive)
+        private void BuildSubtitlePreviewContent(SubtitleStylePreset preset, string[] words, TimeSpan[] wordStarts, bool isActive, TimeSpan cueEnd = default)
         {
+            _runningPreviewStoryboard?.Stop();
+            _runningPreviewStoryboard = null;
+            _runningWordPopStoryboard?.Stop();
+            _runningWordPopStoryboard = null;
             SubtitlePreviewCanvas!.Children.Clear();
             _previewKaraokeRuns.Clear();
             _previewContent = null;
+            _previewActiveWordIndex = -1;
+            _previewCueEnd = cueEnd;
 
             var bounds = GetPreviewVideoBounds();
             if (bounds.Width <= 0 || bounds.Height <= 0)
@@ -2390,20 +2432,25 @@ namespace Files_Tools.Pages
 
             _previewBaseColor = ToPreviewColor(preset.FillColor);
             _previewHighlightColor = ToPreviewColor(preset.KaraokeHighlightColor);
+            _cachedPreviewBaseBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(_previewBaseColor);
+            _cachedPreviewHighlightBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(_previewHighlightColor);
 
-            // The preset is already in the target frame's coordinate space (PlayResY == video height,
-            // font/margins scaled), so scale straight to the displayed video rectangle — no fudge factor.
-            var scale = bounds.Height / Math.Max(1, preset.PlayResY);
-
-            // When the video has a rotation metadata tag (e.g. a phone video stored as landscape with
-            // rotate=90), FFmpeg's subtitles filter processes storage-orientation frames. libass then
-            // scales the font by codedHeight/PlayResY rather than 1 — replicate that reduction so the
-            // preview matches the burned output.
-            if (_previewCodedHeight > 0 && _previewCodedHeight != preset.PlayResY)
+            if (_previewIsKaraoke)
             {
-                scale *= (double)_previewCodedHeight / preset.PlayResY;
+                _previewKaraokeFill = ResolvePreviewKaraokeFill(preset);
+                _previewActiveWordPopScale = ResolvePreviewActiveWordPopScale(preset);
+            }
+            else
+            {
+                _previewKaraokeFill = KaraokeFill.Instant;
+                _previewActiveWordPopScale = 1d;
             }
 
+            // The preset is already in the target frame's coordinate space (PlayResY == video height,
+            // font/margins scaled to the same target the renderer probes), so the on-screen size is
+            // exactly the generated .ass Style Fontsize scaled to the displayed video rectangle. This
+            // matches the burn 1:1 (verified against the actual generated .ass files).
+            var scale = bounds.Height / Math.Max(1, preset.PlayResY);
             var fontPx = Math.Max(8d, preset.FontSize * scale);
             var outlineOffset = Math.Max(1d, preset.OutlineWidth * scale * 0.6d);
             _previewMaxWidth = bounds.Width * 0.92d;
@@ -2487,14 +2534,25 @@ namespace Files_Tools.Pages
 
             if (isActive)
             {
-                PlayPreviewEntryAnimation(content, preset);
+                // Defer Begin() to the next dispatcher iteration so the element has completed its
+                // layout pass in the visual tree before the storyboard targets it. Calling Begin()
+                // before layout is done causes WinUI 3 to silently drop the animation.
+                var capturedContent = content;
+                var capturedPreset = preset;
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    if (ReferenceEquals(_previewContent, capturedContent))
+                    {
+                        PlayPreviewEntryAnimation(capturedContent, capturedPreset);
+                    }
+                });
             }
 
         }
 
         // Approximates the preset's entry presentation on the live preview: a fade-in and/or a
         // scale "pop". Karaoke colour sweep is handled per-frame in UpdateKaraokeHighlight.
-        private static void PlayPreviewEntryAnimation(Border content, SubtitleStylePreset preset)
+        private void PlayPreviewEntryAnimation(Border content, SubtitleStylePreset preset)
         {
             var entryFadeMs = preset.EntryFadeMilliseconds;
             var introScale = preset.IntroScale;
@@ -2561,6 +2619,7 @@ namespace Files_Tools.Pages
                 }
             }
 
+            _runningPreviewStoryboard = storyboard;
             storyboard.Begin();
         }
 
@@ -2622,12 +2681,15 @@ namespace Files_Tools.Pages
             var deltaYPercent = (point.Y - _previewDragLastPoint.Y) / bounds.Height * 100d;
             _previewDragLastPoint = point;
 
-            ApplySubtitlePlacementValue(
-                (_subtitlePlacementX * 100d) + deltaXPercent,
-                (_subtitlePlacementY * 100d) + deltaYPercent,
-                synchronizeX: true,
-                synchronizeY: true,
-                refreshState: false);
+            // Hot path: update the position and reposition without touching NumberBoxes or rebuilding
+            // anything. NumberBox.Value writes on every frame are expensive (WinUI control layout work);
+            // UpdateSubtitlePlacementPreview builds a template tree on a hidden element every frame.
+            // Both happen in ApplySubtitlePlacementValue, so we bypass it here and sync once on release.
+            var newX = Math.Clamp(Math.Round((_subtitlePlacementX * 100d) + deltaXPercent, 1, MidpointRounding.AwayFromZero), 0d, 100d);
+            var newY = Math.Clamp(Math.Round((_subtitlePlacementY * 100d) + deltaYPercent, 1, MidpointRounding.AwayFromZero), 0d, 100d);
+            _subtitlePlacementX = newX / 100d;
+            _subtitlePlacementY = newY / 100d;
+            PositionPreviewContent();
             e.Handled = true;
         }
 
@@ -2645,10 +2707,71 @@ namespace Files_Tools.Pages
             }
 
             e.Handled = true;
-            RefreshValidationAndState();
 
-            // Persist the new placement into the generated .ass.
-            _ = ReRenderAdvancedSubtitlesIfReadyAsync();
+            // Sync the NumberBoxes and placement marker once now that the drag has ended.
+            ApplySubtitlePlacementValue(_subtitlePlacementX * 100d, _subtitlePlacementY * 100d,
+                synchronizeX: true, synchronizeY: true, refreshState: true);
+
+            // Persist placement into the .ass file. Use the lightweight path: no editor reload, no
+            // extra ffprobe — LoadAdvancedSubtitleEditor rebuilds every cue row (visible "refresh")
+            // and ResolveSubtitleRenderTargetAsync launches ffprobe; neither is needed for a position
+            // change only.
+            _ = PersistSubtitlePlacementAsync();
+        }
+
+        /// <summary>
+        /// Lightweight placement persist: re-renders the .ass with the current position and writes it
+        /// to disk. Does NOT reload the subtitle editor (no cue-row rebuild) and reuses the cached
+        /// render target (no ffprobe). Called after a drag-release so only the \pos/\an values change.
+        /// </summary>
+        private async Task PersistSubtitlePlacementAsync()
+        {
+            if (_advancedSubtitleDraft is null || _sourceVideoFile is null
+                || _isRestylingAdvancedSubtitles || _isGeneratingSubtitles || _isProcessing)
+            {
+                return;
+            }
+
+            _isRestylingAdvancedSubtitles = true;
+            try
+            {
+                var path = SubtitlesService.EnsureAssExtension(
+                    _generatedSubtitlePath
+                    ?? _pendingAdvancedSubtitleOutputPath
+                    ?? CreateGeneratedSubtitlePath(_sourceVideoFile, ".ass"));
+
+                var placement = CreateSubtitlePlacementOptionsFromUi();
+                var preset = CreateAdvancedSubtitleStylePresetFromConfiguration();
+
+                // Reuse the cached render target — no need to re-probe the source file.
+                var target = _previewRenderTarget
+                    ?? (_previewVideoSize.Width > 0 && _previewVideoSize.Height > 0
+                        ? new SubtitleRenderTarget((int)Math.Round(_previewVideoSize.Width), (int)Math.Round(_previewVideoSize.Height))
+                        : null);
+
+                var ass = IsKaraokeAdvancedSubtitleTypeSelected()
+                    ? _subtitlesService.RenderKaraokeAss(_advancedSubtitleDraft, preset, placement, target)
+                    : _subtitlesService.RenderStyledAss(_advancedSubtitleDraft, preset, placement, target);
+
+                var directory = Path.GetDirectoryName(path);
+                if (!string.IsNullOrWhiteSpace(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                await File.WriteAllTextAsync(path, ass);
+                _generatedSubtitlePath = path;
+                _pendingAdvancedSubtitleOutputPath = null;
+                _pendingAdvancedSubtitleKind = PendingAdvancedSubtitleKind.None;
+                if (SubtitlePathTextBox is not null)
+                {
+                    SubtitlePathTextBox.Text = path;
+                }
+            }
+            finally
+            {
+                _isRestylingAdvancedSubtitles = false;
+            }
         }
 
         private TextBlock CreatePreviewLine(
@@ -2699,12 +2822,182 @@ namespace Files_Tools.Pages
 
         private void UpdateKaraokeHighlight(TimeSpan position)
         {
-            var baseBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(_previewBaseColor);
-            var highlightBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(_previewHighlightColor);
-            foreach (var (run, start) in _previewKaraokeRuns)
+            var runs = _previewKaraokeRuns;
+            if (runs.Count == 0)
             {
-                run.Foreground = position >= start ? highlightBrush : baseBrush;
+                return;
             }
+
+            // Find which word is currently being spoken.
+            var activeIndex = -1;
+            for (var i = 0; i < runs.Count; i++)
+            {
+                var wordStart = runs[i].Start;
+                var wordEnd = i + 1 < runs.Count ? runs[i + 1].Start : _previewCueEnd;
+                if (position >= wordStart && position < wordEnd)
+                {
+                    activeIndex = i;
+                    break;
+                }
+            }
+
+            // Trigger a scale pop on the whole block when the active word advances.
+            if (activeIndex >= 0 && activeIndex != _previewActiveWordIndex && _previewActiveWordPopScale > 1.001d)
+            {
+                TriggerActiveWordPopAnimation();
+            }
+            _previewActiveWordIndex = activeIndex;
+
+            var isDropIn = _previewKaraokeFill == KaraokeFill.DropIn;
+            var isSweep = _previewKaraokeFill == KaraokeFill.Sweep || isDropIn;
+
+            var baseBrush = _cachedPreviewBaseBrush ?? new Microsoft.UI.Xaml.Media.SolidColorBrush(_previewBaseColor);
+            var highlightBrush = _cachedPreviewHighlightBrush ?? new Microsoft.UI.Xaml.Media.SolidColorBrush(_previewHighlightColor);
+
+            for (var i = 0; i < runs.Count; i++)
+            {
+                var run = runs[i].Run;
+                if (i < activeIndex)
+                {
+                    // Words already spoken — always show as highlighted.
+                    run.Foreground = highlightBrush;
+                }
+                else if (i == activeIndex)
+                {
+                    if (isSweep)
+                    {
+                        var wordStart = runs[i].Start;
+                        var wordEnd = i + 1 < runs.Count ? runs[i + 1].Start : _previewCueEnd;
+                        var wordDuration = (wordEnd - wordStart).TotalMilliseconds;
+                        var elapsed = (position - wordStart).TotalMilliseconds;
+                        var fraction = wordDuration > 0 ? Math.Clamp(elapsed / wordDuration, 0d, 1d) : 1d;
+                        run.Foreground = CreateKaraokeSweepBrush(fraction, isDropIn);
+                    }
+                    else
+                    {
+                        run.Foreground = highlightBrush;
+                    }
+                }
+                else
+                {
+                    // Words not yet spoken — transparent for DropIn, base colour otherwise.
+                    run.Foreground = isDropIn ? TransparentBrush : baseBrush;
+                }
+            }
+        }
+
+        // Horizontal sweep brush: filled (highlight or transparent-to-highlight for DropIn)
+        // on the left up to `fraction`, unfilled on the right.
+        private Microsoft.UI.Xaml.Media.Brush CreateKaraokeSweepBrush(double fraction, bool isDropIn)
+        {
+            var filledColor = _previewHighlightColor;
+            var unfilledColor = isDropIn ? Microsoft.UI.Colors.Transparent : _previewBaseColor;
+
+            if (fraction <= 0d)
+            {
+                return new Microsoft.UI.Xaml.Media.SolidColorBrush(unfilledColor);
+            }
+
+            if (fraction >= 1d)
+            {
+                return _cachedPreviewHighlightBrush ?? new Microsoft.UI.Xaml.Media.SolidColorBrush(filledColor);
+            }
+
+            // Two adjacent stops at `fraction` create a sharp horizontal fill edge.
+            var brush = new Microsoft.UI.Xaml.Media.LinearGradientBrush
+            {
+                StartPoint = new Point(0, 0),
+                EndPoint = new Point(1, 0)
+            };
+            brush.GradientStops.Add(new Microsoft.UI.Xaml.Media.GradientStop { Color = filledColor, Offset = 0 });
+            brush.GradientStops.Add(new Microsoft.UI.Xaml.Media.GradientStop { Color = filledColor, Offset = fraction });
+            brush.GradientStops.Add(new Microsoft.UI.Xaml.Media.GradientStop { Color = unfilledColor, Offset = fraction });
+            brush.GradientStops.Add(new Microsoft.UI.Xaml.Media.GradientStop { Color = unfilledColor, Offset = 1 });
+            return brush;
+        }
+
+        // Plays a brief scale-down animation on the whole preview block when the active karaoke
+        // word changes. Approximates the per-word pop of `ActiveWordPop` in the ASS output.
+        private void TriggerActiveWordPopAnimation()
+        {
+            if (_previewContent is null)
+            {
+                return;
+            }
+
+            // Reuse existing transform if available, so this doesn't interfere with the entry pop.
+            if (_previewContent.RenderTransform is not Microsoft.UI.Xaml.Media.ScaleTransform scaleTransform)
+            {
+                scaleTransform = new Microsoft.UI.Xaml.Media.ScaleTransform();
+                _previewContent.RenderTransform = scaleTransform;
+                _previewContent.RenderTransformOrigin = new Point(0.5d, 0.5d);
+            }
+
+            _runningWordPopStoryboard?.Stop();
+
+            var storyboard = new Microsoft.UI.Xaml.Media.Animation.Storyboard();
+            var ease = new Microsoft.UI.Xaml.Media.Animation.CubicEase
+            {
+                EasingMode = Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut
+            };
+            foreach (var axis in new[] { "ScaleX", "ScaleY" })
+            {
+                var anim = new Microsoft.UI.Xaml.Media.Animation.DoubleAnimation
+                {
+                    From = _previewActiveWordPopScale,
+                    To = 1d,
+                    Duration = TimeSpan.FromMilliseconds(120),
+                    EasingFunction = ease
+                };
+                Microsoft.UI.Xaml.Media.Animation.Storyboard.SetTarget(anim, scaleTransform);
+                Microsoft.UI.Xaml.Media.Animation.Storyboard.SetTargetProperty(anim, axis);
+                storyboard.Children.Add(anim);
+            }
+
+            _runningWordPopStoryboard = storyboard;
+            storyboard.Begin();
+        }
+
+        // Mirrors SubtitlesService.ResolveKaraokeFill for use in the preview without reaching
+        // into the service's private implementation.
+        private static KaraokeFill ResolvePreviewKaraokeFill(SubtitleStylePreset preset)
+        {
+            if (preset.Effects is { Count: > 0 } effects)
+            {
+                foreach (var effect in effects)
+                {
+                    switch (effect.Kind)
+                    {
+                        case SubtitleEffectKind.DropIn: return KaraokeFill.DropIn;
+                        case SubtitleEffectKind.KaraokeColorInstant: return KaraokeFill.Instant;
+                        case SubtitleEffectKind.KaraokeColorSweep: return KaraokeFill.Sweep;
+                    }
+                }
+            }
+
+            return preset.PresentationAnimation switch
+            {
+                SubtitlePresentationAnimation.DropIn => KaraokeFill.DropIn,
+                SubtitlePresentationAnimation.None => KaraokeFill.Instant,
+                _ => KaraokeFill.Sweep
+            };
+        }
+
+        // Mirrors SubtitlesService.ResolveActiveWordScale.
+        private static double ResolvePreviewActiveWordPopScale(SubtitleStylePreset preset)
+        {
+            if (preset.Effects is { Count: > 0 } effects)
+            {
+                foreach (var effect in effects)
+                {
+                    if (effect.Kind == SubtitleEffectKind.ActiveWordPop)
+                    {
+                        return effect.Scale > 0 ? Math.Min(effect.Scale, 1.4d) : 1d;
+                    }
+                }
+            }
+
+            return 1d;
         }
 
         private TimeSpan[] ComputeWordStarts(SubtitleCue cue, int wordCount)
