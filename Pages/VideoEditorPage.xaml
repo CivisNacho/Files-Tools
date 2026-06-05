@@ -606,11 +606,11 @@
                                                                     Click="ConfigureAdvancedSubtitlesButton_Click" />
                                                                 <TextBlock
                                                                     x:Name="AdvancedSubtitlePresetSummaryTextBlock"
+                                                                    x:Uid="VideoPage_AdvancedPresetSummary"
                                                                     Opacity="0.76"
-                                                                    Text="Preset: SocialImpact (default)"
                                                                     TextWrapping="Wrap" />
                                                                 <StackPanel Spacing="6">
-                                                                    <TextBlock x:Name="SubtitleSectionDurationTextBlock" Text="Advanced subtitle section length: 6.5 s max" />
+                                                                    <TextBlock x:Name="SubtitleSectionDurationTextBlock" x:Uid="VideoPage_SubtitleSectionDuration" />
                                                                     <Grid ColumnSpacing="12">
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="*" />
@@ -639,7 +639,7 @@
                                                                     </Grid>
                                                                     <Grid ColumnSpacing="12">
                                                                         <Grid.ColumnDefinitions>
-                                                                            <ColumnDefinition Width="Auto" />
+                                                                            <ColumnDefinition Width="*" />
                                                                             <ColumnDefinition Width="124" />
                                                                         </Grid.ColumnDefinitions>
                                                                         <CheckBox

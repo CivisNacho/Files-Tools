@@ -193,28 +193,28 @@ area so captions clear platform UI chrome.
 
 ### Styled ASS Subtitle Presets
 
-Built-in presets for styled `.ass` subtitle output (`StyledSubtitlePresets`):
+Built-in preset for styled `.ass` subtitle output (`StyledSubtitlePresets`):
 
-- `StyledSubtitlePresets.SocialImpact` — bold social-style subtitles:
+- `StyledSubtitlePresets.SocialImpact` — bold social-style subtitles (the single internal base):
   - primary font: `Impact`, fallback stack: `Impact`, `Anton`, `Bebas Neue`, `Arial Black`
   - uppercase transform, white fill, thick black outline
   - fade-plus-pop animation, bottom-center alignment
-  - max lines: 2, max chars per line: 28
+  - max lines: 2, max chars per line: 26
 
-- `StyledSubtitlePresets.CleanSans` — clean sans-serif captions with subtle fade-in/out
-- `StyledSubtitlePresets.CaptionBox` — boxed captions with opaque background styling
-- `StyledSubtitlePresets.BroadcastLowerThird` — broadcast-style lower thirds with uppercase text and pop animation
+The page layer lets the user customise font, size, outline width, vertical margin, bold, text
+transform, word fill colour, and outline colour on top of this base. No additional styled presets
+are exposed in the catalog — customisation replaces preset selection for the styled path.
 
 ### Karaoke Subtitle Presets
 
 Built-in presets for karaoke `.ass` subtitle output (`KaraokeSubtitlePresets`). Each preset has a distinct default font for visual differentiation:
 
-- `KaraokeSubtitlePresets.NeonKaraoke` — neon-style karaoke with bold pop animation
+- `KaraokeSubtitlePresets.GlowKaraoke` — soft entry glow + per-word colour sweep (default preset)
   - **default font**: `Segoe UI Semibold`
-  - bright cyan-to-yellow highlight color for high-energy word effects
-  - scale pop (112% → 100%) animation on entry
-  - 80ms fade duration, bottom-center alignment
-  - designed for fast-paced, energetic presentations
+  - line blurs in sharp on entry (`\blur8` → `\blur0` over 240 ms), giving a neon-glow feel
+  - electric cyan (`#00FFD200`) highlight sweeps left-to-right through each word (`\kf`)
+  - 80 ms entry/exit fade; 10 px dark navy outline for contrast
+  - bottom-center alignment, designed for music and dramatic narration
 
 - `KaraokeSubtitlePresets.Punch` — bold, high-impact word emphasis style
   - **default font**: `Arial Black` (bold, standard case)

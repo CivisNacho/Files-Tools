@@ -1,3 +1,4 @@
+using Files_Tools.Helpers;
 using Files_Tools.Services;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
@@ -820,6 +821,7 @@ namespace Files_Tools.Pages
                     _transcriptionDownloadProgressBar.IsIndeterminate = false;
                     _transcriptionDownloadProgressBar.Value = fraction;
                     _transcriptionDownloadStatusTextBlock.Text = $"{update.Stage} ({fraction * 100d:0}%)";
+                    TaskbarProgressHelper.SetProgress(fraction);
                 });
 
                 await _audioTranscriptionService.InstallAsync(progress);
@@ -833,6 +835,7 @@ namespace Files_Tools.Pages
             finally
             {
                 _isInstallingTranscriptionModel = false;
+                TaskbarProgressHelper.Clear();
                 RefreshValidationAndState();
             }
         }
@@ -871,6 +874,7 @@ namespace Files_Tools.Pages
                     _transcriptionEtaTextBlock.Text = update.EstimatedRemainingTime is TimeSpan eta
                         ? $"{update.StageDescription} - ETA {FormatDuration(eta)}"
                         : $"{update.StageDescription} - ETA calculating...";
+                    TaskbarProgressHelper.SetProgress(update.OverallPercent);
                 });
 
                 if (string.Equals(outputType, "Subtitles", StringComparison.Ordinal))
@@ -920,6 +924,7 @@ namespace Files_Tools.Pages
                 _transcriptionProgressBar.Value = 0d;
                 _transcriptionEtaTextBlock.Visibility = Visibility.Collapsed;
                 _transcriptionEtaTextBlock.Text = "ETA calculating...";
+                TaskbarProgressHelper.Clear();
                 RefreshValidationAndState();
             }
         }
@@ -1341,6 +1346,13 @@ namespace Files_Tools.Pages
             ProcessingEtaTextBlock.Text = eta;
             ProcessingDetailTextBlock.Text = detail;
             ProcessingProgressBar.Value = Math.Clamp(progress, 0, 1);
+
+            if (!visible)
+                TaskbarProgressHelper.Clear();
+            else if (progress > 0)
+                TaskbarProgressHelper.SetProgress(progress);
+            else
+                TaskbarProgressHelper.SetIndeterminate();
         }
 
         private void TrimTimelineCanvas_SizeChanged(object sender, SizeChangedEventArgs e)

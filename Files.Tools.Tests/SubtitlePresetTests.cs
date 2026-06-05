@@ -165,7 +165,7 @@ public class SubtitlePresetTests
         var builtInIds = SubtitleStyleCatalog.Entries.Select(e => e.Id).ToList();
 
         var overrideEntry = SubtitlePresetMapper.ToCatalogEntry(
-            new SubtitlePresetDto { Id = "CleanSans", DisplayName = "Overridden Clean Sans", Kind = SubtitleStyleKind.Styled });
+            new SubtitlePresetDto { Id = "Punch", DisplayName = "Overridden Punch", Kind = SubtitleStyleKind.Karaoke });
         var newEntry = SubtitlePresetMapper.ToCatalogEntry(
             new SubtitlePresetDto { Id = "Brand New", DisplayName = "Brand New", Kind = SubtitleStyleKind.Karaoke });
 
@@ -173,9 +173,9 @@ public class SubtitlePresetTests
 
         var merged = SubtitleStyleCatalog.Entries;
         Assert.AreEqual(builtInCount + 1, merged.Count, "One override replaces in place; one new entry appends.");
-        Assert.AreEqual("Overridden Clean Sans", merged.Single(e => e.Id == "CleanSans").DisplayName);
+        Assert.AreEqual("Overridden Punch", merged.Single(e => e.Id == "Punch").DisplayName);
         // Override keeps the built-in's position.
-        Assert.AreEqual(builtInIds.IndexOf("CleanSans"), merged.ToList().FindIndex(e => e.Id == "CleanSans"));
+        Assert.AreEqual(builtInIds.IndexOf("Punch"), merged.ToList().FindIndex(e => e.Id == "Punch"));
         // New entry is appended last.
         Assert.AreEqual("Brand New", merged[^1].Id);
     }

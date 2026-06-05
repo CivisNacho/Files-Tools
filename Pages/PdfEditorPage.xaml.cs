@@ -1,3 +1,4 @@
+using Files_Tools.Helpers;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -933,7 +934,14 @@ namespace Files_Tools.Pages
             ProcessingStatusPanel.Visibility = Visibility.Visible;
             ProcessingProgressBar.IsIndeterminate = active;
             if (!active)
+            {
                 ProcessingProgressBar.Value = ProcessingProgressBar.Maximum;
+                TaskbarProgressHelper.Clear();
+            }
+            else
+            {
+                TaskbarProgressHelper.SetIndeterminate();
+            }
         }
 
         private async void ApplyButton_Click(object sender, RoutedEventArgs e)
@@ -1405,6 +1413,7 @@ namespace Files_Tools.Pages
             DownloadTessDataButton.IsEnabled = false;
             OcrDownloadProgressBar.Visibility = Visibility.Visible;
             OcrDownloadStatusTextBlock.Text = $"Downloading {langName} language pack…";
+            TaskbarProgressHelper.SetIndeterminate();
 
             try
             {
@@ -1430,6 +1439,8 @@ namespace Files_Tools.Pages
                     OcrDownloadStatusTextBlock.Text = totalBytes > 0
                         ? $"Downloading… {received / 1024:N0} KB / {totalBytes / 1024:N0} KB"
                         : $"Downloading… {received / 1024:N0} KB";
+                    if (totalBytes > 0)
+                        TaskbarProgressHelper.SetProgress((double)received / totalBytes);
                 }
 
                 // Set tessdata path to the download dir if not already pointing there.
@@ -1457,6 +1468,7 @@ namespace Files_Tools.Pages
             finally
             {
                 _isTessDataDownloading = false;
+                TaskbarProgressHelper.Clear();
                 if (!cts.IsCancellationRequested)
                 {
                     DownloadTessDataButton.IsEnabled = true;

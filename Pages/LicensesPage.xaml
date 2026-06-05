@@ -65,35 +65,6 @@
                 </Border>
 
                 <Border
-                    Grid.Row="3"
-                    Padding="16"
-                    CornerRadius="10"
-                    BorderThickness="1"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                    <Grid ColumnSpacing="16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Spacing="2">
-                            <TextBlock FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="MMS forced-alignment model" />
-                            <TextBlock Opacity="0.82" Text="License: CC-BY-NC-4.0 (Non-Commercial)" />
-                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Attribution: Meta AI — MMS (Massively Multilingual Speech) mms-300m forced-alignment model, via torchaudio; int8 ONNX build redistributed by this app" />
-                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Usage: word-level timestamp alignment for karaoke and styled subtitles" />
-                        </StackPanel>
-
-                        <Button
-                            x:Uid="LicensesPage_ShowLicense"
-                            Grid.Column="1"
-                            VerticalAlignment="Center"
-                            Content="Show License"
-                            Click="ShowMmsAlignerLicense_Click" />
-                    </Grid>
-                </Border>
-
-                <Border
                     Grid.Row="4"
                     Padding="16"
                     CornerRadius="10"

@@ -1,3 +1,4 @@
+using Files_Tools.Helpers;
 using Files_Tools.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -230,10 +231,12 @@ public sealed partial class DocumentEditorPage : Page
                 {
                     LibreOfficeSetupProgressBar.IsIndeterminate = false;
                     LibreOfficeSetupProgressBar.Value           = p.Percentage;
+                    TaskbarProgressHelper.SetProgress(p.Percentage);
                 }
                 else
                 {
                     LibreOfficeSetupProgressBar.IsIndeterminate = true;
+                    TaskbarProgressHelper.SetIndeterminate();
                 }
 
                 if (p.Stage == LibreOfficeSetupStage.Complete)
@@ -266,6 +269,7 @@ public sealed partial class DocumentEditorPage : Page
         }
         finally
         {
+            TaskbarProgressHelper.Clear();
             _libreofficeCts?.Dispose();
             _libreofficeCts = null;
         }

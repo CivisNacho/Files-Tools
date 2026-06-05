@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -560,6 +560,78 @@
   </data>
   <data name="VideoPage_ConfigureAdvanced.Content" xml:space="preserve">
     <value>Configure advanced subtitles</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvancedTitle" xml:space="preserve">
+    <value>Configure advanced subtitles</value>
+  </data>
+  <data name="VideoPage_ConfigureKaraokeSummary" xml:space="preserve">
+    <value>Choose a karaoke style and tune the typography and highlight accent used for rendering.</value>
+  </data>
+  <data name="VideoPage_ConfigureStyledSummary" xml:space="preserve">
+    <value>Tune the typography and colours used for styled subtitle rendering.</value>
+  </data>
+  <data name="VideoPage_BasePreset.Header" xml:space="preserve">
+    <value>Base preset</value>
+  </data>
+  <data name="VideoPage_SystemFont.Header" xml:space="preserve">
+    <value>System font</value>
+  </data>
+  <data name="VideoPage_SelectInstalledFont" xml:space="preserve">
+    <value>Select an installed font</value>
+  </data>
+  <data name="VideoPage_FontSize.Header" xml:space="preserve">
+    <value>Font size</value>
+  </data>
+  <data name="VideoPage_OutlineWidth.Header" xml:space="preserve">
+    <value>Outline width</value>
+  </data>
+  <data name="VideoPage_VerticalMargin.Header" xml:space="preserve">
+    <value>Vertical margin</value>
+  </data>
+  <data name="VideoPage_BoldText.Content" xml:space="preserve">
+    <value>Bold text</value>
+  </data>
+  <data name="VideoPage_TextTransform.Header" xml:space="preserve">
+    <value>Text transform</value>
+  </data>
+  <data name="VideoPage_OriginalCase" xml:space="preserve">
+    <value>Original case</value>
+  </data>
+  <data name="VideoPage_Uppercase" xml:space="preserve">
+    <value>UPPERCASE</value>
+  </data>
+  <data name="VideoPage_Lowercase" xml:space="preserve">
+    <value>lowercase</value>
+  </data>
+  <data name="VideoPage_FillingColor" xml:space="preserve">
+    <value>Filling color</value>
+  </data>
+  <data name="VideoPage_PreFillingColor" xml:space="preserve">
+    <value>Pre-filling color</value>
+  </data>
+  <data name="VideoPage_WordFillColor" xml:space="preserve">
+    <value>Word fill color</value>
+  </data>
+  <data name="VideoPage_OutlineColor" xml:space="preserve">
+    <value>Outline color</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvancedSave" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvancedResetDefaults" xml:space="preserve">
+    <value>Reset defaults</value>
+  </data>
+  <data name="VideoPage_AdvancedPresetSummary.Text" xml:space="preserve">
+    <value>Preset summary</value>
+  </data>
+  <data name="VideoPage_AdvancedPresetSummaryFormat" xml:space="preserve">
+    <value>Preset: {0} ({1}) | {2} {3} | {4} | {5} | Outline {6}</value>
+  </data>
+  <data name="VideoPage_SubtitleSectionDuration.Text" xml:space="preserve">
+    <value>Advanced subtitle section length</value>
+  </data>
+  <data name="VideoPage_SubtitleSectionDurationFormat" xml:space="preserve">
+    <value>Advanced subtitle section length: {0} s max</value>
   </data>
   <data name="VideoPage_SecondsMax.Header" xml:space="preserve">
     <value>Seconds max</value>
@@ -1715,5 +1787,29 @@
   </data>
   <data name="DocPage_FileInfoSize.Text" xml:space="preserve">
     <value>Size</value>
+  </data>
+  <data name="VideoPage_VerticalMargin_Header" xml:space="preserve">
+    <value>Vertical margin</value>
+  </data>
+  <data name="Shared_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="VideoPage_BoldText_Content" xml:space="preserve">
+    <value>Bold text</value>
+  </data>
+  <data name="VideoPage_OutlineWidth_Header" xml:space="preserve">
+    <value>Outline width</value>
+  </data>
+  <data name="VideoPage_SystemFont_Header" xml:space="preserve">
+    <value>System font</value>
+  </data>
+  <data name="VideoPage_TextTransform_Header" xml:space="preserve">
+    <value>Text transform</value>
+  </data>
+  <data name="VideoPage_FontSize_Header" xml:space="preserve">
+    <value>Font size</value>
+  </data>
+  <data name="VideoPage_BasePreset_Header" xml:space="preserve">
+    <value>Base preset</value>
   </data>
 </root>

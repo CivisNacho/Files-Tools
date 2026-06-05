@@ -591,6 +591,9 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
     internal sealed class ProgressState
     {
         public DateTimeOffset? StartedAtUtc { get; set; }
+        public AudioTranscriptionStage? CurrentStage { get; set; }
+        public DateTimeOffset? StageStartedAtUtc { get; set; }
+        public double StageStartOverallPercent { get; set; }
     }
 
     private sealed class CallbackProgress<T> : IProgress<T>
@@ -1019,6 +1022,13 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             _ => stagePercent
         };
 
+        if (state.CurrentStage != stage)
+        {
+            state.CurrentStage = stage;
+            state.StageStartedAtUtc = DateTimeOffset.UtcNow;
+            state.StageStartOverallPercent = overallPercent;
+        }
+
         progress.Report(new AudioTranscriptionProgress
         {
             Stage = stage,
@@ -1027,11 +1037,11 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             StageDescription = description,
             EstimatedRemainingTime = stage == AudioTranscriptionStage.Completed
                 ? TimeSpan.Zero
-                : ComputeEta(state.StartedAtUtc.Value, overallPercent)
+                : ComputeEta(state, overallPercent, stagePercent)
         });
     }
 
-    private static TimeSpan? ComputeEta(DateTimeOffset startedAtUtc, double overallPercent)
+    private static TimeSpan? ComputeEta(ProgressState state, double overallPercent, double stagePercent)
     {
         if (overallPercent < 0.02d)
         {
@@ -1043,7 +1053,23 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             return TimeSpan.Zero;
         }
 
-        var elapsed = DateTimeOffset.UtcNow - startedAtUtc;
+        // When the current stage has been running long enough to produce a reliable rate, use
+        // stage-local timing. This prevents the fast PreparingAudio stage (0–15%) from making
+        // the ETA optimistic once the slower Transcribing stage starts.
+        if (state.StageStartedAtUtc.HasValue && stagePercent > 0.05d)
+        {
+            var stageElapsed = DateTimeOffset.UtcNow - state.StageStartedAtUtc.Value;
+            var overallGainedInStage = overallPercent - state.StageStartOverallPercent;
+            if (stageElapsed.TotalSeconds > 2d && overallGainedInStage > 0.01d)
+            {
+                var ratePerSecond = overallGainedInStage / stageElapsed.TotalSeconds;
+                var remainingOverall = 1d - overallPercent;
+                return TimeSpan.FromSeconds(remainingOverall / ratePerSecond);
+            }
+        }
+
+        // Fall back to global rate (used during PreparingAudio and early in each stage).
+        var elapsed = DateTimeOffset.UtcNow - state.StartedAtUtc!.Value;
         if (elapsed <= TimeSpan.Zero)
         {
             return null;
