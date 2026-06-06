@@ -2942,11 +2942,10 @@ namespace Files_Tools.Pages
                 }
             }
 
-            // Fallback: if no exact window matched (position is in a gap between words, or the
-            // 16 ms timer fired just after a very short first word's window closed), use the last
-            // word whose start is ≤ position.  This prevents word 0 from being treated as
-            // "already spoken" just because the timer happened to fire slightly late.
-            if (activeIndex < 0)
+            // Fallback for inter-word gaps: if no exact window matched but position has passed
+            // word 0's start, use the last word whose start is ≤ position (handles silence gaps
+            // at the end of a cue where _previewCueEnd may not fully cover all words).
+            if (activeIndex < 0 && runs.Count > 0 && position >= runs[0].Start)
             {
                 for (var i = runs.Count - 1; i >= 0; i--)
                 {
@@ -2956,6 +2955,20 @@ namespace Files_Tools.Pages
                         break;
                     }
                 }
+            }
+
+            // First-tick guard: on the very first call after a new cue is built
+            // (_previewActiveWordIndex == -1), the 16 ms timer may have fired a few
+            // milliseconds after a short first word's window already closed, so the
+            // primary scan lands on word 1 and word 0 appears instantly fully-lit.
+            // If position hasn't advanced more than 200 ms past word 0's start this is
+            // timer jitter, not a genuine seek — clamp back to word 0 so the sweep
+            // always begins from the first word.
+            if (_previewActiveWordIndex < 0 && activeIndex > 0 && runs.Count > 0)
+            {
+                var elapsedPastFirstWord = (position - runs[0].Start).TotalMilliseconds;
+                if (elapsedPastFirstWord < 200d)
+                    activeIndex = 0;
             }
 
             // Trigger a scale pop on the whole block when the active word advances.
