@@ -3148,7 +3148,26 @@ namespace Files_Tools.Pages
                     .ToList();
                 if (inCue.Count == wordCount)
                 {
-                    return inCue.Select(word => word.Start).ToArray();
+                    var wordStarts = inCue.Select(word => word.Start).ToArray();
+
+                    // Ensure strictly-increasing start times. The alignment model sometimes
+                    // assigns the same timestamp to consecutive words (zero-duration windows).
+                    // A zero-duration window [T, T) is never matched in the half-open scan,
+                    // so word 0 would appear instantly filled instead of sweeping progressively.
+                    // Spread any duplicate/out-of-order starts by a minimum visible gap so
+                    // the 16 ms timer can catch each word at least twice before advancing.
+                    var minGap = TimeSpan.FromMilliseconds(50);
+                    for (var i = 1; i < wordStarts.Length; i++)
+                    {
+                        if (wordStarts[i] - wordStarts[i - 1] < minGap)
+                        {
+                            var proposed = wordStarts[i - 1] + minGap;
+                            // Don't push past the cue end; fall back to a 1 ms nudge if needed.
+                            wordStarts[i] = proposed < cue.End ? proposed : wordStarts[i - 1] + TimeSpan.FromMilliseconds(1);
+                        }
+                    }
+
+                    return wordStarts;
                 }
             }
 
