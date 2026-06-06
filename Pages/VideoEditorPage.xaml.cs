@@ -2188,7 +2188,7 @@ namespace Files_Tools.Pages
                 return;
             }
 
-            _subtitlePreviewTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+            _subtitlePreviewTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(16) };
             _subtitlePreviewTimer.Tick += SubtitlePreviewTimer_Tick;
             _subtitlePreviewTimer.Start();
         }
@@ -2929,6 +2929,7 @@ namespace Files_Tools.Pages
             }
 
             // Find which word is currently being spoken.
+            // Primary pass: strict half-open window [wordStart, nextWordStart).
             var activeIndex = -1;
             for (var i = 0; i < runs.Count; i++)
             {
@@ -2938,6 +2939,22 @@ namespace Files_Tools.Pages
                 {
                     activeIndex = i;
                     break;
+                }
+            }
+
+            // Fallback: if no exact window matched (position is in a gap between words, or the
+            // 16 ms timer fired just after a very short first word's window closed), use the last
+            // word whose start is ≤ position.  This prevents word 0 from being treated as
+            // "already spoken" just because the timer happened to fire slightly late.
+            if (activeIndex < 0)
+            {
+                for (var i = runs.Count - 1; i >= 0; i--)
+                {
+                    if (position >= runs[i].Start)
+                    {
+                        activeIndex = i;
+                        break;
+                    }
                 }
             }
 
