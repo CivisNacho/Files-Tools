@@ -22,6 +22,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <TextBlock x:Uid="LicensesPage_Title" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="34" FontWeight="SemiBold" Text="Licenses" />
@@ -62,6 +63,25 @@
                             </TextBlock>
                         </StackPanel>
                     </Grid>
+                </Border>
+
+                <Border
+                    Grid.Row="3"
+                    Padding="16"
+                    CornerRadius="10"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel Spacing="2">
+                        <TextBlock FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="Karaoke Effect Templates" />
+                        <TextBlock Opacity="0.82" TextWrapping="Wrap">
+                            <Run Text="Some of the ASS subtitles ideas and templates came from" />
+                            <Hyperlink NavigateUri="https://github.com/Seekladoom/Aegisub-Karaoke-Effect-481-Templates">
+                                <Run Text="this repository" />
+                            </Hyperlink>
+                            <Run Text="." />
+                        </TextBlock>
+                    </StackPanel>
                 </Border>
 
                 <Border
