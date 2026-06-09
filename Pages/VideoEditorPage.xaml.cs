@@ -2981,7 +2981,7 @@ namespace Files_Tools.Pages
             // Fallback for inter-word gaps: if no exact window matched but position has passed
             // word 0's start, use the last word whose start is ≤ position (handles silence gaps
             // at the end of a cue where _previewCueEnd may not fully cover all words).
-            if (activeIndex < 0 && runs.Count > 0 && position >= runs[0].Start)
+            if (activeIndex < 0 && position >= runs[0].Start)
             {
                 for (var i = runs.Count - 1; i >= 0; i--)
                 {
@@ -2993,25 +2993,16 @@ namespace Files_Tools.Pages
                 }
             }
 
-            // First-tick guard: on the very first call after a new active-cue build
-            // (_previewActiveWordIndex == -1) the scan may land past word 0 because:
-            //   (a) The 16 ms timer fired slightly after a short window closed (jitter).
-            //   (b) A mid-cue automatic refresh (style change, size change, …) rebuilt the
-            //       cue while playback was already deep inside it.
-            // In case (a) we want to clamp back to word 0 so the sweep always starts from
-            // the first word.  In case (b) we must NOT clamp — the user or the player is
-            // genuinely mid-cue and should see the correct "already spoken" state.
-            //
-            // We distinguish the two cases with a wall-clock delta: _previewCueBuildTick is
-            // captured at the END of BuildSubtitlePreviewContentCore (after wordStarts are
-            // applied) so it is very close in time to this first UpdateKaraokeHighlight call.
-            // A small delta (≤ 250 ms) means we are at the natural cue start; a large delta
-            // means a mid-cue rebuild happened and we should leave the scan result as-is.
-            if (_previewActiveWordIndex < 0 && activeIndex > 0 && runs.Count > 0)
+            // First-tick guard: on the first call after a new active-cue build the scan may land
+            // past word 0 either from timer jitter at the natural cue start (clamp back to 0 so
+            // the sweep starts at the first word) or from a mid-cue rebuild such as a style/size
+            // refresh (do NOT clamp — the "already spoken" state is correct). The wall-clock
+            // delta since the build (_previewCueBuildTick) distinguishes the two: jitter is tiny,
+            // a mid-cue rebuild happens long after the cue's natural start.
+            if (_previewActiveWordIndex < 0 && activeIndex > 0
+                && Environment.TickCount64 - _previewCueBuildTick <= 250L)
             {
-                var wallClockElapsedMs = Environment.TickCount64 - _previewCueBuildTick;
-                if (wallClockElapsedMs <= 250L)
-                    activeIndex = 0;
+                activeIndex = 0;
             }
 
             // Trigger a scale pop on the whole block when the active word advances.
@@ -3185,42 +3176,27 @@ namespace Files_Tools.Pages
             var sourceWords = _advancedSubtitleDraft?.SourceWords;
             if (sourceWords is { Count: > 0 })
             {
+                // Same overlap + boundary-artifact filter as the .ass generator
+                // (SubtitlesService.BuildCueWordsFromSubtitleCue) so both paths map
+                // the same source words to the same cue tokens.
                 var inCue = sourceWords
                     .Where(word => word.Start < cue.End && word.End > cue.Start
-                        // Mirror the boundary-spanning filter in BuildCueWordsFromSubtitleCue:
-                        // exclude words that started before this cue and extend only trivially
-                        // past cue.Start (< 100 ms). They belong to the previous segment and
-                        // would produce a near-zero first-word window.
-                        && !(word.Start < cue.Start
-                             && (word.End - cue.Start) < TimeSpan.FromMilliseconds(100)))
+                        && !SubtitlesService.IsBoundarySpanningArtifact(word, cue.Start))
                     .OrderBy(word => word.Start)
                     .ToList();
                 if (inCue.Count == wordCount)
                 {
-                    var wordStarts = inCue.Select(word => word.Start).ToArray();
-
-                    // Apply the same cursor-based clamping that BuildCueWordsFromSubtitleCue
-                    // uses when generating the .ass file.  If the raw alignment gives
-                    // word[i+1].Start < word[i].End (overlap), that word's start is clamped
-                    // to the previous word's end — exactly mirroring "if (start < cursor)
-                    // start = cursor; … cursor = end;" in the .ass generator.
-                    // Without this, the preview sees zero-duration windows [T,T) that the
-                    // half-open scan can never match, making the first word appear instantly
-                    // filled instead of sweeping progressively (most visible on even cues
-                    // whose raw alignment timestamps overlap).
+                    // Cursor-clamp starts exactly like the .ass generator: overlapping starts are
+                    // pushed to the previous word's end (1 ms floor), so the preview never sees a
+                    // zero-duration [T,T) window the half-open scan would skip.
+                    var wordStarts = new TimeSpan[wordCount];
                     var clampCursor = cue.Start;
-                    for (var i = 0; i < wordStarts.Length; i++)
+                    for (var i = 0; i < wordCount; i++)
                     {
-                        if (wordStarts[i] < clampCursor)
-                            wordStarts[i] = clampCursor;
-
-                        // Advance cursor to this word's end time, with a 1 ms floor to
-                        // guarantee forward progress (mirrors "if (end <= start) end = start
-                        // + MinimumPositiveDuration;" in BuildCueWordsFromSubtitleCue).
-                        var wordEnd = inCue[i].End;
-                        if (wordEnd <= wordStarts[i])
-                            wordEnd = wordStarts[i] + TimeSpan.FromMilliseconds(1);
-                        clampCursor = wordEnd;
+                        wordStarts[i] = inCue[i].Start < clampCursor ? clampCursor : inCue[i].Start;
+                        clampCursor = inCue[i].End > wordStarts[i]
+                            ? inCue[i].End
+                            : wordStarts[i] + TimeSpan.FromMilliseconds(1);
                     }
 
                     return wordStarts;

@@ -1261,6 +1261,20 @@ public sealed class SubtitlesService : ISubtitlesService
         return karaokeCues;
     }
 
+    /// <summary>
+    /// True when a source word that starts before <paramref name="cueStart"/> extends only
+    /// trivially past it (&lt; 100 ms). Wav2Vec2AlignmentService cursor-clamps timestamps within
+    /// each segment but not across segments, so the last word of segment N can spill slightly
+    /// into the cue that begins segment N+1. Mapping such a word to the cue's first token gives
+    /// it a near-zero duration after clamping, which renders as an instant karaoke fill (the
+    /// "first word fills entirely" bug). Both the ASS generator and the live preview use this
+    /// to drop the artifact so word-to-token mapping stays in sync between the two paths.
+    /// </summary>
+    internal static bool IsBoundarySpanningArtifact(AudioTranscriptionWord word, TimeSpan cueStart)
+    {
+        return word.Start < cueStart && word.End - cueStart < TimeSpan.FromMilliseconds(100);
+    }
+
     private static List<KaraokeCueWord> BuildCueWordsFromSubtitleCue(SubtitleCue cue, IReadOnlyList<AudioTranscriptionWord>? sourceWords)
     {
         var normalizedText = cue.Text.Replace("\r\n", "\n", StringComparison.Ordinal);
@@ -1291,25 +1305,8 @@ public sealed class SubtitlesService : ISubtitlesService
             var overlapping = new List<AudioTranscriptionWord>();
             foreach (var word in sourceWords)
             {
-                if (word.Start < cueEnd && word.End > cueStart)
+                if (word.Start < cueEnd && word.End > cueStart && !IsBoundarySpanningArtifact(word, cueStart))
                 {
-                    // Exclude cross-segment boundary-spanning words: a word that starts
-                    // before this cue and extends only trivially past cueStart belongs
-                    // to the previous cue.  Wav2Vec2AlignmentService cursor-clamps within
-                    // each segment but NOT across segments, so the last word of segment N
-                    // can end slightly past the boundary that begins segment N+1.  If such
-                    // a word is mapped to the first text token of this cue, it produces a
-                    // near-zero effective duration (word.End − cueStart ≈ 1–10 ms) which
-                    // renders as an instant \kf sweep (the "first word fills entirely" bug
-                    // on even cues).  Filter it out so the count check below either
-                    // falls through to weight-based distribution or uses the genuine
-                    // in-cue words instead.
-                    if (word.Start < cueStart &&
-                        (word.End - cueStart) < TimeSpan.FromMilliseconds(100))
-                    {
-                        continue;
-                    }
-
                     overlapping.Add(word);
                 }
             }
