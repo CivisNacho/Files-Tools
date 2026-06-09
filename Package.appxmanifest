@@ -10,7 +10,7 @@
   <Identity
     Name="NachoGarcaGmez.MediaTools"
     Publisher="CN=DA0ED678-FA79-4B56-A0A1-FF73C9058BEB"
-    Version="1.0.0.0" />
+    Version="1.1.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="864af31e-f506-419f-9e31-6bdc84b62889" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
