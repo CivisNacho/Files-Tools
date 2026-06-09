@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -134,6 +135,7 @@ public enum AudioTranscriptionStage
 {
     PreparingAudio,
     Transcribing,
+    Aligning,
     WritingSubtitles,
     Completed
 }
@@ -159,7 +161,9 @@ public sealed class AudioTranscriptionProgress
 /// </summary>
 public sealed class AudioTranscriptionService : IAudioTranscriptionService
 {
-    private const string BaseModelFileName = "ggml-medium.bin";
+    // The Whisper model is chosen automatically by installed RAM: Large-v3 (~3 GB) on capable machines
+    // for best accuracy, and the lighter Large-v3-Turbo (~1.5 GB) on lower-RAM machines.
+    private const long LargeModelRamThresholdBytes = 8L * 1024 * 1024 * 1024;
     private static readonly TimeSpan MinimumWordDuration = TimeSpan.FromMilliseconds(1);
     private static readonly string[] SupportedVideoExtensions = [".mp4", ".mov", ".mkv", ".avi", ".wmv", ".webm", ".m4v", ".gif"];
 
@@ -167,6 +171,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
     private readonly IWhisperModelInstaller _modelInstaller;
     private readonly IWhisperTranscriber _transcriber;
     private readonly IMediaPreparationService _mediaPreparationService;
+    private readonly IWordAligner? _wordAligner;
 
     /// <summary>
     /// Creates the service with default local media preparation and Whisper adapters.
@@ -176,7 +181,8 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             ResolveDefaultModelPath(),
             new WhisperModelInstaller(),
             new WhisperNetTranscriber(),
-            new MediaPreparationService(new AudioProcessingService(), new VideoProcessingService()))
+            new MediaPreparationService(new AudioProcessingService(), new VideoProcessingService()),
+            new Wav2Vec2AlignmentService())
     {
     }
 
@@ -184,18 +190,21 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
         string modelPath,
         IWhisperModelInstaller modelInstaller,
         IWhisperTranscriber transcriber,
-        IMediaPreparationService mediaPreparationService)
+        IMediaPreparationService mediaPreparationService,
+        IWordAligner? wordAligner = null)
     {
         _modelPath = modelPath ?? throw new ArgumentNullException(nameof(modelPath));
         _modelInstaller = modelInstaller ?? throw new ArgumentNullException(nameof(modelInstaller));
         _transcriber = transcriber ?? throw new ArgumentNullException(nameof(transcriber));
         _mediaPreparationService = mediaPreparationService ?? throw new ArgumentNullException(nameof(mediaPreparationService));
+        _wordAligner = wordAligner;
     }
 
     /// <inheritdoc />
     public bool IsInstalled()
     {
-        return File.Exists(_modelPath);
+        // The transcription feature needs both the Whisper model and the forced-alignment model.
+        return File.Exists(_modelPath) && (_wordAligner?.IsInstalled() ?? true);
     }
 
     /// <inheritdoc />
@@ -230,19 +239,46 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
         });
 
         Directory.CreateDirectory(modelDirectory);
-        var copyProgress = progress is null
-            ? null
-            : new ThrottledProgress<double>(value =>
-            {
-                var fraction = Math.Clamp(value, 0d, 1d);
-                progress.Report(new AudioTranscriptionInstallProgress
-                {
-                    Stage = fraction >= 1d ? "Transcription feature downloaded." : "Downloading transcription feature...",
-                    FractionComplete = fraction
-                });
-            }, throttleMilliseconds: 200);
 
-        await _modelInstaller.InstallBaseModelAsync(_modelPath, copyProgress, cancellationToken).ConfigureAwait(false);
+        // Whisper (speech-to-text) downloads first and maps to the first 80% of overall progress;
+        // the forced-alignment model fills the remaining 20%. The Whisper model is far larger, so
+        // this split keeps the bar moving roughly in line with bytes downloaded.
+        const double WhisperShare = 0.8d;
+
+        if (!File.Exists(_modelPath))
+        {
+            var copyProgress = progress is null
+                ? null
+                : new ThrottledProgress<double>(value =>
+                {
+                    var fraction = Math.Clamp(value, 0d, 1d) * WhisperShare;
+                    progress.Report(new AudioTranscriptionInstallProgress
+                    {
+                        Stage = "Downloading transcription model...",
+                        FractionComplete = fraction
+                    });
+                }, throttleMilliseconds: 200);
+
+            await _modelInstaller.InstallBaseModelAsync(_modelPath, copyProgress, cancellationToken).ConfigureAwait(false);
+        }
+
+        if (_wordAligner is not null && !_wordAligner.IsInstalled())
+        {
+            var alignerProgress = progress is null
+                ? null
+                : new ThrottledProgress<double>(value =>
+                {
+                    var fraction = WhisperShare + (Math.Clamp(value, 0d, 1d) * (1d - WhisperShare));
+                    progress.Report(new AudioTranscriptionInstallProgress
+                    {
+                        Stage = "Downloading alignment model...",
+                        FractionComplete = fraction
+                    });
+                }, throttleMilliseconds: 200);
+
+            await _wordAligner.InstallAsync(alignerProgress, cancellationToken).ConfigureAwait(false);
+        }
+
         progress?.Report(new AudioTranscriptionInstallProgress
         {
             Stage = "Transcription feature downloaded.",
@@ -339,7 +375,37 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             var transcriptionProgress = progress is null
                 ? null
                 : new CallbackProgress<double>(value => Report(progress, progressState, AudioTranscriptionStage.Transcribing, value, "Transcribing audio"));
-            return await _transcriber.TranscribeAsync(_modelPath, preparedAudio.AudioPath, transcriptionProgress, cancellationToken).ConfigureAwait(false);
+            var segments = await _transcriber.TranscribeAsync(_modelPath, preparedAudio.AudioPath, transcriptionProgress, cancellationToken).ConfigureAwait(false);
+            System.Diagnostics.Debug.WriteLine($"[Transcription] Whisper produced {segments.Count} segments from '{System.IO.Path.GetFileName(inputPath)}'.");
+
+            // Refine word timing with forced alignment. The Whisper model/session is fully released
+            // by TranscribeAsync above before this runs, so only one acoustic model is resident at a
+            // time. Alignment is best-effort: on any failure we keep Whisper's token timings.
+            var alignerInstalled = _wordAligner is not null && _wordAligner.IsInstalled();
+            System.Diagnostics.Debug.WriteLine($"[Transcription] Word aligner {(alignerInstalled ? "available -> refining word timings" : "unavailable -> using Whisper token timings")}.");
+            if (alignerInstalled)
+            {
+                var alignmentProgress = progress is null
+                    ? null
+                    : new CallbackProgress<double>(value => Report(progress, progressState, AudioTranscriptionStage.Aligning, value, "Aligning word timings"));
+                try
+                {
+                    segments = await Task.Run(
+                        () => _wordAligner!.Align(preparedAudio.AudioPath, segments, alignmentProgress, cancellationToken),
+                        cancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    // Keep the unaligned segments; karaoke falls back to Whisper/synthesized timing.
+                    System.Diagnostics.Debug.WriteLine($"[Transcription] Alignment failed ({ex.GetType().Name}: {ex.Message}); falling back to Whisper token timings.");
+                }
+            }
+
+            return segments;
         }
         catch (AudioTranscriptionException)
         {
@@ -444,7 +510,69 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             "Media Tools",
             "Whisper");
 
-        return Path.Combine(root, BaseModelFileName);
+        return Path.Combine(root, ResolveModelTier().FileName);
+    }
+
+    /// <summary>
+    /// Selects the Whisper model for this machine by installed RAM: Large-v3 at or above 8 GB,
+    /// Large-v3-Turbo below. The file name is model-specific so a machine downloads only its tier's
+    /// model, and switching tiers re-downloads rather than reusing the wrong model.
+    /// </summary>
+    internal static (GgmlType Type, string FileName) ResolveModelTier()
+    {
+        return SystemMemory.TotalPhysicalBytes() >= LargeModelRamThresholdBytes
+            ? (GgmlType.LargeV3, "ggml-large-v3.bin")
+            : (GgmlType.LargeV3Turbo, "ggml-large-v3-turbo.bin");
+    }
+
+    /// <summary>Total installed physical RAM probe used to pick the Whisper model tier.</summary>
+    private static class SystemMemory
+    {
+        public static long TotalPhysicalBytes()
+        {
+            // GlobalMemoryStatusEx reports true installed physical RAM. GC.GetGCMemoryInfo's
+            // TotalAvailableMemoryBytes is the GC heap budget (can be a fraction of RAM), so it is
+            // only a last-resort fallback.
+            try
+            {
+                var status = new MemoryStatusEx();
+                if (GlobalMemoryStatusEx(status))
+                {
+                    return (long)status.ullTotalPhys;
+                }
+            }
+            catch
+            {
+                // Fall through to the managed estimate.
+            }
+
+            try
+            {
+                return GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private sealed class MemoryStatusEx
+        {
+            public uint dwLength = (uint)Marshal.SizeOf(typeof(MemoryStatusEx));
+            public uint dwMemoryLoad;
+            public ulong ullTotalPhys;
+            public ulong ullAvailPhys;
+            public ulong ullTotalPageFile;
+            public ulong ullAvailPageFile;
+            public ulong ullTotalVirtual;
+            public ulong ullAvailVirtual;
+            public ulong ullAvailExtendedVirtual;
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool GlobalMemoryStatusEx([In, Out] MemoryStatusEx lpBuffer);
     }
 
     private static void ValidateInputPath(string path)
@@ -463,6 +591,9 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
     internal sealed class ProgressState
     {
         public DateTimeOffset? StartedAtUtc { get; set; }
+        public AudioTranscriptionStage? CurrentStage { get; set; }
+        public DateTimeOffset? StageStartedAtUtc { get; set; }
+        public double StageStartOverallPercent { get; set; }
     }
 
     private sealed class CallbackProgress<T> : IProgress<T>
@@ -560,7 +691,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
                 return;
             }
 
-            await using var sourceStream = await WhisperGgmlDownloader.Default.GetGgmlModelAsync(GgmlType.Medium, QuantizationType.NoQuantization, cancellationToken).ConfigureAwait(false);
+            await using var sourceStream = await WhisperGgmlDownloader.Default.GetGgmlModelAsync(ResolveModelTier().Type, QuantizationType.NoQuantization, cancellationToken).ConfigureAwait(false);
             var totalLength = sourceStream.CanSeek ? sourceStream.Length : -1L;
             await using var targetStream = File.Create(modelPath);
             var buffer = new byte[81920];
@@ -592,6 +723,24 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             }
 
             progress?.Report(1d);
+
+            // Reclaim disk from the superseded medium-tier model now that the new tier is installed.
+            try
+            {
+                var directory = Path.GetDirectoryName(modelPath);
+                if (!string.IsNullOrEmpty(directory))
+                {
+                    var legacy = Path.Combine(directory, "ggml-medium.bin");
+                    if (File.Exists(legacy) && !string.Equals(legacy, modelPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        File.Delete(legacy);
+                    }
+                }
+            }
+            catch
+            {
+                // Best-effort cleanup only.
+            }
         }
     }
 
@@ -865,12 +1014,20 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
 
         var overallPercent = stage switch
         {
-            AudioTranscriptionStage.PreparingAudio => stagePercent * 0.2d,
-            AudioTranscriptionStage.Transcribing => 0.2d + (stagePercent * 0.75d),
+            AudioTranscriptionStage.PreparingAudio => stagePercent * 0.15d,
+            AudioTranscriptionStage.Transcribing => 0.15d + (stagePercent * 0.6d),
+            AudioTranscriptionStage.Aligning => 0.75d + (stagePercent * 0.2d),
             AudioTranscriptionStage.WritingSubtitles => 0.95d + (stagePercent * 0.04d),
             AudioTranscriptionStage.Completed => 1d,
             _ => stagePercent
         };
+
+        if (state.CurrentStage != stage)
+        {
+            state.CurrentStage = stage;
+            state.StageStartedAtUtc = DateTimeOffset.UtcNow;
+            state.StageStartOverallPercent = overallPercent;
+        }
 
         progress.Report(new AudioTranscriptionProgress
         {
@@ -880,11 +1037,11 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             StageDescription = description,
             EstimatedRemainingTime = stage == AudioTranscriptionStage.Completed
                 ? TimeSpan.Zero
-                : ComputeEta(state.StartedAtUtc.Value, overallPercent)
+                : ComputeEta(state, overallPercent, stagePercent)
         });
     }
 
-    private static TimeSpan? ComputeEta(DateTimeOffset startedAtUtc, double overallPercent)
+    private static TimeSpan? ComputeEta(ProgressState state, double overallPercent, double stagePercent)
     {
         if (overallPercent < 0.02d)
         {
@@ -896,7 +1053,23 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             return TimeSpan.Zero;
         }
 
-        var elapsed = DateTimeOffset.UtcNow - startedAtUtc;
+        // When the current stage has been running long enough to produce a reliable rate, use
+        // stage-local timing. This prevents the fast PreparingAudio stage (0–15%) from making
+        // the ETA optimistic once the slower Transcribing stage starts.
+        if (state.StageStartedAtUtc.HasValue && stagePercent > 0.05d)
+        {
+            var stageElapsed = DateTimeOffset.UtcNow - state.StageStartedAtUtc.Value;
+            var overallGainedInStage = overallPercent - state.StageStartOverallPercent;
+            if (stageElapsed.TotalSeconds > 2d && overallGainedInStage > 0.01d)
+            {
+                var ratePerSecond = overallGainedInStage / stageElapsed.TotalSeconds;
+                var remainingOverall = 1d - overallPercent;
+                return TimeSpan.FromSeconds(remainingOverall / ratePerSecond);
+            }
+        }
+
+        // Fall back to global rate (used during PreparingAudio and early in each stage).
+        var elapsed = DateTimeOffset.UtcNow - state.StartedAtUtc!.Value;
         if (elapsed <= TimeSpan.Zero)
         {
             return null;

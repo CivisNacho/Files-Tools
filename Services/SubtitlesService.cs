@@ -280,7 +280,20 @@ public enum SubtitleEffectKind
     /// Chunked karaoke: the active word scales from <see cref="SubtitleEffect.Scale"/> down to 100%
     /// as it becomes active. Rendered as one dialogue event per word.
     /// </summary>
-    ActiveWordPop
+    ActiveWordPop,
+
+    /// <summary>
+    /// Entry glow: the whole line starts blurred and sharpens over <see cref="SubtitleEffect.DurationMs"/>.
+    /// Blur radius is set by <see cref="SubtitleEffect.Scale"/> (e.g. 8 = heavy glow, 4 = soft).
+    /// </summary>
+    KaraokeGlowBurst,
+
+    /// <summary>
+    /// Entry outline flash: the outline colour starts at the karaoke highlight colour and fades to
+    /// the base outline colour over <see cref="SubtitleEffect.DurationMs"/>. Creates a vivid border
+    /// pulse each time a new cue appears.
+    /// </summary>
+    KaraokeOutlineFlash
 }
 
 /// <summary>
@@ -313,6 +326,20 @@ public static class SubtitleEffects
     public static SubtitleEffect DropIn() => new(SubtitleEffectKind.DropIn);
 
     public static SubtitleEffect ActiveWordPop(double scale) => new(SubtitleEffectKind.ActiveWordPop) { Scale = scale };
+
+    /// <summary>
+    /// Entry glow: the line starts blurred (<paramref name="blurRadius"/>) and sharpens over
+    /// <paramref name="durationMs"/> milliseconds.
+    /// </summary>
+    public static SubtitleEffect KaraokeGlowBurst(int durationMs = 240, double blurRadius = 8d) =>
+        new(SubtitleEffectKind.KaraokeGlowBurst) { DurationMs = durationMs, Scale = blurRadius };
+
+    /// <summary>
+    /// Entry outline flash: the outline starts at the karaoke highlight colour and fades to the
+    /// base outline colour over <paramref name="durationMs"/> milliseconds.
+    /// </summary>
+    public static SubtitleEffect KaraokeOutlineFlash(int durationMs = 280) =>
+        new(SubtitleEffectKind.KaraokeOutlineFlash) { DurationMs = durationMs };
 }
 
 /// <summary>
@@ -326,17 +353,13 @@ internal enum KaraokeFill
 }
 
 /// <summary>
-/// Built-in styled ASS subtitle presets.
+/// Built-in styled ASS subtitle preset. A single base style is exposed; the page layer lets the
+/// user customise font, size, outline, margin, weight, transform, fill colour, and outline colour
+/// on top of it — no additional presets are needed in the catalog.
 /// </summary>
 public static class StyledSubtitlePresets
 {
     public static SubtitleStylePreset SocialImpact => CreateSocialImpact();
-
-    public static SubtitleStylePreset CleanSans => CreateCleanSans();
-
-    public static SubtitleStylePreset CaptionBox => CreateCaptionBox();
-
-    public static SubtitleStylePreset BroadcastLowerThird => CreateBroadcastLowerThird();
 
     public static SubtitleStylePreset CreateSocialImpact()
     {
@@ -374,113 +397,6 @@ public static class StyledSubtitlePresets
         };
     }
 
-    public static SubtitleStylePreset CreateCleanSans()
-    {
-        return new SubtitleStylePreset
-        {
-            Name = "CleanSans",
-            AssStyleName = "CleanSans",
-            ScriptTitle = "Styled subtitles",
-            PlayResX = 1920,
-            PlayResY = 1080,
-            WrapStyle = 0,
-            ScaledBorderAndShadow = true,
-            PrimaryFontFamily = "Segoe UI",
-            FontFamilyFallbacks = ["Segoe UI", "Arial", "Helvetica", "Noto Sans"],
-            FontSize = 66,
-            Bold = true,
-            Italic = false,
-            TextTransform = SubtitleTextTransform.None,
-            FillColor = SubtitleColor.White,
-            OutlineColor = SubtitleColor.Black,
-            ShadowColor = new SubtitleColor(120, 0, 0, 0),
-            UseBackgroundBox = false,
-            PresentationAnimation = SubtitlePresentationAnimation.Fade,
-            EntryFadeMilliseconds = 100,
-            ExitFadeMilliseconds = 100,
-            IntroScale = 1d,
-            OutlineWidth = 5,
-            ShadowDepth = 1,
-            Alignment = SubtitleVisualAlignment.BottomCenter,
-            MarginLeft = 80,
-            MarginRight = 80,
-            MarginVertical = 110,
-            MaxLines = 2,
-            MaxCharsPerLine = 32
-        };
-    }
-
-    public static SubtitleStylePreset CreateCaptionBox()
-    {
-        return new SubtitleStylePreset
-        {
-            Name = "CaptionBox",
-            AssStyleName = "CaptionBox",
-            ScriptTitle = "Styled subtitles",
-            PlayResX = 1920,
-            PlayResY = 1080,
-            WrapStyle = 0,
-            ScaledBorderAndShadow = true,
-            PrimaryFontFamily = "Arial",
-            FontFamilyFallbacks = ["Arial", "Helvetica", "Segoe UI"],
-            FontSize = 62,
-            Bold = true,
-            Italic = false,
-            TextTransform = SubtitleTextTransform.None,
-            FillColor = SubtitleColor.White,
-            OutlineColor = SubtitleColor.Black,
-            ShadowColor = new SubtitleColor(180, 0, 0, 0),
-            UseBackgroundBox = true,
-            PresentationAnimation = SubtitlePresentationAnimation.Fade,
-            EntryFadeMilliseconds = 140,
-            ExitFadeMilliseconds = 140,
-            IntroScale = 1d,
-            OutlineWidth = 3,
-            ShadowDepth = 0.5,
-            Alignment = SubtitleVisualAlignment.BottomCenter,
-            MarginLeft = 88,
-            MarginRight = 88,
-            MarginVertical = 110,
-            MaxLines = 2,
-            MaxCharsPerLine = 32
-        };
-    }
-
-    public static SubtitleStylePreset CreateBroadcastLowerThird()
-    {
-        return new SubtitleStylePreset
-        {
-            Name = "BroadcastLowerThird",
-            AssStyleName = "BroadcastLowerThird",
-            ScriptTitle = "Styled subtitles",
-            PlayResX = 1920,
-            PlayResY = 1080,
-            WrapStyle = 0,
-            ScaledBorderAndShadow = true,
-            PrimaryFontFamily = "Segoe UI Semibold",
-            FontFamilyFallbacks = ["Segoe UI Semibold", "Segoe UI", "Arial"],
-            FontSize = 56,
-            Bold = true,
-            Italic = false,
-            TextTransform = SubtitleTextTransform.Uppercase,
-            FillColor = SubtitleColor.White,
-            OutlineColor = SubtitleColor.Black,
-            ShadowColor = new SubtitleColor(200, 24, 32, 56),
-            UseBackgroundBox = true,
-            PresentationAnimation = SubtitlePresentationAnimation.Pop,
-            EntryFadeMilliseconds = 100,
-            ExitFadeMilliseconds = 120,
-            IntroScale = 1.1d,
-            OutlineWidth = 4,
-            ShadowDepth = 1,
-            Alignment = SubtitleVisualAlignment.BottomLeft,
-            MarginLeft = 96,
-            MarginRight = 96,
-            MarginVertical = 96,
-            MaxLines = 2,
-            MaxCharsPerLine = 30
-        };
-    }
 }
 
 /// <summary>
@@ -488,48 +404,9 @@ public static class StyledSubtitlePresets
 /// </summary>
 public static class KaraokeSubtitlePresets
 {
-    public static SubtitleStylePreset NeonKaraoke => CreateNeonKaraoke();
-
     public static SubtitleStylePreset Punch => CreatePunch();
 
-    public static SubtitleStylePreset CreateNeonKaraoke()
-    {
-        return new SubtitleStylePreset
-        {
-            Name = "NeonKaraoke",
-            AssStyleName = "NeonKaraoke",
-            ScriptTitle = "Karaoke subtitles",
-            PlayResX = 1920,
-            PlayResY = 1080,
-            WrapStyle = 0,
-            ScaledBorderAndShadow = true,
-            PrimaryFontFamily = "Segoe UI Semibold",
-            FontFamilyFallbacks = ["Segoe UI Semibold", "Segoe UI", "Arial"],
-            FontSize = 64,
-            Bold = true,
-            Italic = false,
-            TextTransform = SubtitleTextTransform.None,
-            FillColor = SubtitleColor.White,
-            OutlineColor = SubtitleColor.Black,
-            ShadowColor = new SubtitleColor(180, 0, 0, 0),
-            KaraokeHighlightColor = new SubtitleColor(0, 255, 220, 20),
-            UseBackgroundBox = false,
-            PresentationAnimation = SubtitlePresentationAnimation.FadePop,
-            EntryFadeMilliseconds = 80,
-            ExitFadeMilliseconds = 80,
-            IntroScale = 1.15d,
-            OutlineWidth = 9,
-            ShadowDepth = 1.5,
-            Alignment = SubtitleVisualAlignment.BottomCenter,
-            MarginLeft = 100,
-            MarginRight = 100,
-            MarginVertical = 120,
-            MaxLines = 2,
-            MaxCharsPerLine = 26
-        };
-    }
-
-public static SubtitleStylePreset CreatePunch()
+    public static SubtitleStylePreset CreatePunch()
     {
         return new SubtitleStylePreset
         {
@@ -573,40 +450,53 @@ public static SubtitleStylePreset CreatePunch()
         };
     }
 
-    public static SubtitleStylePreset Bubbly => CreateBubbly();
+    public static SubtitleStylePreset GlowKaraoke => CreateGlowKaraoke();
 
-    public static SubtitleStylePreset CreateBubbly()
+    /// <summary>
+    /// Soft entry glow + per-word colour sweep. Inspired by classic Aegisub colour-transition
+    /// templates: the whole line blurs in sharp on entry while each word sweeps from white to
+    /// electric cyan, giving a neon-glow feel without per-character positioning.
+    /// </summary>
+    public static SubtitleStylePreset CreateGlowKaraoke()
     {
         return new SubtitleStylePreset
         {
-            Name = "Bubbly",
-            AssStyleName = "Bubbly",
+            Name = "GlowKaraoke",
+            AssStyleName = "GlowKaraoke",
             ScriptTitle = "Karaoke subtitles",
             PlayResX = 1920,
             PlayResY = 1080,
             WrapStyle = 0,
             ScaledBorderAndShadow = true,
-            PrimaryFontFamily = "Bahnschrift",
-            FontFamilyFallbacks = ["Bahnschrift", "Segoe UI", "Arial"],
-            FontSize = 74,
+            PrimaryFontFamily = "Segoe UI Semibold",
+            FontFamilyFallbacks = ["Segoe UI Semibold", "Segoe UI", "Arial"],
+            FontSize = 68,
             Bold = true,
             Italic = false,
-            TextTransform = SubtitleTextTransform.Lowercase,
-            FillColor = new SubtitleColor(0, 255, 180, 200),
-            OutlineColor = SubtitleColor.White,
-            ShadowColor = new SubtitleColor(120, 0, 0, 0),
-            KaraokeHighlightColor = new SubtitleColor(0, 255, 230, 80),
+            TextTransform = SubtitleTextTransform.None,
+            // White = "not yet sung"; electric cyan = "currently sweeping through".
+            FillColor = SubtitleColor.White,
+            OutlineColor = new SubtitleColor(0, 20, 40, 90),   // dark navy for contrast
+            ShadowColor = new SubtitleColor(160, 0, 0, 0),
+            KaraokeHighlightColor = new SubtitleColor(0, 0, 210, 255), // electric cyan
             UseBackgroundBox = false,
-            PresentationAnimation = SubtitlePresentationAnimation.DropIn,
-            EntryFadeMilliseconds = 200,
-            ExitFadeMilliseconds = 100,
+            PresentationAnimation = SubtitlePresentationAnimation.None,
+            Effects =
+            [
+                SubtitleEffects.EntryFade(80),
+                SubtitleEffects.ExitFade(80),
+                SubtitleEffects.KaraokeGlowBurst(240, 8d),
+                SubtitleEffects.KaraokeColorSweep()
+            ],
+            EntryFadeMilliseconds = 80,
+            ExitFadeMilliseconds = 80,
             IntroScale = 1d,
-            OutlineWidth = 12,
-            ShadowDepth = 0,
-            Alignment = SubtitleVisualAlignment.BottomLeft,
-            MarginLeft = 96,
-            MarginRight = 96,
-            MarginVertical = 110,
+            OutlineWidth = 10,
+            ShadowDepth = 1,
+            Alignment = SubtitleVisualAlignment.BottomCenter,
+            MarginLeft = 100,
+            MarginRight = 100,
+            MarginVertical = 120,
             MaxLines = 2,
             MaxCharsPerLine = 28
         };
@@ -686,14 +576,13 @@ public static class SubtitleStyleCatalog
 {
     private static readonly SubtitleStyleCatalogEntry[] BuiltInEntries =
     [
-        new("SocialImpact", "Social Impact", SubtitleStyleKind.Styled, StyledSubtitlePresets.CreateSocialImpact),
-        new("CleanSans", "Clean Sans", SubtitleStyleKind.Styled, StyledSubtitlePresets.CreateCleanSans),
-        new("CaptionBox", "Caption Box", SubtitleStyleKind.Styled, StyledSubtitlePresets.CreateCaptionBox),
-        new("BroadcastLowerThird", "Broadcast Lower Third", SubtitleStyleKind.Styled, StyledSubtitlePresets.CreateBroadcastLowerThird),
-        new("NeonKaraoke", "Neon Karaoke", SubtitleStyleKind.Karaoke, KaraokeSubtitlePresets.CreateNeonKaraoke),
+        // Styled presets are intentionally absent from the catalog: the page layer exposes a single
+        // customisable styled option (based on SocialImpact) rather than a preset picker, so there
+        // is nothing to enumerate here. The StyledSubtitlePresets factory methods still exist and
+        // are called directly wherever a base style is needed.
         new("Punch", "Punch", SubtitleStyleKind.Karaoke, KaraokeSubtitlePresets.CreatePunch),
-        new("Bubbly", "Bubbly", SubtitleStyleKind.Karaoke, KaraokeSubtitlePresets.CreateBubbly),
-        new("WordPop", "Word Pop", SubtitleStyleKind.Karaoke, KaraokeSubtitlePresets.CreateWordPop)
+        new("WordPop", "Word Pop", SubtitleStyleKind.Karaoke, KaraokeSubtitlePresets.CreateWordPop),
+        new("GlowKaraoke", "Glow", SubtitleStyleKind.Karaoke, KaraokeSubtitlePresets.CreateGlowKaraoke)
     ];
 
     private static readonly object SyncRoot = new();
@@ -890,6 +779,13 @@ public interface ISubtitlesService
     /// Renders a processed subtitle draft to karaoke ASS text while preserving reviewed cue boundaries.
     /// </summary>
     string RenderKaraokeAss(SubtitleDraft draft, SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null, SubtitleRenderTarget? target = null);
+
+    /// <summary>
+    /// Rewrites a preset into the given target frame's coordinate space (the same font/margin scaling
+    /// the renderers apply), so a live preview can size text exactly like the burned output — including
+    /// the chunked karaoke fit-to-frame clamp. Returns the preset unchanged when target is null/equal.
+    /// </summary>
+    SubtitleStylePreset ApplyRenderTarget(SubtitleStylePreset preset, SubtitleRenderTarget? target);
 }
 
 /// <summary>
@@ -1092,6 +988,13 @@ public sealed class SubtitlesService : ISubtitlesService
         {
             SourceWords = draft.SourceWords
         };
+    }
+
+    /// <inheritdoc />
+    public SubtitleStylePreset ApplyRenderTarget(SubtitleStylePreset preset, SubtitleRenderTarget? target)
+    {
+        ArgumentNullException.ThrowIfNull(preset);
+        return ApplyTargetResolutionToPreset(NormalizePreset(preset), target);
     }
 
     /// <inheritdoc />
@@ -1358,6 +1261,20 @@ public sealed class SubtitlesService : ISubtitlesService
         return karaokeCues;
     }
 
+    /// <summary>
+    /// True when a source word that starts before <paramref name="cueStart"/> extends only
+    /// trivially past it (&lt; 100 ms). Wav2Vec2AlignmentService cursor-clamps timestamps within
+    /// each segment but not across segments, so the last word of segment N can spill slightly
+    /// into the cue that begins segment N+1. Mapping such a word to the cue's first token gives
+    /// it a near-zero duration after clamping, which renders as an instant karaoke fill (the
+    /// "first word fills entirely" bug). Both the ASS generator and the live preview use this
+    /// to drop the artifact so word-to-token mapping stays in sync between the two paths.
+    /// </summary>
+    internal static bool IsBoundarySpanningArtifact(AudioTranscriptionWord word, TimeSpan cueStart)
+    {
+        return word.Start < cueStart && word.End - cueStart < TimeSpan.FromMilliseconds(100);
+    }
+
     private static List<KaraokeCueWord> BuildCueWordsFromSubtitleCue(SubtitleCue cue, IReadOnlyList<AudioTranscriptionWord>? sourceWords)
     {
         var normalizedText = cue.Text.Replace("\r\n", "\n", StringComparison.Ordinal);
@@ -1388,7 +1305,7 @@ public sealed class SubtitlesService : ISubtitlesService
             var overlapping = new List<AudioTranscriptionWord>();
             foreach (var word in sourceWords)
             {
-                if (word.Start < cueEnd && word.End > cueStart)
+                if (word.Start < cueEnd && word.End > cueStart && !IsBoundarySpanningArtifact(word, cueStart))
                 {
                     overlapping.Add(word);
                 }
@@ -1935,7 +1852,7 @@ public sealed class SubtitlesService : ISubtitlesService
     private static KaraokeRenderPreset CreateDefaultKaraokePreset(SubtitleStylePreset? preset = null, SubtitlePlacementOptions? placement = null, SubtitleRenderTarget? target = null)
     {
         var basePreset = ApplyTargetResolutionToPreset(
-            ApplyPlacementToPreset(NormalizePreset(preset ?? KaraokeSubtitlePresets.NeonKaraoke), placement),
+            ApplyPlacementToPreset(NormalizePreset(preset ?? KaraokeSubtitlePresets.GlowKaraoke), placement),
             target);
         return new KaraokeRenderPreset
         {
@@ -2153,18 +2070,39 @@ public sealed class SubtitlesService : ISubtitlesService
 
             if (wordStartCs > emittedCs)
             {
+                // Silent gap filler. When the word that follows opens a new visual line, append
+                // \N to the gap syllable's text so the line break falls *between* syllables rather
+                // than inside the incoming word's fill-sweep bounding box — which would cause the
+                // renderer to complete the sweep instantly (the "first word fills entirely" bug).
                 builder.Append('{').Append(fillTag)
                     .Append((wordStartCs - emittedCs).ToString(System.Globalization.CultureInfo.InvariantCulture))
                     .Append('}');
+                if (word.BreakBefore)
+                {
+                    builder.Append(@"\N");
+                }
+
                 emittedCs = wordStartCs;
+            }
+            else if (word.BreakBefore)
+            {
+                // No gap before this word, but it starts a new visual line. Emit a 1cs filler
+                // syllable that owns the \N so the line break falls *between* syllables — not
+                // inside the preceding word's syllable text (which would cause the renderer to
+                // complete the next word's fill-sweep instantly, the "first word of lane 2 fills
+                // entirely" bug). Mirrors the gap-filler approach used when wordStartCs > emittedCs.
+                builder.Append('{').Append(fillTag).Append("1}\\N");
+                emittedCs += 1;
             }
 
             var durationCs = Math.Max(1L, wordEndCs - emittedCs);
-            var prefix = word.BreakBefore ? @"\N" : index > 0 ? " " : string.Empty;
+            // Inter-word space: only for same-line words that follow another word (never after a
+            // line break, where \N already provides the visual separation).
+            var space = !word.BreakBefore && index > 0 ? " " : string.Empty;
             builder.Append('{').Append(fillTag)
                 .Append(durationCs.ToString(System.Globalization.CultureInfo.InvariantCulture))
                 .Append('}')
-                .Append(prefix)
+                .Append(space)
                 .Append(EscapeAssText(word.Text));
             emittedCs += durationCs;
         }
@@ -2233,7 +2171,7 @@ public sealed class SubtitlesService : ISubtitlesService
             tags.Add(positionOverride);
         }
 
-        var animationOverride = BuildLineOverrideTags(ResolveLineEffects(preset), start, end);
+        var animationOverride = BuildLineOverrideTags(ResolveLineEffects(preset), start, end, preset.KaraokeHighlightColor, preset.OutlineColor);
         if (animationOverride.Length > 0)
         {
             tags.Add(animationOverride);
@@ -2253,7 +2191,7 @@ public sealed class SubtitlesService : ISubtitlesService
             tags.Add(positionOverride);
         }
 
-        var animationOverride = BuildLineOverrideTags(preset.LineEffects, start, end);
+        var animationOverride = BuildLineOverrideTags(preset.LineEffects, start, end, preset.HighlightColor, preset.OutlineColor);
         if (animationOverride.Length > 0)
         {
             tags.Add(animationOverride);
@@ -2362,14 +2300,28 @@ public sealed class SubtitlesService : ISubtitlesService
     }
 
     /// <summary>
-    /// Compiles a list of effects into the line-level ASS override tags (fade and entry pop).
-    /// This is the single place effects become ASS, so new looks need no renderer changes.
+    /// Compiles a list of effects into the line-level ASS override tags (fade, entry pop, glow,
+    /// and outline flash). This is the single place effects become ASS, so new looks need no
+    /// renderer changes beyond adding cases here.
+    /// <para>
+    /// <paramref name="highlightColor"/> and <paramref name="outlineColor"/> are required for
+    /// <see cref="SubtitleEffectKind.KaraokeOutlineFlash"/> (the flash starts at the highlight
+    /// colour and fades to the base outline colour); they are ignored by all other effects.
+    /// </para>
     /// </summary>
-    private static string BuildLineOverrideTags(IReadOnlyList<SubtitleEffect> effects, TimeSpan start, TimeSpan end)
+    private static string BuildLineOverrideTags(
+        IReadOnlyList<SubtitleEffect> effects,
+        TimeSpan start,
+        TimeSpan end,
+        SubtitleColor? highlightColor = null,
+        SubtitleColor? outlineColor = null)
     {
         var entryFade = 0;
         var exitFade = 0;
         double? popScale = null;
+        double? glowBlurRadius = null;
+        var glowDurationMs = 240;
+        var outlineFlashDurationMs = 0;
 
         foreach (var effect in effects)
         {
@@ -2383,6 +2335,13 @@ public sealed class SubtitlesService : ISubtitlesService
                     break;
                 case SubtitleEffectKind.EntryPop:
                     popScale = effect.Scale;
+                    break;
+                case SubtitleEffectKind.KaraokeGlowBurst:
+                    glowBlurRadius = effect.Scale > 0 ? Math.Min(effect.Scale, 20d) : 8d;
+                    glowDurationMs = effect.DurationMs > 0 ? Math.Clamp(effect.DurationMs, 50, 2000) : 240;
+                    break;
+                case SubtitleEffectKind.KaraokeOutlineFlash:
+                    outlineFlashDurationMs = effect.DurationMs > 0 ? Math.Clamp(effect.DurationMs, 50, 2000) : 280;
                     break;
             }
         }
@@ -2410,6 +2369,24 @@ public sealed class SubtitlesService : ISubtitlesService
                 .Append(@"\fscy")
                 .Append(scalePercent)
                 .Append(@"\t(0,160,\fscx100\fscy100)");
+        }
+
+        // Glow: start blurred and sharpen over glowDurationMs. \blur transitions smoothly in
+        // libass and all modern renderers; a value of 0 means fully sharp.
+        if (glowBlurRadius is double blurRadius)
+        {
+            var blurInt = Math.Max(1, (int)Math.Round(blurRadius, MidpointRounding.AwayFromZero));
+            builder.Append(@"\blur")
+                .Append(blurInt)
+                .Append(FormattableString.Invariant($@"\t(0,{glowDurationMs},\blur0)"));
+        }
+
+        // Outline flash: outline starts at the highlight colour and fades to the base outline colour.
+        if (outlineFlashDurationMs > 0 && highlightColor is not null && outlineColor is not null)
+        {
+            builder.Append(@"\3c")
+                .Append(ToAssColor(highlightColor))
+                .Append(FormattableString.Invariant($@"\t(0,{outlineFlashDurationMs},\3c{ToAssColor(outlineColor)})"));
         }
 
         if (builder.Length > 0 && start >= end)
@@ -2791,14 +2768,18 @@ public sealed class SubtitlesService : ISubtitlesService
         // Standard subtitle sizing: scale the font by the height ratio.
         var fontSize = preset.FontSize * scaleY;
 
-        // The chunked style is single-line and cannot wrap, so additionally clamp the font so a full
-        // line (up to MaxCharsPerLine, widened by the active-word pop) fits the usable width.
+        // Fit-to-frame clamp: for the chunked "viral" style every chunk is a single, non-wrapping
+        // line, so we must ensure MaxCharsPerLine characters (plus the active-word pop) fit within
+        // the usable width. Non-chunked presets rely on libass WrapStyle wrapping and do not need a
+        // font-size cap — clamping them would prevent user-configured font sizes from taking effect
+        // on portrait / square frames even though libass will wrap the text naturally.
         if (preset.MaxWordsPerChunk is > 0)
         {
             var usableWidth = Math.Max(1, size.Width - marginLeft - marginRight);
             var maxChars = Math.Max(1, preset.MaxCharsPerLine);
             var activeScale = ResolveActiveWordScale(preset);
             activeScale = activeScale > 0 ? Math.Min(activeScale, 1.4d) : 1d;
+
             const double averageGlyphAdvance = 0.62d;
             var widthFitFont = usableWidth / (maxChars * averageGlyphAdvance * activeScale);
             fontSize = Math.Min(fontSize, widthFitFont);

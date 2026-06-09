@@ -616,6 +616,12 @@ public sealed class VideoSourceInfo
 
     /// <summary>Display height of the primary video stream (rotation applied), or 0 if unknown.</summary>
     public int Height { get; init; }
+
+    /// <summary>Coded (storage) width — the raw stream width before any rotation tag is applied. Equals Width for non-rotated video.</summary>
+    public int CodedWidth { get; init; }
+
+    /// <summary>Coded (storage) height — the raw stream height before any rotation tag is applied. Equals Height for non-rotated video.</summary>
+    public int CodedHeight { get; init; }
 }
 
 /// <summary>
@@ -748,7 +754,9 @@ public sealed class VideoProcessingService : IVideoProcessingService
             VideoCodecName = MapVideoCodecToUiName(info.PrimaryVideoStream?.CodecName),
             AudioCodecName = MapAudioCodecToUiName(info.PrimaryAudioStream?.CodecName),
             Width = displayWidth,
-            Height = displayHeight
+            Height = displayHeight,
+            CodedWidth = info.PrimaryVideoStream?.Width ?? 0,
+            CodedHeight = info.PrimaryVideoStream?.Height ?? 0
         };
     }
 

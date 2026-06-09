@@ -1,3 +1,4 @@
+using Files_Tools.Helpers;
 using Files_Tools.Services;
 using Microsoft.Graphics.Canvas.Text;
 using Microsoft.UI;
@@ -32,7 +33,7 @@ namespace Files_Tools.Pages
         {
             // Ids reference SubtitleStyleCatalog entries, so adding a catalog style needs no UI changes.
             public string StyledPresetId { get; set; } = "SocialImpact";
-            public string KaraokePresetId { get; set; } = "NeonKaraoke";
+            public string KaraokePresetId { get; set; } = "GlowKaraoke";
             public string FontFamily { get; set; } = "Impact";
             public double FontSize { get; set; } = 72d;
             public bool Bold { get; set; } = true;
@@ -41,12 +42,28 @@ namespace Files_Tools.Pages
             public int MarginVertical { get; set; } = 90;
             public SubtitleColor KaraokeHighlightColor { get; set; } = new(0, 255, 110, 0);
 
+            /// <summary>Text fill colour used for styled (non-karaoke) subtitles.</summary>
+            public SubtitleColor FillColor { get; set; } = new(0, 255, 255, 255);
+
+            /// <summary>Outline colour used for styled (non-karaoke) subtitles.</summary>
+            public SubtitleColor OutlineColor { get; set; } = new(0, 0, 0, 0);
+
+            /// <summary>Text fill colour used for karaoke subtitles (the "unsung" word colour).</summary>
+            public SubtitleColor KaraokeFillColor { get; set; } = new(0, 255, 255, 255);
+
+            /// <summary>Outline colour used for karaoke subtitles.</summary>
+            public SubtitleColor KaraokeOutlineColor { get; set; } = new(0, 20, 40, 90);
+
             public static SubtitlePresetConfiguration CreateDefault() => new()
             {
                 StyledPresetId = "SocialImpact",
-                KaraokePresetId = "NeonKaraoke",
+                KaraokePresetId = "GlowKaraoke",
                 FontFamily = "Impact",
-                KaraokeHighlightColor = new SubtitleColor(0, 255, 110, 0)
+                KaraokeHighlightColor = new SubtitleColor(0, 255, 110, 0),
+                FillColor = new SubtitleColor(0, 255, 255, 255),
+                OutlineColor = new SubtitleColor(0, 0, 0, 0),
+                KaraokeFillColor = new SubtitleColor(0, 255, 255, 255),
+                KaraokeOutlineColor = new SubtitleColor(0, 20, 40, 90)
             };
         }
 
@@ -431,6 +448,7 @@ namespace Files_Tools.Pages
                     {
                         BatchTranscriptionDownloadProgressBar.Value = p.FractionComplete;
                         BatchTranscriptionDownloadStatusTextBlock.Text = p.Stage;
+                        TaskbarProgressHelper.SetProgress(p.FractionComplete);
                     });
                 });
                 await transcriptionService.InstallAsync(progress);
@@ -444,6 +462,7 @@ namespace Files_Tools.Pages
             finally
             {
                 BatchTranscriptionDownloadProgressBar.Visibility = Visibility.Collapsed;
+                TaskbarProgressHelper.Clear();
             }
         }
 
@@ -465,7 +484,7 @@ namespace Files_Tools.Pages
                 ? _batchAdvancedSubtitlePresetConfiguration.KaraokePresetId
                 : _batchAdvancedSubtitlePresetConfiguration.StyledPresetId;
 
-            var basePresetComboBox = new ComboBox { Header = "Base preset" };
+            var basePresetComboBox = new ComboBox { Header = Strings.Get("VideoPage_BasePreset_Header") };
             foreach (var entry in presetEntries)
                 basePresetComboBox.Items.Add(new ComboBoxItem { Content = entry.DisplayName });
 
@@ -474,42 +493,43 @@ namespace Files_Tools.Pages
 
             var fontSizeNumberBox = new NumberBox
             {
-                Header = "Font size", Minimum = 24, Maximum = 160, SmallChange = 1,
+                Header = Strings.Get("VideoPage_FontSize_Header"), Minimum = 24, Maximum = 160, SmallChange = 1,
                 SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Compact,
                 Value = _batchAdvancedSubtitlePresetConfiguration.FontSize
             };
             var fontFamilyComboBox = new ComboBox
             {
-                Header = "System font",
+                Header = Strings.Get("VideoPage_SystemFont_Header"),
                 ItemsSource = _batchInstalledFontFamilies.ToList(),
-                PlaceholderText = "Select an installed font"
+                PlaceholderText = Strings.Get("VideoPage_SelectInstalledFont")
             };
             if (_batchInstalledFontFamilies.Contains(_batchAdvancedSubtitlePresetConfiguration.FontFamily, StringComparer.OrdinalIgnoreCase))
                 fontFamilyComboBox.SelectedItem = _batchInstalledFontFamilies.First(n => string.Equals(n, _batchAdvancedSubtitlePresetConfiguration.FontFamily, StringComparison.OrdinalIgnoreCase));
 
             var outlineNumberBox = new NumberBox
             {
-                Header = "Outline width", Minimum = 0, Maximum = 20, SmallChange = 0.5,
+                Header = Strings.Get("VideoPage_OutlineWidth_Header"), Minimum = 0, Maximum = 20, SmallChange = 0.5,
                 SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Compact,
                 Value = _batchAdvancedSubtitlePresetConfiguration.OutlineWidth
             };
             var marginVerticalNumberBox = new NumberBox
             {
-                Header = "Vertical margin", Minimum = 0, Maximum = 400, SmallChange = 1,
+                Header = Strings.Get("VideoPage_VerticalMargin_Header"), Minimum = 0, Maximum = 400, SmallChange = 1,
                 SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Compact,
                 Value = _batchAdvancedSubtitlePresetConfiguration.MarginVertical
             };
-            var boldCheckBox = new CheckBox { Content = "Bold text", IsChecked = _batchAdvancedSubtitlePresetConfiguration.Bold };
-            var textTransformComboBox = new ComboBox { Header = "Text transform" };
-            textTransformComboBox.Items.Add(new ComboBoxItem { Content = "Original case" });
-            textTransformComboBox.Items.Add(new ComboBoxItem { Content = "UPPERCASE" });
-            textTransformComboBox.Items.Add(new ComboBoxItem { Content = "lowercase" });
+            var boldCheckBox = new CheckBox { Content = Strings.Get("VideoPage_BoldText_Content"), IsChecked = _batchAdvancedSubtitlePresetConfiguration.Bold };
+            var textTransformComboBox = new ComboBox { Header = Strings.Get("VideoPage_TextTransform_Header") };
+            textTransformComboBox.Items.Add(new ComboBoxItem { Content = Strings.Get("VideoPage_OriginalCase") });
+            textTransformComboBox.Items.Add(new ComboBoxItem { Content = Strings.Get("VideoPage_Uppercase") });
+            textTransformComboBox.Items.Add(new ComboBoxItem { Content = Strings.Get("VideoPage_Lowercase") });
             textTransformComboBox.SelectedIndex = _batchAdvancedSubtitlePresetConfiguration.TextTransform switch
             {
                 SubtitleTextTransform.Uppercase => 1,
                 SubtitleTextTransform.Lowercase => 2,
                 _                               => 0
             };
+            // Karaoke-only: word highlight colour.
             var karaokeAccentColorPicker = new ColorPicker
             {
                 Color = ToUiColor(_batchAdvancedSubtitlePresetConfiguration.KaraokeHighlightColor),
@@ -518,41 +538,67 @@ namespace Files_Tools.Pages
             };
             var karaokeAccentLabel = new TextBlock
             {
-                Text = "Karaoke highlight color",
+                Text = Strings.Get("VideoPage_FillingColor"),
                 Visibility = isKaraokeMode ? Visibility.Visible : Visibility.Collapsed
             };
 
-            basePresetComboBox.SelectionChanged += (_, _) =>
+            // Word fill and outline colours — available in both styled and karaoke modes.
+            var fillColorPicker = new ColorPicker
             {
-                var selectedIndex = basePresetComboBox.SelectedIndex;
-                if (selectedIndex < 0 || selectedIndex >= presetEntries.Count)
-                    return;
-
-                var defaults = presetEntries[selectedIndex].Factory();
-
-                var defaultFont = defaults.PrimaryFontFamily;
-                if (_batchInstalledFontFamilies.Contains(defaultFont, StringComparer.OrdinalIgnoreCase))
-                    fontFamilyComboBox.SelectedItem = _batchInstalledFontFamilies.First(n => string.Equals(n, defaultFont, StringComparison.OrdinalIgnoreCase));
-
-                fontSizeNumberBox.Value = defaults.FontSize;
-                outlineNumberBox.Value  = defaults.OutlineWidth;
-                marginVerticalNumberBox.Value = defaults.MarginVertical;
-                boldCheckBox.IsChecked  = defaults.Bold;
-                textTransformComboBox.SelectedIndex = defaults.TextTransform switch
-                {
-                    SubtitleTextTransform.Uppercase => 1,
-                    SubtitleTextTransform.Lowercase => 2,
-                    _                               => 0
-                };
+                Color = ToUiColor(isKaraokeMode
+                    ? _batchAdvancedSubtitlePresetConfiguration.KaraokeFillColor
+                    : _batchAdvancedSubtitlePresetConfiguration.FillColor)
             };
+            var fillColorLabel = new TextBlock { Text = isKaraokeMode ? Strings.Get("VideoPage_PreFillingColor") : Strings.Get("VideoPage_WordFillColor") };
+            var outlineColorPicker = new ColorPicker
+            {
+                Color = ToUiColor(isKaraokeMode
+                    ? _batchAdvancedSubtitlePresetConfiguration.KaraokeOutlineColor
+                    : _batchAdvancedSubtitlePresetConfiguration.OutlineColor)
+            };
+            var outlineColorLabel = new TextBlock { Text = Strings.Get("VideoPage_OutlineColor") };
+
+            // Karaoke: selecting a preset auto-fills typography defaults.
+            // Styled: single customisable base, no preset picker.
+            if (isKaraokeMode)
+            {
+                basePresetComboBox.SelectionChanged += (_, _) =>
+                {
+                    var selectedIndex = basePresetComboBox.SelectedIndex;
+                    if (selectedIndex < 0 || selectedIndex >= presetEntries.Count)
+                        return;
+
+                    var defaults = presetEntries[selectedIndex].Factory();
+
+                    var defaultFont = defaults.PrimaryFontFamily;
+                    if (_batchInstalledFontFamilies.Contains(defaultFont, StringComparer.OrdinalIgnoreCase))
+                        fontFamilyComboBox.SelectedItem = _batchInstalledFontFamilies.First(n => string.Equals(n, defaultFont, StringComparison.OrdinalIgnoreCase));
+
+                    fontSizeNumberBox.Value = defaults.FontSize;
+                    outlineNumberBox.Value  = defaults.OutlineWidth;
+                    marginVerticalNumberBox.Value = defaults.MarginVertical;
+                    boldCheckBox.IsChecked  = defaults.Bold;
+                    textTransformComboBox.SelectedIndex = defaults.TextTransform switch
+                    {
+                        SubtitleTextTransform.Uppercase => 1,
+                        SubtitleTextTransform.Lowercase => 2,
+                        _                               => 0
+                    };
+                    fillColorPicker.Color = ToUiColor(defaults.FillColor);
+                    outlineColorPicker.Color = ToUiColor(defaults.OutlineColor);
+                };
+            }
 
             var content = new StackPanel { Spacing = 10 };
             content.Children.Add(new TextBlock
             {
-                Text = "Choose a preset and tune the typography, presentation, and karaoke accent used for advanced subtitle rendering.",
+                Text = isKaraokeMode
+                    ? Strings.Get("VideoPage_ConfigureKaraokeSummary")
+                    : Strings.Get("VideoPage_ConfigureStyledSummary"),
                 TextWrapping = TextWrapping.Wrap, Opacity = 0.76
             });
-            content.Children.Add(basePresetComboBox);
+            if (isKaraokeMode)
+                content.Children.Add(basePresetComboBox);
             content.Children.Add(fontFamilyComboBox);
             content.Children.Add(fontSizeNumberBox);
             content.Children.Add(outlineNumberBox);
@@ -561,19 +607,23 @@ namespace Files_Tools.Pages
             content.Children.Add(textTransformComboBox);
             content.Children.Add(karaokeAccentLabel);
             content.Children.Add(karaokeAccentColorPicker);
+            content.Children.Add(fillColorLabel);
+            content.Children.Add(fillColorPicker);
+            content.Children.Add(outlineColorLabel);
+            content.Children.Add(outlineColorPicker);
 
             var dialog = new ContentDialog
             {
-                Title = "Configure advanced subtitles",
+                Title = Strings.Get("VideoPage_ConfigureAdvancedTitle"),
                 Content = new ScrollViewer
                 {
                     VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
                     HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
                     MaxHeight = 560, MinWidth = 420, Content = content
                 },
-                PrimaryButtonText   = "Save",
-                SecondaryButtonText = "Reset defaults",
-                CloseButtonText     = "Cancel",
+                PrimaryButtonText   = Strings.Get("VideoPage_ConfigureAdvancedSave"),
+                SecondaryButtonText = Strings.Get("VideoPage_ConfigureAdvancedResetDefaults"),
+                CloseButtonText     = Strings.Get("Shared_Cancel"),
                 XamlRoot            = XamlRoot
             };
 
@@ -607,6 +657,22 @@ namespace Files_Tools.Pages
                 _ => SubtitleTextTransform.None
             };
             newConfig.KaraokeHighlightColor = FromUiColor(karaokeAccentColorPicker.Color);
+            if (isKaraokeMode)
+            {
+                newConfig.KaraokeFillColor = FromUiColor(fillColorPicker.Color);
+                newConfig.KaraokeOutlineColor = FromUiColor(outlineColorPicker.Color);
+                // Preserve the styled-mode colours untouched.
+                newConfig.FillColor = _batchAdvancedSubtitlePresetConfiguration.FillColor;
+                newConfig.OutlineColor = _batchAdvancedSubtitlePresetConfiguration.OutlineColor;
+            }
+            else
+            {
+                newConfig.FillColor = FromUiColor(fillColorPicker.Color);
+                newConfig.OutlineColor = FromUiColor(outlineColorPicker.Color);
+                // Preserve the karaoke-mode colours untouched.
+                newConfig.KaraokeFillColor = _batchAdvancedSubtitlePresetConfiguration.KaraokeFillColor;
+                newConfig.KaraokeOutlineColor = _batchAdvancedSubtitlePresetConfiguration.KaraokeOutlineColor;
+            }
 
             if (selectedEntry is not null)
             {
@@ -652,13 +718,20 @@ namespace Files_Tools.Pages
         private SubtitleStylePreset CreateBatchSubtitleStylePreset()
         {
             var isKaraokeMode = BatchIsKaraokeAdvancedSubtitleTypeSelected();
-            var presetId = isKaraokeMode
-                ? _batchAdvancedSubtitlePresetConfiguration.KaraokePresetId
-                : _batchAdvancedSubtitlePresetConfiguration.StyledPresetId;
 
-            // Resolve from the catalog, falling back to the kind's default if the id is unknown.
-            var basePreset = (SubtitleStyleCatalog.Find(presetId)
-                ?? SubtitleStyleCatalog.Find(isKaraokeMode ? "NeonKaraoke" : "SocialImpact")!).Factory();
+            // Karaoke: resolve from catalog with GlowKaraoke as fallback.
+            // Styled: always use SocialImpact as the single internal base (no catalog entry).
+            SubtitleStylePreset basePreset;
+            if (isKaraokeMode)
+            {
+                var presetId = _batchAdvancedSubtitlePresetConfiguration.KaraokePresetId;
+                basePreset = (SubtitleStyleCatalog.Find(presetId)
+                    ?? SubtitleStyleCatalog.Find("GlowKaraoke")!).Factory();
+            }
+            else
+            {
+                basePreset = StyledSubtitlePresets.SocialImpact;
+            }
 
             return new SubtitleStylePreset
             {
@@ -675,8 +748,8 @@ namespace Files_Tools.Pages
                 Bold = _batchAdvancedSubtitlePresetConfiguration.Bold,
                 Italic = basePreset.Italic,
                 TextTransform = _batchAdvancedSubtitlePresetConfiguration.TextTransform,
-                FillColor = basePreset.FillColor,
-                OutlineColor = basePreset.OutlineColor,
+                FillColor = isKaraokeMode ? _batchAdvancedSubtitlePresetConfiguration.KaraokeFillColor : _batchAdvancedSubtitlePresetConfiguration.FillColor,
+                OutlineColor = isKaraokeMode ? _batchAdvancedSubtitlePresetConfiguration.KaraokeOutlineColor : _batchAdvancedSubtitlePresetConfiguration.OutlineColor,
                 ShadowColor = basePreset.ShadowColor,
                 KaraokeHighlightColor = _batchAdvancedSubtitlePresetConfiguration.KaraokeHighlightColor,
                 UseBackgroundBox = basePreset.UseBackgroundBox,
@@ -727,11 +800,14 @@ namespace Files_Tools.Pages
             return new[] { "Impact", "Segoe UI", "Arial" };
         }
 
+        // ASS alpha is inverted relative to Windows ARGB:
+        //   ASS  0x00 = fully opaque  →  Windows 0xFF = fully opaque
+        //   ASS  0xFF = fully transparent  →  Windows 0x00 = fully transparent
         private static Color ToUiColor(SubtitleColor color) =>
-            Color.FromArgb(color.Alpha, color.Red, color.Green, color.Blue);
+            Color.FromArgb((byte)(255 - color.Alpha), color.Red, color.Green, color.Blue);
 
         private static SubtitleColor FromUiColor(Color color) =>
-            new(color.A, color.R, color.G, color.B);
+            new((byte)(255 - color.A), color.R, color.G, color.B);
 
         // ── Processing ────────────────────────────────────────────────────────
 
@@ -824,6 +900,7 @@ namespace Files_Tools.Pages
                 StopElapsedTimer();
                 ProcessProgressBar.IsIndeterminate = false;
                 ProcessingProgressPanel.Visibility = Visibility.Collapsed;
+                TaskbarProgressHelper.Clear();
                 ProcessStatusTextBlock.Visibility  = Visibility.Visible;
                 CancelButton.Visibility            = Visibility.Collapsed;
                 ProcessButton.IsEnabled            = true;
@@ -897,6 +974,7 @@ namespace Files_Tools.Pages
                 {
                     ProcessProgressBar.IsIndeterminate = true;
                     ProcessProgressPercentTextBlock.Text = "—";
+                    TaskbarProgressHelper.SetIndeterminate();
                 }
                 else
                 {
@@ -904,6 +982,7 @@ namespace Files_Tools.Pages
                     ProcessProgressBar.Value = progress.OverallFraction;
                     var pct = (int)Math.Round(progress.OverallFraction * 100);
                     ProcessProgressPercentTextBlock.Text = $"{pct}%";
+                    TaskbarProgressHelper.SetProgress(progress.OverallFraction);
                 }
 
                 // ── Label: "File X of Y" or stage description ─────────────────

@@ -1,310 +1,926 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
-  <resheader name="version"><value>2.0</value></resheader>
-  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
   <!-- ═══════════════════════════════════════════════════════════════
        Main Window
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="AppTitleBar.Title" xml:space="preserve"><value>Files Tools</value></data>
-  <data name="LicensesButton.Content" xml:space="preserve"><value>라이선스</value></data>
-
+  <data name="AppTitleBar.Title" xml:space="preserve">
+    <value>Files Tools</value>
+  </data>
+  <data name="LicensesButton.Content" xml:space="preserve">
+    <value>라이선스</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Navigation items  (reused across all editor nav menus)
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="NavMedia.Content" xml:space="preserve"><value>미디어</value></data>
-  <data name="NavTransform.Content" xml:space="preserve"><value>변환</value></data>
-  <data name="NavAdjust.Content" xml:space="preserve"><value>조정</value></data>
-  <data name="NavAdvanced.Content" xml:space="preserve"><value>고급</value></data>
-  <data name="NavFormat.Content" xml:space="preserve"><value>형식</value></data>
-  <data name="NavAudio.Content" xml:space="preserve"><value>오디오</value></data>
-  <data name="NavSubtitles.Content" xml:space="preserve"><value>자막</value></data>
-  <data name="NavResize.Content" xml:space="preserve"><value>크기 조정</value></data>
-  <data name="NavTrim.Content" xml:space="preserve"><value>자르기</value></data>
-  <data name="NavRotate.Content" xml:space="preserve"><value>회전</value></data>
-  <data name="NavMetadata.Content" xml:space="preserve"><value>메타데이터</value></data>
-  <data name="NavRepair.Content" xml:space="preserve"><value>복구</value></data>
-  <data name="NavCrop.Content" xml:space="preserve"><value>잘라내기</value></data>
-  <data name="NavUpscale.Content" xml:space="preserve"><value>업스케일</value></data>
-  <data name="NavColor.Content" xml:space="preserve"><value>색상</value></data>
-  <data name="NavSilence.Content" xml:space="preserve"><value>무음</value></data>
-  <data name="NavNormalize.Content" xml:space="preserve"><value>정규화</value></data>
-  <data name="NavEQ.Content" xml:space="preserve"><value>EQ</value></data>
-  <data name="NavDenoise.Content" xml:space="preserve"><value>노이즈 제거</value></data>
-  <data name="NavTranscription.Content" xml:space="preserve"><value>전사</value></data>
-  <data name="NavGenerate.Content" xml:space="preserve"><value>생성</value></data>
-  <data name="NavOrganization.Content" xml:space="preserve"><value>구성</value></data>
-  <data name="NavMerge.Content" xml:space="preserve"><value>병합</value></data>
-  <data name="NavSplit.Content" xml:space="preserve"><value>분할</value></data>
-  <data name="NavReorder.Content" xml:space="preserve"><value>순서 변경</value></data>
-  <data name="NavExtract.Content" xml:space="preserve"><value>추출</value></data>
-  <data name="NavExtractAudio.Content" xml:space="preserve"><value>오디오 추출</value></data>
-  <data name="NavSecurity.Content" xml:space="preserve"><value>보안</value></data>
-  <data name="NavEncrypt.Content" xml:space="preserve"><value>암호화</value></data>
-  <data name="NavPassword.Content" xml:space="preserve"><value>암호</value></data>
-  <data name="NavPermissions.Content" xml:space="preserve"><value>권한</value></data>
-  <data name="NavContent.Content" xml:space="preserve"><value>콘텐츠</value></data>
-  <data name="NavOCR.Content" xml:space="preserve"><value>OCR</value></data>
-  <data name="NavPodcast.Content" xml:space="preserve"><value>팟캐스트</value></data>
-  <data name="NavVideo.Content" xml:space="preserve"><value>비디오</value></data>
-  <data name="NavContainer.Content" xml:space="preserve"><value>컨테이너</value></data>
-  <data name="NavCodec.Content" xml:space="preserve"><value>코덱</value></data>
-  <data name="NavCompress.Content" xml:space="preserve"><value>압축</value></data>
-  <data name="NavDocuments.Content" xml:space="preserve"><value>문서</value></data>
-  <data name="NavPDF.Content" xml:space="preserve"><value>PDF</value></data>
-  <data name="NavImages.Content" xml:space="preserve"><value>이미지</value></data>
-  <data name="NavOutput.Content" xml:space="preserve"><value>출력</value></data>
-
+  <data name="NavMedia.Content" xml:space="preserve">
+    <value>미디어</value>
+  </data>
+  <data name="NavTransform.Content" xml:space="preserve">
+    <value>변환</value>
+  </data>
+  <data name="NavAdjust.Content" xml:space="preserve">
+    <value>조정</value>
+  </data>
+  <data name="NavAdvanced.Content" xml:space="preserve">
+    <value>고급</value>
+  </data>
+  <data name="NavFormat.Content" xml:space="preserve">
+    <value>형식</value>
+  </data>
+  <data name="NavAudio.Content" xml:space="preserve">
+    <value>오디오</value>
+  </data>
+  <data name="NavSubtitles.Content" xml:space="preserve">
+    <value>자막</value>
+  </data>
+  <data name="NavResize.Content" xml:space="preserve">
+    <value>크기 조정</value>
+  </data>
+  <data name="NavTrim.Content" xml:space="preserve">
+    <value>자르기</value>
+  </data>
+  <data name="NavRotate.Content" xml:space="preserve">
+    <value>회전</value>
+  </data>
+  <data name="NavMetadata.Content" xml:space="preserve">
+    <value>메타데이터</value>
+  </data>
+  <data name="NavRepair.Content" xml:space="preserve">
+    <value>복구</value>
+  </data>
+  <data name="NavCrop.Content" xml:space="preserve">
+    <value>잘라내기</value>
+  </data>
+  <data name="NavUpscale.Content" xml:space="preserve">
+    <value>업스케일</value>
+  </data>
+  <data name="NavColor.Content" xml:space="preserve">
+    <value>색상</value>
+  </data>
+  <data name="NavSilence.Content" xml:space="preserve">
+    <value>무음</value>
+  </data>
+  <data name="NavNormalize.Content" xml:space="preserve">
+    <value>정규화</value>
+  </data>
+  <data name="NavEQ.Content" xml:space="preserve">
+    <value>EQ</value>
+  </data>
+  <data name="NavDenoise.Content" xml:space="preserve">
+    <value>노이즈 제거</value>
+  </data>
+  <data name="NavTranscription.Content" xml:space="preserve">
+    <value>전사</value>
+  </data>
+  <data name="NavGenerate.Content" xml:space="preserve">
+    <value>생성</value>
+  </data>
+  <data name="NavOrganization.Content" xml:space="preserve">
+    <value>구성</value>
+  </data>
+  <data name="NavMerge.Content" xml:space="preserve">
+    <value>병합</value>
+  </data>
+  <data name="NavSplit.Content" xml:space="preserve">
+    <value>분할</value>
+  </data>
+  <data name="NavReorder.Content" xml:space="preserve">
+    <value>순서 변경</value>
+  </data>
+  <data name="NavExtract.Content" xml:space="preserve">
+    <value>추출</value>
+  </data>
+  <data name="NavExtractAudio.Content" xml:space="preserve">
+    <value>오디오 추출</value>
+  </data>
+  <data name="NavSecurity.Content" xml:space="preserve">
+    <value>보안</value>
+  </data>
+  <data name="NavEncrypt.Content" xml:space="preserve">
+    <value>암호화</value>
+  </data>
+  <data name="NavPassword.Content" xml:space="preserve">
+    <value>암호</value>
+  </data>
+  <data name="NavPermissions.Content" xml:space="preserve">
+    <value>권한</value>
+  </data>
+  <data name="NavContent.Content" xml:space="preserve">
+    <value>콘텐츠</value>
+  </data>
+  <data name="NavOCR.Content" xml:space="preserve">
+    <value>OCR</value>
+  </data>
+  <data name="NavPodcast.Content" xml:space="preserve">
+    <value>팟캐스트</value>
+  </data>
+  <data name="NavVideo.Content" xml:space="preserve">
+    <value>비디오</value>
+  </data>
+  <data name="NavContainer.Content" xml:space="preserve">
+    <value>컨테이너</value>
+  </data>
+  <data name="NavCodec.Content" xml:space="preserve">
+    <value>코덱</value>
+  </data>
+  <data name="NavCompress.Content" xml:space="preserve">
+    <value>압축</value>
+  </data>
+  <data name="NavDocuments.Content" xml:space="preserve">
+    <value>문서</value>
+  </data>
+  <data name="NavPDF.Content" xml:space="preserve">
+    <value>PDF</value>
+  </data>
+  <data name="NavImages.Content" xml:space="preserve">
+    <value>이미지</value>
+  </data>
+  <data name="NavOutput.Content" xml:space="preserve">
+    <value>출력</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Shared editor strings  (reused across multiple pages)
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="PreviewTitle.Text" xml:space="preserve"><value>미리 보기</value></data>
-  <data name="ApplyChanges.Content" xml:space="preserve"><value>변경 사항 적용</value></data>
-  <data name="SelectOptionHeader.Text" xml:space="preserve"><value>옵션 선택</value></data>
-  <data name="EtaCalculating.Text" xml:space="preserve"><value>예상 시간 계산 중...</value></data>
-
+  <data name="PreviewTitle.Text" xml:space="preserve">
+    <value>미리 보기</value>
+  </data>
+  <data name="ApplyChanges.Content" xml:space="preserve">
+    <value>변경 사항 적용</value>
+  </data>
+  <data name="SelectOptionHeader.Text" xml:space="preserve">
+    <value>옵션 선택</value>
+  </data>
+  <data name="EtaCalculating.Text" xml:space="preserve">
+    <value>예상 시간 계산 중...</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Home page
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="HomePage_Header.Text" xml:space="preserve"><value>파일을 끌어다 놓아 시작하세요</value></data>
-  <data name="HomePage_Subtitle.Text" xml:space="preserve"><value>파일 하나를 끌어다 놓으면 적합한 편집기가 열립니다. 같은 형식의 파일 여러 개를 놓으면 일괄 처리할 수 있습니다. 아래 버튼으로 파일을 탐색할 수도 있습니다.</value></data>
-  <data name="HomePage_Formats.Text" xml:space="preserve"><value>이미지: PNG, JPG, WebP, AVIF   •   비디오: MP4, MKV, MOV, AVI, WebM   •   오디오: MP3, M4A, FLAC, WAV, OPUS   •   문서: DOCX, PPTX, XLSX, PDF</value></data>
-  <data name="HomePage_OrBrowse.Text" xml:space="preserve"><value>또는 탐색</value></data>
-  <data name="HomePage_SingleFile.Text" xml:space="preserve"><value>단일 파일</value></data>
-  <data name="HomePage_BatchFiles.Text" xml:space="preserve"><value>일괄 처리용 여러 파일</value></data>
-
+  <data name="HomePage_Header.Text" xml:space="preserve">
+    <value>파일을 끌어다 놓아 시작하세요</value>
+  </data>
+  <data name="HomePage_Subtitle.Text" xml:space="preserve">
+    <value>파일 하나를 끌어다 놓으면 적합한 편집기가 열립니다. 같은 형식의 파일 여러 개를 놓으면 일괄 처리할 수 있습니다. 아래 버튼으로 파일을 탐색할 수도 있습니다.</value>
+  </data>
+  <data name="HomePage_Formats.Text" xml:space="preserve">
+    <value>이미지: PNG, JPG, WebP, AVIF   •   비디오: MP4, MKV, MOV, AVI, WebM   •   오디오: MP3, M4A, FLAC, WAV, OPUS   •   문서: DOCX, PPTX, XLSX, PDF</value>
+  </data>
+  <data name="HomePage_OrBrowse.Text" xml:space="preserve">
+    <value>또는 탐색</value>
+  </data>
+  <data name="HomePage_SingleFile.Text" xml:space="preserve">
+    <value>단일 파일</value>
+  </data>
+  <data name="HomePage_BatchFiles.Text" xml:space="preserve">
+    <value>일괄 처리용 여러 파일</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Audio editor page
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="AudioPage_Title.Text" xml:space="preserve"><value>오디오 편집기</value></data>
-  <data name="AudioPage_Subtitle.Text" xml:space="preserve"><value>오디오 파일을 불러오고 처리 체인을 구성한 뒤 선택한 작업을 한 번에 적용하세요.</value></data>
-  <data name="AudioPage_PreviewHint.Text" xml:space="preserve"><value>오디오 파일을 끌어다 놓거나 화면을 클릭하여 파일을 선택하세요. 처리 중 상태는 아래에 표시됩니다.</value></data>
-  <data name="AudioPage_AudioDetails.Text" xml:space="preserve"><value>오디오 정보</value></data>
-  <data name="AudioPage_NoAudioLoaded.Text" xml:space="preserve"><value>아직 오디오가 로드되지 않았습니다.</value></data>
-  <data name="AudioPage_DropHintTitle.Text" xml:space="preserve"><value>오디오를 여기에 놓으세요</value></data>
-  <data name="AudioPage_DropHintSubtitle.Text" xml:space="preserve"><value>클릭하여 트랙을 찾아보세요. 형식, 정규화, 자르기, EQ, 노이즈 제거 및 메타데이터 도구는 옵션 패널에 있습니다.</value></data>
-  <data name="AudioPage_Processing.Text" xml:space="preserve"><value>오디오 처리 중...</value></data>
-  <data name="AudioPage_PreparingPipeline.Text" xml:space="preserve"><value>파이프라인 준비 중...</value></data>
-
+  <data name="AudioPage_Title.Text" xml:space="preserve">
+    <value>오디오 편집기</value>
+  </data>
+  <data name="AudioPage_Subtitle.Text" xml:space="preserve">
+    <value>오디오 파일을 불러오고 처리 체인을 구성한 뒤 선택한 작업을 한 번에 적용하세요.</value>
+  </data>
+  <data name="AudioPage_PreviewHint.Text" xml:space="preserve">
+    <value>오디오 파일을 끌어다 놓거나 화면을 클릭하여 파일을 선택하세요. 처리 중 상태는 아래에 표시됩니다.</value>
+  </data>
+  <data name="AudioPage_AudioDetails.Text" xml:space="preserve">
+    <value>오디오 정보</value>
+  </data>
+  <data name="AudioPage_NoAudioLoaded.Text" xml:space="preserve">
+    <value>아직 오디오가 로드되지 않았습니다.</value>
+  </data>
+  <data name="AudioPage_DropHintTitle.Text" xml:space="preserve">
+    <value>오디오를 여기에 놓으세요</value>
+  </data>
+  <data name="AudioPage_DropHintSubtitle.Text" xml:space="preserve">
+    <value>클릭하여 트랙을 찾아보세요. 형식, 정규화, 자르기, EQ, 노이즈 제거 및 메타데이터 도구는 옵션 패널에 있습니다.</value>
+  </data>
+  <data name="AudioPage_Processing.Text" xml:space="preserve">
+    <value>오디오 처리 중...</value>
+  </data>
+  <data name="AudioPage_PreparingPipeline.Text" xml:space="preserve">
+    <value>파이프라인 준비 중...</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Image editor page
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="ImagePage_Title.Text" xml:space="preserve"><value>이미지 편집기</value></data>
-  <data name="ImagePage_Subtitle.Text" xml:space="preserve"><value>이미지를 가져와 편집 작업을 정렬하고 미리 보기와 컨트롤이 한눈에 들어오는 레이아웃으로 한 번에 적용하세요.</value></data>
-  <data name="ImagePage_PreviewHint.Text" xml:space="preserve"><value>이미지를 끌어다 놓거나 미리 보기 화면을 클릭하여 시작하세요. 자르기 핸들과 시각적 편집은 이 작업 영역을 중심으로 표시됩니다.</value></data>
-  <data name="ImagePage_NoImageLoaded.Text" xml:space="preserve"><value>아직 이미지가 로드되지 않았습니다.</value></data>
-  <data name="ImagePage_DropHintTitle.Text" xml:space="preserve"><value>이미지를 여기에 놓으세요</value></data>
-  <data name="ImagePage_DropHintSubtitle.Text" xml:space="preserve"><value>이 화면을 클릭하여 파일을 찾아볼 수도 있습니다. 자르기, 크기 조정, 업스케일, 회전, 미러, RGB 레벨 조정은 옵션 패널에서 사용할 수 있습니다.</value></data>
-  <data name="ImagePage_FormatSection.Text" xml:space="preserve"><value>형식 및 품질</value></data>
-  <data name="ImagePage_OutputFormat.Header" xml:space="preserve"><value>출력 형식</value></data>
-  <data name="ImagePage_KeepOriginalFormat.Content" xml:space="preserve"><value>원본 형식 유지</value></data>
-  <data name="ImagePage_PreserveQuality.Content" xml:space="preserve"><value>원본 품질 유지</value></data>
-  <data name="ImagePage_Crop.Text" xml:space="preserve"><value>잘라내기</value></data>
-  <data name="ImagePage_EnableCrop.Content" xml:space="preserve"><value>잘라내기 사용</value></data>
-  <data name="ImagePage_ApplyCrop.Content" xml:space="preserve"><value>잘라내기 적용</value></data>
-  <data name="ImagePage_CropDisabled.Text" xml:space="preserve"><value>잘라내기 비활성화됨</value></data>
-  <data name="ImagePage_Resize.Text" xml:space="preserve"><value>크기 조정</value></data>
-  <data name="ImagePage_EnableResize.Content" xml:space="preserve"><value>크기 조정 사용</value></data>
-  <data name="ImagePage_Width.Header" xml:space="preserve"><value>너비</value></data>
-  <data name="ImagePage_Height.Header" xml:space="preserve"><value>높이</value></data>
-  <data name="ImagePage_PreserveAspectRatio.Content" xml:space="preserve"><value>가로세로 비율 유지</value></data>
-  <data name="ImagePage_Upscale.Text" xml:space="preserve"><value>업스케일</value></data>
-  <data name="ImagePage_EnableUpscale.Content" xml:space="preserve"><value>업스케일 사용</value></data>
-  <data name="ImagePage_TargetWidth.Header" xml:space="preserve"><value>목표 너비</value></data>
-  <data name="ImagePage_TargetHeight.Header" xml:space="preserve"><value>목표 높이</value></data>
-  <data name="ImagePage_RotateAndMirror.Text" xml:space="preserve"><value>회전 및 미러</value></data>
-  <data name="ImagePage_Rotation.Header" xml:space="preserve"><value>회전</value></data>
-  <data name="ImagePage_FlipHorizontally.Content" xml:space="preserve"><value>수평 뒤집기</value></data>
-  <data name="ImagePage_FlipVertically.Content" xml:space="preserve"><value>수직 뒤집기</value></data>
-  <data name="ImagePage_RGBAdjustments.Text" xml:space="preserve"><value>RGB 조정</value></data>
-  <data name="ImagePage_EnableRGB.Content" xml:space="preserve"><value>RGB 조정 사용</value></data>
-
+  <data name="ImagePage_Title.Text" xml:space="preserve">
+    <value>이미지 편집기</value>
+  </data>
+  <data name="ImagePage_Subtitle.Text" xml:space="preserve">
+    <value>이미지를 가져와 편집 작업을 정렬하고 미리 보기와 컨트롤이 한눈에 들어오는 레이아웃으로 한 번에 적용하세요.</value>
+  </data>
+  <data name="ImagePage_PreviewHint.Text" xml:space="preserve">
+    <value>이미지를 끌어다 놓거나 미리 보기 화면을 클릭하여 시작하세요. 자르기 핸들과 시각적 편집은 이 작업 영역을 중심으로 표시됩니다.</value>
+  </data>
+  <data name="ImagePage_NoImageLoaded.Text" xml:space="preserve">
+    <value>아직 이미지가 로드되지 않았습니다.</value>
+  </data>
+  <data name="ImagePage_DropHintTitle.Text" xml:space="preserve">
+    <value>이미지를 여기에 놓으세요</value>
+  </data>
+  <data name="ImagePage_DropHintSubtitle.Text" xml:space="preserve">
+    <value>이 화면을 클릭하여 파일을 찾아볼 수도 있습니다. 자르기, 크기 조정, 업스케일, 회전, 미러, RGB 레벨 조정은 옵션 패널에서 사용할 수 있습니다.</value>
+  </data>
+  <data name="ImagePage_FormatSection.Text" xml:space="preserve">
+    <value>형식 및 품질</value>
+  </data>
+  <data name="ImagePage_OutputFormat.Header" xml:space="preserve">
+    <value>출력 형식</value>
+  </data>
+  <data name="ImagePage_KeepOriginalFormat.Content" xml:space="preserve">
+    <value>원본 형식 유지</value>
+  </data>
+  <data name="ImagePage_PreserveQuality.Content" xml:space="preserve">
+    <value>원본 품질 유지</value>
+  </data>
+  <data name="ImagePage_Crop.Text" xml:space="preserve">
+    <value>잘라내기</value>
+  </data>
+  <data name="ImagePage_EnableCrop.Content" xml:space="preserve">
+    <value>잘라내기 사용</value>
+  </data>
+  <data name="ImagePage_ApplyCrop.Content" xml:space="preserve">
+    <value>잘라내기 적용</value>
+  </data>
+  <data name="ImagePage_CropDisabled.Text" xml:space="preserve">
+    <value>잘라내기 비활성화됨</value>
+  </data>
+  <data name="ImagePage_Resize.Text" xml:space="preserve">
+    <value>크기 조정</value>
+  </data>
+  <data name="ImagePage_EnableResize.Content" xml:space="preserve">
+    <value>크기 조정 사용</value>
+  </data>
+  <data name="ImagePage_Width.Header" xml:space="preserve">
+    <value>너비</value>
+  </data>
+  <data name="ImagePage_Height.Header" xml:space="preserve">
+    <value>높이</value>
+  </data>
+  <data name="ImagePage_PreserveAspectRatio.Content" xml:space="preserve">
+    <value>가로세로 비율 유지</value>
+  </data>
+  <data name="ImagePage_Upscale.Text" xml:space="preserve">
+    <value>업스케일</value>
+  </data>
+  <data name="ImagePage_EnableUpscale.Content" xml:space="preserve">
+    <value>업스케일 사용</value>
+  </data>
+  <data name="ImagePage_TargetWidth.Header" xml:space="preserve">
+    <value>목표 너비</value>
+  </data>
+  <data name="ImagePage_TargetHeight.Header" xml:space="preserve">
+    <value>목표 높이</value>
+  </data>
+  <data name="ImagePage_RotateAndMirror.Text" xml:space="preserve">
+    <value>회전 및 미러</value>
+  </data>
+  <data name="ImagePage_Rotation.Header" xml:space="preserve">
+    <value>회전</value>
+  </data>
+  <data name="ImagePage_FlipHorizontally.Content" xml:space="preserve">
+    <value>수평 뒤집기</value>
+  </data>
+  <data name="ImagePage_FlipVertically.Content" xml:space="preserve">
+    <value>수직 뒤집기</value>
+  </data>
+  <data name="ImagePage_RGBAdjustments.Text" xml:space="preserve">
+    <value>RGB 조정</value>
+  </data>
+  <data name="ImagePage_EnableRGB.Content" xml:space="preserve">
+    <value>RGB 조정 사용</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Video editor page
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="VideoPage_Title.Text" xml:space="preserve"><value>비디오 편집기</value></data>
-  <data name="VideoPage_Subtitle.Text" xml:space="preserve"><value>비디오를 가져와 처리 옵션을 조정하고 미리 보기와 결정 사항이 한눈에 들어오는 레이아웃으로 FFmpeg 기반 편집을 실행하세요.</value></data>
-  <data name="VideoPage_PreviewHint.Text" xml:space="preserve"><value>비디오를 끌어다 놓거나 미리 보기 화면을 클릭하여 시작하세요. 재생 및 편집 옵션은 이 작업 영역을 중심으로 표시됩니다.</value></data>
-  <data name="VideoPage_NoVideoLoaded.Text" xml:space="preserve"><value>아직 비디오가 로드되지 않았습니다.</value></data>
-  <data name="VideoPage_DropHintTitle.Text" xml:space="preserve"><value>비디오를 여기에 놓으세요</value></data>
-  <data name="VideoPage_DropHintSubtitle.Text" xml:space="preserve"><value>이 화면을 클릭하여 파일을 찾아볼 수도 있습니다. 자르기, 크기 조정, 복구, 컨테이너 옵션은 옵션 패널에서 사용할 수 있습니다.</value></data>
-  <data name="VideoPage_SubtitlePosition.Text" xml:space="preserve"><value>자막 위치</value></data>
-  <data name="VideoPage_DragToPlace.Text" xml:space="preserve"><value>끌어서 자막 위치 지정</value></data>
-  <data name="VideoPage_Processing.Text" xml:space="preserve"><value>비디오 처리 중...</value></data>
-  <data name="VideoPage_PreparingFFmpeg.Text" xml:space="preserve"><value>FFmpeg 준비 중...</value></data>
-  <data name="VideoPage_FormatAndCodecs.Text" xml:space="preserve"><value>형식 및 코덱</value></data>
-  <data name="VideoPage_OutputFormat.Header" xml:space="preserve"><value>출력 형식</value></data>
-  <data name="VideoPage_KeepOriginal.Content" xml:space="preserve"><value>원본 유지</value></data>
-  <data name="VideoPage_VideoCodec.Header" xml:space="preserve"><value>비디오 코덱</value></data>
-  <data name="VideoPage_VideoCodecPlaceholder.PlaceholderText" xml:space="preserve"><value>비디오 코덱</value></data>
-  <data name="VideoPage_AudioCodec.Header" xml:space="preserve"><value>오디오 코덱</value></data>
-  <data name="VideoPage_AudioCodecPlaceholder.PlaceholderText" xml:space="preserve"><value>오디오 코덱</value></data>
-  <data name="VideoPage_RemoveAudio.Content" xml:space="preserve"><value>오디오 제거</value></data>
-  <data name="VideoPage_Compression.Text" xml:space="preserve"><value>압축</value></data>
-  <data name="VideoPage_EnableCompression.Content" xml:space="preserve"><value>압축 프리셋 사용</value></data>
-  <data name="VideoPage_CompressionPreset.Header" xml:space="preserve"><value>압축 프리셋</value></data>
-  <data name="VideoPage_AudioAndVolume.Text" xml:space="preserve"><value>오디오 및 볼륨</value></data>
-  <data name="VideoPage_ExtractAudio.Content" xml:space="preserve"><value>오디오 추출</value></data>
-  <data name="VideoPage_AdjustVolume.Content" xml:space="preserve"><value>출력 볼륨 조정</value></data>
-  <data name="VideoPage_VolumeHint.Text" xml:space="preserve"><value>이 슬라이더는 믹싱이 활성화된 경우 대체 오디오를 포함하여 최종 내보내기 오디오 레벨을 변경합니다.</value></data>
-  <data name="VideoPage_NormalizeAudio.Content" xml:space="preserve"><value>오디오 정규화</value></data>
-  <data name="VideoPage_NormalizeHint.Text" xml:space="preserve"><value>최종 출력 오디오에 단순 음량 정규화를 적용합니다.</value></data>
-  <data name="VideoPage_FixAudioSync.Content" xml:space="preserve"><value>오디오 동기화 수정</value></data>
-  <data name="VideoPage_MoveAudio.Header" xml:space="preserve"><value>오디오 이동</value></data>
-  <data name="VideoPage_Earlier.Content" xml:space="preserve"><value>앞으로</value></data>
-  <data name="VideoPage_Later.Content" xml:space="preserve"><value>뒤로</value></data>
-  <data name="VideoPage_ApplyDenoise.Content" xml:space="preserve"><value>오디오 노이즈 제거 적용</value></data>
-  <data name="VideoPage_DenoiseMode.Header" xml:space="preserve"><value>노이즈 제거 모드</value></data>
-  <data name="VideoPage_DenoiseMono.Content" xml:space="preserve"><value>모노</value></data>
-  <data name="VideoPage_DenoiseStereo.Content" xml:space="preserve"><value>스테레오</value></data>
-  <data name="VideoPage_AddReplaceAudio.Content" xml:space="preserve"><value>오디오 트랙 추가 또는 교체</value></data>
-  <data name="VideoPage_AudioFile.Header" xml:space="preserve"><value>오디오 파일</value></data>
-  <data name="VideoPage_AudioFile.PlaceholderText" xml:space="preserve"><value>오디오 소스 선택</value></data>
-  <data name="VideoPage_BrowseAudio.Content" xml:space="preserve"><value>오디오 파일 찾아보기</value></data>
-  <data name="VideoPage_ReplaceAudio.Content" xml:space="preserve"><value>기존 오디오 교체</value></data>
-  <data name="VideoPage_UseShortest.Content" xml:space="preserve"><value>짧은 길이 사용</value></data>
-  <data name="VideoPage_SetDefaultAudio.Content" xml:space="preserve"><value>기본 오디오로 설정</value></data>
-  <data name="VideoPage_Subtitles.Text" xml:space="preserve"><value>자막</value></data>
-  <data name="VideoPage_TranscriptionHeader.Text" xml:space="preserve"><value>전사</value></data>
-  <data name="VideoPage_TranscriptionHint.Text" xml:space="preserve"><value>기본 SRT 또는 고급 스타일 ASS 자막 생성을 선택하세요.</value></data>
-  <data name="VideoPage_DownloadTranscription.Content" xml:space="preserve"><value>전사 기능 다운로드</value></data>
-  <data name="VideoPage_TranscriptionNotDownloaded.Text" xml:space="preserve"><value>전사 기능이 아직 다운로드되지 않았습니다.</value></data>
-  <data name="VideoPage_SubtitleGenMode.Header" xml:space="preserve"><value>자막 생성 모드</value></data>
-  <data name="VideoPage_BasicSRT.Content" xml:space="preserve"><value>기본 (SRT)</value></data>
-  <data name="VideoPage_AdvancedASS.Content" xml:space="preserve"><value>고급 (ASS)</value></data>
-  <data name="VideoPage_AdvancedOutputType.Header" xml:space="preserve"><value>고급 출력 유형</value></data>
-  <data name="VideoPage_StyledASS.Content" xml:space="preserve"><value>스타일 ASS</value></data>
-  <data name="VideoPage_KaraokeASS.Content" xml:space="preserve"><value>가라오케 ASS</value></data>
-  <data name="VideoPage_ConfigureAdvanced.Content" xml:space="preserve"><value>고급 자막 구성</value></data>
-  <data name="VideoPage_SecondsMax.Header" xml:space="preserve"><value>최대 초</value></data>
-  <data name="VideoPage_LimitWords.Content" xml:space="preserve"><value>구간당 단어 수 제한</value></data>
-  <data name="VideoPage_WordsMax.Header" xml:space="preserve"><value>최대 단어 수</value></data>
-  <data name="VideoPage_SectionHint.Text" xml:space="preserve"><value>초 제한은 한 구간이 화면에 표시되는 최대 시간을 설정합니다. 단어 수 제한을 활성화하면 한 구간에 포함될 수 있는 최대 단어 수를 제한합니다.</value></data>
-  <data name="VideoPage_GenerateSubtitles.Content" xml:space="preserve"><value>비디오에서 자막 생성</value></data>
-  <data name="VideoPage_SubtitlesNotGenerated.Text" xml:space="preserve"><value>자막이 아직 생성되지 않았습니다.</value></data>
-  <data name="VideoPage_AddSubtitles.Content" xml:space="preserve"><value>자막 추가</value></data>
-  <data name="VideoPage_SubtitleFile.Header" xml:space="preserve"><value>자막 파일</value></data>
-  <data name="VideoPage_SubtitleFile.PlaceholderText" xml:space="preserve"><value>자막 소스 선택</value></data>
-  <data name="VideoPage_BrowseSubtitle.Content" xml:space="preserve"><value>자막 파일 찾아보기</value></data>
-  <data name="VideoPage_SubtitleMode.Header" xml:space="preserve"><value>자막 모드</value></data>
-  <data name="VideoPage_SoftMux.Content" xml:space="preserve"><value>SoftMux</value></data>
-  <data name="VideoPage_BurnIn.Content" xml:space="preserve"><value>BurnIn</value></data>
-  <data name="VideoPage_Placement.Text" xml:space="preserve"><value>배치</value></data>
-  <data name="VideoPage_PlacementHint.Text" xml:space="preserve"><value>미리 보기에서 자막 배지를 끌거나 여기서 배치를 세밀하게 조정하세요.</value></data>
-  <data name="VideoPage_Horizontal.Header" xml:space="preserve"><value>수평 (%)</value></data>
-  <data name="VideoPage_Vertical.Header" xml:space="preserve"><value>수직 (%)</value></data>
-  <data name="VideoPage_ResetPlacement.Content" xml:space="preserve"><value>배치 초기화</value></data>
-  <data name="VideoPage_PlacementStatus.Text" xml:space="preserve"><value>배치는 생성된 ASS 자막에는 정확하게 렌더링되며, 박스 및 애니메이션 프리셋을 포함한 소각 텍스트 자막에는 근사치로 적용됩니다.</value></data>
-  <data name="VideoPage_LanguageTag.Header" xml:space="preserve"><value>언어 태그</value></data>
-  <data name="VideoPage_LanguageTag.PlaceholderText" xml:space="preserve"><value>예: ko</value></data>
-  <data name="VideoPage_SubtitleTitle.Header" xml:space="preserve"><value>자막 제목</value></data>
-  <data name="VideoPage_SubtitleTitle.PlaceholderText" xml:space="preserve"><value>예: 한국어</value></data>
-  <data name="VideoPage_SetDefaultSubtitle.Content" xml:space="preserve"><value>기본 자막으로 설정</value></data>
-  <data name="VideoPage_Resize.Text" xml:space="preserve"><value>크기 조정</value></data>
-  <data name="VideoPage_EnableResize.Content" xml:space="preserve"><value>크기 조정 사용</value></data>
-  <data name="VideoPage_Width.Header" xml:space="preserve"><value>너비</value></data>
-  <data name="VideoPage_Height.Header" xml:space="preserve"><value>높이</value></data>
-  <data name="VideoPage_ResizeMode.Header" xml:space="preserve"><value>크기 조정 모드</value></data>
-  <data name="VideoPage_PadToFit.Content" xml:space="preserve"><value>여백 채워 맞추기</value></data>
-  <data name="VideoPage_CropToFill.Content" xml:space="preserve"><value>잘라서 채우기</value></data>
-  <data name="VideoPage_Stretch.Content" xml:space="preserve"><value>늘리기</value></data>
-  <data name="VideoPage_PaddingColor.Header" xml:space="preserve"><value>패딩 색상</value></data>
-  <data name="VideoPage_PaddingColor.PlaceholderText" xml:space="preserve"><value>예: black 또는 #000000</value></data>
-  <data name="VideoPage_Trim.Text" xml:space="preserve"><value>자르기</value></data>
-  <data name="VideoPage_EnableTrim.Content" xml:space="preserve"><value>자르기 사용</value></data>
-  <data name="VideoPage_TrimHint.Text" xml:space="preserve"><value>미리 보기 아래의 자르기 핸들을 끌어 시작점과 끝점을 선택하세요.</value></data>
-  <data name="VideoPage_RotateAndMirror.Text" xml:space="preserve"><value>회전 및 미러</value></data>
-  <data name="VideoPage_Rotation.Header" xml:space="preserve"><value>회전</value></data>
-  <data name="VideoPage_MirrorHorizontally.Content" xml:space="preserve"><value>수평 미러</value></data>
-  <data name="VideoPage_MirrorVertically.Content" xml:space="preserve"><value>수직 미러</value></data>
-  <data name="VideoPage_Metadata.Text" xml:space="preserve"><value>메타데이터</value></data>
-  <data name="VideoPage_RemoveMetadata.Content" xml:space="preserve"><value>메타데이터 제거</value></data>
-  <data name="VideoPage_Repair.Text" xml:space="preserve"><value>복구</value></data>
-  <data name="VideoPage_EnableRepair.Content" xml:space="preserve"><value>복구 모드 사용</value></data>
-  <data name="VideoPage_RepairMode.Header" xml:space="preserve"><value>복구 모드</value></data>
-  <data name="VideoPage_Remux.Content" xml:space="preserve"><value>리먹스</value></data>
-  <data name="VideoPage_Reencode.Content" xml:space="preserve"><value>재인코딩</value></data>
-  <data name="VideoPage_RegenerateTimestamps.Content" xml:space="preserve"><value>타임스탬프 재생성</value></data>
-  <data name="VideoPage_IgnoreErrors.Content" xml:space="preserve"><value>복구 가능한 오류 무시</value></data>
-  <data name="VideoPage_DropNonEssential.Content" xml:space="preserve"><value>불필요한 스트림 제거</value></data>
-  <data name="VideoPage_RemoveMetadataRepair.Content" xml:space="preserve"><value>복구 중 메타데이터 제거</value></data>
-  <data name="VideoPage_TranscriptionReview.Text" xml:space="preserve"><value>전사 검토</value></data>
-  <data name="VideoPage_TranscriptionReviewHint.Text" xml:space="preserve"><value>앱이 내보내기용 최종 ASS 자막을 생성하기 전에 여기서 각 Whisper 세그먼트를 검토하세요. 비디오를 처리할 때 편집 내용이 자동으로 적용됩니다.</value></data>
-  <data name="VideoPage_SubtitleEditorStatus.Text" xml:space="preserve"><value>자막 파일을 생성하거나 선택하여 편집하세요.</value></data>
-
+  <data name="VideoPage_Title.Text" xml:space="preserve">
+    <value>비디오 편집기</value>
+  </data>
+  <data name="VideoPage_Subtitle.Text" xml:space="preserve">
+    <value>비디오를 가져와 처리 옵션을 조정하고 미리 보기와 결정 사항이 한눈에 들어오는 레이아웃으로 FFmpeg 기반 편집을 실행하세요.</value>
+  </data>
+  <data name="VideoPage_PreviewHint.Text" xml:space="preserve">
+    <value>비디오를 끌어다 놓거나 미리 보기 화면을 클릭하여 시작하세요. 재생 및 편집 옵션은 이 작업 영역을 중심으로 표시됩니다.</value>
+  </data>
+  <data name="VideoPage_NoVideoLoaded.Text" xml:space="preserve">
+    <value>아직 비디오가 로드되지 않았습니다.</value>
+  </data>
+  <data name="VideoPage_DropHintTitle.Text" xml:space="preserve">
+    <value>비디오를 여기에 놓으세요</value>
+  </data>
+  <data name="VideoPage_DropHintSubtitle.Text" xml:space="preserve">
+    <value>이 화면을 클릭하여 파일을 찾아볼 수도 있습니다. 자르기, 크기 조정, 복구, 컨테이너 옵션은 옵션 패널에서 사용할 수 있습니다.</value>
+  </data>
+  <data name="VideoPage_SubtitlePosition.Text" xml:space="preserve">
+    <value>자막 위치</value>
+  </data>
+  <data name="VideoPage_DragToPlace.Text" xml:space="preserve">
+    <value>끌어서 자막 위치 지정</value>
+  </data>
+  <data name="VideoPage_Processing.Text" xml:space="preserve">
+    <value>비디오 처리 중...</value>
+  </data>
+  <data name="VideoPage_PreparingFFmpeg.Text" xml:space="preserve">
+    <value>FFmpeg 준비 중...</value>
+  </data>
+  <data name="VideoPage_FormatAndCodecs.Text" xml:space="preserve">
+    <value>형식 및 코덱</value>
+  </data>
+  <data name="VideoPage_OutputFormat.Header" xml:space="preserve">
+    <value>출력 형식</value>
+  </data>
+  <data name="VideoPage_KeepOriginal.Content" xml:space="preserve">
+    <value>원본 유지</value>
+  </data>
+  <data name="VideoPage_VideoCodec.Header" xml:space="preserve">
+    <value>비디오 코덱</value>
+  </data>
+  <data name="VideoPage_VideoCodecPlaceholder.PlaceholderText" xml:space="preserve">
+    <value>비디오 코덱</value>
+  </data>
+  <data name="VideoPage_AudioCodec.Header" xml:space="preserve">
+    <value>오디오 코덱</value>
+  </data>
+  <data name="VideoPage_AudioCodecPlaceholder.PlaceholderText" xml:space="preserve">
+    <value>오디오 코덱</value>
+  </data>
+  <data name="VideoPage_RemoveAudio.Content" xml:space="preserve">
+    <value>오디오 제거</value>
+  </data>
+  <data name="VideoPage_Compression.Text" xml:space="preserve">
+    <value>압축</value>
+  </data>
+  <data name="VideoPage_EnableCompression.Content" xml:space="preserve">
+    <value>압축 프리셋 사용</value>
+  </data>
+  <data name="VideoPage_CompressionPreset.Header" xml:space="preserve">
+    <value>압축 프리셋</value>
+  </data>
+  <data name="VideoPage_AudioAndVolume.Text" xml:space="preserve">
+    <value>오디오 및 볼륨</value>
+  </data>
+  <data name="VideoPage_ExtractAudio.Content" xml:space="preserve">
+    <value>오디오 추출</value>
+  </data>
+  <data name="VideoPage_AdjustVolume.Content" xml:space="preserve">
+    <value>출력 볼륨 조정</value>
+  </data>
+  <data name="VideoPage_VolumeHint.Text" xml:space="preserve">
+    <value>이 슬라이더는 믹싱이 활성화된 경우 대체 오디오를 포함하여 최종 내보내기 오디오 레벨을 변경합니다.</value>
+  </data>
+  <data name="VideoPage_NormalizeAudio.Content" xml:space="preserve">
+    <value>오디오 정규화</value>
+  </data>
+  <data name="VideoPage_NormalizeHint.Text" xml:space="preserve">
+    <value>최종 출력 오디오에 단순 음량 정규화를 적용합니다.</value>
+  </data>
+  <data name="VideoPage_FixAudioSync.Content" xml:space="preserve">
+    <value>오디오 동기화 수정</value>
+  </data>
+  <data name="VideoPage_MoveAudio.Header" xml:space="preserve">
+    <value>오디오 이동</value>
+  </data>
+  <data name="VideoPage_Earlier.Content" xml:space="preserve">
+    <value>앞으로</value>
+  </data>
+  <data name="VideoPage_Later.Content" xml:space="preserve">
+    <value>뒤로</value>
+  </data>
+  <data name="VideoPage_ApplyDenoise.Content" xml:space="preserve">
+    <value>오디오 노이즈 제거 적용</value>
+  </data>
+  <data name="VideoPage_DenoiseMode.Header" xml:space="preserve">
+    <value>노이즈 제거 모드</value>
+  </data>
+  <data name="VideoPage_DenoiseMono.Content" xml:space="preserve">
+    <value>모노</value>
+  </data>
+  <data name="VideoPage_DenoiseStereo.Content" xml:space="preserve">
+    <value>스테레오</value>
+  </data>
+  <data name="VideoPage_AddReplaceAudio.Content" xml:space="preserve">
+    <value>오디오 트랙 추가 또는 교체</value>
+  </data>
+  <data name="VideoPage_AudioFile.Header" xml:space="preserve">
+    <value>오디오 파일</value>
+  </data>
+  <data name="VideoPage_AudioFile.PlaceholderText" xml:space="preserve">
+    <value>오디오 소스 선택</value>
+  </data>
+  <data name="VideoPage_BrowseAudio.Content" xml:space="preserve">
+    <value>오디오 파일 찾아보기</value>
+  </data>
+  <data name="VideoPage_ReplaceAudio.Content" xml:space="preserve">
+    <value>기존 오디오 교체</value>
+  </data>
+  <data name="VideoPage_UseShortest.Content" xml:space="preserve">
+    <value>짧은 길이 사용</value>
+  </data>
+  <data name="VideoPage_SetDefaultAudio.Content" xml:space="preserve">
+    <value>기본 오디오로 설정</value>
+  </data>
+  <data name="VideoPage_Subtitles.Text" xml:space="preserve">
+    <value>자막</value>
+  </data>
+  <data name="VideoPage_TranscriptionHeader.Text" xml:space="preserve">
+    <value>전사</value>
+  </data>
+  <data name="VideoPage_TranscriptionHint.Text" xml:space="preserve">
+    <value>기본 SRT 또는 고급 스타일 ASS 자막 생성을 선택하세요.</value>
+  </data>
+  <data name="VideoPage_DownloadTranscription.Content" xml:space="preserve">
+    <value>전사 기능 다운로드</value>
+  </data>
+  <data name="VideoPage_TranscriptionNotDownloaded.Text" xml:space="preserve">
+    <value>전사 기능이 아직 다운로드되지 않았습니다.</value>
+  </data>
+  <data name="VideoPage_SubtitleGenMode.Header" xml:space="preserve">
+    <value>자막 생성 모드</value>
+  </data>
+  <data name="VideoPage_BasicSRT.Content" xml:space="preserve">
+    <value>기본 (SRT)</value>
+  </data>
+  <data name="VideoPage_AdvancedASS.Content" xml:space="preserve">
+    <value>고급 (ASS)</value>
+  </data>
+  <data name="VideoPage_AdvancedOutputType.Header" xml:space="preserve">
+    <value>고급 출력 유형</value>
+  </data>
+  <data name="VideoPage_StyledASS.Content" xml:space="preserve">
+    <value>스타일 ASS</value>
+  </data>
+  <data name="VideoPage_KaraokeASS.Content" xml:space="preserve">
+    <value>가라오케 ASS</value>
+  </data>
+  <data name="VideoPage_SubtitleStyle.Header" xml:space="preserve">
+    <value>자막 스타일</value>
+  </data>
+  <data name="VideoPage_SubtitleStyleHint.Text" xml:space="preserve">
+    <value>스타일을 선택하면 생성된 자막을 다시 생성하지 않고 즉시 다시 스타일을 적용할 수 있습니다.</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvanced.Content" xml:space="preserve">
+    <value>고급 자막 구성</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvancedTitle" xml:space="preserve">
+    <value>고급 자막 구성</value>
+  </data>
+  <data name="VideoPage_ConfigureKaraokeSummary" xml:space="preserve">
+    <value>노래방 스타일을 선택하고 렌더링에 사용할 타이포그래피 및 강조 악센트를 조정합니다.</value>
+  </data>
+  <data name="VideoPage_ConfigureStyledSummary" xml:space="preserve">
+    <value>스타일이 지정된 자막 렌더링에 사용할 타이포그래피 및 색상을 조정합니다.</value>
+  </data>
+  <data name="VideoPage_BasePreset.Header" xml:space="preserve">
+    <value>기본 사전 설정</value>
+  </data>
+  <data name="VideoPage_SystemFont.Header" xml:space="preserve">
+    <value>시스템 글꼴</value>
+  </data>
+  <data name="VideoPage_SelectInstalledFont" xml:space="preserve">
+    <value>설치된 글꼴 선택</value>
+  </data>
+  <data name="VideoPage_FontSize.Header" xml:space="preserve">
+    <value>글꼴 크기</value>
+  </data>
+  <data name="VideoPage_OutlineWidth.Header" xml:space="preserve">
+    <value>윤곽선 너비</value>
+  </data>
+  <data name="VideoPage_VerticalMargin.Header" xml:space="preserve">
+    <value>세로 여백</value>
+  </data>
+  <data name="VideoPage_BoldText.Content" xml:space="preserve">
+    <value>굵은 텍스트</value>
+  </data>
+  <data name="VideoPage_TextTransform.Header" xml:space="preserve">
+    <value>텍스트 변환</value>
+  </data>
+  <data name="VideoPage_OriginalCase" xml:space="preserve">
+    <value>원본 케이스</value>
+  </data>
+  <data name="VideoPage_Uppercase" xml:space="preserve">
+    <value>대문자</value>
+  </data>
+  <data name="VideoPage_Lowercase" xml:space="preserve">
+    <value>소문자</value>
+  </data>
+  <data name="VideoPage_FillingColor" xml:space="preserve">
+    <value>채우기 색상</value>
+  </data>
+  <data name="VideoPage_PreFillingColor" xml:space="preserve">
+    <value>사전 채우기 색상</value>
+  </data>
+  <data name="VideoPage_WordFillColor" xml:space="preserve">
+    <value>단어 채우기 색상</value>
+  </data>
+  <data name="VideoPage_OutlineColor" xml:space="preserve">
+    <value>윤곽선 색상</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvancedSave" xml:space="preserve">
+    <value>저장</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvancedResetDefaults" xml:space="preserve">
+    <value>기본값 재설정</value>
+  </data>
+  <data name="VideoPage_AdvancedPresetSummary.Text" xml:space="preserve">
+    <value>사전 설정 요약</value>
+  </data>
+  <data name="VideoPage_AdvancedPresetSummaryFormat" xml:space="preserve">
+    <value>사전 설정: {0} ({1}) | {2} {3} | {4} | {5} | 윤곽선 {6}</value>
+  </data>
+  <data name="VideoPage_SubtitleSectionDuration.Text" xml:space="preserve">
+    <value>고급 자막 섹션 길이</value>
+  </data>
+  <data name="VideoPage_SubtitleSectionDurationFormat" xml:space="preserve">
+    <value>고급 자막 섹션 길이: 최대 {0}초</value>
+  </data>
+  <data name="VideoPage_SecondsMax.Header" xml:space="preserve">
+    <value>최대 초</value>
+  </data>
+  <data name="VideoPage_LimitWords.Content" xml:space="preserve">
+    <value>구간당 단어 수 제한</value>
+  </data>
+  <data name="VideoPage_WordsMax.Header" xml:space="preserve">
+    <value>최대 단어 수</value>
+  </data>
+  <data name="VideoPage_SectionHint.Text" xml:space="preserve">
+    <value>초 제한은 한 구간이 화면에 표시되는 최대 시간을 설정합니다. 단어 수 제한을 활성화하면 한 구간에 포함될 수 있는 최대 단어 수를 제한합니다.</value>
+  </data>
+  <data name="VideoPage_GenerateSubtitles.Content" xml:space="preserve">
+    <value>비디오에서 자막 생성</value>
+  </data>
+  <data name="VideoPage_SubtitlesNotGenerated.Text" xml:space="preserve">
+    <value>자막이 아직 생성되지 않았습니다.</value>
+  </data>
+  <data name="VideoPage_AddSubtitles.Content" xml:space="preserve">
+    <value>자막 추가</value>
+  </data>
+  <data name="VideoPage_SubtitleFile.Header" xml:space="preserve">
+    <value>자막 파일</value>
+  </data>
+  <data name="VideoPage_SubtitleFile.PlaceholderText" xml:space="preserve">
+    <value>자막 소스 선택</value>
+  </data>
+  <data name="VideoPage_BrowseSubtitle.Content" xml:space="preserve">
+    <value>자막 파일 찾아보기</value>
+  </data>
+  <data name="VideoPage_SubtitleMode.Header" xml:space="preserve">
+    <value>자막 모드</value>
+  </data>
+  <data name="VideoPage_SoftMux.Content" xml:space="preserve">
+    <value>SoftMux</value>
+  </data>
+  <data name="VideoPage_BurnIn.Content" xml:space="preserve">
+    <value>BurnIn</value>
+  </data>
+  <data name="VideoPage_Placement.Text" xml:space="preserve">
+    <value>배치</value>
+  </data>
+  <data name="VideoPage_PlacementHint.Text" xml:space="preserve">
+    <value>미리 보기에서 자막 배지를 끌거나 여기서 배치를 세밀하게 조정하세요.</value>
+  </data>
+  <data name="VideoPage_Horizontal.Header" xml:space="preserve">
+    <value>수평 (%)</value>
+  </data>
+  <data name="VideoPage_Vertical.Header" xml:space="preserve">
+    <value>수직 (%)</value>
+  </data>
+  <data name="VideoPage_ResetPlacement.Content" xml:space="preserve">
+    <value>배치 초기화</value>
+  </data>
+  <data name="VideoPage_PlacementStatus.Text" xml:space="preserve">
+    <value>배치는 생성된 ASS 자막에는 정확하게 렌더링되며, 박스 및 애니메이션 프리셋을 포함한 소각 텍스트 자막에는 근사치로 적용됩니다.</value>
+  </data>
+  <data name="VideoPage_LanguageTag.Header" xml:space="preserve">
+    <value>언어 태그</value>
+  </data>
+  <data name="VideoPage_LanguageTag.PlaceholderText" xml:space="preserve">
+    <value>예: ko</value>
+  </data>
+  <data name="VideoPage_SubtitleTitle.Header" xml:space="preserve">
+    <value>자막 제목</value>
+  </data>
+  <data name="VideoPage_SubtitleTitle.PlaceholderText" xml:space="preserve">
+    <value>예: 한국어</value>
+  </data>
+  <data name="VideoPage_SetDefaultSubtitle.Content" xml:space="preserve">
+    <value>기본 자막으로 설정</value>
+  </data>
+  <data name="VideoPage_Resize.Text" xml:space="preserve">
+    <value>크기 조정</value>
+  </data>
+  <data name="VideoPage_EnableResize.Content" xml:space="preserve">
+    <value>크기 조정 사용</value>
+  </data>
+  <data name="VideoPage_Width.Header" xml:space="preserve">
+    <value>너비</value>
+  </data>
+  <data name="VideoPage_Height.Header" xml:space="preserve">
+    <value>높이</value>
+  </data>
+  <data name="VideoPage_ResizeMode.Header" xml:space="preserve">
+    <value>크기 조정 모드</value>
+  </data>
+  <data name="VideoPage_PadToFit.Content" xml:space="preserve">
+    <value>여백 채워 맞추기</value>
+  </data>
+  <data name="VideoPage_CropToFill.Content" xml:space="preserve">
+    <value>잘라서 채우기</value>
+  </data>
+  <data name="VideoPage_Stretch.Content" xml:space="preserve">
+    <value>늘리기</value>
+  </data>
+  <data name="VideoPage_PaddingColor.Header" xml:space="preserve">
+    <value>패딩 색상</value>
+  </data>
+  <data name="VideoPage_PaddingColor.PlaceholderText" xml:space="preserve">
+    <value>예: black 또는 #000000</value>
+  </data>
+  <data name="VideoPage_Trim.Text" xml:space="preserve">
+    <value>자르기</value>
+  </data>
+  <data name="VideoPage_EnableTrim.Content" xml:space="preserve">
+    <value>자르기 사용</value>
+  </data>
+  <data name="VideoPage_TrimHint.Text" xml:space="preserve">
+    <value>미리 보기 아래의 자르기 핸들을 끌어 시작점과 끝점을 선택하세요.</value>
+  </data>
+  <data name="VideoPage_RotateAndMirror.Text" xml:space="preserve">
+    <value>회전 및 미러</value>
+  </data>
+  <data name="VideoPage_Rotation.Header" xml:space="preserve">
+    <value>회전</value>
+  </data>
+  <data name="VideoPage_MirrorHorizontally.Content" xml:space="preserve">
+    <value>수평 미러</value>
+  </data>
+  <data name="VideoPage_MirrorVertically.Content" xml:space="preserve">
+    <value>수직 미러</value>
+  </data>
+  <data name="VideoPage_Metadata.Text" xml:space="preserve">
+    <value>메타데이터</value>
+  </data>
+  <data name="VideoPage_RemoveMetadata.Content" xml:space="preserve">
+    <value>메타데이터 제거</value>
+  </data>
+  <data name="VideoPage_Repair.Text" xml:space="preserve">
+    <value>복구</value>
+  </data>
+  <data name="VideoPage_EnableRepair.Content" xml:space="preserve">
+    <value>복구 모드 사용</value>
+  </data>
+  <data name="VideoPage_RepairMode.Header" xml:space="preserve">
+    <value>복구 모드</value>
+  </data>
+  <data name="VideoPage_Remux.Content" xml:space="preserve">
+    <value>리먹스</value>
+  </data>
+  <data name="VideoPage_Reencode.Content" xml:space="preserve">
+    <value>재인코딩</value>
+  </data>
+  <data name="VideoPage_RegenerateTimestamps.Content" xml:space="preserve">
+    <value>타임스탬프 재생성</value>
+  </data>
+  <data name="VideoPage_IgnoreErrors.Content" xml:space="preserve">
+    <value>복구 가능한 오류 무시</value>
+  </data>
+  <data name="VideoPage_DropNonEssential.Content" xml:space="preserve">
+    <value>불필요한 스트림 제거</value>
+  </data>
+  <data name="VideoPage_RemoveMetadataRepair.Content" xml:space="preserve">
+    <value>복구 중 메타데이터 제거</value>
+  </data>
+  <data name="VideoPage_TranscriptionReview.Text" xml:space="preserve">
+    <value>전사 검토</value>
+  </data>
+  <data name="VideoPage_TranscriptionReviewHint.Text" xml:space="preserve">
+    <value>앱이 내보내기용 최종 ASS 자막을 생성하기 전에 여기서 각 Whisper 세그먼트를 검토하세요. 비디오를 처리할 때 편집 내용이 자동으로 적용됩니다.</value>
+  </data>
+  <data name="VideoPage_SubtitleEditorStatus.Text" xml:space="preserve">
+    <value>자막 파일을 생성하거나 선택하여 편집하세요.</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        PDF editor page
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="PdfPage_Title.Text" xml:space="preserve"><value>PDF 편집기</value></data>
-  <data name="PdfPage_Subtitle.Text" xml:space="preserve"><value>PDF를 가져오고 페이지를 정리하고 보안을 추가하고 미리 보기와 옵션이 한눈에 들어오는 레이아웃으로 편집을 적용하세요.</value></data>
-  <data name="PdfPage_PreviewHint.Text" xml:space="preserve"><value>PDF를 끌어다 놓거나 미리 보기 화면을 클릭하여 시작하세요. 구성, 보안, 콘텐츠 편집은 옵션 패널에서 사용할 수 있습니다.</value></data>
-  <data name="PdfPage_NoPdfLoaded.Text" xml:space="preserve"><value>아직 PDF가 로드되지 않았습니다.</value></data>
-  <data name="PdfPage_DropHintTitle.Text" xml:space="preserve"><value>PDF를 여기에 놓으세요</value></data>
-  <data name="PdfPage_DropHintSubtitle.Text" xml:space="preserve"><value>이 화면을 클릭하여 파일을 찾아볼 수도 있습니다. 병합, 분할, 암호화, 콘텐츠 옵션은 옵션 패널에서 사용할 수 있습니다.</value></data>
-  <data name="PdfPage_FitPage.Content" xml:space="preserve"><value>페이지에 맞추기</value></data>
-  <data name="PdfPage_Previous.Content" xml:space="preserve"><value>← 이전</value></data>
-  <data name="PdfPage_Next.Content" xml:space="preserve"><value>다음 →</value></data>
-  <data name="PdfPage_SelectCategory.Text" xml:space="preserve"><value>왼쪽에서 카테고리를 선택하세요</value></data>
-  <data name="PdfPage_Processing.Text" xml:space="preserve"><value>PDF 처리 중...</value></data>
-  <data name="PdfPage_PreparingService.Text" xml:space="preserve"><value>PDF 서비스 준비 중...</value></data>
-  <data name="PdfPage_Merge.Text" xml:space="preserve"><value>병합</value></data>
-  <data name="PdfPage_MergeHint.Text" xml:space="preserve"><value>여러 PDF를 하나의 문서로 결합합니다.</value></data>
-  <data name="PdfPage_AddPdf.Content" xml:space="preserve"><value>병합할 PDF 추가</value></data>
-  <data name="PdfPage_Split.Text" xml:space="preserve"><value>분할</value></data>
-  <data name="PdfPage_SplitMode.Header" xml:space="preserve"><value>분할 모드</value></data>
-  <data name="PdfPage_OnePagePerFile.Content" xml:space="preserve"><value>파일당 한 페이지</value></data>
-  <data name="PdfPage_ByPageRanges.Content" xml:space="preserve"><value>페이지 범위별</value></data>
-  <data name="PdfPage_PageRanges.Header" xml:space="preserve"><value>페이지 범위</value></data>
-  <data name="PdfPage_PageRanges.PlaceholderText" xml:space="preserve"><value>예: 1-3, 5, 7-9</value></data>
-  <data name="PdfPage_PageRangesHint.Text" xml:space="preserve"><value>1-3처럼 범위를 지정하거나 5처럼 단일 페이지를 지정하세요.</value></data>
-  <data name="PdfPage_Reorder.Text" xml:space="preserve"><value>순서 변경</value></data>
-  <data name="PdfPage_ReorderHint.Text" xml:space="preserve"><value>새 순서를 지정하여 페이지를 재배열합니다.</value></data>
-  <data name="PdfPage_PageOrder.Header" xml:space="preserve"><value>페이지 순서</value></data>
-  <data name="PdfPage_PageOrder.PlaceholderText" xml:space="preserve"><value>예: 3, 1, 2, 5, 4</value></data>
-  <data name="PdfPage_PageOrderHint.Text" xml:space="preserve"><value>원하는 순서대로 페이지 번호를 쉼표로 구분하여 입력하세요.</value></data>
-  <data name="PdfPage_Extract.Text" xml:space="preserve"><value>추출</value></data>
-  <data name="PdfPage_ExtractImages.Content" xml:space="preserve"><value>이미지 추출</value></data>
-  <data name="PdfPage_ExtractAttachments.Content" xml:space="preserve"><value>첨부 파일 추출</value></data>
-  <data name="PdfPage_ImagesFolderName" xml:space="preserve"><value>이미지</value></data>
-  <data name="PdfPage_AttachmentsFolderName" xml:space="preserve"><value>첨부 파일</value></data>
-  <data name="PdfPage_ExtractHint.Text" xml:space="preserve"><value>추출된 파일은 별도의 폴더에 저장됩니다.</value></data>
-  <data name="PdfPage_Rotate.Text" xml:space="preserve"><value>회전</value></data>
-  <data name="PdfPage_Rotation.Header" xml:space="preserve"><value>회전</value></data>
-  <data name="PdfPage_0Degrees.Content" xml:space="preserve"><value>0도</value></data>
-  <data name="PdfPage_90CW.Content" xml:space="preserve"><value>시계 방향 90도</value></data>
-  <data name="PdfPage_180Degrees.Content" xml:space="preserve"><value>180도</value></data>
-  <data name="PdfPage_270CW.Content" xml:space="preserve"><value>시계 방향 270도</value></data>
-  <data name="PdfPage_ApplyTo.Header" xml:space="preserve"><value>적용 대상</value></data>
-  <data name="PdfPage_AllPages.Content" xml:space="preserve"><value>모든 페이지</value></data>
-  <data name="PdfPage_CurrentPage.Content" xml:space="preserve"><value>현재 페이지</value></data>
-  <data name="PdfPage_SelectedPages.Content" xml:space="preserve"><value>선택한 페이지</value></data>
-  <data name="PdfPage_PageNumbers.Header" xml:space="preserve"><value>페이지 번호</value></data>
-  <data name="PdfPage_PageNumbers.PlaceholderText" xml:space="preserve"><value>예: 1, 3-5, 7</value></data>
-  <data name="PdfPage_Encrypt.Text" xml:space="preserve"><value>암호화</value></data>
-  <data name="PdfPage_Password.Header" xml:space="preserve"><value>암호</value></data>
-  <data name="PdfPage_ConfirmPassword.Header" xml:space="preserve"><value>암호 확인</value></data>
-  <data name="PdfPage_SetOwnerPassword.Content" xml:space="preserve"><value>소유자 암호 설정</value></data>
-  <data name="PdfPage_OwnerPassword.Header" xml:space="preserve"><value>소유자 암호</value></data>
-  <data name="PdfPage_PasswordSection.Text" xml:space="preserve"><value>암호</value></data>
-  <data name="PdfPage_PasswordAction.Header" xml:space="preserve"><value>작업</value></data>
-  <data name="PdfPage_RemovePassword.Content" xml:space="preserve"><value>암호 제거</value></data>
-  <data name="PdfPage_ChangePassword.Content" xml:space="preserve"><value>암호 변경</value></data>
-  <data name="PdfPage_CurrentPassword.Header" xml:space="preserve"><value>현재 암호</value></data>
-  <data name="PdfPage_RemovePasswordHint.Text" xml:space="preserve"><value>보호를 해제하려면 PDF의 현재 암호를 입력하세요.</value></data>
-  <data name="PdfPage_NewPassword.Header" xml:space="preserve"><value>새 암호</value></data>
-  <data name="PdfPage_ConfirmNewPassword.Header" xml:space="preserve"><value>새 암호 확인</value></data>
-  <data name="PdfPage_PermissionsSection.Text" xml:space="preserve"><value>권한</value></data>
-  <data name="PdfPage_PermissionsHint.Text" xml:space="preserve"><value>사용자가 PDF로 할 수 있는 작업을 제어합니다.</value></data>
-  <data name="PdfPage_AllowPrinting.Content" xml:space="preserve"><value>인쇄 허용</value></data>
-  <data name="PdfPage_AllowCopying.Content" xml:space="preserve"><value>텍스트 및 이미지 복사 허용</value></data>
-  <data name="PdfPage_AllowEditing.Content" xml:space="preserve"><value>편집 허용</value></data>
-  <data name="PdfPage_AllowAnnotations.Content" xml:space="preserve"><value>주석 허용</value></data>
-  <data name="PdfPage_OCR.Text" xml:space="preserve"><value>OCR</value></data>
-  <data name="PdfPage_OcrHint.Text" xml:space="preserve"><value>텍스트를 인식하여 스캔된 PDF를 검색 가능하게 만듭니다.</value></data>
-  <data name="PdfPage_OcrLanguage.Header" xml:space="preserve"><value>언어</value></data>
-  <data name="PdfPage_OcrAutoDetect.Content" xml:space="preserve"><value>자동 감지</value></data>
+  <data name="PdfPage_Title.Text" xml:space="preserve">
+    <value>PDF 편집기</value>
+  </data>
+  <data name="PdfPage_Subtitle.Text" xml:space="preserve">
+    <value>PDF를 가져오고 페이지를 정리하고 보안을 추가하고 미리 보기와 옵션이 한눈에 들어오는 레이아웃으로 편집을 적용하세요.</value>
+  </data>
+  <data name="PdfPage_PreviewHint.Text" xml:space="preserve">
+    <value>PDF를 끌어다 놓거나 미리 보기 화면을 클릭하여 시작하세요. 구성, 보안, 콘텐츠 편집은 옵션 패널에서 사용할 수 있습니다.</value>
+  </data>
+  <data name="PdfPage_NoPdfLoaded.Text" xml:space="preserve">
+    <value>아직 PDF가 로드되지 않았습니다.</value>
+  </data>
+  <data name="PdfPage_DropHintTitle.Text" xml:space="preserve">
+    <value>PDF를 여기에 놓으세요</value>
+  </data>
+  <data name="PdfPage_DropHintSubtitle.Text" xml:space="preserve">
+    <value>이 화면을 클릭하여 파일을 찾아볼 수도 있습니다. 병합, 분할, 암호화, 콘텐츠 옵션은 옵션 패널에서 사용할 수 있습니다.</value>
+  </data>
+  <data name="PdfPage_FitPage.Content" xml:space="preserve">
+    <value>페이지에 맞추기</value>
+  </data>
+  <data name="PdfPage_Previous.Content" xml:space="preserve">
+    <value>← 이전</value>
+  </data>
+  <data name="PdfPage_Next.Content" xml:space="preserve">
+    <value>다음 →</value>
+  </data>
+  <data name="PdfPage_SelectCategory.Text" xml:space="preserve">
+    <value>왼쪽에서 카테고리를 선택하세요</value>
+  </data>
+  <data name="PdfPage_Processing.Text" xml:space="preserve">
+    <value>PDF 처리 중...</value>
+  </data>
+  <data name="PdfPage_PreparingService.Text" xml:space="preserve">
+    <value>PDF 서비스 준비 중...</value>
+  </data>
+  <data name="PdfPage_Merge.Text" xml:space="preserve">
+    <value>병합</value>
+  </data>
+  <data name="PdfPage_MergeHint.Text" xml:space="preserve">
+    <value>여러 PDF를 하나의 문서로 결합합니다.</value>
+  </data>
+  <data name="PdfPage_AddPdf.Content" xml:space="preserve">
+    <value>병합할 PDF 추가</value>
+  </data>
+  <data name="PdfPage_Split.Text" xml:space="preserve">
+    <value>분할</value>
+  </data>
+  <data name="PdfPage_SplitMode.Header" xml:space="preserve">
+    <value>분할 모드</value>
+  </data>
+  <data name="PdfPage_OnePagePerFile.Content" xml:space="preserve">
+    <value>파일당 한 페이지</value>
+  </data>
+  <data name="PdfPage_ByPageRanges.Content" xml:space="preserve">
+    <value>페이지 범위별</value>
+  </data>
+  <data name="PdfPage_PageRanges.Header" xml:space="preserve">
+    <value>페이지 범위</value>
+  </data>
+  <data name="PdfPage_PageRanges.PlaceholderText" xml:space="preserve">
+    <value>예: 1-3, 5, 7-9</value>
+  </data>
+  <data name="PdfPage_PageRangesHint.Text" xml:space="preserve">
+    <value>1-3처럼 범위를 지정하거나 5처럼 단일 페이지를 지정하세요.</value>
+  </data>
+  <data name="PdfPage_Reorder.Text" xml:space="preserve">
+    <value>순서 변경</value>
+  </data>
+  <data name="PdfPage_ReorderHint.Text" xml:space="preserve">
+    <value>새 순서를 지정하여 페이지를 재배열합니다.</value>
+  </data>
+  <data name="PdfPage_PageOrder.Header" xml:space="preserve">
+    <value>페이지 순서</value>
+  </data>
+  <data name="PdfPage_PageOrder.PlaceholderText" xml:space="preserve">
+    <value>예: 3, 1, 2, 5, 4</value>
+  </data>
+  <data name="PdfPage_PageOrderHint.Text" xml:space="preserve">
+    <value>원하는 순서대로 페이지 번호를 쉼표로 구분하여 입력하세요.</value>
+  </data>
+  <data name="PdfPage_Extract.Text" xml:space="preserve">
+    <value>추출</value>
+  </data>
+  <data name="PdfPage_ExtractImages.Content" xml:space="preserve">
+    <value>이미지 추출</value>
+  </data>
+  <data name="PdfPage_ExtractAttachments.Content" xml:space="preserve">
+    <value>첨부 파일 추출</value>
+  </data>
+  <data name="PdfPage_ImagesFolderName" xml:space="preserve">
+    <value>이미지</value>
+  </data>
+  <data name="PdfPage_AttachmentsFolderName" xml:space="preserve">
+    <value>첨부 파일</value>
+  </data>
+  <data name="PdfPage_ExtractHint.Text" xml:space="preserve">
+    <value>추출된 파일은 별도의 폴더에 저장됩니다.</value>
+  </data>
+  <data name="PdfPage_Rotate.Text" xml:space="preserve">
+    <value>회전</value>
+  </data>
+  <data name="PdfPage_Rotation.Header" xml:space="preserve">
+    <value>회전</value>
+  </data>
+  <data name="PdfPage_0Degrees.Content" xml:space="preserve">
+    <value>0도</value>
+  </data>
+  <data name="PdfPage_90CW.Content" xml:space="preserve">
+    <value>시계 방향 90도</value>
+  </data>
+  <data name="PdfPage_180Degrees.Content" xml:space="preserve">
+    <value>180도</value>
+  </data>
+  <data name="PdfPage_270CW.Content" xml:space="preserve">
+    <value>시계 방향 270도</value>
+  </data>
+  <data name="PdfPage_ApplyTo.Header" xml:space="preserve">
+    <value>적용 대상</value>
+  </data>
+  <data name="PdfPage_AllPages.Content" xml:space="preserve">
+    <value>모든 페이지</value>
+  </data>
+  <data name="PdfPage_CurrentPage.Content" xml:space="preserve">
+    <value>현재 페이지</value>
+  </data>
+  <data name="PdfPage_SelectedPages.Content" xml:space="preserve">
+    <value>선택한 페이지</value>
+  </data>
+  <data name="PdfPage_PageNumbers.Header" xml:space="preserve">
+    <value>페이지 번호</value>
+  </data>
+  <data name="PdfPage_PageNumbers.PlaceholderText" xml:space="preserve">
+    <value>예: 1, 3-5, 7</value>
+  </data>
+  <data name="PdfPage_Encrypt.Text" xml:space="preserve">
+    <value>암호화</value>
+  </data>
+  <data name="PdfPage_Password.Header" xml:space="preserve">
+    <value>암호</value>
+  </data>
+  <data name="PdfPage_ConfirmPassword.Header" xml:space="preserve">
+    <value>암호 확인</value>
+  </data>
+  <data name="PdfPage_SetOwnerPassword.Content" xml:space="preserve">
+    <value>소유자 암호 설정</value>
+  </data>
+  <data name="PdfPage_OwnerPassword.Header" xml:space="preserve">
+    <value>소유자 암호</value>
+  </data>
+  <data name="PdfPage_PasswordSection.Text" xml:space="preserve">
+    <value>암호</value>
+  </data>
+  <data name="PdfPage_PasswordAction.Header" xml:space="preserve">
+    <value>작업</value>
+  </data>
+  <data name="PdfPage_RemovePassword.Content" xml:space="preserve">
+    <value>암호 제거</value>
+  </data>
+  <data name="PdfPage_ChangePassword.Content" xml:space="preserve">
+    <value>암호 변경</value>
+  </data>
+  <data name="PdfPage_CurrentPassword.Header" xml:space="preserve">
+    <value>현재 암호</value>
+  </data>
+  <data name="PdfPage_RemovePasswordHint.Text" xml:space="preserve">
+    <value>보호를 해제하려면 PDF의 현재 암호를 입력하세요.</value>
+  </data>
+  <data name="PdfPage_NewPassword.Header" xml:space="preserve">
+    <value>새 암호</value>
+  </data>
+  <data name="PdfPage_ConfirmNewPassword.Header" xml:space="preserve">
+    <value>새 암호 확인</value>
+  </data>
+  <data name="PdfPage_PermissionsSection.Text" xml:space="preserve">
+    <value>권한</value>
+  </data>
+  <data name="PdfPage_PermissionsHint.Text" xml:space="preserve">
+    <value>사용자가 PDF로 할 수 있는 작업을 제어합니다.</value>
+  </data>
+  <data name="PdfPage_AllowPrinting.Content" xml:space="preserve">
+    <value>인쇄 허용</value>
+  </data>
+  <data name="PdfPage_AllowCopying.Content" xml:space="preserve">
+    <value>텍스트 및 이미지 복사 허용</value>
+  </data>
+  <data name="PdfPage_AllowEditing.Content" xml:space="preserve">
+    <value>편집 허용</value>
+  </data>
+  <data name="PdfPage_AllowAnnotations.Content" xml:space="preserve">
+    <value>주석 허용</value>
+  </data>
+  <data name="PdfPage_OCR.Text" xml:space="preserve">
+    <value>OCR</value>
+  </data>
+  <data name="PdfPage_OcrHint.Text" xml:space="preserve">
+    <value>텍스트를 인식하여 스캔된 PDF를 검색 가능하게 만듭니다.</value>
+  </data>
+  <data name="PdfPage_OcrLanguage.Header" xml:space="preserve">
+    <value>언어</value>
+  </data>
+  <data name="PdfPage_OcrAutoDetect.Content" xml:space="preserve">
+    <value>자동 감지</value>
+  </data>
   <data name="PdfPage_OcrTessDataLabel.Text" xml:space="preserve">
     <value>Tessdata 디렉터리</value>
   </data>
@@ -314,277 +930,814 @@
   <data name="PdfPage_OcrTessDataHint.Text" xml:space="preserve">
     <value>.traineddata 언어 팩이 있는 폴더입니다. %LOCALAPPDATA%\FilesTools\tessdata에 있으면 자동으로 감지됩니다.</value>
   </data>
-  <data name="PdfPage_Metadata.Text" xml:space="preserve"><value>메타데이터</value></data>
-  <data name="PdfPage_MetadataTitle.Header" xml:space="preserve"><value>제목</value></data>
-  <data name="PdfPage_MetadataTitle.PlaceholderText" xml:space="preserve"><value>문서 제목</value></data>
-  <data name="PdfPage_MetadataAuthor.Header" xml:space="preserve"><value>작성자</value></data>
-  <data name="PdfPage_MetadataAuthor.PlaceholderText" xml:space="preserve"><value>작성자 이름</value></data>
-  <data name="PdfPage_MetadataSubject.Header" xml:space="preserve"><value>제목(주제)</value></data>
-  <data name="PdfPage_MetadataSubject.PlaceholderText" xml:space="preserve"><value>문서 주제</value></data>
-  <data name="PdfPage_MetadataKeywords.Header" xml:space="preserve"><value>키워드</value></data>
-  <data name="PdfPage_MetadataKeywords.PlaceholderText" xml:space="preserve"><value>쉼표로 구분된 키워드</value></data>
-  <data name="PdfPage_MetadataCreator.Header" xml:space="preserve"><value>작성 프로그램</value></data>
-  <data name="PdfPage_MetadataCreator.PlaceholderText" xml:space="preserve"><value>작성 응용 프로그램</value></data>
-  <data name="PdfPage_MetadataProducer.Header" xml:space="preserve"><value>생성 프로그램</value></data>
-  <data name="PdfPage_MetadataProducer.PlaceholderText" xml:space="preserve"><value>생성 응용 프로그램</value></data>
-  <data name="PdfPage_Repair.Text" xml:space="preserve"><value>복구</value></data>
-  <data name="PdfPage_RepairHint.Text" xml:space="preserve"><value>손상되거나 오류가 있는 PDF 파일을 수정합니다.</value></data>
-  <data name="PdfPage_RepairButton.Content" xml:space="preserve"><value>PDF 복구</value></data>
-  <data name="PdfPage_RepairReady.Text" xml:space="preserve"><value>복구 준비가 되었습니다.</value></data>
-
+  <data name="PdfPage_Metadata.Text" xml:space="preserve">
+    <value>메타데이터</value>
+  </data>
+  <data name="PdfPage_MetadataTitle.Header" xml:space="preserve">
+    <value>제목</value>
+  </data>
+  <data name="PdfPage_MetadataTitle.PlaceholderText" xml:space="preserve">
+    <value>문서 제목</value>
+  </data>
+  <data name="PdfPage_MetadataAuthor.Header" xml:space="preserve">
+    <value>작성자</value>
+  </data>
+  <data name="PdfPage_MetadataAuthor.PlaceholderText" xml:space="preserve">
+    <value>작성자 이름</value>
+  </data>
+  <data name="PdfPage_MetadataSubject.Header" xml:space="preserve">
+    <value>제목(주제)</value>
+  </data>
+  <data name="PdfPage_MetadataSubject.PlaceholderText" xml:space="preserve">
+    <value>문서 주제</value>
+  </data>
+  <data name="PdfPage_MetadataKeywords.Header" xml:space="preserve">
+    <value>키워드</value>
+  </data>
+  <data name="PdfPage_MetadataKeywords.PlaceholderText" xml:space="preserve">
+    <value>쉼표로 구분된 키워드</value>
+  </data>
+  <data name="PdfPage_MetadataCreator.Header" xml:space="preserve">
+    <value>작성 프로그램</value>
+  </data>
+  <data name="PdfPage_MetadataCreator.PlaceholderText" xml:space="preserve">
+    <value>작성 응용 프로그램</value>
+  </data>
+  <data name="PdfPage_MetadataProducer.Header" xml:space="preserve">
+    <value>생성 프로그램</value>
+  </data>
+  <data name="PdfPage_MetadataProducer.PlaceholderText" xml:space="preserve">
+    <value>생성 응용 프로그램</value>
+  </data>
+  <data name="PdfPage_Repair.Text" xml:space="preserve">
+    <value>복구</value>
+  </data>
+  <data name="PdfPage_RepairHint.Text" xml:space="preserve">
+    <value>손상되거나 오류가 있는 PDF 파일을 수정합니다.</value>
+  </data>
+  <data name="PdfPage_RepairButton.Content" xml:space="preserve">
+    <value>PDF 복구</value>
+  </data>
+  <data name="PdfPage_RepairReady.Text" xml:space="preserve">
+    <value>복구 준비가 되었습니다.</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Document editor page
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="DocPage_Title.Text" xml:space="preserve"><value>문서 처리</value></data>
-  <data name="DocPage_Subtitle.Text" xml:space="preserve"><value>문서를 PDF로 변환하거나 손상된 파일을 복구하거나 포함된 이미지를 추출하세요. 패널에서 작업을 선택하고 문서를 끌어다 놓거나 찾아보세요.</value></data>
-  <data name="DocPage_LibreOfficeRequired.Text" xml:space="preserve"><value>LibreOffice 필요</value></data>
-  <data name="DocPage_LibreOfficeStatus.Text" xml:space="preserve"><value>문서 처리에는 LibreOffice가 필요하며 다운로드해야 합니다(약 420 MB). 이 다운로드는 한 번만 수행되며 기기에 저장됩니다.</value></data>
-  <data name="DocPage_DownloadLibreOffice.Content" xml:space="preserve"><value>LibreOffice 다운로드</value></data>
-  <data name="DocPage_Cancel.Content" xml:space="preserve"><value>취소</value></data>
-  <data name="DocPage_DocumentSection.Text" xml:space="preserve"><value>문서</value></data>
-  <data name="DocPage_DocumentSectionHint.Text" xml:space="preserve"><value>문서를 끌어다 놓거나 화면을 클릭하여 찾아보세요. 작업 버튼을 클릭하면 선택한 작업이 적용됩니다.</value></data>
-  <data name="DocPage_NoDocumentLoaded.Text" xml:space="preserve"><value>아직 문서가 로드되지 않았습니다.</value></data>
-  <data name="DocPage_DropHintTitle.Text" xml:space="preserve"><value>문서를 여기에 놓으세요</value></data>
-  <data name="DocPage_DropHintSubtitle.Text" xml:space="preserve"><value>이 화면을 클릭하여 파일을 찾아볼 수도 있습니다. DOCX, PDF, PPTX, XLSX 등의 형식을 지원합니다.</value></data>
-  <data name="DocPage_ProcessDocument.Content" xml:space="preserve"><value>문서 처리</value></data>
-  <data name="DocPage_SelectOperation.Text" xml:space="preserve"><value>작업 선택</value></data>
-  <data name="DocPage_PdfVariant.Text" xml:space="preserve"><value>PDF 변형</value></data>
-  <data name="DocPage_OutputStandard.Header" xml:space="preserve"><value>출력 표준</value></data>
-  <data name="DocPage_StandardPdf.Content" xml:space="preserve"><value>표준 PDF 1.4</value></data>
-  <data name="DocPage_PdfA1b.Content" xml:space="preserve"><value>PDF/A-1b (장기 보관용)</value></data>
-  <data name="DocPage_PdfA2b.Content" xml:space="preserve"><value>PDF/A-2b (확장 보관용)</value></data>
-  <data name="DocPage_PdfA3b.Content" xml:space="preserve"><value>PDF/A-3b (첨부 파일 포함)</value></data>
-  <data name="DocPage_ImageCompression.Text" xml:space="preserve"><value>이미지 압축</value></data>
-  <data name="DocPage_CompressionMethod.Header" xml:space="preserve"><value>압축 방식</value></data>
-  <data name="DocPage_DefaultCompression.Content" xml:space="preserve"><value>기본 압축</value></data>
-  <data name="DocPage_Lossless.Content" xml:space="preserve"><value>무손실 (품질 손실 없음)</value></data>
-  <data name="DocPage_JpegCompression.Content" xml:space="preserve"><value>JPEG (파일 크기 축소)</value></data>
-  <data name="DocPage_PageRange.Text" xml:space="preserve"><value>페이지 범위 (선택 사항)</value></data>
-  <data name="DocPage_PagesToInclude.Header" xml:space="preserve"><value>포함할 페이지</value></data>
-  <data name="DocPage_PagesToInclude.PlaceholderText" xml:space="preserve"><value>모든 페이지는 비워두세요. 예: 1-3,5,8-10</value></data>
-  <data name="DocPage_PageRangeHint.Text" xml:space="preserve"><value>페이지 또는 범위를 쉼표로 구분하여 입력하세요. 프레젠테이션은 슬라이드 번호, 스프레드시트는 시트 인덱스를 사용하세요.</value></data>
-  <data name="DocPage_RepairOutputFormat.Text" xml:space="preserve"><value>출력 형식</value></data>
-  <data name="DocPage_SaveAs.Header" xml:space="preserve"><value>다른 이름으로 저장</value></data>
-  <data name="DocPage_KeepOriginalFormat.Content" xml:space="preserve"><value>원본 형식 유지</value></data>
-  <data name="DocPage_Docx.Content" xml:space="preserve"><value>DOCX (Word)</value></data>
-  <data name="DocPage_Pptx.Content" xml:space="preserve"><value>PPTX (PowerPoint)</value></data>
-  <data name="DocPage_Xlsx.Content" xml:space="preserve"><value>XLSX (Excel)</value></data>
-  <data name="DocPage_Odt.Content" xml:space="preserve"><value>ODT (OpenDocument 텍스트)</value></data>
-  <data name="DocPage_Odp.Content" xml:space="preserve"><value>ODP (OpenDocument 프레젠테이션)</value></data>
-  <data name="DocPage_Ods.Content" xml:space="preserve"><value>ODS (OpenDocument 스프레드시트)</value></data>
-  <data name="DocPage_RepairHint.Text" xml:space="preserve"><value>복구 과정에서 손상된 구조가 수정됩니다. 복구 중 다른 형식으로 변환할 수도 있습니다.</value></data>
-  <data name="DocPage_ExtractSettings.Text" xml:space="preserve"><value>추출 설정</value></data>
-  <data name="DocPage_ExtractHint.Text" xml:space="preserve"><value>포함된 이미지가 모두 추출되어 ZIP 아카이브에 압축됩니다. 아카이브는 선택한 위치에 생성됩니다.</value></data>
-
+  <data name="DocPage_Title.Text" xml:space="preserve">
+    <value>문서 처리</value>
+  </data>
+  <data name="DocPage_Subtitle.Text" xml:space="preserve">
+    <value>문서를 PDF로 변환하거나 손상된 파일을 복구하거나 포함된 이미지를 추출하세요. 패널에서 작업을 선택하고 문서를 끌어다 놓거나 찾아보세요.</value>
+  </data>
+  <data name="DocPage_LibreOfficeRequired.Text" xml:space="preserve">
+    <value>LibreOffice 필요</value>
+  </data>
+  <data name="DocPage_LibreOfficeStatus.Text" xml:space="preserve">
+    <value>문서 처리에는 LibreOffice가 필요하며 다운로드해야 합니다(약 420 MB). 이 다운로드는 한 번만 수행되며 기기에 저장됩니다.</value>
+  </data>
+  <data name="DocPage_DownloadLibreOffice.Content" xml:space="preserve">
+    <value>LibreOffice 다운로드</value>
+  </data>
+  <data name="DocPage_Cancel.Content" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="DocPage_DocumentSection.Text" xml:space="preserve">
+    <value>문서</value>
+  </data>
+  <data name="DocPage_DocumentSectionHint.Text" xml:space="preserve">
+    <value>문서를 끌어다 놓거나 화면을 클릭하여 찾아보세요. 작업 버튼을 클릭하면 선택한 작업이 적용됩니다.</value>
+  </data>
+  <data name="DocPage_NoDocumentLoaded.Text" xml:space="preserve">
+    <value>아직 문서가 로드되지 않았습니다.</value>
+  </data>
+  <data name="DocPage_DropHintTitle.Text" xml:space="preserve">
+    <value>문서를 여기에 놓으세요</value>
+  </data>
+  <data name="DocPage_DropHintSubtitle.Text" xml:space="preserve">
+    <value>이 화면을 클릭하여 파일을 찾아볼 수도 있습니다. DOCX, PDF, PPTX, XLSX 등의 형식을 지원합니다.</value>
+  </data>
+  <data name="DocPage_ProcessDocument.Content" xml:space="preserve">
+    <value>문서 처리</value>
+  </data>
+  <data name="DocPage_SelectOperation.Text" xml:space="preserve">
+    <value>작업 선택</value>
+  </data>
+  <data name="DocPage_PdfVariant.Text" xml:space="preserve">
+    <value>PDF 변형</value>
+  </data>
+  <data name="DocPage_OutputStandard.Header" xml:space="preserve">
+    <value>출력 표준</value>
+  </data>
+  <data name="DocPage_StandardPdf.Content" xml:space="preserve">
+    <value>표준 PDF 1.4</value>
+  </data>
+  <data name="DocPage_PdfA1b.Content" xml:space="preserve">
+    <value>PDF/A-1b (장기 보관용)</value>
+  </data>
+  <data name="DocPage_PdfA2b.Content" xml:space="preserve">
+    <value>PDF/A-2b (확장 보관용)</value>
+  </data>
+  <data name="DocPage_PdfA3b.Content" xml:space="preserve">
+    <value>PDF/A-3b (첨부 파일 포함)</value>
+  </data>
+  <data name="DocPage_ImageCompression.Text" xml:space="preserve">
+    <value>이미지 압축</value>
+  </data>
+  <data name="DocPage_CompressionMethod.Header" xml:space="preserve">
+    <value>압축 방식</value>
+  </data>
+  <data name="DocPage_DefaultCompression.Content" xml:space="preserve">
+    <value>기본 압축</value>
+  </data>
+  <data name="DocPage_Lossless.Content" xml:space="preserve">
+    <value>무손실 (품질 손실 없음)</value>
+  </data>
+  <data name="DocPage_JpegCompression.Content" xml:space="preserve">
+    <value>JPEG (파일 크기 축소)</value>
+  </data>
+  <data name="DocPage_PageRange.Text" xml:space="preserve">
+    <value>페이지 범위 (선택 사항)</value>
+  </data>
+  <data name="DocPage_PagesToInclude.Header" xml:space="preserve">
+    <value>포함할 페이지</value>
+  </data>
+  <data name="DocPage_PagesToInclude.PlaceholderText" xml:space="preserve">
+    <value>모든 페이지는 비워두세요. 예: 1-3,5,8-10</value>
+  </data>
+  <data name="DocPage_PageRangeHint.Text" xml:space="preserve">
+    <value>페이지 또는 범위를 쉼표로 구분하여 입력하세요. 프레젠테이션은 슬라이드 번호, 스프레드시트는 시트 인덱스를 사용하세요.</value>
+  </data>
+  <data name="DocPage_RepairOutputFormat.Text" xml:space="preserve">
+    <value>출력 형식</value>
+  </data>
+  <data name="DocPage_SaveAs.Header" xml:space="preserve">
+    <value>다른 이름으로 저장</value>
+  </data>
+  <data name="DocPage_KeepOriginalFormat.Content" xml:space="preserve">
+    <value>원본 형식 유지</value>
+  </data>
+  <data name="DocPage_Docx.Content" xml:space="preserve">
+    <value>DOCX (Word)</value>
+  </data>
+  <data name="DocPage_Pptx.Content" xml:space="preserve">
+    <value>PPTX (PowerPoint)</value>
+  </data>
+  <data name="DocPage_Xlsx.Content" xml:space="preserve">
+    <value>XLSX (Excel)</value>
+  </data>
+  <data name="DocPage_Odt.Content" xml:space="preserve">
+    <value>ODT (OpenDocument 텍스트)</value>
+  </data>
+  <data name="DocPage_Odp.Content" xml:space="preserve">
+    <value>ODP (OpenDocument 프레젠테이션)</value>
+  </data>
+  <data name="DocPage_Ods.Content" xml:space="preserve">
+    <value>ODS (OpenDocument 스프레드시트)</value>
+  </data>
+  <data name="DocPage_RepairHint.Text" xml:space="preserve">
+    <value>복구 과정에서 손상된 구조가 수정됩니다. 복구 중 다른 형식으로 변환할 수도 있습니다.</value>
+  </data>
+  <data name="DocPage_ExtractSettings.Text" xml:space="preserve">
+    <value>추출 설정</value>
+  </data>
+  <data name="DocPage_ExtractHint.Text" xml:space="preserve">
+    <value>포함된 이미지가 모두 추출되어 ZIP 아카이브에 압축됩니다. 아카이브는 선택한 위치에 생성됩니다.</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Batch editor page
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="BatchPage_Title.Text" xml:space="preserve"><value>일괄 처리기</value></data>
-  <data name="BatchPage_Subtitle.Text" xml:space="preserve"><value>오디오, 비디오, 문서, PDF, 이미지 등 여러 파일을 끌어다 놓고 각 유형 그룹에 선별된 작업을 한 번에 적용하세요.</value></data>
-  <data name="BatchPage_FilesSection.Text" xml:space="preserve"><value>파일</value></data>
-  <data name="BatchPage_FileCountDefault.Text" xml:space="preserve"><value>아래에 파일을 끌어다 놓거나 추가를 클릭하여 시작하세요.</value></data>
-  <data name="BatchPage_AddFiles.Content" xml:space="preserve"><value>파일 추가</value></data>
-  <data name="BatchPage_ClearAll.Content" xml:space="preserve"><value>모두 지우기</value></data>
-  <data name="BatchPage_DropHintTitle.Text" xml:space="preserve"><value>파일을 여기에 놓으세요</value></data>
-  <data name="BatchPage_DropHintSubtitle.Text" xml:space="preserve"><value>유형을 자유롭게 혼합하세요. 오디오, 비디오, 문서, PDF, 이미지 모두 지원되며 각 그룹에 별도의 작업이 적용됩니다.</value></data>
-  <data name="BatchPage_Preparing.Text" xml:space="preserve"><value>준비 중…</value></data>
-  <data name="BatchPage_NoFilesLoaded.Text" xml:space="preserve"><value>아직 파일이 로드되지 않았습니다.</value></data>
-  <data name="BatchPage_ShowInFolder.Content" xml:space="preserve"><value>폴더에서 보기</value></data>
-  <data name="BatchPage_Cancel.Content" xml:space="preserve"><value>취소</value></data>
-  <data name="BatchPage_ProcessBatch.Content" xml:space="preserve"><value>일괄 처리 실행</value></data>
-  <data name="BatchPage_SelectOperationHeader.Text" xml:space="preserve"><value>작업 선택</value></data>
-  <data name="BatchPage_NoSelectionHint.Text" xml:space="preserve"><value>사이드바에서 작업을 선택하여 구성하세요. 원하는 만큼 활성화할 수 있으며 각 파일에 파이프라인으로 실행됩니다.</value></data>
-  <data name="BatchPage_OutputSettings.Text" xml:space="preserve"><value>출력 설정</value></data>
-  <data name="BatchPage_FilenameSuffix.Header" xml:space="preserve"><value>파일 이름 접미사</value></data>
-  <data name="BatchPage_FilesInParallel.Header" xml:space="preserve"><value>병렬 처리 파일 수</value></data>
-  <data name="BatchPage_ConvertAudioFormat.Content" xml:space="preserve"><value>오디오 형식 변환</value></data>
-  <data name="BatchPage_AudioOutputFormat.Header" xml:space="preserve"><value>출력 형식</value></data>
-  <data name="BatchPage_FlacLossless.Content" xml:space="preserve"><value>FLAC (무손실)</value></data>
-  <data name="BatchPage_WavPcm.Content" xml:space="preserve"><value>WAV (PCM)</value></data>
-  <data name="BatchPage_OggVorbis.Content" xml:space="preserve"><value>OGG Vorbis</value></data>
-  <data name="BatchPage_CompressAudio.Content" xml:space="preserve"><value>오디오 압축</value></data>
-  <data name="BatchPage_CompressionMode.Header" xml:space="preserve"><value>압축 모드</value></data>
-  <data name="BatchPage_LossySmaller.Content" xml:space="preserve"><value>손실 압축 (파일 크기 축소)</value></data>
-  <data name="BatchPage_Lossless.Content" xml:space="preserve"><value>무손실</value></data>
-  <data name="BatchPage_TargetBitrate.Header" xml:space="preserve"><value>목표 비트레이트 (kbps)</value></data>
-  <data name="BatchPage_NormalizeLoudness.Content" xml:space="preserve"><value>음량 정규화</value></data>
-  <data name="BatchPage_NormalizeMode.Header" xml:space="preserve"><value>모드</value></data>
-  <data name="BatchPage_LUFS.Content" xml:space="preserve"><value>LUFS (방송 기준)</value></data>
-  <data name="BatchPage_Peak.Content" xml:space="preserve"><value>피크</value></data>
-  <data name="BatchPage_TargetLevel.Header" xml:space="preserve"><value>목표 레벨 (dB / LUFS)</value></data>
-  <data name="BatchPage_ChangeContainer.Content" xml:space="preserve"><value>컨테이너 변경</value></data>
-  <data name="BatchPage_TargetContainer.Header" xml:space="preserve"><value>목표 컨테이너</value></data>
-  <data name="BatchPage_ChangeCodec.Content" xml:space="preserve"><value>코덱 변경</value></data>
-  <data name="BatchPage_VideoCodec.Header" xml:space="preserve"><value>비디오 코덱</value></data>
-  <data name="BatchPage_AudioCodec.Header" xml:space="preserve"><value>오디오 코덱</value></data>
-  <data name="BatchPage_H264.Content" xml:space="preserve"><value>H.264</value></data>
-  <data name="BatchPage_H265.Content" xml:space="preserve"><value>H.265 / HEVC</value></data>
-  <data name="BatchPage_CompressVideo.Content" xml:space="preserve"><value>비디오 압축</value></data>
-  <data name="BatchPage_VideoQualityPreset.Header" xml:space="preserve"><value>품질 프리셋</value></data>
-  <data name="BatchPage_VeryHighQuality.Content" xml:space="preserve"><value>최고 품질</value></data>
-  <data name="BatchPage_HighQuality.Content" xml:space="preserve"><value>고품질</value></data>
-  <data name="BatchPage_Balanced.Content" xml:space="preserve"><value>균형</value></data>
-  <data name="BatchPage_SmallSize.Content" xml:space="preserve"><value>작은 크기</value></data>
-  <data name="BatchPage_ResizeVideo.Content" xml:space="preserve"><value>비디오 크기 조정</value></data>
-  <data name="BatchPage_VideoWidth.Header" xml:space="preserve"><value>너비</value></data>
-  <data name="BatchPage_VideoHeight.Header" xml:space="preserve"><value>높이</value></data>
-  <data name="BatchPage_ExtractAudioTrack.Content" xml:space="preserve"><value>오디오 트랙 추출</value></data>
-  <data name="BatchPage_OutputAudioFormat.Header" xml:space="preserve"><value>출력 오디오 형식</value></data>
-  <data name="BatchPage_GenerateMuxSubtitles.Content" xml:space="preserve"><value>자막 생성 및 믹싱</value></data>
-  <data name="BatchPage_TranscriptionSection.Text" xml:space="preserve"><value>전사</value></data>
-  <data name="BatchPage_TranscriptionHint.Text" xml:space="preserve"><value>Whisper를 사용하여 각 비디오를 전사합니다. 기본 모드는 SRT 파일을 생성하고 고급 모드는 스타일 ASS 자막을 생성합니다.</value></data>
-  <data name="BatchPage_DownloadTranscription.Content" xml:space="preserve"><value>전사 기능 다운로드</value></data>
-  <data name="BatchPage_TranscriptionNotDownloaded.Text" xml:space="preserve"><value>전사 기능이 아직 다운로드되지 않았습니다.</value></data>
-  <data name="BatchPage_SubtitleGenMode.Header" xml:space="preserve"><value>자막 생성 모드</value></data>
-  <data name="BatchPage_BasicSRT.Content" xml:space="preserve"><value>기본 (SRT)</value></data>
-  <data name="BatchPage_AdvancedASS.Content" xml:space="preserve"><value>고급 (ASS)</value></data>
-  <data name="BatchPage_AdvancedOutputType.Header" xml:space="preserve"><value>고급 출력 유형</value></data>
-  <data name="BatchPage_StyledASS.Content" xml:space="preserve"><value>스타일 ASS</value></data>
-  <data name="BatchPage_KaraokeASS.Content" xml:space="preserve"><value>가라오케 ASS</value></data>
-  <data name="BatchPage_ConfigureAdvanced.Content" xml:space="preserve"><value>고급 자막 구성</value></data>
-  <data name="BatchPage_SecondsMax.Header" xml:space="preserve"><value>최대 초</value></data>
-  <data name="BatchPage_LimitWords.Content" xml:space="preserve"><value>구간당 단어 수 제한</value></data>
-  <data name="BatchPage_WordsMax.Header" xml:space="preserve"><value>최대 단어 수</value></data>
-  <data name="BatchPage_SubtitleMux.Text" xml:space="preserve"><value>자막 믹싱</value></data>
-  <data name="BatchPage_MuxMode.Header" xml:space="preserve"><value>믹싱 모드</value></data>
-  <data name="BatchPage_SoftMux.Content" xml:space="preserve"><value>SoftMux (포함 트랙)</value></data>
-  <data name="BatchPage_BurnIn.Content" xml:space="preserve"><value>BurnIn (화면에 소각)</value></data>
-  <data name="BatchPage_PlacementSection.Text" xml:space="preserve"><value>배치</value></data>
-  <data name="BatchPage_PlacementHint.Text" xml:space="preserve"><value>비디오 프레임의 백분율로 자막 위치를 세밀하게 조정하세요.</value></data>
-  <data name="BatchPage_Horizontal.Header" xml:space="preserve"><value>수평 (%)</value></data>
-  <data name="BatchPage_Vertical.Header" xml:space="preserve"><value>수직 (%)</value></data>
-  <data name="BatchPage_ResetPlacement.Content" xml:space="preserve"><value>배치 초기화</value></data>
-  <data name="BatchPage_LanguageTag.Header" xml:space="preserve"><value>언어 태그</value></data>
-  <data name="BatchPage_LanguageTag.PlaceholderText" xml:space="preserve"><value>예: ko</value></data>
-  <data name="BatchPage_SubtitleTitle.Header" xml:space="preserve"><value>자막 제목</value></data>
-  <data name="BatchPage_SubtitleTitle.PlaceholderText" xml:space="preserve"><value>예: 한국어</value></data>
-  <data name="BatchPage_SetDefaultSubtitle.Content" xml:space="preserve"><value>기본 자막으로 설정</value></data>
-  <data name="BatchPage_ConvertToPdf.Content" xml:space="preserve"><value>PDF로 변환</value></data>
-  <data name="BatchPage_LibreOfficeHint.Text" xml:space="preserve"><value>LibreOffice를 사용하여 각 문서를 변환합니다.</value></data>
-  <data name="BatchPage_PdfVariant.Header" xml:space="preserve"><value>PDF 변형</value></data>
-  <data name="BatchPage_StandardPdf.Content" xml:space="preserve"><value>표준 PDF</value></data>
-  <data name="BatchPage_PdfA1b.Content" xml:space="preserve"><value>PDF/A-1b (보관용)</value></data>
-  <data name="BatchPage_PdfA2b.Content" xml:space="preserve"><value>PDF/A-2b</value></data>
-  <data name="BatchPage_PdfA3b.Content" xml:space="preserve"><value>PDF/A-3b</value></data>
-  <data name="BatchPage_CompressOptimizePdf.Content" xml:space="preserve"><value>PDF 압축 / 최적화</value></data>
-  <data name="BatchPage_CompressPdfHint.Text" xml:space="preserve"><value>파일을 선형화하고 재구성하여 크기를 줄입니다 (qpdf 사용).</value></data>
-  <data name="BatchPage_RepairPdf.Content" xml:space="preserve"><value>PDF 복구</value></data>
-  <data name="BatchPage_RepairPdfHint.Text" xml:space="preserve"><value>손상을 수정하기 위해 문서 구조를 재구성합니다 (qpdf 사용).</value></data>
-  <data name="BatchPage_AddOcrLayer.Content" xml:space="preserve"><value>OCR 텍스트 레이어 추가</value></data>
-  <data name="BatchPage_TessdataPath.Header" xml:space="preserve"><value>Tessdata 디렉터리 경로</value></data>
-  <data name="BatchPage_TessdataPath.PlaceholderText" xml:space="preserve"><value>C:\경로\to\tessdata</value></data>
-  <data name="BatchPage_OcrLanguages.Header" xml:space="preserve"><value>언어 (Tesseract 코드)</value></data>
-  <data name="BatchPage_RasterizationDpi.Header" xml:space="preserve"><value>래스터화 DPI</value></data>
-  <data name="BatchPage_MergeAllPdfs.Content" xml:space="preserve"><value>모든 PDF를 하나의 파일로 병합</value></data>
-  <data name="BatchPage_MergeHint.Text" xml:space="preserve"><value>다른 PDF 작업과 함께 사용할 수 없습니다.</value></data>
-  <data name="BatchPage_MergeFilename.Header" xml:space="preserve"><value>출력 파일 이름</value></data>
-  <data name="BatchPage_ConvertImageFormat.Content" xml:space="preserve"><value>이미지 형식 변환</value></data>
-  <data name="BatchPage_ImageTargetFormat.Header" xml:space="preserve"><value>목표 형식</value></data>
-  <data name="BatchPage_CompressImages.Content" xml:space="preserve"><value>이미지 압축</value></data>
-  <data name="BatchPage_ResizeImages.Content" xml:space="preserve"><value>이미지 크기 조정</value></data>
-  <data name="BatchPage_ImageWidth.Header" xml:space="preserve"><value>너비</value></data>
-  <data name="BatchPage_ImageHeight.Header" xml:space="preserve"><value>높이</value></data>
-
+  <data name="BatchPage_Title.Text" xml:space="preserve">
+    <value>일괄 처리기</value>
+  </data>
+  <data name="BatchPage_Subtitle.Text" xml:space="preserve">
+    <value>오디오, 비디오, 문서, PDF, 이미지 등 여러 파일을 끌어다 놓고 각 유형 그룹에 선별된 작업을 한 번에 적용하세요.</value>
+  </data>
+  <data name="BatchPage_FilesSection.Text" xml:space="preserve">
+    <value>파일</value>
+  </data>
+  <data name="BatchPage_FileCountDefault.Text" xml:space="preserve">
+    <value>아래에 파일을 끌어다 놓거나 추가를 클릭하여 시작하세요.</value>
+  </data>
+  <data name="BatchPage_AddFiles.Content" xml:space="preserve">
+    <value>파일 추가</value>
+  </data>
+  <data name="BatchPage_ClearAll.Content" xml:space="preserve">
+    <value>모두 지우기</value>
+  </data>
+  <data name="BatchPage_DropHintTitle.Text" xml:space="preserve">
+    <value>파일을 여기에 놓으세요</value>
+  </data>
+  <data name="BatchPage_DropHintSubtitle.Text" xml:space="preserve">
+    <value>유형을 자유롭게 혼합하세요. 오디오, 비디오, 문서, PDF, 이미지 모두 지원되며 각 그룹에 별도의 작업이 적용됩니다.</value>
+  </data>
+  <data name="BatchPage_Preparing.Text" xml:space="preserve">
+    <value>준비 중…</value>
+  </data>
+  <data name="BatchPage_NoFilesLoaded.Text" xml:space="preserve">
+    <value>아직 파일이 로드되지 않았습니다.</value>
+  </data>
+  <data name="BatchPage_ShowInFolder.Content" xml:space="preserve">
+    <value>폴더에서 보기</value>
+  </data>
+  <data name="BatchPage_Cancel.Content" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="BatchPage_ProcessBatch.Content" xml:space="preserve">
+    <value>일괄 처리 실행</value>
+  </data>
+  <data name="BatchPage_SelectOperationHeader.Text" xml:space="preserve">
+    <value>작업 선택</value>
+  </data>
+  <data name="BatchPage_NoSelectionHint.Text" xml:space="preserve">
+    <value>사이드바에서 작업을 선택하여 구성하세요. 원하는 만큼 활성화할 수 있으며 각 파일에 파이프라인으로 실행됩니다.</value>
+  </data>
+  <data name="BatchPage_OutputSettings.Text" xml:space="preserve">
+    <value>출력 설정</value>
+  </data>
+  <data name="BatchPage_FilenameSuffix.Header" xml:space="preserve">
+    <value>파일 이름 접미사</value>
+  </data>
+  <data name="BatchPage_FilesInParallel.Header" xml:space="preserve">
+    <value>병렬 처리 파일 수</value>
+  </data>
+  <data name="BatchPage_ConvertAudioFormat.Content" xml:space="preserve">
+    <value>오디오 형식 변환</value>
+  </data>
+  <data name="BatchPage_AudioOutputFormat.Header" xml:space="preserve">
+    <value>출력 형식</value>
+  </data>
+  <data name="BatchPage_FlacLossless.Content" xml:space="preserve">
+    <value>FLAC (무손실)</value>
+  </data>
+  <data name="BatchPage_WavPcm.Content" xml:space="preserve">
+    <value>WAV (PCM)</value>
+  </data>
+  <data name="BatchPage_OggVorbis.Content" xml:space="preserve">
+    <value>OGG Vorbis</value>
+  </data>
+  <data name="BatchPage_CompressAudio.Content" xml:space="preserve">
+    <value>오디오 압축</value>
+  </data>
+  <data name="BatchPage_CompressionMode.Header" xml:space="preserve">
+    <value>압축 모드</value>
+  </data>
+  <data name="BatchPage_LossySmaller.Content" xml:space="preserve">
+    <value>손실 압축 (파일 크기 축소)</value>
+  </data>
+  <data name="BatchPage_Lossless.Content" xml:space="preserve">
+    <value>무손실</value>
+  </data>
+  <data name="BatchPage_TargetBitrate.Header" xml:space="preserve">
+    <value>목표 비트레이트 (kbps)</value>
+  </data>
+  <data name="BatchPage_NormalizeLoudness.Content" xml:space="preserve">
+    <value>음량 정규화</value>
+  </data>
+  <data name="BatchPage_NormalizeMode.Header" xml:space="preserve">
+    <value>모드</value>
+  </data>
+  <data name="BatchPage_LUFS.Content" xml:space="preserve">
+    <value>LUFS (방송 기준)</value>
+  </data>
+  <data name="BatchPage_Peak.Content" xml:space="preserve">
+    <value>피크</value>
+  </data>
+  <data name="BatchPage_TargetLevel.Header" xml:space="preserve">
+    <value>목표 레벨 (dB / LUFS)</value>
+  </data>
+  <data name="BatchPage_ChangeContainer.Content" xml:space="preserve">
+    <value>컨테이너 변경</value>
+  </data>
+  <data name="BatchPage_TargetContainer.Header" xml:space="preserve">
+    <value>목표 컨테이너</value>
+  </data>
+  <data name="BatchPage_ChangeCodec.Content" xml:space="preserve">
+    <value>코덱 변경</value>
+  </data>
+  <data name="BatchPage_VideoCodec.Header" xml:space="preserve">
+    <value>비디오 코덱</value>
+  </data>
+  <data name="BatchPage_AudioCodec.Header" xml:space="preserve">
+    <value>오디오 코덱</value>
+  </data>
+  <data name="BatchPage_H264.Content" xml:space="preserve">
+    <value>H.264</value>
+  </data>
+  <data name="BatchPage_H265.Content" xml:space="preserve">
+    <value>H.265 / HEVC</value>
+  </data>
+  <data name="BatchPage_CompressVideo.Content" xml:space="preserve">
+    <value>비디오 압축</value>
+  </data>
+  <data name="BatchPage_VideoQualityPreset.Header" xml:space="preserve">
+    <value>품질 프리셋</value>
+  </data>
+  <data name="BatchPage_VeryHighQuality.Content" xml:space="preserve">
+    <value>최고 품질</value>
+  </data>
+  <data name="BatchPage_HighQuality.Content" xml:space="preserve">
+    <value>고품질</value>
+  </data>
+  <data name="BatchPage_Balanced.Content" xml:space="preserve">
+    <value>균형</value>
+  </data>
+  <data name="BatchPage_SmallSize.Content" xml:space="preserve">
+    <value>작은 크기</value>
+  </data>
+  <data name="BatchPage_ResizeVideo.Content" xml:space="preserve">
+    <value>비디오 크기 조정</value>
+  </data>
+  <data name="BatchPage_VideoWidth.Header" xml:space="preserve">
+    <value>너비</value>
+  </data>
+  <data name="BatchPage_VideoHeight.Header" xml:space="preserve">
+    <value>높이</value>
+  </data>
+  <data name="BatchPage_ExtractAudioTrack.Content" xml:space="preserve">
+    <value>오디오 트랙 추출</value>
+  </data>
+  <data name="BatchPage_OutputAudioFormat.Header" xml:space="preserve">
+    <value>출력 오디오 형식</value>
+  </data>
+  <data name="BatchPage_GenerateMuxSubtitles.Content" xml:space="preserve">
+    <value>자막 생성 및 믹싱</value>
+  </data>
+  <data name="BatchPage_TranscriptionSection.Text" xml:space="preserve">
+    <value>전사</value>
+  </data>
+  <data name="BatchPage_TranscriptionHint.Text" xml:space="preserve">
+    <value>Whisper를 사용하여 각 비디오를 전사합니다. 기본 모드는 SRT 파일을 생성하고 고급 모드는 스타일 ASS 자막을 생성합니다.</value>
+  </data>
+  <data name="BatchPage_DownloadTranscription.Content" xml:space="preserve">
+    <value>전사 기능 다운로드</value>
+  </data>
+  <data name="BatchPage_TranscriptionNotDownloaded.Text" xml:space="preserve">
+    <value>전사 기능이 아직 다운로드되지 않았습니다.</value>
+  </data>
+  <data name="BatchPage_SubtitleGenMode.Header" xml:space="preserve">
+    <value>자막 생성 모드</value>
+  </data>
+  <data name="BatchPage_BasicSRT.Content" xml:space="preserve">
+    <value>기본 (SRT)</value>
+  </data>
+  <data name="BatchPage_AdvancedASS.Content" xml:space="preserve">
+    <value>고급 (ASS)</value>
+  </data>
+  <data name="BatchPage_AdvancedOutputType.Header" xml:space="preserve">
+    <value>고급 출력 유형</value>
+  </data>
+  <data name="BatchPage_StyledASS.Content" xml:space="preserve">
+    <value>스타일 ASS</value>
+  </data>
+  <data name="BatchPage_KaraokeASS.Content" xml:space="preserve">
+    <value>가라오케 ASS</value>
+  </data>
+  <data name="BatchPage_ConfigureAdvanced.Content" xml:space="preserve">
+    <value>고급 자막 구성</value>
+  </data>
+  <data name="BatchPage_SecondsMax.Header" xml:space="preserve">
+    <value>최대 초</value>
+  </data>
+  <data name="BatchPage_LimitWords.Content" xml:space="preserve">
+    <value>구간당 단어 수 제한</value>
+  </data>
+  <data name="BatchPage_WordsMax.Header" xml:space="preserve">
+    <value>최대 단어 수</value>
+  </data>
+  <data name="BatchPage_SubtitleMux.Text" xml:space="preserve">
+    <value>자막 믹싱</value>
+  </data>
+  <data name="BatchPage_MuxMode.Header" xml:space="preserve">
+    <value>믹싱 모드</value>
+  </data>
+  <data name="BatchPage_SoftMux.Content" xml:space="preserve">
+    <value>SoftMux (포함 트랙)</value>
+  </data>
+  <data name="BatchPage_BurnIn.Content" xml:space="preserve">
+    <value>BurnIn (화면에 소각)</value>
+  </data>
+  <data name="BatchPage_PlacementSection.Text" xml:space="preserve">
+    <value>배치</value>
+  </data>
+  <data name="BatchPage_PlacementHint.Text" xml:space="preserve">
+    <value>비디오 프레임의 백분율로 자막 위치를 세밀하게 조정하세요.</value>
+  </data>
+  <data name="BatchPage_Horizontal.Header" xml:space="preserve">
+    <value>수평 (%)</value>
+  </data>
+  <data name="BatchPage_Vertical.Header" xml:space="preserve">
+    <value>수직 (%)</value>
+  </data>
+  <data name="BatchPage_ResetPlacement.Content" xml:space="preserve">
+    <value>배치 초기화</value>
+  </data>
+  <data name="BatchPage_LanguageTag.Header" xml:space="preserve">
+    <value>언어 태그</value>
+  </data>
+  <data name="BatchPage_LanguageTag.PlaceholderText" xml:space="preserve">
+    <value>예: ko</value>
+  </data>
+  <data name="BatchPage_SubtitleTitle.Header" xml:space="preserve">
+    <value>자막 제목</value>
+  </data>
+  <data name="BatchPage_SubtitleTitle.PlaceholderText" xml:space="preserve">
+    <value>예: 한국어</value>
+  </data>
+  <data name="BatchPage_SetDefaultSubtitle.Content" xml:space="preserve">
+    <value>기본 자막으로 설정</value>
+  </data>
+  <data name="BatchPage_ConvertToPdf.Content" xml:space="preserve">
+    <value>PDF로 변환</value>
+  </data>
+  <data name="BatchPage_LibreOfficeHint.Text" xml:space="preserve">
+    <value>LibreOffice를 사용하여 각 문서를 변환합니다.</value>
+  </data>
+  <data name="BatchPage_PdfVariant.Header" xml:space="preserve">
+    <value>PDF 변형</value>
+  </data>
+  <data name="BatchPage_StandardPdf.Content" xml:space="preserve">
+    <value>표준 PDF</value>
+  </data>
+  <data name="BatchPage_PdfA1b.Content" xml:space="preserve">
+    <value>PDF/A-1b (보관용)</value>
+  </data>
+  <data name="BatchPage_PdfA2b.Content" xml:space="preserve">
+    <value>PDF/A-2b</value>
+  </data>
+  <data name="BatchPage_PdfA3b.Content" xml:space="preserve">
+    <value>PDF/A-3b</value>
+  </data>
+  <data name="BatchPage_CompressOptimizePdf.Content" xml:space="preserve">
+    <value>PDF 압축 / 최적화</value>
+  </data>
+  <data name="BatchPage_CompressPdfHint.Text" xml:space="preserve">
+    <value>파일을 선형화하고 재구성하여 크기를 줄입니다 (qpdf 사용).</value>
+  </data>
+  <data name="BatchPage_RepairPdf.Content" xml:space="preserve">
+    <value>PDF 복구</value>
+  </data>
+  <data name="BatchPage_RepairPdfHint.Text" xml:space="preserve">
+    <value>손상을 수정하기 위해 문서 구조를 재구성합니다 (qpdf 사용).</value>
+  </data>
+  <data name="BatchPage_AddOcrLayer.Content" xml:space="preserve">
+    <value>OCR 텍스트 레이어 추가</value>
+  </data>
+  <data name="BatchPage_TessdataPath.Header" xml:space="preserve">
+    <value>Tessdata 디렉터리 경로</value>
+  </data>
+  <data name="BatchPage_TessdataPath.PlaceholderText" xml:space="preserve">
+    <value>C:\경로\to\tessdata</value>
+  </data>
+  <data name="BatchPage_OcrLanguages.Header" xml:space="preserve">
+    <value>언어 (Tesseract 코드)</value>
+  </data>
+  <data name="BatchPage_RasterizationDpi.Header" xml:space="preserve">
+    <value>래스터화 DPI</value>
+  </data>
+  <data name="BatchPage_MergeAllPdfs.Content" xml:space="preserve">
+    <value>모든 PDF를 하나의 파일로 병합</value>
+  </data>
+  <data name="BatchPage_MergeHint.Text" xml:space="preserve">
+    <value>다른 PDF 작업과 함께 사용할 수 없습니다.</value>
+  </data>
+  <data name="BatchPage_MergeFilename.Header" xml:space="preserve">
+    <value>출력 파일 이름</value>
+  </data>
+  <data name="BatchPage_ConvertImageFormat.Content" xml:space="preserve">
+    <value>이미지 형식 변환</value>
+  </data>
+  <data name="BatchPage_ImageTargetFormat.Header" xml:space="preserve">
+    <value>목표 형식</value>
+  </data>
+  <data name="BatchPage_CompressImages.Content" xml:space="preserve">
+    <value>이미지 압축</value>
+  </data>
+  <data name="BatchPage_ResizeImages.Content" xml:space="preserve">
+    <value>이미지 크기 조정</value>
+  </data>
+  <data name="BatchPage_ImageWidth.Header" xml:space="preserve">
+    <value>너비</value>
+  </data>
+  <data name="BatchPage_ImageHeight.Header" xml:space="preserve">
+    <value>높이</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Licenses page
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="LicensesPage_Title.Text" xml:space="preserve"><value>라이선스</value></data>
-  <data name="LicensesPage_Subtitle1.Text" xml:space="preserve"><value>이 앱에서 사용된 서드파티 구성 요소, 저작권 표시 및 라이선스입니다.</value></data>
-  <data name="LicensesPage_Subtitle2.Text" xml:space="preserve"><value>나열된 모든 라이선스는 해당 약관 및 재배포 의무에 따라 상업적 사용을 허용합니다.</value></data>
-  <data name="LicensesPage_ShowLicense.Content" xml:space="preserve"><value>라이선스 보기</value></data>
-
-
-  <data name="ImagePage_FileInfoSection.Text" xml:space="preserve"><value>파일 정보</value></data>
-  <data name="ImagePage_FileInfoName.Text" xml:space="preserve"><value>파일 이름</value></data>
-  <data name="ImagePage_FileInfoDimensions.Text" xml:space="preserve"><value>해상도</value></data>
-  <data name="ImagePage_FileInfoFormat.Text" xml:space="preserve"><value>형식</value></data>
-  <data name="ImagePage_FileInfoSize.Text" xml:space="preserve"><value>파일 크기</value></data>
-  <data name="VideoPage_FileInfoSection.Text" xml:space="preserve"><value>파일 정보</value></data>
-  <data name="VideoPage_FileInfoName.Text" xml:space="preserve"><value>파일 이름</value></data>
-  <data name="VideoPage_FileInfoDimensions.Text" xml:space="preserve"><value>해상도</value></data>
-  <data name="VideoPage_FileInfoDuration.Text" xml:space="preserve"><value>재생 시간</value></data>
-  <data name="VideoPage_FileInfoFormat.Text" xml:space="preserve"><value>형식</value></data>
-  <data name="VideoPage_FileInfoSize.Text" xml:space="preserve"><value>파일 크기</value></data>
-  <data name="AudioPage_FileInfoSection.Text" xml:space="preserve"><value>파일 정보</value></data>
-  <data name="AudioPage_FileInfoName.Text" xml:space="preserve"><value>파일 이름</value></data>
-  <data name="AudioPage_FileInfoDuration.Text" xml:space="preserve"><value>재생 시간</value></data>
-  <data name="AudioPage_FileInfoFormat.Text" xml:space="preserve"><value>형식</value></data>
-  <data name="AudioPage_FileInfoSize.Text" xml:space="preserve"><value>파일 크기</value></data>
-  <data name="PdfPage_FileInfoSection.Text" xml:space="preserve"><value>파일 정보</value></data>
-  <data name="PdfPage_FileInfoName.Text" xml:space="preserve"><value>파일 이름</value></data>
-  <data name="PdfPage_FileInfoPages.Text" xml:space="preserve"><value>페이지 수</value></data>
-  <data name="PdfPage_FileInfoSize.Text" xml:space="preserve"><value>파일 크기</value></data>
-  <data name="DocPage_FileInfoSection.Text" xml:space="preserve"><value>파일 정보</value></data>
-  <data name="DocPage_FileInfoName.Text" xml:space="preserve"><value>파일 이름</value></data>
-  <data name="DocPage_FileInfoFormat.Text" xml:space="preserve"><value>형식</value></data>
-  <data name="DocPage_FileInfoSize.Text" xml:space="preserve"><value>파일 크기</value></data>
-  <data name="CB_Audio_GeneratingTranscription" xml:space="preserve"><value>전사 생성 중...</value></data>
-  <data name="CB_Audio_TranscriptionReady" xml:space="preserve"><value>텍스트 전사 준비 완료.</value></data>
-  <data name="CB_Audio_TranscriptionDownloaded" xml:space="preserve"><value>전사 기능이 다운로드되었습니다.</value></data>
-  <data name="CB_Doc_DownloadCancelled" xml:space="preserve"><value>다운로드가 취소되었습니다.</value></data>
-  <data name="CB_Pdf_ProcessSuccess" xml:space="preserve"><value>PDF가 성공적으로 처리되었습니다!</value></data>
-  <data name="CB_Pdf_AllCompleted" xml:space="preserve"><value>모든 작업이 완료되었습니다.</value></data>
-  <data name="CB_Pdf_ErrorProcessing" xml:space="preserve"><value>PDF 처리 중 오류 발생</value></data>
-  <data name="CB_Pdf_PreparingOps" xml:space="preserve"><value>작업 준비 중...</value></data>
-  <data name="CB_Pdf_MergeMultiple" xml:space="preserve"><value>병합하려면 여러 PDF를 선택해야 합니다</value></data>
-  <data name="CB_Pdf_Splitting" xml:space="preserve"><value>PDF 분할 중...</value></data>
-  <data name="CB_Pdf_Reordering" xml:space="preserve"><value>페이지 재정렬 중...</value></data>
-  <data name="CB_Pdf_PagesReordered" xml:space="preserve"><value>페이지 재정렬 완료</value></data>
-  <data name="CB_Pdf_Extracting" xml:space="preserve"><value>콘텐츠 추출 중...</value></data>
-  <data name="CB_Pdf_Rotating" xml:space="preserve"><value>페이지 회전 중...</value></data>
-  <data name="CB_Pdf_Encrypting" xml:space="preserve"><value>PDF 암호화 중...</value></data>
-  <data name="CB_Pdf_Encrypted" xml:space="preserve"><value>PDF 암호화 완료</value></data>
-  <data name="CB_Pdf_RemovingPassword" xml:space="preserve"><value>비밀번호 제거 중...</value></data>
-  <data name="CB_Pdf_PasswordRemoved" xml:space="preserve"><value>비밀번호가 제거되었습니다</value></data>
-  <data name="CB_Pdf_ChangingPassword" xml:space="preserve"><value>비밀번호 변경 중...</value></data>
-  <data name="CB_Pdf_PasswordChanged" xml:space="preserve"><value>비밀번호가 변경되었습니다</value></data>
-  <data name="CB_Pdf_UpdatingPermissions" xml:space="preserve"><value>권한 업데이트 중...</value></data>
-  <data name="CB_Pdf_PermissionsConfigured" xml:space="preserve"><value>권한이 구성되었습니다</value></data>
-  <data name="CB_Pdf_RunningOCR" xml:space="preserve"><value>OCR 실행 중...</value></data>
-  <data name="CB_Pdf_OcrNeedsTesseract" xml:space="preserve"><value>OCR에는 Tesseract 구성이 필요합니다</value></data>
-  <data name="CB_Pdf_UpdatingMetadata" xml:space="preserve"><value>메타데이터 업데이트 중...</value></data>
-  <data name="CB_Pdf_MetadataUpdated" xml:space="preserve"><value>메타데이터가 업데이트되었습니다</value></data>
-  <data name="CB_Pdf_Repairing" xml:space="preserve"><value>PDF 복구 중...</value></data>
-  <data name="CB_Pdf_Repaired" xml:space="preserve"><value>PDF 복구 완료</value></data>
-  <data name="CB_Video_GeneratingSubtitles" xml:space="preserve"><value>자막 생성 중...</value></data>
-  <data name="CB_Video_AssEditingDisabled" xml:space="preserve"><value>고급 흐름에서는 ASS 텍스트 편집이 비활성화됩니다. 먼저 자막 섹션을 생성한 다음 여기에서 검토하고 적용하세요.</value></data>
-  <data name="CB_Batch_ReadyToProcess" xml:space="preserve"><value>처리할 준비가 되었습니다.</value></data>
-  <data name="CB_Batch_DownloadingTranscription" xml:space="preserve"><value>전사 기능 다운로드 중...</value></data>
-  <data name="CB_Batch_ConfigureOperation" xml:space="preserve"><value>최소한 하나의 유형 그룹 작업을 구성하세요.</value></data>
-  <data name="CB_Batch_Estimating" xml:space="preserve"><value>추정 중…</value></data>
-  <data name="CB_Batch_Cancelled" xml:space="preserve"><value>배치가 취소되었습니다.</value></data>
-  <data name="CB_Batch_CreatingZip" xml:space="preserve"><value>ZIP 압축 파일 생성 중…</value></data>
-  <data name="CB_Batch_Done" xml:space="preserve"><value>완료</value></data>
-  <data name="CB_Batch_NoFilesOfType" xml:space="preserve"><value>배치에 이 유형의 파일이 없습니다</value></data>
-  <data name="CB_Batch_OneFile" xml:space="preserve"><value>배치에 1개 파일</value></data>
-  <data name="CB_Batch_NFiles" xml:space="preserve"><value>배치에 {0}개 파일</value></data>
-  <data name="CB_Batch_Succeeded" xml:space="preserve"><value>{0}개 성공</value></data>
-  <data name="CB_Batch_Failed" xml:space="preserve"><value>, {0}개 실패</value></data>
-  <data name="CB_Batch_Skipped" xml:space="preserve"><value>, {0}개 건너뜀</value></data>
-  <data name="CB_Batch_ResultDone" xml:space="preserve"><value>완료. {0}.</value></data>
-  <data name="CB_Batch_ResultCancelled" xml:space="preserve"><value>취소됨. {0}.</value></data>
-  <data name="CB_Batch_Elapsed" xml:space="preserve"><value>경과 {0}</value></data>
-  <data name="CB_Batch_TimeLeft" xml:space="preserve"><value>{0} 남음</value></data>
-  <data name="CB_Batch_FileProgress" xml:space="preserve"><value>파일 {0}/{1}</value></data>
-  <data name="CB_Batch_SectionLength" xml:space="preserve"><value>섹션 길이: 최대 {0}초</value></data>
-  <data name="CB_Batch_Header_Output" xml:space="preserve"><value>출력 설정</value></data>
-  <data name="CB_Batch_Header_AudioFormat" xml:space="preserve"><value>오디오 · 형식</value></data>
-  <data name="CB_Batch_Header_AudioCompress" xml:space="preserve"><value>오디오 · 압축</value></data>
-  <data name="CB_Batch_Header_AudioNormalize" xml:space="preserve"><value>오디오 · 정규화</value></data>
-  <data name="CB_Batch_Header_VideoContainer" xml:space="preserve"><value>비디오 · 컨테이너</value></data>
-  <data name="CB_Batch_Header_VideoCodec" xml:space="preserve"><value>비디오 · 코덱</value></data>
-  <data name="CB_Batch_Header_VideoCompress" xml:space="preserve"><value>비디오 · 압축</value></data>
-  <data name="CB_Batch_Header_VideoResize" xml:space="preserve"><value>비디오 · 크기 조정</value></data>
-  <data name="CB_Batch_Header_VideoExtractAudio" xml:space="preserve"><value>비디오 · 오디오 추출</value></data>
-  <data name="CB_Batch_Header_VideoSubtitles" xml:space="preserve"><value>비디오 · 자막</value></data>
-  <data name="CB_Batch_Header_DocsConvert" xml:space="preserve"><value>문서 · PDF로 변환</value></data>
-  <data name="CB_Batch_Header_PdfCompress" xml:space="preserve"><value>PDF · 압축</value></data>
-  <data name="CB_Batch_Header_PdfRepair" xml:space="preserve"><value>PDF · 복구</value></data>
-  <data name="CB_Batch_Header_PdfOCR" xml:space="preserve"><value>PDF · OCR</value></data>
-  <data name="CB_Batch_Header_PdfMerge" xml:space="preserve"><value>PDF · 병합</value></data>
-  <data name="CB_Batch_Header_ImagesFormat" xml:space="preserve"><value>이미지 · 형식</value></data>
-  <data name="CB_Batch_Header_ImagesCompress" xml:space="preserve"><value>이미지 · 압축</value></data>
-  <data name="CB_Batch_Header_ImagesResize" xml:space="preserve"><value>이미지 · 크기 조정</value></data>
-  <data name="CB_Batch_ImageQuality" xml:space="preserve"><value>품질: {0}%</value></data>
-  <data name="CB_Batch_AdvSubtitleSectionLength" xml:space="preserve"><value>고급 자막 섹션 길이: 최대 {0}초</value></data>
+  <data name="LicensesPage_Title.Text" xml:space="preserve">
+    <value>라이선스</value>
+  </data>
+  <data name="LicensesPage_Subtitle1.Text" xml:space="preserve">
+    <value>이 앱에서 사용된 서드파티 구성 요소, 저작권 표시 및 라이선스입니다.</value>
+  </data>
+  <data name="LicensesPage_Subtitle2.Text" xml:space="preserve">
+    <value>나열된 모든 라이선스는 해당 약관 및 재배포 의무에 따라 상업적 사용을 허용합니다.</value>
+  </data>
+  <data name="LicensesPage_ShowLicense.Content" xml:space="preserve">
+    <value>라이선스 보기</value>
+  </data>
+  <data name="ImagePage_FileInfoSection.Text" xml:space="preserve">
+    <value>파일 정보</value>
+  </data>
+  <data name="ImagePage_FileInfoName.Text" xml:space="preserve">
+    <value>파일 이름</value>
+  </data>
+  <data name="ImagePage_FileInfoDimensions.Text" xml:space="preserve">
+    <value>해상도</value>
+  </data>
+  <data name="ImagePage_FileInfoFormat.Text" xml:space="preserve">
+    <value>형식</value>
+  </data>
+  <data name="ImagePage_FileInfoSize.Text" xml:space="preserve">
+    <value>파일 크기</value>
+  </data>
+  <data name="VideoPage_FileInfoSection.Text" xml:space="preserve">
+    <value>파일 정보</value>
+  </data>
+  <data name="VideoPage_FileInfoName.Text" xml:space="preserve">
+    <value>파일 이름</value>
+  </data>
+  <data name="VideoPage_FileInfoDimensions.Text" xml:space="preserve">
+    <value>해상도</value>
+  </data>
+  <data name="VideoPage_FileInfoDuration.Text" xml:space="preserve">
+    <value>재생 시간</value>
+  </data>
+  <data name="VideoPage_FileInfoFormat.Text" xml:space="preserve">
+    <value>형식</value>
+  </data>
+  <data name="VideoPage_FileInfoSize.Text" xml:space="preserve">
+    <value>파일 크기</value>
+  </data>
+  <data name="AudioPage_FileInfoSection.Text" xml:space="preserve">
+    <value>파일 정보</value>
+  </data>
+  <data name="AudioPage_FileInfoName.Text" xml:space="preserve">
+    <value>파일 이름</value>
+  </data>
+  <data name="AudioPage_FileInfoDuration.Text" xml:space="preserve">
+    <value>재생 시간</value>
+  </data>
+  <data name="AudioPage_FileInfoFormat.Text" xml:space="preserve">
+    <value>형식</value>
+  </data>
+  <data name="AudioPage_FileInfoSize.Text" xml:space="preserve">
+    <value>파일 크기</value>
+  </data>
+  <data name="PdfPage_FileInfoSection.Text" xml:space="preserve">
+    <value>파일 정보</value>
+  </data>
+  <data name="PdfPage_FileInfoName.Text" xml:space="preserve">
+    <value>파일 이름</value>
+  </data>
+  <data name="PdfPage_FileInfoPages.Text" xml:space="preserve">
+    <value>페이지 수</value>
+  </data>
+  <data name="PdfPage_FileInfoSize.Text" xml:space="preserve">
+    <value>파일 크기</value>
+  </data>
+  <data name="DocPage_FileInfoSection.Text" xml:space="preserve">
+    <value>파일 정보</value>
+  </data>
+  <data name="DocPage_FileInfoName.Text" xml:space="preserve">
+    <value>파일 이름</value>
+  </data>
+  <data name="DocPage_FileInfoFormat.Text" xml:space="preserve">
+    <value>형식</value>
+  </data>
+  <data name="DocPage_FileInfoSize.Text" xml:space="preserve">
+    <value>파일 크기</value>
+  </data>
+  <data name="CB_Audio_GeneratingTranscription" xml:space="preserve">
+    <value>전사 생성 중...</value>
+  </data>
+  <data name="CB_Audio_TranscriptionReady" xml:space="preserve">
+    <value>텍스트 전사 준비 완료.</value>
+  </data>
+  <data name="CB_Audio_TranscriptionDownloaded" xml:space="preserve">
+    <value>전사 기능이 다운로드되었습니다.</value>
+  </data>
+  <data name="CB_Doc_DownloadCancelled" xml:space="preserve">
+    <value>다운로드가 취소되었습니다.</value>
+  </data>
+  <data name="CB_Pdf_ProcessSuccess" xml:space="preserve">
+    <value>PDF가 성공적으로 처리되었습니다!</value>
+  </data>
+  <data name="CB_Pdf_AllCompleted" xml:space="preserve">
+    <value>모든 작업이 완료되었습니다.</value>
+  </data>
+  <data name="CB_Pdf_ErrorProcessing" xml:space="preserve">
+    <value>PDF 처리 중 오류 발생</value>
+  </data>
+  <data name="CB_Pdf_PreparingOps" xml:space="preserve">
+    <value>작업 준비 중...</value>
+  </data>
+  <data name="CB_Pdf_MergeMultiple" xml:space="preserve">
+    <value>병합하려면 여러 PDF를 선택해야 합니다</value>
+  </data>
+  <data name="CB_Pdf_Splitting" xml:space="preserve">
+    <value>PDF 분할 중...</value>
+  </data>
+  <data name="CB_Pdf_Reordering" xml:space="preserve">
+    <value>페이지 재정렬 중...</value>
+  </data>
+  <data name="CB_Pdf_PagesReordered" xml:space="preserve">
+    <value>페이지 재정렬 완료</value>
+  </data>
+  <data name="CB_Pdf_Extracting" xml:space="preserve">
+    <value>콘텐츠 추출 중...</value>
+  </data>
+  <data name="CB_Pdf_Rotating" xml:space="preserve">
+    <value>페이지 회전 중...</value>
+  </data>
+  <data name="CB_Pdf_Encrypting" xml:space="preserve">
+    <value>PDF 암호화 중...</value>
+  </data>
+  <data name="CB_Pdf_Encrypted" xml:space="preserve">
+    <value>PDF 암호화 완료</value>
+  </data>
+  <data name="CB_Pdf_RemovingPassword" xml:space="preserve">
+    <value>비밀번호 제거 중...</value>
+  </data>
+  <data name="CB_Pdf_PasswordRemoved" xml:space="preserve">
+    <value>비밀번호가 제거되었습니다</value>
+  </data>
+  <data name="CB_Pdf_ChangingPassword" xml:space="preserve">
+    <value>비밀번호 변경 중...</value>
+  </data>
+  <data name="CB_Pdf_PasswordChanged" xml:space="preserve">
+    <value>비밀번호가 변경되었습니다</value>
+  </data>
+  <data name="CB_Pdf_UpdatingPermissions" xml:space="preserve">
+    <value>권한 업데이트 중...</value>
+  </data>
+  <data name="CB_Pdf_PermissionsConfigured" xml:space="preserve">
+    <value>권한이 구성되었습니다</value>
+  </data>
+  <data name="CB_Pdf_RunningOCR" xml:space="preserve">
+    <value>OCR 실행 중...</value>
+  </data>
+  <data name="CB_Pdf_OcrNeedsTesseract" xml:space="preserve">
+    <value>OCR에는 Tesseract 구성이 필요합니다</value>
+  </data>
+  <data name="CB_Pdf_UpdatingMetadata" xml:space="preserve">
+    <value>메타데이터 업데이트 중...</value>
+  </data>
+  <data name="CB_Pdf_MetadataUpdated" xml:space="preserve">
+    <value>메타데이터가 업데이트되었습니다</value>
+  </data>
+  <data name="CB_Pdf_Repairing" xml:space="preserve">
+    <value>PDF 복구 중...</value>
+  </data>
+  <data name="CB_Pdf_Repaired" xml:space="preserve">
+    <value>PDF 복구 완료</value>
+  </data>
+  <data name="CB_Video_GeneratingSubtitles" xml:space="preserve">
+    <value>자막 생성 중...</value>
+  </data>
+  <data name="CB_Video_AssEditingDisabled" xml:space="preserve">
+    <value>고급 흐름에서는 ASS 텍스트 편집이 비활성화됩니다. 먼저 자막 섹션을 생성한 다음 여기에서 검토하고 적용하세요.</value>
+  </data>
+  <data name="CB_Batch_ReadyToProcess" xml:space="preserve">
+    <value>처리할 준비가 되었습니다.</value>
+  </data>
+  <data name="CB_Batch_DownloadingTranscription" xml:space="preserve">
+    <value>전사 기능 다운로드 중...</value>
+  </data>
+  <data name="CB_Batch_ConfigureOperation" xml:space="preserve">
+    <value>최소한 하나의 유형 그룹 작업을 구성하세요.</value>
+  </data>
+  <data name="CB_Batch_Estimating" xml:space="preserve">
+    <value>추정 중…</value>
+  </data>
+  <data name="CB_Batch_Cancelled" xml:space="preserve">
+    <value>배치가 취소되었습니다.</value>
+  </data>
+  <data name="CB_Batch_CreatingZip" xml:space="preserve">
+    <value>ZIP 압축 파일 생성 중…</value>
+  </data>
+  <data name="CB_Batch_Done" xml:space="preserve">
+    <value>완료</value>
+  </data>
+  <data name="CB_Batch_NoFilesOfType" xml:space="preserve">
+    <value>배치에 이 유형의 파일이 없습니다</value>
+  </data>
+  <data name="CB_Batch_OneFile" xml:space="preserve">
+    <value>배치에 1개 파일</value>
+  </data>
+  <data name="CB_Batch_NFiles" xml:space="preserve">
+    <value>배치에 {0}개 파일</value>
+  </data>
+  <data name="CB_Batch_Succeeded" xml:space="preserve">
+    <value>{0}개 성공</value>
+  </data>
+  <data name="CB_Batch_Failed" xml:space="preserve">
+    <value>, {0}개 실패</value>
+  </data>
+  <data name="CB_Batch_Skipped" xml:space="preserve">
+    <value>, {0}개 건너뜀</value>
+  </data>
+  <data name="CB_Batch_ResultDone" xml:space="preserve">
+    <value>완료. {0}.</value>
+  </data>
+  <data name="CB_Batch_ResultCancelled" xml:space="preserve">
+    <value>취소됨. {0}.</value>
+  </data>
+  <data name="CB_Batch_Elapsed" xml:space="preserve">
+    <value>경과 {0}</value>
+  </data>
+  <data name="CB_Batch_TimeLeft" xml:space="preserve">
+    <value>{0} 남음</value>
+  </data>
+  <data name="CB_Batch_FileProgress" xml:space="preserve">
+    <value>파일 {0}/{1}</value>
+  </data>
+  <data name="CB_Batch_SectionLength" xml:space="preserve">
+    <value>섹션 길이: 최대 {0}초</value>
+  </data>
+  <data name="CB_Batch_Header_Output" xml:space="preserve">
+    <value>출력 설정</value>
+  </data>
+  <data name="CB_Batch_Header_AudioFormat" xml:space="preserve">
+    <value>오디오 · 형식</value>
+  </data>
+  <data name="CB_Batch_Header_AudioCompress" xml:space="preserve">
+    <value>오디오 · 압축</value>
+  </data>
+  <data name="CB_Batch_Header_AudioNormalize" xml:space="preserve">
+    <value>오디오 · 정규화</value>
+  </data>
+  <data name="CB_Batch_Header_VideoContainer" xml:space="preserve">
+    <value>비디오 · 컨테이너</value>
+  </data>
+  <data name="CB_Batch_Header_VideoCodec" xml:space="preserve">
+    <value>비디오 · 코덱</value>
+  </data>
+  <data name="CB_Batch_Header_VideoCompress" xml:space="preserve">
+    <value>비디오 · 압축</value>
+  </data>
+  <data name="CB_Batch_Header_VideoResize" xml:space="preserve">
+    <value>비디오 · 크기 조정</value>
+  </data>
+  <data name="CB_Batch_Header_VideoExtractAudio" xml:space="preserve">
+    <value>비디오 · 오디오 추출</value>
+  </data>
+  <data name="CB_Batch_Header_VideoSubtitles" xml:space="preserve">
+    <value>비디오 · 자막</value>
+  </data>
+  <data name="CB_Batch_Header_DocsConvert" xml:space="preserve">
+    <value>문서 · PDF로 변환</value>
+  </data>
+  <data name="CB_Batch_Header_PdfCompress" xml:space="preserve">
+    <value>PDF · 압축</value>
+  </data>
+  <data name="CB_Batch_Header_PdfRepair" xml:space="preserve">
+    <value>PDF · 복구</value>
+  </data>
+  <data name="CB_Batch_Header_PdfOCR" xml:space="preserve">
+    <value>PDF · OCR</value>
+  </data>
+  <data name="CB_Batch_Header_PdfMerge" xml:space="preserve">
+    <value>PDF · 병합</value>
+  </data>
+  <data name="CB_Batch_Header_ImagesFormat" xml:space="preserve">
+    <value>이미지 · 형식</value>
+  </data>
+  <data name="CB_Batch_Header_ImagesCompress" xml:space="preserve">
+    <value>이미지 · 압축</value>
+  </data>
+  <data name="CB_Batch_Header_ImagesResize" xml:space="preserve">
+    <value>이미지 · 크기 조정</value>
+  </data>
+  <data name="CB_Batch_ImageQuality" xml:space="preserve">
+    <value>품질: {0}%</value>
+  </data>
+  <data name="CB_Batch_AdvSubtitleSectionLength" xml:space="preserve">
+    <value>고급 자막 섹션 길이: 최대 {0}초</value>
+  </data>
+  <data name="VideoPage_VerticalMargin_Header" xml:space="preserve">
+    <value>세로 여백</value>
+  </data>
+  <data name="Shared_Cancel" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="VideoPage_BoldText_Content" xml:space="preserve">
+    <value>굵은 텍스트</value>
+  </data>
+  <data name="VideoPage_OutlineWidth_Header" xml:space="preserve">
+    <value>윤곽선 너비</value>
+  </data>
+  <data name="VideoPage_SystemFont_Header" xml:space="preserve">
+    <value>시스템 글꼴</value>
+  </data>
+  <data name="VideoPage_TextTransform_Header" xml:space="preserve">
+    <value>텍스트 변환</value>
+  </data>
+  <data name="VideoPage_FontSize_Header" xml:space="preserve">
+    <value>글꼴 크기</value>
+  </data>
+  <data name="VideoPage_BasePreset_Header" xml:space="preserve">
+    <value>기본 사전 설정</value>
+  </data>
 </root>

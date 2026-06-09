@@ -21,6 +21,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <TextBlock x:Uid="LicensesPage_Title" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="34" FontWeight="SemiBold" Text="Licenses" />
@@ -35,7 +36,7 @@
                         x:Uid="LicensesPage_Subtitle2"
                         Opacity="0.78"
                         TextWrapping="Wrap"
-                        Text="All listed licenses permit commercial use, subject to their terms and any redistribution obligations." />
+                        Text="Most listed licenses permit commercial use, subject to their terms and any redistribution obligations. Components marked Non-Commercial may not be used for commercial purposes." />
                 </StackPanel>
 
                 <Border
@@ -64,7 +65,7 @@
                 </Border>
 
                 <Border
-                    Grid.Row="3"
+                    Grid.Row="4"
                     Padding="16"
                     CornerRadius="10"
                     BorderThickness="1"
@@ -93,7 +94,7 @@
                 </Border>
 
                 <Border
-                    Grid.Row="4"
+                    Grid.Row="5"
                     Padding="16"
                     CornerRadius="10"
                     BorderThickness="1"
@@ -122,7 +123,7 @@
                 </Border>
 
                 <Border
-                    Grid.Row="5"
+                    Grid.Row="6"
                     Padding="16"
                     CornerRadius="10"
                     BorderThickness="1"
@@ -151,7 +152,7 @@
                 </Border>
 
                 <Border
-                    Grid.Row="6"
+                    Grid.Row="7"
                     Padding="16"
                     CornerRadius="10"
                     BorderThickness="1"
@@ -167,7 +168,7 @@
                             <TextBlock FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="ONNX Runtime" />
                             <TextBlock Opacity="0.82" Text="License: MIT" />
                             <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Attribution: Microsoft.ML.OnnxRuntime" />
-                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Usage: executing DTLN ONNX models" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Usage: executing DTLN denoise and MMS forced-alignment ONNX models" />
                         </StackPanel>
 
                         <Button
@@ -180,7 +181,7 @@
                 </Border>
 
                 <Border
-                    Grid.Row="7"
+                    Grid.Row="8"
                     Padding="16"
                     CornerRadius="10"
                     BorderThickness="1"
@@ -209,7 +210,7 @@
                 </Border>
 
                 <Border
-                    Grid.Row="8"
+                    Grid.Row="9"
                     Padding="16"
                     CornerRadius="10"
                     BorderThickness="1"
@@ -238,7 +239,7 @@
                 </Border>
 
                 <Border
-                    Grid.Row="9"
+                    Grid.Row="10"
                     Padding="16"
                     CornerRadius="10"
                     BorderThickness="1"
@@ -267,7 +268,7 @@
                 </Border>
 
                 <Border
-                    Grid.Row="10"
+                    Grid.Row="11"
                     Padding="16"
                     CornerRadius="10"
                     BorderThickness="1"

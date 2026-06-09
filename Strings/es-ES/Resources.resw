@@ -552,8 +552,26 @@
   <data name="VideoPage_KaraokeASS.Content" xml:space="preserve">
     <value>ASS karaoke</value>
   </data>
+  <data name="VideoPage_SubtitleStyle.Header" xml:space="preserve">
+    <value>Estilo de subtítulos</value>
+  </data>
+  <data name="VideoPage_SubtitleStyleHint.Text" xml:space="preserve">
+    <value>Elige un estilo para volver a aplicarlo a los subtítulos generados al instante, sin necesidad de generarlos de nuevo.</value>
+  </data>
   <data name="VideoPage_ConfigureAdvanced.Content" xml:space="preserve">
     <value>Configurar subtítulos avanzados</value>
+  </data>
+  <data name="VideoPage_AdvancedPresetSummary.Text" xml:space="preserve">
+    <value>Resumen de preajuste</value>
+  </data>
+  <data name="VideoPage_AdvancedPresetSummaryFormat" xml:space="preserve">
+    <value>Preajuste: {0} ({1}) | {2} {3} | {4} | {5} | Contorno {6}</value>
+  </data>
+  <data name="VideoPage_SubtitleSectionDuration.Text" xml:space="preserve">
+    <value>Duración de sección de subtítulos avanzada</value>
+  </data>
+  <data name="VideoPage_SubtitleSectionDurationFormat" xml:space="preserve">
+    <value>Duración de sección de subtítulos avanzada: máx. {0} s</value>
   </data>
   <data name="VideoPage_SecondsMax.Header" xml:space="preserve">
     <value>Segundos máx.</value>
@@ -1709,5 +1727,89 @@
   </data>
   <data name="CB_Batch_AdvSubtitleSectionLength" xml:space="preserve">
     <value>Duración avanzada de sección de subtítulo: máx. {0} s</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvancedTitle" xml:space="preserve">
+    <value>Configurar subtítulos avanzados</value>
+  </data>
+  <data name="VideoPage_ConfigureKaraokeSummary" xml:space="preserve">
+    <value>Elija un estilo de karaoke y ajuste la tipografía y el acento de resaltado utilizados para la representación.</value>
+  </data>
+  <data name="VideoPage_ConfigureStyledSummary" xml:space="preserve">
+    <value>Ajuste la tipografía y los colores utilizados para la representación de subtítulos estilizados.</value>
+  </data>
+  <data name="VideoPage_BasePreset.Header" xml:space="preserve">
+    <value>Preajuste base</value>
+  </data>
+  <data name="VideoPage_SystemFont.Header" xml:space="preserve">
+    <value>Fuente del sistema</value>
+  </data>
+  <data name="VideoPage_SelectInstalledFont" xml:space="preserve">
+    <value>Seleccione una fuente instalada</value>
+  </data>
+  <data name="VideoPage_FontSize.Header" xml:space="preserve">
+    <value>Tamaño de fuente</value>
+  </data>
+  <data name="VideoPage_OutlineWidth.Header" xml:space="preserve">
+    <value>Ancho del contorno</value>
+  </data>
+  <data name="VideoPage_VerticalMargin.Header" xml:space="preserve">
+    <value>Margen vertical</value>
+  </data>
+  <data name="VideoPage_BoldText.Content" xml:space="preserve">
+    <value>Texto en negrita</value>
+  </data>
+  <data name="VideoPage_TextTransform.Header" xml:space="preserve">
+    <value>Transformación de texto</value>
+  </data>
+  <data name="VideoPage_OriginalCase" xml:space="preserve">
+    <value>Caso original</value>
+  </data>
+  <data name="VideoPage_Uppercase" xml:space="preserve">
+    <value>MAYÚSCULAS</value>
+  </data>
+  <data name="VideoPage_Lowercase" xml:space="preserve">
+    <value>minúsculas</value>
+  </data>
+  <data name="VideoPage_FillingColor" xml:space="preserve">
+    <value>Color de relleno</value>
+  </data>
+  <data name="VideoPage_PreFillingColor" xml:space="preserve">
+    <value>Color de prerelleno</value>
+  </data>
+  <data name="VideoPage_WordFillColor" xml:space="preserve">
+    <value>Color de relleno de palabra</value>
+  </data>
+  <data name="VideoPage_OutlineColor" xml:space="preserve">
+    <value>Color del contorno</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvancedSave" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvancedResetDefaults" xml:space="preserve">
+    <value>Reestablecer</value>
+  </data>
+  <data name="VideoPage_VerticalMargin_Header" xml:space="preserve">
+    <value>Margen vertical</value>
+  </data>
+  <data name="VideoPage_BoldText_Content" xml:space="preserve">
+    <value>Texto en negrita</value>
+  </data>
+  <data name="VideoPage_OutlineWidth_Header" xml:space="preserve">
+    <value>Ancho del contorno</value>
+  </data>
+  <data name="VideoPage_SystemFont_Header" xml:space="preserve">
+    <value>Fuente del sistema</value>
+  </data>
+  <data name="VideoPage_TextTransform_Header" xml:space="preserve">
+    <value>Transformación de texto</value>
+  </data>
+  <data name="VideoPage_FontSize_Header" xml:space="preserve">
+    <value>Tamaño de fuente</value>
+  </data>
+  <data name="VideoPage_BasePreset_Header" xml:space="preserve">
+    <value>Preajuste base</value>
+  </data>
+  <data name="Shared_Cancel" xml:space="preserve">
+    <value>Cancelar</value>
   </data>
 </root>

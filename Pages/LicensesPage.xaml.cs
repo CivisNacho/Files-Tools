@@ -60,8 +60,37 @@ public sealed partial class LicensesPage : Page
         "License: MIT\n\n" +
         "Project URL:\n" +
         "https://github.com/microsoft/onnxruntime\n\n" +
-        "Usage: Executes the bundled DTLN ONNX models for audio denoise.\n\n" +
+        "Usage: Executes the bundled DTLN ONNX models for audio denoise and the MMS " +
+        "forced-alignment ONNX model for subtitle word-timing.\n\n" +
         MitLicenseText;
+
+    private const string CcByNc40LicenseSummary =
+        "Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)\n\n" +
+        "You are free to share (copy and redistribute the material in any medium or format) " +
+        "and adapt (remix, transform, and build upon the material) under the following terms:\n\n" +
+        "  - Attribution — You must give appropriate credit, provide a link to the license, " +
+        "and indicate if changes were made.\n" +
+        "  - NonCommercial — You may NOT use the material for commercial purposes.\n\n" +
+        "No additional restrictions — You may not apply legal terms or technological measures " +
+        "that legally restrict others from doing anything the license permits.\n\n" +
+        "THE WORK IS PROVIDED \"AS-IS\" AND WITHOUT WARRANTIES OF ANY KIND.\n\n" +
+        "Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode";
+
+    private const string MmsAlignerLicenseText =
+        "Component: MMS forced-alignment acoustic model (mms-300m, fine-tuned for forced alignment)\n" +
+        "Copyright: Copyright (c) Meta Platforms, Inc. and affiliates\n" +
+        "License: CC-BY-NC-4.0 (Non-Commercial)\n\n" +
+        "Source model (Meta AI — Massively Multilingual Speech):\n" +
+        "https://github.com/facebookresearch/fairseq/tree/main/examples/mms\n\n" +
+        "Distributed via torchaudio MMS_FA bundle:\n" +
+        "https://pytorch.org/audio/stable/generated/torchaudio.pipelines.MMS_FA.html\n\n" +
+        "Redistributed (int8 ONNX build) at:\n" +
+        "https://huggingface.co/CivisNacho/mms-fa-int8\n\n" +
+        "Usage: word-level timestamp alignment (CTC forced alignment) to drive accurate " +
+        "karaoke and styled subtitle timing. The model is downloaded on demand alongside the " +
+        "transcription feature and stored in the user's local app data folder.\n\n" +
+        "IMPORTANT: This model is licensed for NON-COMMERCIAL use only.\n\n" +
+        CcByNc40LicenseSummary;
 
     private const string LibreOfficeLicenseText =
         "Component: LibreOffice\n" +
@@ -182,6 +211,11 @@ public sealed partial class LicensesPage : Page
     private void ShowOnnxRuntimeLicense_Click(object sender, RoutedEventArgs e)
     {
         ShowLicenseDialog("ONNX Runtime License", OnnxRuntimeLicenseText);
+    }
+
+    private void ShowMmsAlignerLicense_Click(object sender, RoutedEventArgs e)
+    {
+        ShowLicenseDialog("MMS Forced-Alignment Model License", MmsAlignerLicenseText);
     }
 
     private void ShowWhisperLicense_Click(object sender, RoutedEventArgs e)

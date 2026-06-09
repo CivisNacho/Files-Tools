@@ -1,0 +1,5 @@
+# Dev-only tooling: never commit the venv, large model artifacts, or test samples.
+.venv/
+models/
+*.wav
+__pycache__/

@@ -1,310 +1,926 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
-  <resheader name="version"><value>2.0</value></resheader>
-  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
   <!-- ═══════════════════════════════════════════════════════════════
        Main Window
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="AppTitleBar.Title" xml:space="preserve"><value>Files Tools</value></data>
-  <data name="LicensesButton.Content" xml:space="preserve"><value>许可证</value></data>
-
+  <data name="AppTitleBar.Title" xml:space="preserve">
+    <value>Files Tools</value>
+  </data>
+  <data name="LicensesButton.Content" xml:space="preserve">
+    <value>许可证</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Navigation items  (reused across all editor nav menus)
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="NavMedia.Content" xml:space="preserve"><value>媒体</value></data>
-  <data name="NavTransform.Content" xml:space="preserve"><value>变换</value></data>
-  <data name="NavAdjust.Content" xml:space="preserve"><value>调整</value></data>
-  <data name="NavAdvanced.Content" xml:space="preserve"><value>高级</value></data>
-  <data name="NavFormat.Content" xml:space="preserve"><value>格式</value></data>
-  <data name="NavAudio.Content" xml:space="preserve"><value>音频</value></data>
-  <data name="NavSubtitles.Content" xml:space="preserve"><value>字幕</value></data>
-  <data name="NavResize.Content" xml:space="preserve"><value>调整大小</value></data>
-  <data name="NavTrim.Content" xml:space="preserve"><value>裁剪</value></data>
-  <data name="NavRotate.Content" xml:space="preserve"><value>旋转</value></data>
-  <data name="NavMetadata.Content" xml:space="preserve"><value>元数据</value></data>
-  <data name="NavRepair.Content" xml:space="preserve"><value>修复</value></data>
-  <data name="NavCrop.Content" xml:space="preserve"><value>裁切</value></data>
-  <data name="NavUpscale.Content" xml:space="preserve"><value>超分辨率</value></data>
-  <data name="NavColor.Content" xml:space="preserve"><value>颜色</value></data>
-  <data name="NavSilence.Content" xml:space="preserve"><value>静音</value></data>
-  <data name="NavNormalize.Content" xml:space="preserve"><value>标准化</value></data>
-  <data name="NavEQ.Content" xml:space="preserve"><value>EQ</value></data>
-  <data name="NavDenoise.Content" xml:space="preserve"><value>降噪</value></data>
-  <data name="NavTranscription.Content" xml:space="preserve"><value>转录</value></data>
-  <data name="NavGenerate.Content" xml:space="preserve"><value>生成</value></data>
-  <data name="NavOrganization.Content" xml:space="preserve"><value>整理</value></data>
-  <data name="NavMerge.Content" xml:space="preserve"><value>合并</value></data>
-  <data name="NavSplit.Content" xml:space="preserve"><value>拆分</value></data>
-  <data name="NavReorder.Content" xml:space="preserve"><value>重新排序</value></data>
-  <data name="NavExtract.Content" xml:space="preserve"><value>提取</value></data>
-  <data name="NavExtractAudio.Content" xml:space="preserve"><value>提取音频</value></data>
-  <data name="NavSecurity.Content" xml:space="preserve"><value>安全</value></data>
-  <data name="NavEncrypt.Content" xml:space="preserve"><value>加密</value></data>
-  <data name="NavPassword.Content" xml:space="preserve"><value>密码</value></data>
-  <data name="NavPermissions.Content" xml:space="preserve"><value>权限</value></data>
-  <data name="NavContent.Content" xml:space="preserve"><value>内容</value></data>
-  <data name="NavOCR.Content" xml:space="preserve"><value>OCR</value></data>
-  <data name="NavPodcast.Content" xml:space="preserve"><value>播客</value></data>
-  <data name="NavVideo.Content" xml:space="preserve"><value>视频</value></data>
-  <data name="NavContainer.Content" xml:space="preserve"><value>容器</value></data>
-  <data name="NavCodec.Content" xml:space="preserve"><value>编解码器</value></data>
-  <data name="NavCompress.Content" xml:space="preserve"><value>压缩</value></data>
-  <data name="NavDocuments.Content" xml:space="preserve"><value>文档</value></data>
-  <data name="NavPDF.Content" xml:space="preserve"><value>PDF</value></data>
-  <data name="NavImages.Content" xml:space="preserve"><value>图像</value></data>
-  <data name="NavOutput.Content" xml:space="preserve"><value>输出</value></data>
-
+  <data name="NavMedia.Content" xml:space="preserve">
+    <value>媒体</value>
+  </data>
+  <data name="NavTransform.Content" xml:space="preserve">
+    <value>变换</value>
+  </data>
+  <data name="NavAdjust.Content" xml:space="preserve">
+    <value>调整</value>
+  </data>
+  <data name="NavAdvanced.Content" xml:space="preserve">
+    <value>高级</value>
+  </data>
+  <data name="NavFormat.Content" xml:space="preserve">
+    <value>格式</value>
+  </data>
+  <data name="NavAudio.Content" xml:space="preserve">
+    <value>音频</value>
+  </data>
+  <data name="NavSubtitles.Content" xml:space="preserve">
+    <value>字幕</value>
+  </data>
+  <data name="NavResize.Content" xml:space="preserve">
+    <value>调整大小</value>
+  </data>
+  <data name="NavTrim.Content" xml:space="preserve">
+    <value>裁剪</value>
+  </data>
+  <data name="NavRotate.Content" xml:space="preserve">
+    <value>旋转</value>
+  </data>
+  <data name="NavMetadata.Content" xml:space="preserve">
+    <value>元数据</value>
+  </data>
+  <data name="NavRepair.Content" xml:space="preserve">
+    <value>修复</value>
+  </data>
+  <data name="NavCrop.Content" xml:space="preserve">
+    <value>裁切</value>
+  </data>
+  <data name="NavUpscale.Content" xml:space="preserve">
+    <value>超分辨率</value>
+  </data>
+  <data name="NavColor.Content" xml:space="preserve">
+    <value>颜色</value>
+  </data>
+  <data name="NavSilence.Content" xml:space="preserve">
+    <value>静音</value>
+  </data>
+  <data name="NavNormalize.Content" xml:space="preserve">
+    <value>标准化</value>
+  </data>
+  <data name="NavEQ.Content" xml:space="preserve">
+    <value>EQ</value>
+  </data>
+  <data name="NavDenoise.Content" xml:space="preserve">
+    <value>降噪</value>
+  </data>
+  <data name="NavTranscription.Content" xml:space="preserve">
+    <value>转录</value>
+  </data>
+  <data name="NavGenerate.Content" xml:space="preserve">
+    <value>生成</value>
+  </data>
+  <data name="NavOrganization.Content" xml:space="preserve">
+    <value>整理</value>
+  </data>
+  <data name="NavMerge.Content" xml:space="preserve">
+    <value>合并</value>
+  </data>
+  <data name="NavSplit.Content" xml:space="preserve">
+    <value>拆分</value>
+  </data>
+  <data name="NavReorder.Content" xml:space="preserve">
+    <value>重新排序</value>
+  </data>
+  <data name="NavExtract.Content" xml:space="preserve">
+    <value>提取</value>
+  </data>
+  <data name="NavExtractAudio.Content" xml:space="preserve">
+    <value>提取音频</value>
+  </data>
+  <data name="NavSecurity.Content" xml:space="preserve">
+    <value>安全</value>
+  </data>
+  <data name="NavEncrypt.Content" xml:space="preserve">
+    <value>加密</value>
+  </data>
+  <data name="NavPassword.Content" xml:space="preserve">
+    <value>密码</value>
+  </data>
+  <data name="NavPermissions.Content" xml:space="preserve">
+    <value>权限</value>
+  </data>
+  <data name="NavContent.Content" xml:space="preserve">
+    <value>内容</value>
+  </data>
+  <data name="NavOCR.Content" xml:space="preserve">
+    <value>OCR</value>
+  </data>
+  <data name="NavPodcast.Content" xml:space="preserve">
+    <value>播客</value>
+  </data>
+  <data name="NavVideo.Content" xml:space="preserve">
+    <value>视频</value>
+  </data>
+  <data name="NavContainer.Content" xml:space="preserve">
+    <value>容器</value>
+  </data>
+  <data name="NavCodec.Content" xml:space="preserve">
+    <value>编解码器</value>
+  </data>
+  <data name="NavCompress.Content" xml:space="preserve">
+    <value>压缩</value>
+  </data>
+  <data name="NavDocuments.Content" xml:space="preserve">
+    <value>文档</value>
+  </data>
+  <data name="NavPDF.Content" xml:space="preserve">
+    <value>PDF</value>
+  </data>
+  <data name="NavImages.Content" xml:space="preserve">
+    <value>图像</value>
+  </data>
+  <data name="NavOutput.Content" xml:space="preserve">
+    <value>输出</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Shared editor strings  (reused across multiple pages)
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="PreviewTitle.Text" xml:space="preserve"><value>预览</value></data>
-  <data name="ApplyChanges.Content" xml:space="preserve"><value>应用更改</value></data>
-  <data name="SelectOptionHeader.Text" xml:space="preserve"><value>选择一个选项</value></data>
-  <data name="EtaCalculating.Text" xml:space="preserve"><value>正在计算剩余时间...</value></data>
-
+  <data name="PreviewTitle.Text" xml:space="preserve">
+    <value>预览</value>
+  </data>
+  <data name="ApplyChanges.Content" xml:space="preserve">
+    <value>应用更改</value>
+  </data>
+  <data name="SelectOptionHeader.Text" xml:space="preserve">
+    <value>选择一个选项</value>
+  </data>
+  <data name="EtaCalculating.Text" xml:space="preserve">
+    <value>正在计算剩余时间...</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Home page
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="HomePage_Header.Text" xml:space="preserve"><value>拖放文件以开始</value></data>
-  <data name="HomePage_Subtitle.Text" xml:space="preserve"><value>拖放单个文件以打开对应编辑器，或拖放多个同类型文件进行批量处理。您也可以使用下方按钮浏览文件。</value></data>
-  <data name="HomePage_Formats.Text" xml:space="preserve"><value>图像：PNG、JPG、WebP、AVIF   •   视频：MP4、MKV、MOV、AVI、WebM   •   音频：MP3、M4A、FLAC、WAV、OPUS   •   文档：DOCX、PPTX、XLSX、PDF</value></data>
-  <data name="HomePage_OrBrowse.Text" xml:space="preserve"><value>或浏览文件</value></data>
-  <data name="HomePage_SingleFile.Text" xml:space="preserve"><value>单个文件</value></data>
-  <data name="HomePage_BatchFiles.Text" xml:space="preserve"><value>批量处理多个文件</value></data>
-
+  <data name="HomePage_Header.Text" xml:space="preserve">
+    <value>拖放文件以开始</value>
+  </data>
+  <data name="HomePage_Subtitle.Text" xml:space="preserve">
+    <value>拖放单个文件以打开对应编辑器，或拖放多个同类型文件进行批量处理。您也可以使用下方按钮浏览文件。</value>
+  </data>
+  <data name="HomePage_Formats.Text" xml:space="preserve">
+    <value>图像：PNG、JPG、WebP、AVIF   •   视频：MP4、MKV、MOV、AVI、WebM   •   音频：MP3、M4A、FLAC、WAV、OPUS   •   文档：DOCX、PPTX、XLSX、PDF</value>
+  </data>
+  <data name="HomePage_OrBrowse.Text" xml:space="preserve">
+    <value>或浏览文件</value>
+  </data>
+  <data name="HomePage_SingleFile.Text" xml:space="preserve">
+    <value>单个文件</value>
+  </data>
+  <data name="HomePage_BatchFiles.Text" xml:space="preserve">
+    <value>批量处理多个文件</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Audio editor page
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="AudioPage_Title.Text" xml:space="preserve"><value>音频编辑器</value></data>
-  <data name="AudioPage_Subtitle.Text" xml:space="preserve"><value>加载音频文件，构建处理链，并一次性应用所有选定的操作。</value></data>
-  <data name="AudioPage_PreviewHint.Text" xml:space="preserve"><value>拖放音频文件或单击此区域以选择文件。处理进度将在下方显示。</value></data>
-  <data name="AudioPage_AudioDetails.Text" xml:space="preserve"><value>音频详情</value></data>
-  <data name="AudioPage_NoAudioLoaded.Text" xml:space="preserve"><value>尚未加载音频。</value></data>
-  <data name="AudioPage_DropHintTitle.Text" xml:space="preserve"><value>将音频拖放至此</value></data>
-  <data name="AudioPage_DropHintSubtitle.Text" xml:space="preserve"><value>单击以浏览音频文件。选项面板中提供格式转换、标准化、裁剪、EQ、降噪和元数据工具。</value></data>
-  <data name="AudioPage_Processing.Text" xml:space="preserve"><value>正在处理音频...</value></data>
-  <data name="AudioPage_PreparingPipeline.Text" xml:space="preserve"><value>正在准备处理管道...</value></data>
-
+  <data name="AudioPage_Title.Text" xml:space="preserve">
+    <value>音频编辑器</value>
+  </data>
+  <data name="AudioPage_Subtitle.Text" xml:space="preserve">
+    <value>加载音频文件，构建处理链，并一次性应用所有选定的操作。</value>
+  </data>
+  <data name="AudioPage_PreviewHint.Text" xml:space="preserve">
+    <value>拖放音频文件或单击此区域以选择文件。处理进度将在下方显示。</value>
+  </data>
+  <data name="AudioPage_AudioDetails.Text" xml:space="preserve">
+    <value>音频详情</value>
+  </data>
+  <data name="AudioPage_NoAudioLoaded.Text" xml:space="preserve">
+    <value>尚未加载音频。</value>
+  </data>
+  <data name="AudioPage_DropHintTitle.Text" xml:space="preserve">
+    <value>将音频拖放至此</value>
+  </data>
+  <data name="AudioPage_DropHintSubtitle.Text" xml:space="preserve">
+    <value>单击以浏览音频文件。选项面板中提供格式转换、标准化、裁剪、EQ、降噪和元数据工具。</value>
+  </data>
+  <data name="AudioPage_Processing.Text" xml:space="preserve">
+    <value>正在处理音频...</value>
+  </data>
+  <data name="AudioPage_PreparingPipeline.Text" xml:space="preserve">
+    <value>正在准备处理管道...</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Image editor page
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="ImagePage_Title.Text" xml:space="preserve"><value>图像编辑器</value></data>
-  <data name="ImagePage_Subtitle.Text" xml:space="preserve"><value>导入图像，排列编辑操作，一键应用，预览与控制面板布局清晰直观。</value></data>
-  <data name="ImagePage_PreviewHint.Text" xml:space="preserve"><value>拖放图像或单击预览区域开始。裁切手柄和视觉编辑均以此工作区为中心。</value></data>
-  <data name="ImagePage_NoImageLoaded.Text" xml:space="preserve"><value>尚未加载图像。</value></data>
-  <data name="ImagePage_DropHintTitle.Text" xml:space="preserve"><value>将图像拖放至此</value></data>
-  <data name="ImagePage_DropHintSubtitle.Text" xml:space="preserve"><value>您也可以单击此区域浏览文件。选项面板中提供裁切、调整大小、超分辨率、旋转、镜像和 RGB 调整功能。</value></data>
-  <data name="ImagePage_FormatSection.Text" xml:space="preserve"><value>格式与质量</value></data>
-  <data name="ImagePage_OutputFormat.Header" xml:space="preserve"><value>输出格式</value></data>
-  <data name="ImagePage_KeepOriginalFormat.Content" xml:space="preserve"><value>保留原始格式</value></data>
-  <data name="ImagePage_PreserveQuality.Content" xml:space="preserve"><value>保留原始质量</value></data>
-  <data name="ImagePage_Crop.Text" xml:space="preserve"><value>裁切</value></data>
-  <data name="ImagePage_EnableCrop.Content" xml:space="preserve"><value>启用裁切</value></data>
-  <data name="ImagePage_ApplyCrop.Content" xml:space="preserve"><value>应用裁切</value></data>
-  <data name="ImagePage_CropDisabled.Text" xml:space="preserve"><value>裁切已禁用</value></data>
-  <data name="ImagePage_Resize.Text" xml:space="preserve"><value>调整大小</value></data>
-  <data name="ImagePage_EnableResize.Content" xml:space="preserve"><value>启用调整大小</value></data>
-  <data name="ImagePage_Width.Header" xml:space="preserve"><value>宽度</value></data>
-  <data name="ImagePage_Height.Header" xml:space="preserve"><value>高度</value></data>
-  <data name="ImagePage_PreserveAspectRatio.Content" xml:space="preserve"><value>保持宽高比</value></data>
-  <data name="ImagePage_Upscale.Text" xml:space="preserve"><value>超分辨率</value></data>
-  <data name="ImagePage_EnableUpscale.Content" xml:space="preserve"><value>启用超分辨率</value></data>
-  <data name="ImagePage_TargetWidth.Header" xml:space="preserve"><value>目标宽度</value></data>
-  <data name="ImagePage_TargetHeight.Header" xml:space="preserve"><value>目标高度</value></data>
-  <data name="ImagePage_RotateAndMirror.Text" xml:space="preserve"><value>旋转与镜像</value></data>
-  <data name="ImagePage_Rotation.Header" xml:space="preserve"><value>旋转</value></data>
-  <data name="ImagePage_FlipHorizontally.Content" xml:space="preserve"><value>水平翻转</value></data>
-  <data name="ImagePage_FlipVertically.Content" xml:space="preserve"><value>垂直翻转</value></data>
-  <data name="ImagePage_RGBAdjustments.Text" xml:space="preserve"><value>RGB 调整</value></data>
-  <data name="ImagePage_EnableRGB.Content" xml:space="preserve"><value>启用 RGB 调整</value></data>
-
+  <data name="ImagePage_Title.Text" xml:space="preserve">
+    <value>图像编辑器</value>
+  </data>
+  <data name="ImagePage_Subtitle.Text" xml:space="preserve">
+    <value>导入图像，排列编辑操作，一键应用，预览与控制面板布局清晰直观。</value>
+  </data>
+  <data name="ImagePage_PreviewHint.Text" xml:space="preserve">
+    <value>拖放图像或单击预览区域开始。裁切手柄和视觉编辑均以此工作区为中心。</value>
+  </data>
+  <data name="ImagePage_NoImageLoaded.Text" xml:space="preserve">
+    <value>尚未加载图像。</value>
+  </data>
+  <data name="ImagePage_DropHintTitle.Text" xml:space="preserve">
+    <value>将图像拖放至此</value>
+  </data>
+  <data name="ImagePage_DropHintSubtitle.Text" xml:space="preserve">
+    <value>您也可以单击此区域浏览文件。选项面板中提供裁切、调整大小、超分辨率、旋转、镜像和 RGB 调整功能。</value>
+  </data>
+  <data name="ImagePage_FormatSection.Text" xml:space="preserve">
+    <value>格式与质量</value>
+  </data>
+  <data name="ImagePage_OutputFormat.Header" xml:space="preserve">
+    <value>输出格式</value>
+  </data>
+  <data name="ImagePage_KeepOriginalFormat.Content" xml:space="preserve">
+    <value>保留原始格式</value>
+  </data>
+  <data name="ImagePage_PreserveQuality.Content" xml:space="preserve">
+    <value>保留原始质量</value>
+  </data>
+  <data name="ImagePage_Crop.Text" xml:space="preserve">
+    <value>裁切</value>
+  </data>
+  <data name="ImagePage_EnableCrop.Content" xml:space="preserve">
+    <value>启用裁切</value>
+  </data>
+  <data name="ImagePage_ApplyCrop.Content" xml:space="preserve">
+    <value>应用裁切</value>
+  </data>
+  <data name="ImagePage_CropDisabled.Text" xml:space="preserve">
+    <value>裁切已禁用</value>
+  </data>
+  <data name="ImagePage_Resize.Text" xml:space="preserve">
+    <value>调整大小</value>
+  </data>
+  <data name="ImagePage_EnableResize.Content" xml:space="preserve">
+    <value>启用调整大小</value>
+  </data>
+  <data name="ImagePage_Width.Header" xml:space="preserve">
+    <value>宽度</value>
+  </data>
+  <data name="ImagePage_Height.Header" xml:space="preserve">
+    <value>高度</value>
+  </data>
+  <data name="ImagePage_PreserveAspectRatio.Content" xml:space="preserve">
+    <value>保持宽高比</value>
+  </data>
+  <data name="ImagePage_Upscale.Text" xml:space="preserve">
+    <value>超分辨率</value>
+  </data>
+  <data name="ImagePage_EnableUpscale.Content" xml:space="preserve">
+    <value>启用超分辨率</value>
+  </data>
+  <data name="ImagePage_TargetWidth.Header" xml:space="preserve">
+    <value>目标宽度</value>
+  </data>
+  <data name="ImagePage_TargetHeight.Header" xml:space="preserve">
+    <value>目标高度</value>
+  </data>
+  <data name="ImagePage_RotateAndMirror.Text" xml:space="preserve">
+    <value>旋转与镜像</value>
+  </data>
+  <data name="ImagePage_Rotation.Header" xml:space="preserve">
+    <value>旋转</value>
+  </data>
+  <data name="ImagePage_FlipHorizontally.Content" xml:space="preserve">
+    <value>水平翻转</value>
+  </data>
+  <data name="ImagePage_FlipVertically.Content" xml:space="preserve">
+    <value>垂直翻转</value>
+  </data>
+  <data name="ImagePage_RGBAdjustments.Text" xml:space="preserve">
+    <value>RGB 调整</value>
+  </data>
+  <data name="ImagePage_EnableRGB.Content" xml:space="preserve">
+    <value>启用 RGB 调整</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Video editor page
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="VideoPage_Title.Text" xml:space="preserve"><value>视频编辑器</value></data>
-  <data name="VideoPage_Subtitle.Text" xml:space="preserve"><value>导入视频，配置处理选项，使用 FFmpeg 进行编辑，预览与决策面板布局清晰直观。</value></data>
-  <data name="VideoPage_PreviewHint.Text" xml:space="preserve"><value>拖放视频或单击预览区域开始。播放和编辑选项均以此工作区为中心。</value></data>
-  <data name="VideoPage_NoVideoLoaded.Text" xml:space="preserve"><value>尚未加载视频。</value></data>
-  <data name="VideoPage_DropHintTitle.Text" xml:space="preserve"><value>将视频拖放至此</value></data>
-  <data name="VideoPage_DropHintSubtitle.Text" xml:space="preserve"><value>您也可以单击此区域浏览文件。选项面板中提供裁剪、调整大小、修复和容器选项。</value></data>
-  <data name="VideoPage_SubtitlePosition.Text" xml:space="preserve"><value>字幕位置</value></data>
-  <data name="VideoPage_DragToPlace.Text" xml:space="preserve"><value>拖动以放置字幕</value></data>
-  <data name="VideoPage_Processing.Text" xml:space="preserve"><value>正在处理视频...</value></data>
-  <data name="VideoPage_PreparingFFmpeg.Text" xml:space="preserve"><value>正在准备 FFmpeg...</value></data>
-  <data name="VideoPage_FormatAndCodecs.Text" xml:space="preserve"><value>格式与编解码器</value></data>
-  <data name="VideoPage_OutputFormat.Header" xml:space="preserve"><value>输出格式</value></data>
-  <data name="VideoPage_KeepOriginal.Content" xml:space="preserve"><value>保留原始</value></data>
-  <data name="VideoPage_VideoCodec.Header" xml:space="preserve"><value>视频编解码器</value></data>
-  <data name="VideoPage_VideoCodecPlaceholder.PlaceholderText" xml:space="preserve"><value>视频编解码器</value></data>
-  <data name="VideoPage_AudioCodec.Header" xml:space="preserve"><value>音频编解码器</value></data>
-  <data name="VideoPage_AudioCodecPlaceholder.PlaceholderText" xml:space="preserve"><value>音频编解码器</value></data>
-  <data name="VideoPage_RemoveAudio.Content" xml:space="preserve"><value>移除音频</value></data>
-  <data name="VideoPage_Compression.Text" xml:space="preserve"><value>压缩</value></data>
-  <data name="VideoPage_EnableCompression.Content" xml:space="preserve"><value>启用压缩预设</value></data>
-  <data name="VideoPage_CompressionPreset.Header" xml:space="preserve"><value>压缩预设</value></data>
-  <data name="VideoPage_AudioAndVolume.Text" xml:space="preserve"><value>音频与音量</value></data>
-  <data name="VideoPage_ExtractAudio.Content" xml:space="preserve"><value>提取音频</value></data>
-  <data name="VideoPage_AdjustVolume.Content" xml:space="preserve"><value>调整输出音量</value></data>
-  <data name="VideoPage_VolumeHint.Text" xml:space="preserve"><value>此滑块调整最终导出的音频音量，包括启用混流时的替换音频。</value></data>
-  <data name="VideoPage_NormalizeAudio.Content" xml:space="preserve"><value>标准化音频</value></data>
-  <data name="VideoPage_NormalizeHint.Text" xml:space="preserve"><value>对最终输出音频进行简单的响度标准化处理。</value></data>
-  <data name="VideoPage_FixAudioSync.Content" xml:space="preserve"><value>修复音频同步</value></data>
-  <data name="VideoPage_MoveAudio.Header" xml:space="preserve"><value>移动音频</value></data>
-  <data name="VideoPage_Earlier.Content" xml:space="preserve"><value>提前</value></data>
-  <data name="VideoPage_Later.Content" xml:space="preserve"><value>延后</value></data>
-  <data name="VideoPage_ApplyDenoise.Content" xml:space="preserve"><value>应用音频降噪</value></data>
-  <data name="VideoPage_DenoiseMode.Header" xml:space="preserve"><value>降噪模式</value></data>
-  <data name="VideoPage_DenoiseMono.Content" xml:space="preserve"><value>单声道</value></data>
-  <data name="VideoPage_DenoiseStereo.Content" xml:space="preserve"><value>立体声</value></data>
-  <data name="VideoPage_AddReplaceAudio.Content" xml:space="preserve"><value>添加或替换音轨</value></data>
-  <data name="VideoPage_AudioFile.Header" xml:space="preserve"><value>音频文件</value></data>
-  <data name="VideoPage_AudioFile.PlaceholderText" xml:space="preserve"><value>选择音频源</value></data>
-  <data name="VideoPage_BrowseAudio.Content" xml:space="preserve"><value>浏览音频文件</value></data>
-  <data name="VideoPage_ReplaceAudio.Content" xml:space="preserve"><value>替换现有音频</value></data>
-  <data name="VideoPage_UseShortest.Content" xml:space="preserve"><value>使用较短时长</value></data>
-  <data name="VideoPage_SetDefaultAudio.Content" xml:space="preserve"><value>设为默认音频</value></data>
-  <data name="VideoPage_Subtitles.Text" xml:space="preserve"><value>字幕</value></data>
-  <data name="VideoPage_TranscriptionHeader.Text" xml:space="preserve"><value>转录</value></data>
-  <data name="VideoPage_TranscriptionHint.Text" xml:space="preserve"><value>选择基础 SRT 或高级样式 ASS 字幕生成方式。</value></data>
-  <data name="VideoPage_DownloadTranscription.Content" xml:space="preserve"><value>下载转录功能</value></data>
-  <data name="VideoPage_TranscriptionNotDownloaded.Text" xml:space="preserve"><value>转录功能尚未下载。</value></data>
-  <data name="VideoPage_SubtitleGenMode.Header" xml:space="preserve"><value>字幕生成模式</value></data>
-  <data name="VideoPage_BasicSRT.Content" xml:space="preserve"><value>基础 (SRT)</value></data>
-  <data name="VideoPage_AdvancedASS.Content" xml:space="preserve"><value>高级 (ASS)</value></data>
-  <data name="VideoPage_AdvancedOutputType.Header" xml:space="preserve"><value>高级输出类型</value></data>
-  <data name="VideoPage_StyledASS.Content" xml:space="preserve"><value>样式 ASS</value></data>
-  <data name="VideoPage_KaraokeASS.Content" xml:space="preserve"><value>卡拉OK ASS</value></data>
-  <data name="VideoPage_ConfigureAdvanced.Content" xml:space="preserve"><value>配置高级字幕</value></data>
-  <data name="VideoPage_SecondsMax.Header" xml:space="preserve"><value>最长秒数</value></data>
-  <data name="VideoPage_LimitWords.Content" xml:space="preserve"><value>限制每段词数</value></data>
-  <data name="VideoPage_WordsMax.Header" xml:space="preserve"><value>最多词数</value></data>
-  <data name="VideoPage_SectionHint.Text" xml:space="preserve"><value>秒数限制每段在屏幕上显示的最长时间。启用后，词数限制每段最多包含的词数。</value></data>
-  <data name="VideoPage_GenerateSubtitles.Content" xml:space="preserve"><value>从视频生成字幕</value></data>
-  <data name="VideoPage_SubtitlesNotGenerated.Text" xml:space="preserve"><value>字幕尚未生成。</value></data>
-  <data name="VideoPage_AddSubtitles.Content" xml:space="preserve"><value>添加字幕</value></data>
-  <data name="VideoPage_SubtitleFile.Header" xml:space="preserve"><value>字幕文件</value></data>
-  <data name="VideoPage_SubtitleFile.PlaceholderText" xml:space="preserve"><value>选择字幕源</value></data>
-  <data name="VideoPage_BrowseSubtitle.Content" xml:space="preserve"><value>浏览字幕文件</value></data>
-  <data name="VideoPage_SubtitleMode.Header" xml:space="preserve"><value>字幕模式</value></data>
-  <data name="VideoPage_SoftMux.Content" xml:space="preserve"><value>软混流</value></data>
-  <data name="VideoPage_BurnIn.Content" xml:space="preserve"><value>烧录</value></data>
-  <data name="VideoPage_Placement.Text" xml:space="preserve"><value>位置</value></data>
-  <data name="VideoPage_PlacementHint.Text" xml:space="preserve"><value>在预览中拖动字幕标签，或在此处精确调整位置。</value></data>
-  <data name="VideoPage_Horizontal.Header" xml:space="preserve"><value>水平 (%)</value></data>
-  <data name="VideoPage_Vertical.Header" xml:space="preserve"><value>垂直 (%)</value></data>
-  <data name="VideoPage_ResetPlacement.Content" xml:space="preserve"><value>重置位置</value></data>
-  <data name="VideoPage_PlacementStatus.Text" xml:space="preserve"><value>位置对生成的 ASS 字幕精确渲染，对烧录文字字幕（包括带框和动画展示预设）则为近似渲染。</value></data>
-  <data name="VideoPage_LanguageTag.Header" xml:space="preserve"><value>语言标签</value></data>
-  <data name="VideoPage_LanguageTag.PlaceholderText" xml:space="preserve"><value>示例：zh</value></data>
-  <data name="VideoPage_SubtitleTitle.Header" xml:space="preserve"><value>字幕标题</value></data>
-  <data name="VideoPage_SubtitleTitle.PlaceholderText" xml:space="preserve"><value>示例：中文</value></data>
-  <data name="VideoPage_SetDefaultSubtitle.Content" xml:space="preserve"><value>设为默认字幕</value></data>
-  <data name="VideoPage_Resize.Text" xml:space="preserve"><value>调整大小</value></data>
-  <data name="VideoPage_EnableResize.Content" xml:space="preserve"><value>启用调整大小</value></data>
-  <data name="VideoPage_Width.Header" xml:space="preserve"><value>宽度</value></data>
-  <data name="VideoPage_Height.Header" xml:space="preserve"><value>高度</value></data>
-  <data name="VideoPage_ResizeMode.Header" xml:space="preserve"><value>调整大小模式</value></data>
-  <data name="VideoPage_PadToFit.Content" xml:space="preserve"><value>填充适配</value></data>
-  <data name="VideoPage_CropToFill.Content" xml:space="preserve"><value>裁剪填充</value></data>
-  <data name="VideoPage_Stretch.Content" xml:space="preserve"><value>拉伸</value></data>
-  <data name="VideoPage_PaddingColor.Header" xml:space="preserve"><value>填充颜色</value></data>
-  <data name="VideoPage_PaddingColor.PlaceholderText" xml:space="preserve"><value>例如 black 或 #000000</value></data>
-  <data name="VideoPage_Trim.Text" xml:space="preserve"><value>裁剪</value></data>
-  <data name="VideoPage_EnableTrim.Content" xml:space="preserve"><value>启用裁剪</value></data>
-  <data name="VideoPage_TrimHint.Text" xml:space="preserve"><value>拖动预览下方的裁剪手柄以选择起点和终点。</value></data>
-  <data name="VideoPage_RotateAndMirror.Text" xml:space="preserve"><value>旋转与镜像</value></data>
-  <data name="VideoPage_Rotation.Header" xml:space="preserve"><value>旋转</value></data>
-  <data name="VideoPage_MirrorHorizontally.Content" xml:space="preserve"><value>水平镜像</value></data>
-  <data name="VideoPage_MirrorVertically.Content" xml:space="preserve"><value>垂直镜像</value></data>
-  <data name="VideoPage_Metadata.Text" xml:space="preserve"><value>元数据</value></data>
-  <data name="VideoPage_RemoveMetadata.Content" xml:space="preserve"><value>移除元数据</value></data>
-  <data name="VideoPage_Repair.Text" xml:space="preserve"><value>修复</value></data>
-  <data name="VideoPage_EnableRepair.Content" xml:space="preserve"><value>启用修复模式</value></data>
-  <data name="VideoPage_RepairMode.Header" xml:space="preserve"><value>修复模式</value></data>
-  <data name="VideoPage_Remux.Content" xml:space="preserve"><value>重混流</value></data>
-  <data name="VideoPage_Reencode.Content" xml:space="preserve"><value>重新编码</value></data>
-  <data name="VideoPage_RegenerateTimestamps.Content" xml:space="preserve"><value>重新生成时间戳</value></data>
-  <data name="VideoPage_IgnoreErrors.Content" xml:space="preserve"><value>忽略可恢复的错误</value></data>
-  <data name="VideoPage_DropNonEssential.Content" xml:space="preserve"><value>丢弃非必要流</value></data>
-  <data name="VideoPage_RemoveMetadataRepair.Content" xml:space="preserve"><value>修复时移除元数据</value></data>
-  <data name="VideoPage_TranscriptionReview.Text" xml:space="preserve"><value>转录审阅</value></data>
-  <data name="VideoPage_TranscriptionReviewHint.Text" xml:space="preserve"><value>在应用生成最终 ASS 字幕进行导出之前，在此审阅每个 Whisper 片段。处理视频时将自动应用您的编辑。</value></data>
-  <data name="VideoPage_SubtitleEditorStatus.Text" xml:space="preserve"><value>生成或选择字幕文件以进行编辑。</value></data>
-
+  <data name="VideoPage_Title.Text" xml:space="preserve">
+    <value>视频编辑器</value>
+  </data>
+  <data name="VideoPage_Subtitle.Text" xml:space="preserve">
+    <value>导入视频，配置处理选项，使用 FFmpeg 进行编辑，预览与决策面板布局清晰直观。</value>
+  </data>
+  <data name="VideoPage_PreviewHint.Text" xml:space="preserve">
+    <value>拖放视频或单击预览区域开始。播放和编辑选项均以此工作区为中心。</value>
+  </data>
+  <data name="VideoPage_NoVideoLoaded.Text" xml:space="preserve">
+    <value>尚未加载视频。</value>
+  </data>
+  <data name="VideoPage_DropHintTitle.Text" xml:space="preserve">
+    <value>将视频拖放至此</value>
+  </data>
+  <data name="VideoPage_DropHintSubtitle.Text" xml:space="preserve">
+    <value>您也可以单击此区域浏览文件。选项面板中提供裁剪、调整大小、修复和容器选项。</value>
+  </data>
+  <data name="VideoPage_SubtitlePosition.Text" xml:space="preserve">
+    <value>字幕位置</value>
+  </data>
+  <data name="VideoPage_DragToPlace.Text" xml:space="preserve">
+    <value>拖动以放置字幕</value>
+  </data>
+  <data name="VideoPage_Processing.Text" xml:space="preserve">
+    <value>正在处理视频...</value>
+  </data>
+  <data name="VideoPage_PreparingFFmpeg.Text" xml:space="preserve">
+    <value>正在准备 FFmpeg...</value>
+  </data>
+  <data name="VideoPage_FormatAndCodecs.Text" xml:space="preserve">
+    <value>格式与编解码器</value>
+  </data>
+  <data name="VideoPage_OutputFormat.Header" xml:space="preserve">
+    <value>输出格式</value>
+  </data>
+  <data name="VideoPage_KeepOriginal.Content" xml:space="preserve">
+    <value>保留原始</value>
+  </data>
+  <data name="VideoPage_VideoCodec.Header" xml:space="preserve">
+    <value>视频编解码器</value>
+  </data>
+  <data name="VideoPage_VideoCodecPlaceholder.PlaceholderText" xml:space="preserve">
+    <value>视频编解码器</value>
+  </data>
+  <data name="VideoPage_AudioCodec.Header" xml:space="preserve">
+    <value>音频编解码器</value>
+  </data>
+  <data name="VideoPage_AudioCodecPlaceholder.PlaceholderText" xml:space="preserve">
+    <value>音频编解码器</value>
+  </data>
+  <data name="VideoPage_RemoveAudio.Content" xml:space="preserve">
+    <value>移除音频</value>
+  </data>
+  <data name="VideoPage_Compression.Text" xml:space="preserve">
+    <value>压缩</value>
+  </data>
+  <data name="VideoPage_EnableCompression.Content" xml:space="preserve">
+    <value>启用压缩预设</value>
+  </data>
+  <data name="VideoPage_CompressionPreset.Header" xml:space="preserve">
+    <value>压缩预设</value>
+  </data>
+  <data name="VideoPage_AudioAndVolume.Text" xml:space="preserve">
+    <value>音频与音量</value>
+  </data>
+  <data name="VideoPage_ExtractAudio.Content" xml:space="preserve">
+    <value>提取音频</value>
+  </data>
+  <data name="VideoPage_AdjustVolume.Content" xml:space="preserve">
+    <value>调整输出音量</value>
+  </data>
+  <data name="VideoPage_VolumeHint.Text" xml:space="preserve">
+    <value>此滑块调整最终导出的音频音量，包括启用混流时的替换音频。</value>
+  </data>
+  <data name="VideoPage_NormalizeAudio.Content" xml:space="preserve">
+    <value>标准化音频</value>
+  </data>
+  <data name="VideoPage_NormalizeHint.Text" xml:space="preserve">
+    <value>对最终输出音频进行简单的响度标准化处理。</value>
+  </data>
+  <data name="VideoPage_FixAudioSync.Content" xml:space="preserve">
+    <value>修复音频同步</value>
+  </data>
+  <data name="VideoPage_MoveAudio.Header" xml:space="preserve">
+    <value>移动音频</value>
+  </data>
+  <data name="VideoPage_Earlier.Content" xml:space="preserve">
+    <value>提前</value>
+  </data>
+  <data name="VideoPage_Later.Content" xml:space="preserve">
+    <value>延后</value>
+  </data>
+  <data name="VideoPage_ApplyDenoise.Content" xml:space="preserve">
+    <value>应用音频降噪</value>
+  </data>
+  <data name="VideoPage_DenoiseMode.Header" xml:space="preserve">
+    <value>降噪模式</value>
+  </data>
+  <data name="VideoPage_DenoiseMono.Content" xml:space="preserve">
+    <value>单声道</value>
+  </data>
+  <data name="VideoPage_DenoiseStereo.Content" xml:space="preserve">
+    <value>立体声</value>
+  </data>
+  <data name="VideoPage_AddReplaceAudio.Content" xml:space="preserve">
+    <value>添加或替换音轨</value>
+  </data>
+  <data name="VideoPage_AudioFile.Header" xml:space="preserve">
+    <value>音频文件</value>
+  </data>
+  <data name="VideoPage_AudioFile.PlaceholderText" xml:space="preserve">
+    <value>选择音频源</value>
+  </data>
+  <data name="VideoPage_BrowseAudio.Content" xml:space="preserve">
+    <value>浏览音频文件</value>
+  </data>
+  <data name="VideoPage_ReplaceAudio.Content" xml:space="preserve">
+    <value>替换现有音频</value>
+  </data>
+  <data name="VideoPage_UseShortest.Content" xml:space="preserve">
+    <value>使用较短时长</value>
+  </data>
+  <data name="VideoPage_SetDefaultAudio.Content" xml:space="preserve">
+    <value>设为默认音频</value>
+  </data>
+  <data name="VideoPage_Subtitles.Text" xml:space="preserve">
+    <value>字幕</value>
+  </data>
+  <data name="VideoPage_TranscriptionHeader.Text" xml:space="preserve">
+    <value>转录</value>
+  </data>
+  <data name="VideoPage_TranscriptionHint.Text" xml:space="preserve">
+    <value>选择基础 SRT 或高级样式 ASS 字幕生成方式。</value>
+  </data>
+  <data name="VideoPage_DownloadTranscription.Content" xml:space="preserve">
+    <value>下载转录功能</value>
+  </data>
+  <data name="VideoPage_TranscriptionNotDownloaded.Text" xml:space="preserve">
+    <value>转录功能尚未下载。</value>
+  </data>
+  <data name="VideoPage_SubtitleGenMode.Header" xml:space="preserve">
+    <value>字幕生成模式</value>
+  </data>
+  <data name="VideoPage_BasicSRT.Content" xml:space="preserve">
+    <value>基础 (SRT)</value>
+  </data>
+  <data name="VideoPage_AdvancedASS.Content" xml:space="preserve">
+    <value>高级 (ASS)</value>
+  </data>
+  <data name="VideoPage_AdvancedOutputType.Header" xml:space="preserve">
+    <value>高级输出类型</value>
+  </data>
+  <data name="VideoPage_StyledASS.Content" xml:space="preserve">
+    <value>样式 ASS</value>
+  </data>
+  <data name="VideoPage_KaraokeASS.Content" xml:space="preserve">
+    <value>卡拉OK ASS</value>
+  </data>
+  <data name="VideoPage_SubtitleStyle.Header" xml:space="preserve">
+    <value>字幕样式</value>
+  </data>
+  <data name="VideoPage_SubtitleStyleHint.Text" xml:space="preserve">
+    <value>选择一种样式即可立即为已生成的字幕重新设置样式，无需重新生成。</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvanced.Content" xml:space="preserve">
+    <value>配置高级字幕</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvancedTitle" xml:space="preserve">
+    <value>配置高级字幕</value>
+  </data>
+  <data name="VideoPage_ConfigureKaraokeSummary" xml:space="preserve">
+    <value>选择卡拉OK风格并调整用于渲染的排版和高亮重音。</value>
+  </data>
+  <data name="VideoPage_ConfigureStyledSummary" xml:space="preserve">
+    <value>调整用于风格化字幕渲染的排版和颜色。</value>
+  </data>
+  <data name="VideoPage_BasePreset.Header" xml:space="preserve">
+    <value>基础预设</value>
+  </data>
+  <data name="VideoPage_SystemFont.Header" xml:space="preserve">
+    <value>系统字体</value>
+  </data>
+  <data name="VideoPage_SelectInstalledFont" xml:space="preserve">
+    <value>选择已安装的字体</value>
+  </data>
+  <data name="VideoPage_FontSize.Header" xml:space="preserve">
+    <value>字体大小</value>
+  </data>
+  <data name="VideoPage_OutlineWidth.Header" xml:space="preserve">
+    <value>轮廓宽度</value>
+  </data>
+  <data name="VideoPage_VerticalMargin.Header" xml:space="preserve">
+    <value>垂直边距</value>
+  </data>
+  <data name="VideoPage_BoldText.Content" xml:space="preserve">
+    <value>粗体文本</value>
+  </data>
+  <data name="VideoPage_TextTransform.Header" xml:space="preserve">
+    <value>文本转换</value>
+  </data>
+  <data name="VideoPage_OriginalCase" xml:space="preserve">
+    <value>原始大小写</value>
+  </data>
+  <data name="VideoPage_Uppercase" xml:space="preserve">
+    <value>大写</value>
+  </data>
+  <data name="VideoPage_Lowercase" xml:space="preserve">
+    <value>小写</value>
+  </data>
+  <data name="VideoPage_FillingColor" xml:space="preserve">
+    <value>填充颜色</value>
+  </data>
+  <data name="VideoPage_PreFillingColor" xml:space="preserve">
+    <value>预填充颜色</value>
+  </data>
+  <data name="VideoPage_WordFillColor" xml:space="preserve">
+    <value>单词填充颜色</value>
+  </data>
+  <data name="VideoPage_OutlineColor" xml:space="preserve">
+    <value>轮廓颜色</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvancedSave" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvancedResetDefaults" xml:space="preserve">
+    <value>重置为默认值</value>
+  </data>
+  <data name="VideoPage_AdvancedPresetSummary.Text" xml:space="preserve">
+    <value>预设摘要</value>
+  </data>
+  <data name="VideoPage_AdvancedPresetSummaryFormat" xml:space="preserve">
+    <value>预设: {0} ({1}) | {2} {3} | {4} | {5} | 轮廓 {6}</value>
+  </data>
+  <data name="VideoPage_SubtitleSectionDuration.Text" xml:space="preserve">
+    <value>高级字幕章节长度</value>
+  </data>
+  <data name="VideoPage_SubtitleSectionDurationFormat" xml:space="preserve">
+    <value>高级字幕章节长度: 最多 {0} 秒</value>
+  </data>
+  <data name="VideoPage_SecondsMax.Header" xml:space="preserve">
+    <value>最长秒数</value>
+  </data>
+  <data name="VideoPage_LimitWords.Content" xml:space="preserve">
+    <value>限制每段词数</value>
+  </data>
+  <data name="VideoPage_WordsMax.Header" xml:space="preserve">
+    <value>最多词数</value>
+  </data>
+  <data name="VideoPage_SectionHint.Text" xml:space="preserve">
+    <value>秒数限制每段在屏幕上显示的最长时间。启用后，词数限制每段最多包含的词数。</value>
+  </data>
+  <data name="VideoPage_GenerateSubtitles.Content" xml:space="preserve">
+    <value>从视频生成字幕</value>
+  </data>
+  <data name="VideoPage_SubtitlesNotGenerated.Text" xml:space="preserve">
+    <value>字幕尚未生成。</value>
+  </data>
+  <data name="VideoPage_AddSubtitles.Content" xml:space="preserve">
+    <value>添加字幕</value>
+  </data>
+  <data name="VideoPage_SubtitleFile.Header" xml:space="preserve">
+    <value>字幕文件</value>
+  </data>
+  <data name="VideoPage_SubtitleFile.PlaceholderText" xml:space="preserve">
+    <value>选择字幕源</value>
+  </data>
+  <data name="VideoPage_BrowseSubtitle.Content" xml:space="preserve">
+    <value>浏览字幕文件</value>
+  </data>
+  <data name="VideoPage_SubtitleMode.Header" xml:space="preserve">
+    <value>字幕模式</value>
+  </data>
+  <data name="VideoPage_SoftMux.Content" xml:space="preserve">
+    <value>软混流</value>
+  </data>
+  <data name="VideoPage_BurnIn.Content" xml:space="preserve">
+    <value>烧录</value>
+  </data>
+  <data name="VideoPage_Placement.Text" xml:space="preserve">
+    <value>位置</value>
+  </data>
+  <data name="VideoPage_PlacementHint.Text" xml:space="preserve">
+    <value>在预览中拖动字幕标签，或在此处精确调整位置。</value>
+  </data>
+  <data name="VideoPage_Horizontal.Header" xml:space="preserve">
+    <value>水平 (%)</value>
+  </data>
+  <data name="VideoPage_Vertical.Header" xml:space="preserve">
+    <value>垂直 (%)</value>
+  </data>
+  <data name="VideoPage_ResetPlacement.Content" xml:space="preserve">
+    <value>重置位置</value>
+  </data>
+  <data name="VideoPage_PlacementStatus.Text" xml:space="preserve">
+    <value>位置对生成的 ASS 字幕精确渲染，对烧录文字字幕（包括带框和动画展示预设）则为近似渲染。</value>
+  </data>
+  <data name="VideoPage_LanguageTag.Header" xml:space="preserve">
+    <value>语言标签</value>
+  </data>
+  <data name="VideoPage_LanguageTag.PlaceholderText" xml:space="preserve">
+    <value>示例：zh</value>
+  </data>
+  <data name="VideoPage_SubtitleTitle.Header" xml:space="preserve">
+    <value>字幕标题</value>
+  </data>
+  <data name="VideoPage_SubtitleTitle.PlaceholderText" xml:space="preserve">
+    <value>示例：中文</value>
+  </data>
+  <data name="VideoPage_SetDefaultSubtitle.Content" xml:space="preserve">
+    <value>设为默认字幕</value>
+  </data>
+  <data name="VideoPage_Resize.Text" xml:space="preserve">
+    <value>调整大小</value>
+  </data>
+  <data name="VideoPage_EnableResize.Content" xml:space="preserve">
+    <value>启用调整大小</value>
+  </data>
+  <data name="VideoPage_Width.Header" xml:space="preserve">
+    <value>宽度</value>
+  </data>
+  <data name="VideoPage_Height.Header" xml:space="preserve">
+    <value>高度</value>
+  </data>
+  <data name="VideoPage_ResizeMode.Header" xml:space="preserve">
+    <value>调整大小模式</value>
+  </data>
+  <data name="VideoPage_PadToFit.Content" xml:space="preserve">
+    <value>填充适配</value>
+  </data>
+  <data name="VideoPage_CropToFill.Content" xml:space="preserve">
+    <value>裁剪填充</value>
+  </data>
+  <data name="VideoPage_Stretch.Content" xml:space="preserve">
+    <value>拉伸</value>
+  </data>
+  <data name="VideoPage_PaddingColor.Header" xml:space="preserve">
+    <value>填充颜色</value>
+  </data>
+  <data name="VideoPage_PaddingColor.PlaceholderText" xml:space="preserve">
+    <value>例如 black 或 #000000</value>
+  </data>
+  <data name="VideoPage_Trim.Text" xml:space="preserve">
+    <value>裁剪</value>
+  </data>
+  <data name="VideoPage_EnableTrim.Content" xml:space="preserve">
+    <value>启用裁剪</value>
+  </data>
+  <data name="VideoPage_TrimHint.Text" xml:space="preserve">
+    <value>拖动预览下方的裁剪手柄以选择起点和终点。</value>
+  </data>
+  <data name="VideoPage_RotateAndMirror.Text" xml:space="preserve">
+    <value>旋转与镜像</value>
+  </data>
+  <data name="VideoPage_Rotation.Header" xml:space="preserve">
+    <value>旋转</value>
+  </data>
+  <data name="VideoPage_MirrorHorizontally.Content" xml:space="preserve">
+    <value>水平镜像</value>
+  </data>
+  <data name="VideoPage_MirrorVertically.Content" xml:space="preserve">
+    <value>垂直镜像</value>
+  </data>
+  <data name="VideoPage_Metadata.Text" xml:space="preserve">
+    <value>元数据</value>
+  </data>
+  <data name="VideoPage_RemoveMetadata.Content" xml:space="preserve">
+    <value>移除元数据</value>
+  </data>
+  <data name="VideoPage_Repair.Text" xml:space="preserve">
+    <value>修复</value>
+  </data>
+  <data name="VideoPage_EnableRepair.Content" xml:space="preserve">
+    <value>启用修复模式</value>
+  </data>
+  <data name="VideoPage_RepairMode.Header" xml:space="preserve">
+    <value>修复模式</value>
+  </data>
+  <data name="VideoPage_Remux.Content" xml:space="preserve">
+    <value>重混流</value>
+  </data>
+  <data name="VideoPage_Reencode.Content" xml:space="preserve">
+    <value>重新编码</value>
+  </data>
+  <data name="VideoPage_RegenerateTimestamps.Content" xml:space="preserve">
+    <value>重新生成时间戳</value>
+  </data>
+  <data name="VideoPage_IgnoreErrors.Content" xml:space="preserve">
+    <value>忽略可恢复的错误</value>
+  </data>
+  <data name="VideoPage_DropNonEssential.Content" xml:space="preserve">
+    <value>丢弃非必要流</value>
+  </data>
+  <data name="VideoPage_RemoveMetadataRepair.Content" xml:space="preserve">
+    <value>修复时移除元数据</value>
+  </data>
+  <data name="VideoPage_TranscriptionReview.Text" xml:space="preserve">
+    <value>转录审阅</value>
+  </data>
+  <data name="VideoPage_TranscriptionReviewHint.Text" xml:space="preserve">
+    <value>在应用生成最终 ASS 字幕进行导出之前，在此审阅每个 Whisper 片段。处理视频时将自动应用您的编辑。</value>
+  </data>
+  <data name="VideoPage_SubtitleEditorStatus.Text" xml:space="preserve">
+    <value>生成或选择字幕文件以进行编辑。</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        PDF editor page
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="PdfPage_Title.Text" xml:space="preserve"><value>PDF 编辑器</value></data>
-  <data name="PdfPage_Subtitle.Text" xml:space="preserve"><value>导入 PDF，整理页面，添加安全保护，使用清晰直观的布局应用编辑，预览与选项一目了然。</value></data>
-  <data name="PdfPage_PreviewHint.Text" xml:space="preserve"><value>拖放 PDF 或单击预览区域开始。整理、安全和内容编辑功能均在选项面板中提供。</value></data>
-  <data name="PdfPage_NoPdfLoaded.Text" xml:space="preserve"><value>尚未加载 PDF。</value></data>
-  <data name="PdfPage_DropHintTitle.Text" xml:space="preserve"><value>将 PDF 拖放至此</value></data>
-  <data name="PdfPage_DropHintSubtitle.Text" xml:space="preserve"><value>您也可以单击此区域浏览文件。选项面板中提供合并、拆分、加密和内容选项。</value></data>
-  <data name="PdfPage_FitPage.Content" xml:space="preserve"><value>适应页面</value></data>
-  <data name="PdfPage_Previous.Content" xml:space="preserve"><value>← 上一页</value></data>
-  <data name="PdfPage_Next.Content" xml:space="preserve"><value>下一页 →</value></data>
-  <data name="PdfPage_SelectCategory.Text" xml:space="preserve"><value>从左侧选择一个类别</value></data>
-  <data name="PdfPage_Processing.Text" xml:space="preserve"><value>正在处理 PDF...</value></data>
-  <data name="PdfPage_PreparingService.Text" xml:space="preserve"><value>正在准备 PDF 服务...</value></data>
-  <data name="PdfPage_Merge.Text" xml:space="preserve"><value>合并</value></data>
-  <data name="PdfPage_MergeHint.Text" xml:space="preserve"><value>将多个 PDF 合并为一个文档。</value></data>
-  <data name="PdfPage_AddPdf.Content" xml:space="preserve"><value>添加 PDF 以合并</value></data>
-  <data name="PdfPage_Split.Text" xml:space="preserve"><value>拆分</value></data>
-  <data name="PdfPage_SplitMode.Header" xml:space="preserve"><value>拆分模式</value></data>
-  <data name="PdfPage_OnePagePerFile.Content" xml:space="preserve"><value>每页一个文件</value></data>
-  <data name="PdfPage_ByPageRanges.Content" xml:space="preserve"><value>按页面范围</value></data>
-  <data name="PdfPage_PageRanges.Header" xml:space="preserve"><value>页面范围</value></data>
-  <data name="PdfPage_PageRanges.PlaceholderText" xml:space="preserve"><value>示例：1-3, 5, 7-9</value></data>
-  <data name="PdfPage_PageRangesHint.Text" xml:space="preserve"><value>指定范围如 1-3 表示第 1 到第 3 页，或单页如 5。</value></data>
-  <data name="PdfPage_Reorder.Text" xml:space="preserve"><value>重新排序</value></data>
-  <data name="PdfPage_ReorderHint.Text" xml:space="preserve"><value>通过指定新顺序重新排列页面。</value></data>
-  <data name="PdfPage_PageOrder.Header" xml:space="preserve"><value>页面顺序</value></data>
-  <data name="PdfPage_PageOrder.PlaceholderText" xml:space="preserve"><value>示例：3, 1, 2, 5, 4</value></data>
-  <data name="PdfPage_PageOrderHint.Text" xml:space="preserve"><value>按所需顺序列出页码，用逗号分隔。</value></data>
-  <data name="PdfPage_Extract.Text" xml:space="preserve"><value>提取</value></data>
-  <data name="PdfPage_ExtractImages.Content" xml:space="preserve"><value>提取图像</value></data>
-  <data name="PdfPage_ExtractAttachments.Content" xml:space="preserve"><value>提取附件</value></data>
-  <data name="PdfPage_ImagesFolderName" xml:space="preserve"><value>图片</value></data>
-  <data name="PdfPage_AttachmentsFolderName" xml:space="preserve"><value>附件</value></data>
-  <data name="PdfPage_ExtractHint.Text" xml:space="preserve"><value>提取的文件将保存到单独的文件夹中。</value></data>
-  <data name="PdfPage_Rotate.Text" xml:space="preserve"><value>旋转</value></data>
-  <data name="PdfPage_Rotation.Header" xml:space="preserve"><value>旋转</value></data>
-  <data name="PdfPage_0Degrees.Content" xml:space="preserve"><value>0 度</value></data>
-  <data name="PdfPage_90CW.Content" xml:space="preserve"><value>顺时针 90 度</value></data>
-  <data name="PdfPage_180Degrees.Content" xml:space="preserve"><value>180 度</value></data>
-  <data name="PdfPage_270CW.Content" xml:space="preserve"><value>顺时针 270 度</value></data>
-  <data name="PdfPage_ApplyTo.Header" xml:space="preserve"><value>应用于</value></data>
-  <data name="PdfPage_AllPages.Content" xml:space="preserve"><value>所有页面</value></data>
-  <data name="PdfPage_CurrentPage.Content" xml:space="preserve"><value>当前页面</value></data>
-  <data name="PdfPage_SelectedPages.Content" xml:space="preserve"><value>选定页面</value></data>
-  <data name="PdfPage_PageNumbers.Header" xml:space="preserve"><value>页码</value></data>
-  <data name="PdfPage_PageNumbers.PlaceholderText" xml:space="preserve"><value>示例：1, 3-5, 7</value></data>
-  <data name="PdfPage_Encrypt.Text" xml:space="preserve"><value>加密</value></data>
-  <data name="PdfPage_Password.Header" xml:space="preserve"><value>密码</value></data>
-  <data name="PdfPage_ConfirmPassword.Header" xml:space="preserve"><value>确认密码</value></data>
-  <data name="PdfPage_SetOwnerPassword.Content" xml:space="preserve"><value>设置所有者密码</value></data>
-  <data name="PdfPage_OwnerPassword.Header" xml:space="preserve"><value>所有者密码</value></data>
-  <data name="PdfPage_PasswordSection.Text" xml:space="preserve"><value>密码</value></data>
-  <data name="PdfPage_PasswordAction.Header" xml:space="preserve"><value>操作</value></data>
-  <data name="PdfPage_RemovePassword.Content" xml:space="preserve"><value>移除密码</value></data>
-  <data name="PdfPage_ChangePassword.Content" xml:space="preserve"><value>更改密码</value></data>
-  <data name="PdfPage_CurrentPassword.Header" xml:space="preserve"><value>当前密码</value></data>
-  <data name="PdfPage_RemovePasswordHint.Text" xml:space="preserve"><value>输入 PDF 的当前密码以移除保护。</value></data>
-  <data name="PdfPage_NewPassword.Header" xml:space="preserve"><value>新密码</value></data>
-  <data name="PdfPage_ConfirmNewPassword.Header" xml:space="preserve"><value>确认新密码</value></data>
-  <data name="PdfPage_PermissionsSection.Text" xml:space="preserve"><value>权限</value></data>
-  <data name="PdfPage_PermissionsHint.Text" xml:space="preserve"><value>控制用户对 PDF 的操作权限。</value></data>
-  <data name="PdfPage_AllowPrinting.Content" xml:space="preserve"><value>允许打印</value></data>
-  <data name="PdfPage_AllowCopying.Content" xml:space="preserve"><value>允许复制文字和图像</value></data>
-  <data name="PdfPage_AllowEditing.Content" xml:space="preserve"><value>允许编辑</value></data>
-  <data name="PdfPage_AllowAnnotations.Content" xml:space="preserve"><value>允许添加注释</value></data>
-  <data name="PdfPage_OCR.Text" xml:space="preserve"><value>OCR</value></data>
-  <data name="PdfPage_OcrHint.Text" xml:space="preserve"><value>通过识别文字使扫描版 PDF 可搜索。</value></data>
-  <data name="PdfPage_OcrLanguage.Header" xml:space="preserve"><value>语言</value></data>
-  <data name="PdfPage_OcrAutoDetect.Content" xml:space="preserve"><value>自动检测</value></data>
+  <data name="PdfPage_Title.Text" xml:space="preserve">
+    <value>PDF 编辑器</value>
+  </data>
+  <data name="PdfPage_Subtitle.Text" xml:space="preserve">
+    <value>导入 PDF，整理页面，添加安全保护，使用清晰直观的布局应用编辑，预览与选项一目了然。</value>
+  </data>
+  <data name="PdfPage_PreviewHint.Text" xml:space="preserve">
+    <value>拖放 PDF 或单击预览区域开始。整理、安全和内容编辑功能均在选项面板中提供。</value>
+  </data>
+  <data name="PdfPage_NoPdfLoaded.Text" xml:space="preserve">
+    <value>尚未加载 PDF。</value>
+  </data>
+  <data name="PdfPage_DropHintTitle.Text" xml:space="preserve">
+    <value>将 PDF 拖放至此</value>
+  </data>
+  <data name="PdfPage_DropHintSubtitle.Text" xml:space="preserve">
+    <value>您也可以单击此区域浏览文件。选项面板中提供合并、拆分、加密和内容选项。</value>
+  </data>
+  <data name="PdfPage_FitPage.Content" xml:space="preserve">
+    <value>适应页面</value>
+  </data>
+  <data name="PdfPage_Previous.Content" xml:space="preserve">
+    <value>← 上一页</value>
+  </data>
+  <data name="PdfPage_Next.Content" xml:space="preserve">
+    <value>下一页 →</value>
+  </data>
+  <data name="PdfPage_SelectCategory.Text" xml:space="preserve">
+    <value>从左侧选择一个类别</value>
+  </data>
+  <data name="PdfPage_Processing.Text" xml:space="preserve">
+    <value>正在处理 PDF...</value>
+  </data>
+  <data name="PdfPage_PreparingService.Text" xml:space="preserve">
+    <value>正在准备 PDF 服务...</value>
+  </data>
+  <data name="PdfPage_Merge.Text" xml:space="preserve">
+    <value>合并</value>
+  </data>
+  <data name="PdfPage_MergeHint.Text" xml:space="preserve">
+    <value>将多个 PDF 合并为一个文档。</value>
+  </data>
+  <data name="PdfPage_AddPdf.Content" xml:space="preserve">
+    <value>添加 PDF 以合并</value>
+  </data>
+  <data name="PdfPage_Split.Text" xml:space="preserve">
+    <value>拆分</value>
+  </data>
+  <data name="PdfPage_SplitMode.Header" xml:space="preserve">
+    <value>拆分模式</value>
+  </data>
+  <data name="PdfPage_OnePagePerFile.Content" xml:space="preserve">
+    <value>每页一个文件</value>
+  </data>
+  <data name="PdfPage_ByPageRanges.Content" xml:space="preserve">
+    <value>按页面范围</value>
+  </data>
+  <data name="PdfPage_PageRanges.Header" xml:space="preserve">
+    <value>页面范围</value>
+  </data>
+  <data name="PdfPage_PageRanges.PlaceholderText" xml:space="preserve">
+    <value>示例：1-3, 5, 7-9</value>
+  </data>
+  <data name="PdfPage_PageRangesHint.Text" xml:space="preserve">
+    <value>指定范围如 1-3 表示第 1 到第 3 页，或单页如 5。</value>
+  </data>
+  <data name="PdfPage_Reorder.Text" xml:space="preserve">
+    <value>重新排序</value>
+  </data>
+  <data name="PdfPage_ReorderHint.Text" xml:space="preserve">
+    <value>通过指定新顺序重新排列页面。</value>
+  </data>
+  <data name="PdfPage_PageOrder.Header" xml:space="preserve">
+    <value>页面顺序</value>
+  </data>
+  <data name="PdfPage_PageOrder.PlaceholderText" xml:space="preserve">
+    <value>示例：3, 1, 2, 5, 4</value>
+  </data>
+  <data name="PdfPage_PageOrderHint.Text" xml:space="preserve">
+    <value>按所需顺序列出页码，用逗号分隔。</value>
+  </data>
+  <data name="PdfPage_Extract.Text" xml:space="preserve">
+    <value>提取</value>
+  </data>
+  <data name="PdfPage_ExtractImages.Content" xml:space="preserve">
+    <value>提取图像</value>
+  </data>
+  <data name="PdfPage_ExtractAttachments.Content" xml:space="preserve">
+    <value>提取附件</value>
+  </data>
+  <data name="PdfPage_ImagesFolderName" xml:space="preserve">
+    <value>图片</value>
+  </data>
+  <data name="PdfPage_AttachmentsFolderName" xml:space="preserve">
+    <value>附件</value>
+  </data>
+  <data name="PdfPage_ExtractHint.Text" xml:space="preserve">
+    <value>提取的文件将保存到单独的文件夹中。</value>
+  </data>
+  <data name="PdfPage_Rotate.Text" xml:space="preserve">
+    <value>旋转</value>
+  </data>
+  <data name="PdfPage_Rotation.Header" xml:space="preserve">
+    <value>旋转</value>
+  </data>
+  <data name="PdfPage_0Degrees.Content" xml:space="preserve">
+    <value>0 度</value>
+  </data>
+  <data name="PdfPage_90CW.Content" xml:space="preserve">
+    <value>顺时针 90 度</value>
+  </data>
+  <data name="PdfPage_180Degrees.Content" xml:space="preserve">
+    <value>180 度</value>
+  </data>
+  <data name="PdfPage_270CW.Content" xml:space="preserve">
+    <value>顺时针 270 度</value>
+  </data>
+  <data name="PdfPage_ApplyTo.Header" xml:space="preserve">
+    <value>应用于</value>
+  </data>
+  <data name="PdfPage_AllPages.Content" xml:space="preserve">
+    <value>所有页面</value>
+  </data>
+  <data name="PdfPage_CurrentPage.Content" xml:space="preserve">
+    <value>当前页面</value>
+  </data>
+  <data name="PdfPage_SelectedPages.Content" xml:space="preserve">
+    <value>选定页面</value>
+  </data>
+  <data name="PdfPage_PageNumbers.Header" xml:space="preserve">
+    <value>页码</value>
+  </data>
+  <data name="PdfPage_PageNumbers.PlaceholderText" xml:space="preserve">
+    <value>示例：1, 3-5, 7</value>
+  </data>
+  <data name="PdfPage_Encrypt.Text" xml:space="preserve">
+    <value>加密</value>
+  </data>
+  <data name="PdfPage_Password.Header" xml:space="preserve">
+    <value>密码</value>
+  </data>
+  <data name="PdfPage_ConfirmPassword.Header" xml:space="preserve">
+    <value>确认密码</value>
+  </data>
+  <data name="PdfPage_SetOwnerPassword.Content" xml:space="preserve">
+    <value>设置所有者密码</value>
+  </data>
+  <data name="PdfPage_OwnerPassword.Header" xml:space="preserve">
+    <value>所有者密码</value>
+  </data>
+  <data name="PdfPage_PasswordSection.Text" xml:space="preserve">
+    <value>密码</value>
+  </data>
+  <data name="PdfPage_PasswordAction.Header" xml:space="preserve">
+    <value>操作</value>
+  </data>
+  <data name="PdfPage_RemovePassword.Content" xml:space="preserve">
+    <value>移除密码</value>
+  </data>
+  <data name="PdfPage_ChangePassword.Content" xml:space="preserve">
+    <value>更改密码</value>
+  </data>
+  <data name="PdfPage_CurrentPassword.Header" xml:space="preserve">
+    <value>当前密码</value>
+  </data>
+  <data name="PdfPage_RemovePasswordHint.Text" xml:space="preserve">
+    <value>输入 PDF 的当前密码以移除保护。</value>
+  </data>
+  <data name="PdfPage_NewPassword.Header" xml:space="preserve">
+    <value>新密码</value>
+  </data>
+  <data name="PdfPage_ConfirmNewPassword.Header" xml:space="preserve">
+    <value>确认新密码</value>
+  </data>
+  <data name="PdfPage_PermissionsSection.Text" xml:space="preserve">
+    <value>权限</value>
+  </data>
+  <data name="PdfPage_PermissionsHint.Text" xml:space="preserve">
+    <value>控制用户对 PDF 的操作权限。</value>
+  </data>
+  <data name="PdfPage_AllowPrinting.Content" xml:space="preserve">
+    <value>允许打印</value>
+  </data>
+  <data name="PdfPage_AllowCopying.Content" xml:space="preserve">
+    <value>允许复制文字和图像</value>
+  </data>
+  <data name="PdfPage_AllowEditing.Content" xml:space="preserve">
+    <value>允许编辑</value>
+  </data>
+  <data name="PdfPage_AllowAnnotations.Content" xml:space="preserve">
+    <value>允许添加注释</value>
+  </data>
+  <data name="PdfPage_OCR.Text" xml:space="preserve">
+    <value>OCR</value>
+  </data>
+  <data name="PdfPage_OcrHint.Text" xml:space="preserve">
+    <value>通过识别文字使扫描版 PDF 可搜索。</value>
+  </data>
+  <data name="PdfPage_OcrLanguage.Header" xml:space="preserve">
+    <value>语言</value>
+  </data>
+  <data name="PdfPage_OcrAutoDetect.Content" xml:space="preserve">
+    <value>自动检测</value>
+  </data>
   <data name="PdfPage_OcrTessDataLabel.Text" xml:space="preserve">
     <value>Tessdata 目录</value>
   </data>
@@ -314,277 +930,814 @@
   <data name="PdfPage_OcrTessDataHint.Text" xml:space="preserve">
     <value>包含 .traineddata 语言包的文件夹。如果存在，将自动从 %LOCALAPPDATA%\FilesTools\tessdata 检测。</value>
   </data>
-  <data name="PdfPage_Metadata.Text" xml:space="preserve"><value>元数据</value></data>
-  <data name="PdfPage_MetadataTitle.Header" xml:space="preserve"><value>标题</value></data>
-  <data name="PdfPage_MetadataTitle.PlaceholderText" xml:space="preserve"><value>文档标题</value></data>
-  <data name="PdfPage_MetadataAuthor.Header" xml:space="preserve"><value>作者</value></data>
-  <data name="PdfPage_MetadataAuthor.PlaceholderText" xml:space="preserve"><value>作者姓名</value></data>
-  <data name="PdfPage_MetadataSubject.Header" xml:space="preserve"><value>主题</value></data>
-  <data name="PdfPage_MetadataSubject.PlaceholderText" xml:space="preserve"><value>文档主题</value></data>
-  <data name="PdfPage_MetadataKeywords.Header" xml:space="preserve"><value>关键词</value></data>
-  <data name="PdfPage_MetadataKeywords.PlaceholderText" xml:space="preserve"><value>以逗号分隔的关键词</value></data>
-  <data name="PdfPage_MetadataCreator.Header" xml:space="preserve"><value>创建程序</value></data>
-  <data name="PdfPage_MetadataCreator.PlaceholderText" xml:space="preserve"><value>创建应用程序</value></data>
-  <data name="PdfPage_MetadataProducer.Header" xml:space="preserve"><value>生成程序</value></data>
-  <data name="PdfPage_MetadataProducer.PlaceholderText" xml:space="preserve"><value>生成应用程序</value></data>
-  <data name="PdfPage_Repair.Text" xml:space="preserve"><value>修复</value></data>
-  <data name="PdfPage_RepairHint.Text" xml:space="preserve"><value>修复损坏的 PDF 文件。</value></data>
-  <data name="PdfPage_RepairButton.Content" xml:space="preserve"><value>修复 PDF</value></data>
-  <data name="PdfPage_RepairReady.Text" xml:space="preserve"><value>已准备好修复。</value></data>
-
+  <data name="PdfPage_Metadata.Text" xml:space="preserve">
+    <value>元数据</value>
+  </data>
+  <data name="PdfPage_MetadataTitle.Header" xml:space="preserve">
+    <value>标题</value>
+  </data>
+  <data name="PdfPage_MetadataTitle.PlaceholderText" xml:space="preserve">
+    <value>文档标题</value>
+  </data>
+  <data name="PdfPage_MetadataAuthor.Header" xml:space="preserve">
+    <value>作者</value>
+  </data>
+  <data name="PdfPage_MetadataAuthor.PlaceholderText" xml:space="preserve">
+    <value>作者姓名</value>
+  </data>
+  <data name="PdfPage_MetadataSubject.Header" xml:space="preserve">
+    <value>主题</value>
+  </data>
+  <data name="PdfPage_MetadataSubject.PlaceholderText" xml:space="preserve">
+    <value>文档主题</value>
+  </data>
+  <data name="PdfPage_MetadataKeywords.Header" xml:space="preserve">
+    <value>关键词</value>
+  </data>
+  <data name="PdfPage_MetadataKeywords.PlaceholderText" xml:space="preserve">
+    <value>以逗号分隔的关键词</value>
+  </data>
+  <data name="PdfPage_MetadataCreator.Header" xml:space="preserve">
+    <value>创建程序</value>
+  </data>
+  <data name="PdfPage_MetadataCreator.PlaceholderText" xml:space="preserve">
+    <value>创建应用程序</value>
+  </data>
+  <data name="PdfPage_MetadataProducer.Header" xml:space="preserve">
+    <value>生成程序</value>
+  </data>
+  <data name="PdfPage_MetadataProducer.PlaceholderText" xml:space="preserve">
+    <value>生成应用程序</value>
+  </data>
+  <data name="PdfPage_Repair.Text" xml:space="preserve">
+    <value>修复</value>
+  </data>
+  <data name="PdfPage_RepairHint.Text" xml:space="preserve">
+    <value>修复损坏的 PDF 文件。</value>
+  </data>
+  <data name="PdfPage_RepairButton.Content" xml:space="preserve">
+    <value>修复 PDF</value>
+  </data>
+  <data name="PdfPage_RepairReady.Text" xml:space="preserve">
+    <value>已准备好修复。</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Document editor page
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="DocPage_Title.Text" xml:space="preserve"><value>文档处理</value></data>
-  <data name="DocPage_Subtitle.Text" xml:space="preserve"><value>将文档转换为 PDF、修复损坏的文件或提取嵌入的图像。从面板中选择操作，然后拖放或浏览文档。</value></data>
-  <data name="DocPage_LibreOfficeRequired.Text" xml:space="preserve"><value>需要 LibreOffice</value></data>
-  <data name="DocPage_LibreOfficeStatus.Text" xml:space="preserve"><value>文档处理需要 LibreOffice，需要下载（约 420 MB）。这是一次性下载，将保留在您的计算机上。</value></data>
-  <data name="DocPage_DownloadLibreOffice.Content" xml:space="preserve"><value>下载 LibreOffice</value></data>
-  <data name="DocPage_Cancel.Content" xml:space="preserve"><value>取消</value></data>
-  <data name="DocPage_DocumentSection.Text" xml:space="preserve"><value>文档</value></data>
-  <data name="DocPage_DocumentSectionHint.Text" xml:space="preserve"><value>拖放文档或单击此区域浏览。单击操作按钮时将应用所选操作。</value></data>
-  <data name="DocPage_NoDocumentLoaded.Text" xml:space="preserve"><value>尚未加载文档。</value></data>
-  <data name="DocPage_DropHintTitle.Text" xml:space="preserve"><value>将文档拖放至此</value></data>
-  <data name="DocPage_DropHintSubtitle.Text" xml:space="preserve"><value>您也可以单击此区域浏览文件。支持的格式包括 DOCX、PDF、PPTX、XLSX 等。</value></data>
-  <data name="DocPage_ProcessDocument.Content" xml:space="preserve"><value>处理文档</value></data>
-  <data name="DocPage_SelectOperation.Text" xml:space="preserve"><value>选择操作</value></data>
-  <data name="DocPage_PdfVariant.Text" xml:space="preserve"><value>PDF 变体</value></data>
-  <data name="DocPage_OutputStandard.Header" xml:space="preserve"><value>输出标准</value></data>
-  <data name="DocPage_StandardPdf.Content" xml:space="preserve"><value>标准 PDF 1.4</value></data>
-  <data name="DocPage_PdfA1b.Content" xml:space="preserve"><value>PDF/A-1b（长期归档）</value></data>
-  <data name="DocPage_PdfA2b.Content" xml:space="preserve"><value>PDF/A-2b（扩展归档）</value></data>
-  <data name="DocPage_PdfA3b.Content" xml:space="preserve"><value>PDF/A-3b（含附件）</value></data>
-  <data name="DocPage_ImageCompression.Text" xml:space="preserve"><value>图像压缩</value></data>
-  <data name="DocPage_CompressionMethod.Header" xml:space="preserve"><value>压缩方式</value></data>
-  <data name="DocPage_DefaultCompression.Content" xml:space="preserve"><value>默认压缩</value></data>
-  <data name="DocPage_Lossless.Content" xml:space="preserve"><value>无损（无质量损失）</value></data>
-  <data name="DocPage_JpegCompression.Content" xml:space="preserve"><value>JPEG（较小文件大小）</value></data>
-  <data name="DocPage_PageRange.Text" xml:space="preserve"><value>页面范围（可选）</value></data>
-  <data name="DocPage_PagesToInclude.Header" xml:space="preserve"><value>要包含的页面</value></data>
-  <data name="DocPage_PagesToInclude.PlaceholderText" xml:space="preserve"><value>留空表示所有页面。示例：1-3,5,8-10</value></data>
-  <data name="DocPage_PageRangeHint.Text" xml:space="preserve"><value>以逗号分隔的页面或范围列表。演示文稿使用幻灯片编号，电子表格使用工作表索引。</value></data>
-  <data name="DocPage_RepairOutputFormat.Text" xml:space="preserve"><value>输出格式</value></data>
-  <data name="DocPage_SaveAs.Header" xml:space="preserve"><value>另存为</value></data>
-  <data name="DocPage_KeepOriginalFormat.Content" xml:space="preserve"><value>保留原始格式</value></data>
-  <data name="DocPage_Docx.Content" xml:space="preserve"><value>DOCX（Word）</value></data>
-  <data name="DocPage_Pptx.Content" xml:space="preserve"><value>PPTX（PowerPoint）</value></data>
-  <data name="DocPage_Xlsx.Content" xml:space="preserve"><value>XLSX（Excel）</value></data>
-  <data name="DocPage_Odt.Content" xml:space="preserve"><value>ODT（OpenDocument 文本）</value></data>
-  <data name="DocPage_Odp.Content" xml:space="preserve"><value>ODP（OpenDocument 演示文稿）</value></data>
-  <data name="DocPage_Ods.Content" xml:space="preserve"><value>ODS（OpenDocument 电子表格）</value></data>
-  <data name="DocPage_RepairHint.Text" xml:space="preserve"><value>修复过程将修正损坏的结构。您可以选择在修复时转换为其他格式。</value></data>
-  <data name="DocPage_ExtractSettings.Text" xml:space="preserve"><value>提取设置</value></data>
-  <data name="DocPage_ExtractHint.Text" xml:space="preserve"><value>所有嵌入的图像将被提取并打包成 ZIP 压缩包，保存到您选择的位置。</value></data>
-
+  <data name="DocPage_Title.Text" xml:space="preserve">
+    <value>文档处理</value>
+  </data>
+  <data name="DocPage_Subtitle.Text" xml:space="preserve">
+    <value>将文档转换为 PDF、修复损坏的文件或提取嵌入的图像。从面板中选择操作，然后拖放或浏览文档。</value>
+  </data>
+  <data name="DocPage_LibreOfficeRequired.Text" xml:space="preserve">
+    <value>需要 LibreOffice</value>
+  </data>
+  <data name="DocPage_LibreOfficeStatus.Text" xml:space="preserve">
+    <value>文档处理需要 LibreOffice，需要下载（约 420 MB）。这是一次性下载，将保留在您的计算机上。</value>
+  </data>
+  <data name="DocPage_DownloadLibreOffice.Content" xml:space="preserve">
+    <value>下载 LibreOffice</value>
+  </data>
+  <data name="DocPage_Cancel.Content" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="DocPage_DocumentSection.Text" xml:space="preserve">
+    <value>文档</value>
+  </data>
+  <data name="DocPage_DocumentSectionHint.Text" xml:space="preserve">
+    <value>拖放文档或单击此区域浏览。单击操作按钮时将应用所选操作。</value>
+  </data>
+  <data name="DocPage_NoDocumentLoaded.Text" xml:space="preserve">
+    <value>尚未加载文档。</value>
+  </data>
+  <data name="DocPage_DropHintTitle.Text" xml:space="preserve">
+    <value>将文档拖放至此</value>
+  </data>
+  <data name="DocPage_DropHintSubtitle.Text" xml:space="preserve">
+    <value>您也可以单击此区域浏览文件。支持的格式包括 DOCX、PDF、PPTX、XLSX 等。</value>
+  </data>
+  <data name="DocPage_ProcessDocument.Content" xml:space="preserve">
+    <value>处理文档</value>
+  </data>
+  <data name="DocPage_SelectOperation.Text" xml:space="preserve">
+    <value>选择操作</value>
+  </data>
+  <data name="DocPage_PdfVariant.Text" xml:space="preserve">
+    <value>PDF 变体</value>
+  </data>
+  <data name="DocPage_OutputStandard.Header" xml:space="preserve">
+    <value>输出标准</value>
+  </data>
+  <data name="DocPage_StandardPdf.Content" xml:space="preserve">
+    <value>标准 PDF 1.4</value>
+  </data>
+  <data name="DocPage_PdfA1b.Content" xml:space="preserve">
+    <value>PDF/A-1b（长期归档）</value>
+  </data>
+  <data name="DocPage_PdfA2b.Content" xml:space="preserve">
+    <value>PDF/A-2b（扩展归档）</value>
+  </data>
+  <data name="DocPage_PdfA3b.Content" xml:space="preserve">
+    <value>PDF/A-3b（含附件）</value>
+  </data>
+  <data name="DocPage_ImageCompression.Text" xml:space="preserve">
+    <value>图像压缩</value>
+  </data>
+  <data name="DocPage_CompressionMethod.Header" xml:space="preserve">
+    <value>压缩方式</value>
+  </data>
+  <data name="DocPage_DefaultCompression.Content" xml:space="preserve">
+    <value>默认压缩</value>
+  </data>
+  <data name="DocPage_Lossless.Content" xml:space="preserve">
+    <value>无损（无质量损失）</value>
+  </data>
+  <data name="DocPage_JpegCompression.Content" xml:space="preserve">
+    <value>JPEG（较小文件大小）</value>
+  </data>
+  <data name="DocPage_PageRange.Text" xml:space="preserve">
+    <value>页面范围（可选）</value>
+  </data>
+  <data name="DocPage_PagesToInclude.Header" xml:space="preserve">
+    <value>要包含的页面</value>
+  </data>
+  <data name="DocPage_PagesToInclude.PlaceholderText" xml:space="preserve">
+    <value>留空表示所有页面。示例：1-3,5,8-10</value>
+  </data>
+  <data name="DocPage_PageRangeHint.Text" xml:space="preserve">
+    <value>以逗号分隔的页面或范围列表。演示文稿使用幻灯片编号，电子表格使用工作表索引。</value>
+  </data>
+  <data name="DocPage_RepairOutputFormat.Text" xml:space="preserve">
+    <value>输出格式</value>
+  </data>
+  <data name="DocPage_SaveAs.Header" xml:space="preserve">
+    <value>另存为</value>
+  </data>
+  <data name="DocPage_KeepOriginalFormat.Content" xml:space="preserve">
+    <value>保留原始格式</value>
+  </data>
+  <data name="DocPage_Docx.Content" xml:space="preserve">
+    <value>DOCX（Word）</value>
+  </data>
+  <data name="DocPage_Pptx.Content" xml:space="preserve">
+    <value>PPTX（PowerPoint）</value>
+  </data>
+  <data name="DocPage_Xlsx.Content" xml:space="preserve">
+    <value>XLSX（Excel）</value>
+  </data>
+  <data name="DocPage_Odt.Content" xml:space="preserve">
+    <value>ODT（OpenDocument 文本）</value>
+  </data>
+  <data name="DocPage_Odp.Content" xml:space="preserve">
+    <value>ODP（OpenDocument 演示文稿）</value>
+  </data>
+  <data name="DocPage_Ods.Content" xml:space="preserve">
+    <value>ODS（OpenDocument 电子表格）</value>
+  </data>
+  <data name="DocPage_RepairHint.Text" xml:space="preserve">
+    <value>修复过程将修正损坏的结构。您可以选择在修复时转换为其他格式。</value>
+  </data>
+  <data name="DocPage_ExtractSettings.Text" xml:space="preserve">
+    <value>提取设置</value>
+  </data>
+  <data name="DocPage_ExtractHint.Text" xml:space="preserve">
+    <value>所有嵌入的图像将被提取并打包成 ZIP 压缩包，保存到您选择的位置。</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Batch editor page
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="BatchPage_Title.Text" xml:space="preserve"><value>批量处理器</value></data>
-  <data name="BatchPage_Subtitle.Text" xml:space="preserve"><value>拖放多个文件（音频、视频、文档、PDF、图像），在一次运行中对每种类型组应用精选操作。</value></data>
-  <data name="BatchPage_FilesSection.Text" xml:space="preserve"><value>文件</value></data>
-  <data name="BatchPage_FileCountDefault.Text" xml:space="preserve"><value>将文件拖放至下方，或单击"添加"开始。</value></data>
-  <data name="BatchPage_AddFiles.Content" xml:space="preserve"><value>添加文件</value></data>
-  <data name="BatchPage_ClearAll.Content" xml:space="preserve"><value>全部清除</value></data>
-  <data name="BatchPage_DropHintTitle.Text" xml:space="preserve"><value>将文件拖放至此</value></data>
-  <data name="BatchPage_DropHintSubtitle.Text" xml:space="preserve"><value>可自由混合类型。支持音频、视频、文档、PDF 和图像，每种类型组各自独立处理。</value></data>
-  <data name="BatchPage_Preparing.Text" xml:space="preserve"><value>正在准备…</value></data>
-  <data name="BatchPage_NoFilesLoaded.Text" xml:space="preserve"><value>尚未加载文件。</value></data>
-  <data name="BatchPage_ShowInFolder.Content" xml:space="preserve"><value>在文件夹中显示</value></data>
-  <data name="BatchPage_Cancel.Content" xml:space="preserve"><value>取消</value></data>
-  <data name="BatchPage_ProcessBatch.Content" xml:space="preserve"><value>批量处理</value></data>
-  <data name="BatchPage_SelectOperationHeader.Text" xml:space="preserve"><value>选择操作</value></data>
-  <data name="BatchPage_NoSelectionHint.Text" xml:space="preserve"><value>从侧边栏选择操作进行配置。可启用任意数量的操作——它们将以管道方式对每个文件依次执行。</value></data>
-  <data name="BatchPage_OutputSettings.Text" xml:space="preserve"><value>输出设置</value></data>
-  <data name="BatchPage_FilenameSuffix.Header" xml:space="preserve"><value>文件名后缀</value></data>
-  <data name="BatchPage_FilesInParallel.Header" xml:space="preserve"><value>并行文件数</value></data>
-  <data name="BatchPage_ConvertAudioFormat.Content" xml:space="preserve"><value>转换音频格式</value></data>
-  <data name="BatchPage_AudioOutputFormat.Header" xml:space="preserve"><value>输出格式</value></data>
-  <data name="BatchPage_FlacLossless.Content" xml:space="preserve"><value>FLAC（无损）</value></data>
-  <data name="BatchPage_WavPcm.Content" xml:space="preserve"><value>WAV（PCM）</value></data>
-  <data name="BatchPage_OggVorbis.Content" xml:space="preserve"><value>OGG Vorbis</value></data>
-  <data name="BatchPage_CompressAudio.Content" xml:space="preserve"><value>压缩音频</value></data>
-  <data name="BatchPage_CompressionMode.Header" xml:space="preserve"><value>压缩模式</value></data>
-  <data name="BatchPage_LossySmaller.Content" xml:space="preserve"><value>有损（较小文件）</value></data>
-  <data name="BatchPage_Lossless.Content" xml:space="preserve"><value>无损</value></data>
-  <data name="BatchPage_TargetBitrate.Header" xml:space="preserve"><value>目标比特率 (kbps)</value></data>
-  <data name="BatchPage_NormalizeLoudness.Content" xml:space="preserve"><value>标准化响度</value></data>
-  <data name="BatchPage_NormalizeMode.Header" xml:space="preserve"><value>模式</value></data>
-  <data name="BatchPage_LUFS.Content" xml:space="preserve"><value>LUFS（广播标准）</value></data>
-  <data name="BatchPage_Peak.Content" xml:space="preserve"><value>峰值</value></data>
-  <data name="BatchPage_TargetLevel.Header" xml:space="preserve"><value>目标电平 (dB / LUFS)</value></data>
-  <data name="BatchPage_ChangeContainer.Content" xml:space="preserve"><value>更改容器</value></data>
-  <data name="BatchPage_TargetContainer.Header" xml:space="preserve"><value>目标容器</value></data>
-  <data name="BatchPage_ChangeCodec.Content" xml:space="preserve"><value>更改编解码器</value></data>
-  <data name="BatchPage_VideoCodec.Header" xml:space="preserve"><value>视频编解码器</value></data>
-  <data name="BatchPage_AudioCodec.Header" xml:space="preserve"><value>音频编解码器</value></data>
-  <data name="BatchPage_H264.Content" xml:space="preserve"><value>H.264</value></data>
-  <data name="BatchPage_H265.Content" xml:space="preserve"><value>H.265 / HEVC</value></data>
-  <data name="BatchPage_CompressVideo.Content" xml:space="preserve"><value>压缩视频</value></data>
-  <data name="BatchPage_VideoQualityPreset.Header" xml:space="preserve"><value>质量预设</value></data>
-  <data name="BatchPage_VeryHighQuality.Content" xml:space="preserve"><value>极高质量</value></data>
-  <data name="BatchPage_HighQuality.Content" xml:space="preserve"><value>高质量</value></data>
-  <data name="BatchPage_Balanced.Content" xml:space="preserve"><value>均衡</value></data>
-  <data name="BatchPage_SmallSize.Content" xml:space="preserve"><value>小文件</value></data>
-  <data name="BatchPage_ResizeVideo.Content" xml:space="preserve"><value>调整视频大小</value></data>
-  <data name="BatchPage_VideoWidth.Header" xml:space="preserve"><value>宽度</value></data>
-  <data name="BatchPage_VideoHeight.Header" xml:space="preserve"><value>高度</value></data>
-  <data name="BatchPage_ExtractAudioTrack.Content" xml:space="preserve"><value>提取音轨</value></data>
-  <data name="BatchPage_OutputAudioFormat.Header" xml:space="preserve"><value>输出音频格式</value></data>
-  <data name="BatchPage_GenerateMuxSubtitles.Content" xml:space="preserve"><value>生成并混流字幕</value></data>
-  <data name="BatchPage_TranscriptionSection.Text" xml:space="preserve"><value>转录</value></data>
-  <data name="BatchPage_TranscriptionHint.Text" xml:space="preserve"><value>使用 Whisper 转录每个视频。基础模式生成 SRT 文件；高级模式生成样式 ASS 字幕。</value></data>
-  <data name="BatchPage_DownloadTranscription.Content" xml:space="preserve"><value>下载转录功能</value></data>
-  <data name="BatchPage_TranscriptionNotDownloaded.Text" xml:space="preserve"><value>转录功能尚未下载。</value></data>
-  <data name="BatchPage_SubtitleGenMode.Header" xml:space="preserve"><value>字幕生成模式</value></data>
-  <data name="BatchPage_BasicSRT.Content" xml:space="preserve"><value>基础 (SRT)</value></data>
-  <data name="BatchPage_AdvancedASS.Content" xml:space="preserve"><value>高级 (ASS)</value></data>
-  <data name="BatchPage_AdvancedOutputType.Header" xml:space="preserve"><value>高级输出类型</value></data>
-  <data name="BatchPage_StyledASS.Content" xml:space="preserve"><value>样式 ASS</value></data>
-  <data name="BatchPage_KaraokeASS.Content" xml:space="preserve"><value>卡拉OK ASS</value></data>
-  <data name="BatchPage_ConfigureAdvanced.Content" xml:space="preserve"><value>配置高级字幕</value></data>
-  <data name="BatchPage_SecondsMax.Header" xml:space="preserve"><value>最长秒数</value></data>
-  <data name="BatchPage_LimitWords.Content" xml:space="preserve"><value>限制每段词数</value></data>
-  <data name="BatchPage_WordsMax.Header" xml:space="preserve"><value>最多词数</value></data>
-  <data name="BatchPage_SubtitleMux.Text" xml:space="preserve"><value>字幕混流</value></data>
-  <data name="BatchPage_MuxMode.Header" xml:space="preserve"><value>混流模式</value></data>
-  <data name="BatchPage_SoftMux.Content" xml:space="preserve"><value>软混流（嵌入轨道）</value></data>
-  <data name="BatchPage_BurnIn.Content" xml:space="preserve"><value>烧录（合并到画面）</value></data>
-  <data name="BatchPage_PlacementSection.Text" xml:space="preserve"><value>位置</value></data>
-  <data name="BatchPage_PlacementHint.Text" xml:space="preserve"><value>以视频帧的百分比精确调整字幕出现的位置。</value></data>
-  <data name="BatchPage_Horizontal.Header" xml:space="preserve"><value>水平 (%)</value></data>
-  <data name="BatchPage_Vertical.Header" xml:space="preserve"><value>垂直 (%)</value></data>
-  <data name="BatchPage_ResetPlacement.Content" xml:space="preserve"><value>重置位置</value></data>
-  <data name="BatchPage_LanguageTag.Header" xml:space="preserve"><value>语言标签</value></data>
-  <data name="BatchPage_LanguageTag.PlaceholderText" xml:space="preserve"><value>示例：zh</value></data>
-  <data name="BatchPage_SubtitleTitle.Header" xml:space="preserve"><value>字幕标题</value></data>
-  <data name="BatchPage_SubtitleTitle.PlaceholderText" xml:space="preserve"><value>示例：中文</value></data>
-  <data name="BatchPage_SetDefaultSubtitle.Content" xml:space="preserve"><value>设为默认字幕</value></data>
-  <data name="BatchPage_ConvertToPdf.Content" xml:space="preserve"><value>转换为 PDF</value></data>
-  <data name="BatchPage_LibreOfficeHint.Text" xml:space="preserve"><value>使用 LibreOffice 转换每个文档。</value></data>
-  <data name="BatchPage_PdfVariant.Header" xml:space="preserve"><value>PDF 变体</value></data>
-  <data name="BatchPage_StandardPdf.Content" xml:space="preserve"><value>标准 PDF</value></data>
-  <data name="BatchPage_PdfA1b.Content" xml:space="preserve"><value>PDF/A-1b（归档）</value></data>
-  <data name="BatchPage_PdfA2b.Content" xml:space="preserve"><value>PDF/A-2b</value></data>
-  <data name="BatchPage_PdfA3b.Content" xml:space="preserve"><value>PDF/A-3b</value></data>
-  <data name="BatchPage_CompressOptimizePdf.Content" xml:space="preserve"><value>压缩/优化 PDF</value></data>
-  <data name="BatchPage_CompressPdfHint.Text" xml:space="preserve"><value>线性化并重建文件以减小大小（使用 qpdf）。</value></data>
-  <data name="BatchPage_RepairPdf.Content" xml:space="preserve"><value>修复 PDF</value></data>
-  <data name="BatchPage_RepairPdfHint.Text" xml:space="preserve"><value>重建文档结构以修复损坏（使用 qpdf）。</value></data>
-  <data name="BatchPage_AddOcrLayer.Content" xml:space="preserve"><value>添加 OCR 文字层</value></data>
-  <data name="BatchPage_TessdataPath.Header" xml:space="preserve"><value>Tessdata 目录路径</value></data>
-  <data name="BatchPage_TessdataPath.PlaceholderText" xml:space="preserve"><value>C:\路径\到\tessdata</value></data>
-  <data name="BatchPage_OcrLanguages.Header" xml:space="preserve"><value>语言（Tesseract 代码）</value></data>
-  <data name="BatchPage_RasterizationDpi.Header" xml:space="preserve"><value>光栅化 DPI</value></data>
-  <data name="BatchPage_MergeAllPdfs.Content" xml:space="preserve"><value>将所有 PDF 合并为一个文件</value></data>
-  <data name="BatchPage_MergeHint.Text" xml:space="preserve"><value>不能与其他 PDF 操作组合使用。</value></data>
-  <data name="BatchPage_MergeFilename.Header" xml:space="preserve"><value>输出文件名</value></data>
-  <data name="BatchPage_ConvertImageFormat.Content" xml:space="preserve"><value>转换图像格式</value></data>
-  <data name="BatchPage_ImageTargetFormat.Header" xml:space="preserve"><value>目标格式</value></data>
-  <data name="BatchPage_CompressImages.Content" xml:space="preserve"><value>压缩图像</value></data>
-  <data name="BatchPage_ResizeImages.Content" xml:space="preserve"><value>调整图像大小</value></data>
-  <data name="BatchPage_ImageWidth.Header" xml:space="preserve"><value>宽度</value></data>
-  <data name="BatchPage_ImageHeight.Header" xml:space="preserve"><value>高度</value></data>
-
+  <data name="BatchPage_Title.Text" xml:space="preserve">
+    <value>批量处理器</value>
+  </data>
+  <data name="BatchPage_Subtitle.Text" xml:space="preserve">
+    <value>拖放多个文件（音频、视频、文档、PDF、图像），在一次运行中对每种类型组应用精选操作。</value>
+  </data>
+  <data name="BatchPage_FilesSection.Text" xml:space="preserve">
+    <value>文件</value>
+  </data>
+  <data name="BatchPage_FileCountDefault.Text" xml:space="preserve">
+    <value>将文件拖放至下方，或单击"添加"开始。</value>
+  </data>
+  <data name="BatchPage_AddFiles.Content" xml:space="preserve">
+    <value>添加文件</value>
+  </data>
+  <data name="BatchPage_ClearAll.Content" xml:space="preserve">
+    <value>全部清除</value>
+  </data>
+  <data name="BatchPage_DropHintTitle.Text" xml:space="preserve">
+    <value>将文件拖放至此</value>
+  </data>
+  <data name="BatchPage_DropHintSubtitle.Text" xml:space="preserve">
+    <value>可自由混合类型。支持音频、视频、文档、PDF 和图像，每种类型组各自独立处理。</value>
+  </data>
+  <data name="BatchPage_Preparing.Text" xml:space="preserve">
+    <value>正在准备…</value>
+  </data>
+  <data name="BatchPage_NoFilesLoaded.Text" xml:space="preserve">
+    <value>尚未加载文件。</value>
+  </data>
+  <data name="BatchPage_ShowInFolder.Content" xml:space="preserve">
+    <value>在文件夹中显示</value>
+  </data>
+  <data name="BatchPage_Cancel.Content" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="BatchPage_ProcessBatch.Content" xml:space="preserve">
+    <value>批量处理</value>
+  </data>
+  <data name="BatchPage_SelectOperationHeader.Text" xml:space="preserve">
+    <value>选择操作</value>
+  </data>
+  <data name="BatchPage_NoSelectionHint.Text" xml:space="preserve">
+    <value>从侧边栏选择操作进行配置。可启用任意数量的操作——它们将以管道方式对每个文件依次执行。</value>
+  </data>
+  <data name="BatchPage_OutputSettings.Text" xml:space="preserve">
+    <value>输出设置</value>
+  </data>
+  <data name="BatchPage_FilenameSuffix.Header" xml:space="preserve">
+    <value>文件名后缀</value>
+  </data>
+  <data name="BatchPage_FilesInParallel.Header" xml:space="preserve">
+    <value>并行文件数</value>
+  </data>
+  <data name="BatchPage_ConvertAudioFormat.Content" xml:space="preserve">
+    <value>转换音频格式</value>
+  </data>
+  <data name="BatchPage_AudioOutputFormat.Header" xml:space="preserve">
+    <value>输出格式</value>
+  </data>
+  <data name="BatchPage_FlacLossless.Content" xml:space="preserve">
+    <value>FLAC（无损）</value>
+  </data>
+  <data name="BatchPage_WavPcm.Content" xml:space="preserve">
+    <value>WAV（PCM）</value>
+  </data>
+  <data name="BatchPage_OggVorbis.Content" xml:space="preserve">
+    <value>OGG Vorbis</value>
+  </data>
+  <data name="BatchPage_CompressAudio.Content" xml:space="preserve">
+    <value>压缩音频</value>
+  </data>
+  <data name="BatchPage_CompressionMode.Header" xml:space="preserve">
+    <value>压缩模式</value>
+  </data>
+  <data name="BatchPage_LossySmaller.Content" xml:space="preserve">
+    <value>有损（较小文件）</value>
+  </data>
+  <data name="BatchPage_Lossless.Content" xml:space="preserve">
+    <value>无损</value>
+  </data>
+  <data name="BatchPage_TargetBitrate.Header" xml:space="preserve">
+    <value>目标比特率 (kbps)</value>
+  </data>
+  <data name="BatchPage_NormalizeLoudness.Content" xml:space="preserve">
+    <value>标准化响度</value>
+  </data>
+  <data name="BatchPage_NormalizeMode.Header" xml:space="preserve">
+    <value>模式</value>
+  </data>
+  <data name="BatchPage_LUFS.Content" xml:space="preserve">
+    <value>LUFS（广播标准）</value>
+  </data>
+  <data name="BatchPage_Peak.Content" xml:space="preserve">
+    <value>峰值</value>
+  </data>
+  <data name="BatchPage_TargetLevel.Header" xml:space="preserve">
+    <value>目标电平 (dB / LUFS)</value>
+  </data>
+  <data name="BatchPage_ChangeContainer.Content" xml:space="preserve">
+    <value>更改容器</value>
+  </data>
+  <data name="BatchPage_TargetContainer.Header" xml:space="preserve">
+    <value>目标容器</value>
+  </data>
+  <data name="BatchPage_ChangeCodec.Content" xml:space="preserve">
+    <value>更改编解码器</value>
+  </data>
+  <data name="BatchPage_VideoCodec.Header" xml:space="preserve">
+    <value>视频编解码器</value>
+  </data>
+  <data name="BatchPage_AudioCodec.Header" xml:space="preserve">
+    <value>音频编解码器</value>
+  </data>
+  <data name="BatchPage_H264.Content" xml:space="preserve">
+    <value>H.264</value>
+  </data>
+  <data name="BatchPage_H265.Content" xml:space="preserve">
+    <value>H.265 / HEVC</value>
+  </data>
+  <data name="BatchPage_CompressVideo.Content" xml:space="preserve">
+    <value>压缩视频</value>
+  </data>
+  <data name="BatchPage_VideoQualityPreset.Header" xml:space="preserve">
+    <value>质量预设</value>
+  </data>
+  <data name="BatchPage_VeryHighQuality.Content" xml:space="preserve">
+    <value>极高质量</value>
+  </data>
+  <data name="BatchPage_HighQuality.Content" xml:space="preserve">
+    <value>高质量</value>
+  </data>
+  <data name="BatchPage_Balanced.Content" xml:space="preserve">
+    <value>均衡</value>
+  </data>
+  <data name="BatchPage_SmallSize.Content" xml:space="preserve">
+    <value>小文件</value>
+  </data>
+  <data name="BatchPage_ResizeVideo.Content" xml:space="preserve">
+    <value>调整视频大小</value>
+  </data>
+  <data name="BatchPage_VideoWidth.Header" xml:space="preserve">
+    <value>宽度</value>
+  </data>
+  <data name="BatchPage_VideoHeight.Header" xml:space="preserve">
+    <value>高度</value>
+  </data>
+  <data name="BatchPage_ExtractAudioTrack.Content" xml:space="preserve">
+    <value>提取音轨</value>
+  </data>
+  <data name="BatchPage_OutputAudioFormat.Header" xml:space="preserve">
+    <value>输出音频格式</value>
+  </data>
+  <data name="BatchPage_GenerateMuxSubtitles.Content" xml:space="preserve">
+    <value>生成并混流字幕</value>
+  </data>
+  <data name="BatchPage_TranscriptionSection.Text" xml:space="preserve">
+    <value>转录</value>
+  </data>
+  <data name="BatchPage_TranscriptionHint.Text" xml:space="preserve">
+    <value>使用 Whisper 转录每个视频。基础模式生成 SRT 文件；高级模式生成样式 ASS 字幕。</value>
+  </data>
+  <data name="BatchPage_DownloadTranscription.Content" xml:space="preserve">
+    <value>下载转录功能</value>
+  </data>
+  <data name="BatchPage_TranscriptionNotDownloaded.Text" xml:space="preserve">
+    <value>转录功能尚未下载。</value>
+  </data>
+  <data name="BatchPage_SubtitleGenMode.Header" xml:space="preserve">
+    <value>字幕生成模式</value>
+  </data>
+  <data name="BatchPage_BasicSRT.Content" xml:space="preserve">
+    <value>基础 (SRT)</value>
+  </data>
+  <data name="BatchPage_AdvancedASS.Content" xml:space="preserve">
+    <value>高级 (ASS)</value>
+  </data>
+  <data name="BatchPage_AdvancedOutputType.Header" xml:space="preserve">
+    <value>高级输出类型</value>
+  </data>
+  <data name="BatchPage_StyledASS.Content" xml:space="preserve">
+    <value>样式 ASS</value>
+  </data>
+  <data name="BatchPage_KaraokeASS.Content" xml:space="preserve">
+    <value>卡拉OK ASS</value>
+  </data>
+  <data name="BatchPage_ConfigureAdvanced.Content" xml:space="preserve">
+    <value>配置高级字幕</value>
+  </data>
+  <data name="BatchPage_SecondsMax.Header" xml:space="preserve">
+    <value>最长秒数</value>
+  </data>
+  <data name="BatchPage_LimitWords.Content" xml:space="preserve">
+    <value>限制每段词数</value>
+  </data>
+  <data name="BatchPage_WordsMax.Header" xml:space="preserve">
+    <value>最多词数</value>
+  </data>
+  <data name="BatchPage_SubtitleMux.Text" xml:space="preserve">
+    <value>字幕混流</value>
+  </data>
+  <data name="BatchPage_MuxMode.Header" xml:space="preserve">
+    <value>混流模式</value>
+  </data>
+  <data name="BatchPage_SoftMux.Content" xml:space="preserve">
+    <value>软混流（嵌入轨道）</value>
+  </data>
+  <data name="BatchPage_BurnIn.Content" xml:space="preserve">
+    <value>烧录（合并到画面）</value>
+  </data>
+  <data name="BatchPage_PlacementSection.Text" xml:space="preserve">
+    <value>位置</value>
+  </data>
+  <data name="BatchPage_PlacementHint.Text" xml:space="preserve">
+    <value>以视频帧的百分比精确调整字幕出现的位置。</value>
+  </data>
+  <data name="BatchPage_Horizontal.Header" xml:space="preserve">
+    <value>水平 (%)</value>
+  </data>
+  <data name="BatchPage_Vertical.Header" xml:space="preserve">
+    <value>垂直 (%)</value>
+  </data>
+  <data name="BatchPage_ResetPlacement.Content" xml:space="preserve">
+    <value>重置位置</value>
+  </data>
+  <data name="BatchPage_LanguageTag.Header" xml:space="preserve">
+    <value>语言标签</value>
+  </data>
+  <data name="BatchPage_LanguageTag.PlaceholderText" xml:space="preserve">
+    <value>示例：zh</value>
+  </data>
+  <data name="BatchPage_SubtitleTitle.Header" xml:space="preserve">
+    <value>字幕标题</value>
+  </data>
+  <data name="BatchPage_SubtitleTitle.PlaceholderText" xml:space="preserve">
+    <value>示例：中文</value>
+  </data>
+  <data name="BatchPage_SetDefaultSubtitle.Content" xml:space="preserve">
+    <value>设为默认字幕</value>
+  </data>
+  <data name="BatchPage_ConvertToPdf.Content" xml:space="preserve">
+    <value>转换为 PDF</value>
+  </data>
+  <data name="BatchPage_LibreOfficeHint.Text" xml:space="preserve">
+    <value>使用 LibreOffice 转换每个文档。</value>
+  </data>
+  <data name="BatchPage_PdfVariant.Header" xml:space="preserve">
+    <value>PDF 变体</value>
+  </data>
+  <data name="BatchPage_StandardPdf.Content" xml:space="preserve">
+    <value>标准 PDF</value>
+  </data>
+  <data name="BatchPage_PdfA1b.Content" xml:space="preserve">
+    <value>PDF/A-1b（归档）</value>
+  </data>
+  <data name="BatchPage_PdfA2b.Content" xml:space="preserve">
+    <value>PDF/A-2b</value>
+  </data>
+  <data name="BatchPage_PdfA3b.Content" xml:space="preserve">
+    <value>PDF/A-3b</value>
+  </data>
+  <data name="BatchPage_CompressOptimizePdf.Content" xml:space="preserve">
+    <value>压缩/优化 PDF</value>
+  </data>
+  <data name="BatchPage_CompressPdfHint.Text" xml:space="preserve">
+    <value>线性化并重建文件以减小大小（使用 qpdf）。</value>
+  </data>
+  <data name="BatchPage_RepairPdf.Content" xml:space="preserve">
+    <value>修复 PDF</value>
+  </data>
+  <data name="BatchPage_RepairPdfHint.Text" xml:space="preserve">
+    <value>重建文档结构以修复损坏（使用 qpdf）。</value>
+  </data>
+  <data name="BatchPage_AddOcrLayer.Content" xml:space="preserve">
+    <value>添加 OCR 文字层</value>
+  </data>
+  <data name="BatchPage_TessdataPath.Header" xml:space="preserve">
+    <value>Tessdata 目录路径</value>
+  </data>
+  <data name="BatchPage_TessdataPath.PlaceholderText" xml:space="preserve">
+    <value>C:\路径\到\tessdata</value>
+  </data>
+  <data name="BatchPage_OcrLanguages.Header" xml:space="preserve">
+    <value>语言（Tesseract 代码）</value>
+  </data>
+  <data name="BatchPage_RasterizationDpi.Header" xml:space="preserve">
+    <value>光栅化 DPI</value>
+  </data>
+  <data name="BatchPage_MergeAllPdfs.Content" xml:space="preserve">
+    <value>将所有 PDF 合并为一个文件</value>
+  </data>
+  <data name="BatchPage_MergeHint.Text" xml:space="preserve">
+    <value>不能与其他 PDF 操作组合使用。</value>
+  </data>
+  <data name="BatchPage_MergeFilename.Header" xml:space="preserve">
+    <value>输出文件名</value>
+  </data>
+  <data name="BatchPage_ConvertImageFormat.Content" xml:space="preserve">
+    <value>转换图像格式</value>
+  </data>
+  <data name="BatchPage_ImageTargetFormat.Header" xml:space="preserve">
+    <value>目标格式</value>
+  </data>
+  <data name="BatchPage_CompressImages.Content" xml:space="preserve">
+    <value>压缩图像</value>
+  </data>
+  <data name="BatchPage_ResizeImages.Content" xml:space="preserve">
+    <value>调整图像大小</value>
+  </data>
+  <data name="BatchPage_ImageWidth.Header" xml:space="preserve">
+    <value>宽度</value>
+  </data>
+  <data name="BatchPage_ImageHeight.Header" xml:space="preserve">
+    <value>高度</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Licenses page
        ═══════════════════════════════════════════════════════════════ -->
-  <data name="LicensesPage_Title.Text" xml:space="preserve"><value>许可证</value></data>
-  <data name="LicensesPage_Subtitle1.Text" xml:space="preserve"><value>本应用所使用的第三方组件、其署名信息及许可证。</value></data>
-  <data name="LicensesPage_Subtitle2.Text" xml:space="preserve"><value>所有列出的许可证均允许商业使用，须遵守其条款及任何再分发义务。</value></data>
-  <data name="LicensesPage_ShowLicense.Content" xml:space="preserve"><value>查看许可证</value></data>
-
-
-  <data name="ImagePage_FileInfoSection.Text" xml:space="preserve"><value>文件信息</value></data>
-  <data name="ImagePage_FileInfoName.Text" xml:space="preserve"><value>文件名</value></data>
-  <data name="ImagePage_FileInfoDimensions.Text" xml:space="preserve"><value>尺寸</value></data>
-  <data name="ImagePage_FileInfoFormat.Text" xml:space="preserve"><value>格式</value></data>
-  <data name="ImagePage_FileInfoSize.Text" xml:space="preserve"><value>文件大小</value></data>
-  <data name="VideoPage_FileInfoSection.Text" xml:space="preserve"><value>文件信息</value></data>
-  <data name="VideoPage_FileInfoName.Text" xml:space="preserve"><value>文件名</value></data>
-  <data name="VideoPage_FileInfoDimensions.Text" xml:space="preserve"><value>尺寸</value></data>
-  <data name="VideoPage_FileInfoDuration.Text" xml:space="preserve"><value>时长</value></data>
-  <data name="VideoPage_FileInfoFormat.Text" xml:space="preserve"><value>格式</value></data>
-  <data name="VideoPage_FileInfoSize.Text" xml:space="preserve"><value>文件大小</value></data>
-  <data name="AudioPage_FileInfoSection.Text" xml:space="preserve"><value>文件信息</value></data>
-  <data name="AudioPage_FileInfoName.Text" xml:space="preserve"><value>文件名</value></data>
-  <data name="AudioPage_FileInfoDuration.Text" xml:space="preserve"><value>时长</value></data>
-  <data name="AudioPage_FileInfoFormat.Text" xml:space="preserve"><value>格式</value></data>
-  <data name="AudioPage_FileInfoSize.Text" xml:space="preserve"><value>文件大小</value></data>
-  <data name="PdfPage_FileInfoSection.Text" xml:space="preserve"><value>文件信息</value></data>
-  <data name="PdfPage_FileInfoName.Text" xml:space="preserve"><value>文件名</value></data>
-  <data name="PdfPage_FileInfoPages.Text" xml:space="preserve"><value>页数</value></data>
-  <data name="PdfPage_FileInfoSize.Text" xml:space="preserve"><value>文件大小</value></data>
-  <data name="DocPage_FileInfoSection.Text" xml:space="preserve"><value>文件信息</value></data>
-  <data name="DocPage_FileInfoName.Text" xml:space="preserve"><value>文件名</value></data>
-  <data name="DocPage_FileInfoFormat.Text" xml:space="preserve"><value>格式</value></data>
-  <data name="DocPage_FileInfoSize.Text" xml:space="preserve"><value>文件大小</value></data>
-  <data name="CB_Audio_GeneratingTranscription" xml:space="preserve"><value>正在生成转录...</value></data>
-  <data name="CB_Audio_TranscriptionReady" xml:space="preserve"><value>文字转录已就绪。</value></data>
-  <data name="CB_Audio_TranscriptionDownloaded" xml:space="preserve"><value>转录功能已下载。</value></data>
-  <data name="CB_Doc_DownloadCancelled" xml:space="preserve"><value>下载已取消。</value></data>
-  <data name="CB_Pdf_ProcessSuccess" xml:space="preserve"><value>PDF 处理成功！</value></data>
-  <data name="CB_Pdf_AllCompleted" xml:space="preserve"><value>所有操作已完成。</value></data>
-  <data name="CB_Pdf_ErrorProcessing" xml:space="preserve"><value>处理 PDF 时出错</value></data>
-  <data name="CB_Pdf_PreparingOps" xml:space="preserve"><value>正在准备操作...</value></data>
-  <data name="CB_Pdf_MergeMultiple" xml:space="preserve"><value>合并需要选择多个 PDF</value></data>
-  <data name="CB_Pdf_Splitting" xml:space="preserve"><value>正在拆分 PDF...</value></data>
-  <data name="CB_Pdf_Reordering" xml:space="preserve"><value>正在重新排序页面...</value></data>
-  <data name="CB_Pdf_PagesReordered" xml:space="preserve"><value>页面已重新排序</value></data>
-  <data name="CB_Pdf_Extracting" xml:space="preserve"><value>正在提取内容...</value></data>
-  <data name="CB_Pdf_Rotating" xml:space="preserve"><value>正在旋转页面...</value></data>
-  <data name="CB_Pdf_Encrypting" xml:space="preserve"><value>正在加密 PDF...</value></data>
-  <data name="CB_Pdf_Encrypted" xml:space="preserve"><value>PDF 已加密</value></data>
-  <data name="CB_Pdf_RemovingPassword" xml:space="preserve"><value>正在移除密码...</value></data>
-  <data name="CB_Pdf_PasswordRemoved" xml:space="preserve"><value>密码已移除</value></data>
-  <data name="CB_Pdf_ChangingPassword" xml:space="preserve"><value>正在更改密码...</value></data>
-  <data name="CB_Pdf_PasswordChanged" xml:space="preserve"><value>密码已更改</value></data>
-  <data name="CB_Pdf_UpdatingPermissions" xml:space="preserve"><value>正在更新权限...</value></data>
-  <data name="CB_Pdf_PermissionsConfigured" xml:space="preserve"><value>权限已配置</value></data>
-  <data name="CB_Pdf_RunningOCR" xml:space="preserve"><value>正在运行 OCR...</value></data>
-  <data name="CB_Pdf_OcrNeedsTesseract" xml:space="preserve"><value>OCR 需要配置 Tesseract</value></data>
-  <data name="CB_Pdf_UpdatingMetadata" xml:space="preserve"><value>正在更新元数据...</value></data>
-  <data name="CB_Pdf_MetadataUpdated" xml:space="preserve"><value>元数据已更新</value></data>
-  <data name="CB_Pdf_Repairing" xml:space="preserve"><value>正在修复 PDF...</value></data>
-  <data name="CB_Pdf_Repaired" xml:space="preserve"><value>PDF 已修复</value></data>
-  <data name="CB_Video_GeneratingSubtitles" xml:space="preserve"><value>正在生成字幕...</value></data>
-  <data name="CB_Video_AssEditingDisabled" xml:space="preserve"><value>高级流程中已禁用 ASS 文本编辑。请先生成字幕段落，然后在此处审阅并应用。</value></data>
-  <data name="CB_Batch_ReadyToProcess" xml:space="preserve"><value>准备处理。</value></data>
-  <data name="CB_Batch_DownloadingTranscription" xml:space="preserve"><value>正在下载转录功能...</value></data>
-  <data name="CB_Batch_ConfigureOperation" xml:space="preserve"><value>至少配置一个类型组操作。</value></data>
-  <data name="CB_Batch_Estimating" xml:space="preserve"><value>正在估算…</value></data>
-  <data name="CB_Batch_Cancelled" xml:space="preserve"><value>批处理已取消。</value></data>
-  <data name="CB_Batch_CreatingZip" xml:space="preserve"><value>正在创建 ZIP 存档…</value></data>
-  <data name="CB_Batch_Done" xml:space="preserve"><value>完成</value></data>
-  <data name="CB_Batch_NoFilesOfType" xml:space="preserve"><value>批次中没有此类文件</value></data>
-  <data name="CB_Batch_OneFile" xml:space="preserve"><value>批次中有 1 个文件</value></data>
-  <data name="CB_Batch_NFiles" xml:space="preserve"><value>批次中有 {0} 个文件</value></data>
-  <data name="CB_Batch_Succeeded" xml:space="preserve"><value>{0} 个成功</value></data>
-  <data name="CB_Batch_Failed" xml:space="preserve"><value>，{0} 个失败</value></data>
-  <data name="CB_Batch_Skipped" xml:space="preserve"><value>，{0} 个已跳过</value></data>
-  <data name="CB_Batch_ResultDone" xml:space="preserve"><value>完成。{0}。</value></data>
-  <data name="CB_Batch_ResultCancelled" xml:space="preserve"><value>已取消。{0}。</value></data>
-  <data name="CB_Batch_Elapsed" xml:space="preserve"><value>已用时 {0}</value></data>
-  <data name="CB_Batch_TimeLeft" xml:space="preserve"><value>剩余 {0}</value></data>
-  <data name="CB_Batch_FileProgress" xml:space="preserve"><value>文件 {0}/{1}</value></data>
-  <data name="CB_Batch_SectionLength" xml:space="preserve"><value>段落长度：最多 {0} 秒</value></data>
-  <data name="CB_Batch_Header_Output" xml:space="preserve"><value>输出设置</value></data>
-  <data name="CB_Batch_Header_AudioFormat" xml:space="preserve"><value>音频 · 格式</value></data>
-  <data name="CB_Batch_Header_AudioCompress" xml:space="preserve"><value>音频 · 压缩</value></data>
-  <data name="CB_Batch_Header_AudioNormalize" xml:space="preserve"><value>音频 · 规范化</value></data>
-  <data name="CB_Batch_Header_VideoContainer" xml:space="preserve"><value>视频 · 容器</value></data>
-  <data name="CB_Batch_Header_VideoCodec" xml:space="preserve"><value>视频 · 编解码器</value></data>
-  <data name="CB_Batch_Header_VideoCompress" xml:space="preserve"><value>视频 · 压缩</value></data>
-  <data name="CB_Batch_Header_VideoResize" xml:space="preserve"><value>视频 · 调整大小</value></data>
-  <data name="CB_Batch_Header_VideoExtractAudio" xml:space="preserve"><value>视频 · 提取音频</value></data>
-  <data name="CB_Batch_Header_VideoSubtitles" xml:space="preserve"><value>视频 · 字幕</value></data>
-  <data name="CB_Batch_Header_DocsConvert" xml:space="preserve"><value>文档 · 转换为 PDF</value></data>
-  <data name="CB_Batch_Header_PdfCompress" xml:space="preserve"><value>PDF · 压缩</value></data>
-  <data name="CB_Batch_Header_PdfRepair" xml:space="preserve"><value>PDF · 修复</value></data>
-  <data name="CB_Batch_Header_PdfOCR" xml:space="preserve"><value>PDF · OCR</value></data>
-  <data name="CB_Batch_Header_PdfMerge" xml:space="preserve"><value>PDF · 合并</value></data>
-  <data name="CB_Batch_Header_ImagesFormat" xml:space="preserve"><value>图像 · 格式</value></data>
-  <data name="CB_Batch_Header_ImagesCompress" xml:space="preserve"><value>图像 · 压缩</value></data>
-  <data name="CB_Batch_Header_ImagesResize" xml:space="preserve"><value>图像 · 调整大小</value></data>
-  <data name="CB_Batch_ImageQuality" xml:space="preserve"><value>质量：{0}%</value></data>
-  <data name="CB_Batch_AdvSubtitleSectionLength" xml:space="preserve"><value>高级字幕段落长度：最多 {0} 秒</value></data>
+  <data name="LicensesPage_Title.Text" xml:space="preserve">
+    <value>许可证</value>
+  </data>
+  <data name="LicensesPage_Subtitle1.Text" xml:space="preserve">
+    <value>本应用所使用的第三方组件、其署名信息及许可证。</value>
+  </data>
+  <data name="LicensesPage_Subtitle2.Text" xml:space="preserve">
+    <value>所有列出的许可证均允许商业使用，须遵守其条款及任何再分发义务。</value>
+  </data>
+  <data name="LicensesPage_ShowLicense.Content" xml:space="preserve">
+    <value>查看许可证</value>
+  </data>
+  <data name="ImagePage_FileInfoSection.Text" xml:space="preserve">
+    <value>文件信息</value>
+  </data>
+  <data name="ImagePage_FileInfoName.Text" xml:space="preserve">
+    <value>文件名</value>
+  </data>
+  <data name="ImagePage_FileInfoDimensions.Text" xml:space="preserve">
+    <value>尺寸</value>
+  </data>
+  <data name="ImagePage_FileInfoFormat.Text" xml:space="preserve">
+    <value>格式</value>
+  </data>
+  <data name="ImagePage_FileInfoSize.Text" xml:space="preserve">
+    <value>文件大小</value>
+  </data>
+  <data name="VideoPage_FileInfoSection.Text" xml:space="preserve">
+    <value>文件信息</value>
+  </data>
+  <data name="VideoPage_FileInfoName.Text" xml:space="preserve">
+    <value>文件名</value>
+  </data>
+  <data name="VideoPage_FileInfoDimensions.Text" xml:space="preserve">
+    <value>尺寸</value>
+  </data>
+  <data name="VideoPage_FileInfoDuration.Text" xml:space="preserve">
+    <value>时长</value>
+  </data>
+  <data name="VideoPage_FileInfoFormat.Text" xml:space="preserve">
+    <value>格式</value>
+  </data>
+  <data name="VideoPage_FileInfoSize.Text" xml:space="preserve">
+    <value>文件大小</value>
+  </data>
+  <data name="AudioPage_FileInfoSection.Text" xml:space="preserve">
+    <value>文件信息</value>
+  </data>
+  <data name="AudioPage_FileInfoName.Text" xml:space="preserve">
+    <value>文件名</value>
+  </data>
+  <data name="AudioPage_FileInfoDuration.Text" xml:space="preserve">
+    <value>时长</value>
+  </data>
+  <data name="AudioPage_FileInfoFormat.Text" xml:space="preserve">
+    <value>格式</value>
+  </data>
+  <data name="AudioPage_FileInfoSize.Text" xml:space="preserve">
+    <value>文件大小</value>
+  </data>
+  <data name="PdfPage_FileInfoSection.Text" xml:space="preserve">
+    <value>文件信息</value>
+  </data>
+  <data name="PdfPage_FileInfoName.Text" xml:space="preserve">
+    <value>文件名</value>
+  </data>
+  <data name="PdfPage_FileInfoPages.Text" xml:space="preserve">
+    <value>页数</value>
+  </data>
+  <data name="PdfPage_FileInfoSize.Text" xml:space="preserve">
+    <value>文件大小</value>
+  </data>
+  <data name="DocPage_FileInfoSection.Text" xml:space="preserve">
+    <value>文件信息</value>
+  </data>
+  <data name="DocPage_FileInfoName.Text" xml:space="preserve">
+    <value>文件名</value>
+  </data>
+  <data name="DocPage_FileInfoFormat.Text" xml:space="preserve">
+    <value>格式</value>
+  </data>
+  <data name="DocPage_FileInfoSize.Text" xml:space="preserve">
+    <value>文件大小</value>
+  </data>
+  <data name="CB_Audio_GeneratingTranscription" xml:space="preserve">
+    <value>正在生成转录...</value>
+  </data>
+  <data name="CB_Audio_TranscriptionReady" xml:space="preserve">
+    <value>文字转录已就绪。</value>
+  </data>
+  <data name="CB_Audio_TranscriptionDownloaded" xml:space="preserve">
+    <value>转录功能已下载。</value>
+  </data>
+  <data name="CB_Doc_DownloadCancelled" xml:space="preserve">
+    <value>下载已取消。</value>
+  </data>
+  <data name="CB_Pdf_ProcessSuccess" xml:space="preserve">
+    <value>PDF 处理成功！</value>
+  </data>
+  <data name="CB_Pdf_AllCompleted" xml:space="preserve">
+    <value>所有操作已完成。</value>
+  </data>
+  <data name="CB_Pdf_ErrorProcessing" xml:space="preserve">
+    <value>处理 PDF 时出错</value>
+  </data>
+  <data name="CB_Pdf_PreparingOps" xml:space="preserve">
+    <value>正在准备操作...</value>
+  </data>
+  <data name="CB_Pdf_MergeMultiple" xml:space="preserve">
+    <value>合并需要选择多个 PDF</value>
+  </data>
+  <data name="CB_Pdf_Splitting" xml:space="preserve">
+    <value>正在拆分 PDF...</value>
+  </data>
+  <data name="CB_Pdf_Reordering" xml:space="preserve">
+    <value>正在重新排序页面...</value>
+  </data>
+  <data name="CB_Pdf_PagesReordered" xml:space="preserve">
+    <value>页面已重新排序</value>
+  </data>
+  <data name="CB_Pdf_Extracting" xml:space="preserve">
+    <value>正在提取内容...</value>
+  </data>
+  <data name="CB_Pdf_Rotating" xml:space="preserve">
+    <value>正在旋转页面...</value>
+  </data>
+  <data name="CB_Pdf_Encrypting" xml:space="preserve">
+    <value>正在加密 PDF...</value>
+  </data>
+  <data name="CB_Pdf_Encrypted" xml:space="preserve">
+    <value>PDF 已加密</value>
+  </data>
+  <data name="CB_Pdf_RemovingPassword" xml:space="preserve">
+    <value>正在移除密码...</value>
+  </data>
+  <data name="CB_Pdf_PasswordRemoved" xml:space="preserve">
+    <value>密码已移除</value>
+  </data>
+  <data name="CB_Pdf_ChangingPassword" xml:space="preserve">
+    <value>正在更改密码...</value>
+  </data>
+  <data name="CB_Pdf_PasswordChanged" xml:space="preserve">
+    <value>密码已更改</value>
+  </data>
+  <data name="CB_Pdf_UpdatingPermissions" xml:space="preserve">
+    <value>正在更新权限...</value>
+  </data>
+  <data name="CB_Pdf_PermissionsConfigured" xml:space="preserve">
+    <value>权限已配置</value>
+  </data>
+  <data name="CB_Pdf_RunningOCR" xml:space="preserve">
+    <value>正在运行 OCR...</value>
+  </data>
+  <data name="CB_Pdf_OcrNeedsTesseract" xml:space="preserve">
+    <value>OCR 需要配置 Tesseract</value>
+  </data>
+  <data name="CB_Pdf_UpdatingMetadata" xml:space="preserve">
+    <value>正在更新元数据...</value>
+  </data>
+  <data name="CB_Pdf_MetadataUpdated" xml:space="preserve">
+    <value>元数据已更新</value>
+  </data>
+  <data name="CB_Pdf_Repairing" xml:space="preserve">
+    <value>正在修复 PDF...</value>
+  </data>
+  <data name="CB_Pdf_Repaired" xml:space="preserve">
+    <value>PDF 已修复</value>
+  </data>
+  <data name="CB_Video_GeneratingSubtitles" xml:space="preserve">
+    <value>正在生成字幕...</value>
+  </data>
+  <data name="CB_Video_AssEditingDisabled" xml:space="preserve">
+    <value>高级流程中已禁用 ASS 文本编辑。请先生成字幕段落，然后在此处审阅并应用。</value>
+  </data>
+  <data name="CB_Batch_ReadyToProcess" xml:space="preserve">
+    <value>准备处理。</value>
+  </data>
+  <data name="CB_Batch_DownloadingTranscription" xml:space="preserve">
+    <value>正在下载转录功能...</value>
+  </data>
+  <data name="CB_Batch_ConfigureOperation" xml:space="preserve">
+    <value>至少配置一个类型组操作。</value>
+  </data>
+  <data name="CB_Batch_Estimating" xml:space="preserve">
+    <value>正在估算…</value>
+  </data>
+  <data name="CB_Batch_Cancelled" xml:space="preserve">
+    <value>批处理已取消。</value>
+  </data>
+  <data name="CB_Batch_CreatingZip" xml:space="preserve">
+    <value>正在创建 ZIP 存档…</value>
+  </data>
+  <data name="CB_Batch_Done" xml:space="preserve">
+    <value>完成</value>
+  </data>
+  <data name="CB_Batch_NoFilesOfType" xml:space="preserve">
+    <value>批次中没有此类文件</value>
+  </data>
+  <data name="CB_Batch_OneFile" xml:space="preserve">
+    <value>批次中有 1 个文件</value>
+  </data>
+  <data name="CB_Batch_NFiles" xml:space="preserve">
+    <value>批次中有 {0} 个文件</value>
+  </data>
+  <data name="CB_Batch_Succeeded" xml:space="preserve">
+    <value>{0} 个成功</value>
+  </data>
+  <data name="CB_Batch_Failed" xml:space="preserve">
+    <value>，{0} 个失败</value>
+  </data>
+  <data name="CB_Batch_Skipped" xml:space="preserve">
+    <value>，{0} 个已跳过</value>
+  </data>
+  <data name="CB_Batch_ResultDone" xml:space="preserve">
+    <value>完成。{0}。</value>
+  </data>
+  <data name="CB_Batch_ResultCancelled" xml:space="preserve">
+    <value>已取消。{0}。</value>
+  </data>
+  <data name="CB_Batch_Elapsed" xml:space="preserve">
+    <value>已用时 {0}</value>
+  </data>
+  <data name="CB_Batch_TimeLeft" xml:space="preserve">
+    <value>剩余 {0}</value>
+  </data>
+  <data name="CB_Batch_FileProgress" xml:space="preserve">
+    <value>文件 {0}/{1}</value>
+  </data>
+  <data name="CB_Batch_SectionLength" xml:space="preserve">
+    <value>段落长度：最多 {0} 秒</value>
+  </data>
+  <data name="CB_Batch_Header_Output" xml:space="preserve">
+    <value>输出设置</value>
+  </data>
+  <data name="CB_Batch_Header_AudioFormat" xml:space="preserve">
+    <value>音频 · 格式</value>
+  </data>
+  <data name="CB_Batch_Header_AudioCompress" xml:space="preserve">
+    <value>音频 · 压缩</value>
+  </data>
+  <data name="CB_Batch_Header_AudioNormalize" xml:space="preserve">
+    <value>音频 · 规范化</value>
+  </data>
+  <data name="CB_Batch_Header_VideoContainer" xml:space="preserve">
+    <value>视频 · 容器</value>
+  </data>
+  <data name="CB_Batch_Header_VideoCodec" xml:space="preserve">
+    <value>视频 · 编解码器</value>
+  </data>
+  <data name="CB_Batch_Header_VideoCompress" xml:space="preserve">
+    <value>视频 · 压缩</value>
+  </data>
+  <data name="CB_Batch_Header_VideoResize" xml:space="preserve">
+    <value>视频 · 调整大小</value>
+  </data>
+  <data name="CB_Batch_Header_VideoExtractAudio" xml:space="preserve">
+    <value>视频 · 提取音频</value>
+  </data>
+  <data name="CB_Batch_Header_VideoSubtitles" xml:space="preserve">
+    <value>视频 · 字幕</value>
+  </data>
+  <data name="CB_Batch_Header_DocsConvert" xml:space="preserve">
+    <value>文档 · 转换为 PDF</value>
+  </data>
+  <data name="CB_Batch_Header_PdfCompress" xml:space="preserve">
+    <value>PDF · 压缩</value>
+  </data>
+  <data name="CB_Batch_Header_PdfRepair" xml:space="preserve">
+    <value>PDF · 修复</value>
+  </data>
+  <data name="CB_Batch_Header_PdfOCR" xml:space="preserve">
+    <value>PDF · OCR</value>
+  </data>
+  <data name="CB_Batch_Header_PdfMerge" xml:space="preserve">
+    <value>PDF · 合并</value>
+  </data>
+  <data name="CB_Batch_Header_ImagesFormat" xml:space="preserve">
+    <value>图像 · 格式</value>
+  </data>
+  <data name="CB_Batch_Header_ImagesCompress" xml:space="preserve">
+    <value>图像 · 压缩</value>
+  </data>
+  <data name="CB_Batch_Header_ImagesResize" xml:space="preserve">
+    <value>图像 · 调整大小</value>
+  </data>
+  <data name="CB_Batch_ImageQuality" xml:space="preserve">
+    <value>质量：{0}%</value>
+  </data>
+  <data name="CB_Batch_AdvSubtitleSectionLength" xml:space="preserve">
+    <value>高级字幕段落长度：最多 {0} 秒</value>
+  </data>
+  <data name="VideoPage_VerticalMargin_Header" xml:space="preserve">
+    <value>垂直边距</value>
+  </data>
+  <data name="Shared_Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="VideoPage_BoldText_Content" xml:space="preserve">
+    <value>粗体文本</value>
+  </data>
+  <data name="VideoPage_OutlineWidth_Header" xml:space="preserve">
+    <value>轮廓宽度</value>
+  </data>
+  <data name="VideoPage_SystemFont_Header" xml:space="preserve">
+    <value>系统字体</value>
+  </data>
+  <data name="VideoPage_TextTransform_Header" xml:space="preserve">
+    <value>文本转换</value>
+  </data>
+  <data name="VideoPage_FontSize_Header" xml:space="preserve">
+    <value>字体大小</value>
+  </data>
+  <data name="VideoPage_BasePreset_Header" xml:space="preserve">
+    <value>基础预设</value>
+  </data>
 </root>

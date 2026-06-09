@@ -453,10 +453,10 @@ public class SubtitlesServiceTests
 
         var ass = await File.ReadAllTextAsync(finalPath);
         StringAssert.Contains(ass, "[V4+ Styles]");
-        StringAssert.Contains(ass, "Style: NeonKaraoke");
+        StringAssert.Contains(ass, "Style: GlowKaraoke");
         StringAssert.Contains(ass, "Dialogue: 0,");
         Assert.IsFalse(ass.Contains("Dialogue: 1,", StringComparison.Ordinal));
-        StringAssert.Contains(ass, @"{\fad(80,80)\fscx115\fscy115\t(0,160,\fscx100\fscy100)}");
+        StringAssert.Contains(ass, @"{\fad(80,80)\blur8\t(0,240,\blur0)}");
     }
 
     [TestMethod]
@@ -620,32 +620,6 @@ public class SubtitlesServiceTests
     }
 
     [TestMethod]
-    public void StyledSubtitlePresets_CaptionBox_UsesBoxPresentation()
-    {
-        var preset = StyledSubtitlePresets.CaptionBox;
-
-        Assert.AreEqual("CaptionBox", preset.Name);
-        Assert.IsTrue(preset.UseBackgroundBox);
-        Assert.AreEqual(SubtitlePresentationAnimation.Fade, preset.PresentationAnimation);
-        Assert.AreEqual(140, preset.EntryFadeMilliseconds);
-        Assert.AreEqual(140, preset.ExitFadeMilliseconds);
-        Assert.AreEqual(SubtitleVisualAlignment.BottomCenter, preset.Alignment);
-    }
-
-    [TestMethod]
-    public void KaraokeSubtitlePresets_NeonKaraoke_UsesAnimatedKaraokeDefaults()
-    {
-        var preset = KaraokeSubtitlePresets.NeonKaraoke;
-
-        Assert.AreEqual("NeonKaraoke", preset.Name);
-        Assert.AreEqual(SubtitlePresentationAnimation.FadePop, preset.PresentationAnimation);
-        Assert.AreEqual(80, preset.EntryFadeMilliseconds);
-        Assert.AreEqual(80, preset.ExitFadeMilliseconds);
-        Assert.AreEqual(1.15d, preset.IntroScale, 0.0001d);
-        Assert.AreEqual(new SubtitleColor(0, 255, 220, 20), preset.KaraokeHighlightColor);
-    }
-
-    [TestMethod]
     public async Task ApplyStylePreset_UppercasesAndReflowsUsingPresetLimits()
     {
         _audioTranscriptionService.Segments =
@@ -684,36 +658,20 @@ public class SubtitlesServiceTests
     }
 
     [TestMethod]
-    public async Task BuildStyledAss_WithCaptionBox_EmitsFadeAnimation()
+    public async Task RenderKaraokeAss_WithGlowKaraoke_EmitsGlowAnimation()
     {
         _audioTranscriptionService.Segments =
         [
-            new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2), "caption box sample")
+            new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2), "glow karaoke sample")
         ];
 
         var draft = await _service.GenerateAdvancedDraftAsync(CreateInputFile());
-        var styled = _service.ApplyStylePreset(draft, StyledSubtitlePresets.CaptionBox);
-        var ass = SubtitlesService.BuildStyledAss(styled);
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.GlowKaraoke);
 
-        StringAssert.Contains(ass, "Style: CaptionBox");
-        StringAssert.Contains(ass, @"{\fad(140,140)}");
-    }
-
-    [TestMethod]
-    public async Task RenderKaraokeAss_WithNeonKaraoke_EmitsPopAnimation()
-    {
-        _audioTranscriptionService.Segments =
-        [
-            new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2), "neon karaoke sample")
-        ];
-
-        var draft = await _service.GenerateAdvancedDraftAsync(CreateInputFile());
-        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.NeonKaraoke);
-
-        StringAssert.Contains(ass, @"{\fad(80,80)\fscx115\fscy115\t(0,160,\fscx100\fscy100)}");
-        StringAssert.Contains(ass, "Style: NeonKaraoke");
+        StringAssert.Contains(ass, @"{\fad(80,80)\blur8\t(0,240,\blur0)}");
+        StringAssert.Contains(ass, "Style: GlowKaraoke");
         StringAssert.Contains(ass, "&H00FFFFFF&"); // White base color
-        StringAssert.Contains(ass, "&H0014DCFF&"); // Vibrant cyan/yellow highlight for NeonKaraoke (RGB 255,220,20)
+        StringAssert.Contains(ass, "&H00FFD200&"); // Electric cyan highlight for GlowKaraoke (RGB 0,210,255)
     }
 
     [TestMethod]
@@ -738,38 +696,6 @@ public class SubtitlesServiceTests
     }
 
     [TestMethod]
-    public async Task RenderKaraokeAss_WithBubbly_UsesDropInPerWordEvents()
-    {
-        _audioTranscriptionService.Segments =
-        [
-            new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2), "bubbly drop in test")
-        ];
-
-        var draft = await _service.GenerateAdvancedDraftAsync(CreateInputFile());
-        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.Bubbly);
-
-        // DropIn uses \kf karaoke tags with transparent SecondaryColour
-        StringAssert.Contains(ass, "Style: Bubbly");
-        StringAssert.Contains(ass, "Bahnschrift");
-        StringAssert.Contains(ass, @"{\kf");
-
-        // SecondaryColour should be fully transparent for DropIn
-        StringAssert.Contains(ass, "&HFF000000&");
-
-        // The line now softly fades in (entry) and out (exit) while words drop in.
-        StringAssert.Contains(ass, @"\fad(200,100)");
-
-        // Should be a single Dialogue line per cue
-        var dialogueLines = ass.Split(["\r\n", "\n"], StringSplitOptions.None)
-            .Where(line => line.StartsWith("Dialogue:", StringComparison.Ordinal))
-            .ToArray();
-        Assert.AreEqual(1, dialogueLines.Length, $"Expected 1 Dialogue line for DropIn cue. ASS output:\n{ass}");
-
-        // Text should be lowercase (Bubbly uses Lowercase text transform)
-        StringAssert.Contains(ass, "bubbly");
-    }
-
-    [TestMethod]
     public void RenderKaraokeAss_WithRealWordTiming_AnchorsHighlightsAndBridgesSilence()
     {
         // alpha is spoken at the very start; beta only at 3.0s, leaving 2.5s of silence between.
@@ -785,7 +711,7 @@ public class SubtitlesServiceTests
             ]
         };
 
-        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.NeonKaraoke);
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.GlowKaraoke);
         var durations = ExtractKaraokeDurations(GetFirstKaraokeDialogue(ass));
 
         // alpha (50cs), an empty filler syllable bridging the silence (250cs), then beta (50cs).
@@ -800,7 +726,7 @@ public class SubtitlesServiceTests
             new SubtitlePostprocessingOptions(),
             []);
 
-        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.NeonKaraoke);
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.GlowKaraoke);
         var durations = ExtractKaraokeDurations(GetFirstKaraokeDialogue(ass));
 
         // No silence filler is synthesized, and the karaoke clock spans exactly the 4s cue.
@@ -824,12 +750,37 @@ public class SubtitlesServiceTests
             ]
         };
 
-        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.NeonKaraoke);
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.GlowKaraoke);
         var durations = ExtractKaraokeDurations(GetFirstKaraokeDialogue(ass));
 
         // 0.4s pre-roll filler, then three contiguous 0.5s words, never overrunning the cue.
         CollectionAssert.AreEqual(new[] { 40, 50, 50, 50 }, durations);
         Assert.IsTrue(durations.Sum() <= 300);
+    }
+
+    [TestMethod]
+    public void RenderKaraokeAss_MultiLineKaraokeCue_FirstWordOfSecondLineFillsProgressively()
+    {
+        // The cue text has a hard line break so "beta" gets BreakBefore=true. With synthetic
+        // (no source-word) timing the two words are contiguous — no gap between them — which
+        // exercises the no-gap BreakBefore path in AppendKaraokeSyllables.
+        var draft = new SubtitleDraft(
+            [new SubtitleCue(1, TimeSpan.Zero, TimeSpan.FromSeconds(4), "alpha\nbeta")],
+            new SubtitlePostprocessingOptions(),
+            []);
+
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.GlowKaraoke);
+        var dialogue = GetFirstKaraokeDialogue(ass);
+        var durations = ExtractKaraokeDurations(dialogue);
+
+        // Three syllables: alpha | 1cs \N filler | beta.
+        // The filler owns the \N so neither alpha's nor beta's syllable text contains \N —
+        // preventing the ASS renderer from completing beta's fill-sweep instantly.
+        Assert.AreEqual(3, durations.Count, "Expected alpha syllable, \\N filler, and beta syllable.");
+        Assert.AreEqual(1, durations[1], "The \\N filler syllable must be exactly 1cs.");
+
+        // The \N must sit between two karaoke tag closings (}\N{), not loose before the tag.
+        StringAssert.Contains(dialogue, "}\\N{", "\\N must be enclosed in its own filler syllable, not in alpha's or beta's syllable text.");
     }
 
     [TestMethod]
@@ -850,7 +801,7 @@ public class SubtitlesServiceTests
         var draft = await _service.GenerateAdvancedDraftAsync(CreateInputFile());
         Assert.IsNotNull(draft.SourceWords);
 
-        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.NeonKaraoke);
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.GlowKaraoke);
         var durations = ExtractKaraokeDurations(GetFirstKaraokeDialogue(ass));
 
         // Three syllables (word, silence filler, word) prove the real timing reached the output.
@@ -967,13 +918,13 @@ public class SubtitlesServiceTests
     {
         var ids = SubtitleStyleCatalog.Entries.Select(entry => entry.Id).ToArray();
         CollectionAssert.AreEquivalent(
-            new[] { "SocialImpact", "CleanSans", "CaptionBox", "BroadcastLowerThird", "NeonKaraoke", "Punch", "Bubbly", "WordPop" },
+            new[] { "Punch", "WordPop", "GlowKaraoke" },
             ids);
 
-        Assert.AreEqual(4, SubtitleStyleCatalog.ByKind(SubtitleStyleKind.Styled).Count());
-        Assert.AreEqual(4, SubtitleStyleCatalog.ByKind(SubtitleStyleKind.Karaoke).Count());
+        Assert.AreEqual(0, SubtitleStyleCatalog.ByKind(SubtitleStyleKind.Styled).Count());
+        Assert.AreEqual(3, SubtitleStyleCatalog.ByKind(SubtitleStyleKind.Karaoke).Count());
 
-        Assert.AreEqual("NeonKaraoke", SubtitleStyleCatalog.Create("neonkaraoke").AssStyleName);
+        Assert.AreEqual("GlowKaraoke", SubtitleStyleCatalog.Create("glowkaraoke").AssStyleName);
         Assert.IsNull(SubtitleStyleCatalog.Find("does-not-exist"));
         Assert.ThrowsExactly<ArgumentException>(() => SubtitleStyleCatalog.Create("does-not-exist"));
     }
@@ -1191,8 +1142,9 @@ public class SubtitlesServiceTests
         var fontSize = double.Parse(
             ass.Split('\n').First(l => l.StartsWith("Style:", StringComparison.Ordinal)).Substring("Style: ".Length).Split(',')[2],
             System.Globalization.CultureInfo.InvariantCulture);
-        // 86 * (1280/1080) = 101.9 (height-scaled; styled wraps so no width clamp).
-        Assert.AreEqual(86d * 1280d / 1080d, fontSize, 0.5);
+        // Non-chunked styled presets rely on libass WrapStyle wrapping — no width-fit clamp is applied
+        // so the user-configured font size takes effect. Expected: 86 * (1280/1080) ≈ 101.9.
+        Assert.AreEqual(86d * 1280d / 1080d, fontSize, 0.5, $"Expected height-scaled font without clamp on portrait, got {fontSize}.");
 
         // Placement \pos scaled into the real frame: centered (0.5*720=360), not 960.
         var pos = System.Text.RegularExpressions.Regex.Match(ass, @"\\pos\((\d+),(\d+)\)");
@@ -1225,16 +1177,17 @@ public class SubtitlesServiceTests
             new SubtitlePostprocessingOptions(),
             []);
 
-        // NeonKaraoke is non-chunked karaoke; it should now adapt to the frame as well.
-        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.NeonKaraoke, placement: null, target: new SubtitleRenderTarget(720, 1280));
+        // GlowKaraoke is non-chunked karaoke; it should adapt to the frame.
+        var ass = _service.RenderKaraokeAss(draft, KaraokeSubtitlePresets.GlowKaraoke, placement: null, target: new SubtitleRenderTarget(720, 1280));
 
         StringAssert.Contains(ass, "PlayResX: 720");
         StringAssert.Contains(ass, "PlayResY: 1280");
         var fontSize = double.Parse(
             ass.Split('\n').First(l => l.StartsWith("Style:", StringComparison.Ordinal)).Substring("Style: ".Length).Split(',')[2],
             System.Globalization.CultureInfo.InvariantCulture);
-        // 64 * (1280/1080) = 75.85 (height-scaled, no width clamp for the wrapping line style).
-        Assert.AreEqual(64d * 1280d / 1080d, fontSize, 0.5);
+        // Non-chunked karaoke relies on libass WrapStyle wrapping — no width-fit clamp is applied so
+        // the user-configured font size takes effect. Expected: 68 * (1280/1080) ≈ 80.6.
+        Assert.AreEqual(68d * 1280d / 1080d, fontSize, 0.5, $"Expected height-scaled font without clamp on portrait, got {fontSize}.");
     }
 
     private static (TimeSpan Start, TimeSpan End) ParseDialogueSpan(string dialogueLine)
