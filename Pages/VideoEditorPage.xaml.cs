@@ -121,6 +121,16 @@ namespace Files_Tools.Pages
         private double _previewActiveWordPopScale = 1d;
         private int _previewActiveWordIndex = -1;
         private TimeSpan _previewCueEnd = TimeSpan.Zero;
+        // Guards against re-entrant UpdateSubtitlePreview calls that fire from XAML layout events
+        // (e.g. PreviewHost_SizeChanged) that are triggered synchronously while
+        // BuildSubtitlePreviewContent is modifying the canvas. Set true for the duration of every
+        // build; RefreshSubtitlePreview skips its immediate UpdateSubtitlePreview call while this
+        // is true, so the next timer tick picks up the refresh instead (at most ~16 ms delay).
+        private bool _buildingSubtitlePreview;
+        // Wall-clock millisecond tick captured at the end of each active-cue build so the first-
+        // tick guard in UpdateKaraokeHighlight can detect "this is the natural cue start" vs "this
+        // is a mid-cue rebuild" regardless of how far into the cue the playback position already is.
+        private long _previewCueBuildTick;
         private Microsoft.UI.Xaml.Media.SolidColorBrush? _cachedPreviewBaseBrush;
         private Microsoft.UI.Xaml.Media.SolidColorBrush? _cachedPreviewHighlightBrush;
         private static readonly Microsoft.UI.Xaml.Media.SolidColorBrush TransparentBrush = new(Microsoft.UI.Colors.Transparent);
@@ -2243,6 +2253,13 @@ namespace Files_Tools.Pages
             }
 
             _previewCueKey = int.MinValue;
+            // If a build is already running (re-entrant XAML layout event), skip the immediate
+            // update — the key reset above is enough to make the next timer tick rebuild cleanly.
+            if (_buildingSubtitlePreview)
+            {
+                return;
+            }
+
             var position = VideoPlayer?.MediaPlayer?.PlaybackSession?.Position ?? TimeSpan.Zero;
             UpdateSubtitlePreview(position);
         }
@@ -2498,6 +2515,19 @@ namespace Files_Tools.Pages
 
         private void BuildSubtitlePreviewContent(SubtitleStylePreset preset, string[] words, TimeSpan[] wordStarts, bool isActive, TimeSpan cueEnd = default)
         {
+            _buildingSubtitlePreview = true;
+            try
+            {
+                BuildSubtitlePreviewContentCore(preset, words, wordStarts, isActive, cueEnd);
+            }
+            finally
+            {
+                _buildingSubtitlePreview = false;
+            }
+        }
+
+        private void BuildSubtitlePreviewContentCore(SubtitleStylePreset preset, string[] words, TimeSpan[] wordStarts, bool isActive, TimeSpan cueEnd)
+        {
             _runningPreviewStoryboard?.Stop();
             _runningPreviewStoryboard = null;
             _runningWordPopStoryboard?.Stop();
@@ -2621,6 +2651,12 @@ namespace Files_Tools.Pages
 
             if (isActive)
             {
+                // Record the wall-clock build time so UpdateKaraokeHighlight can tell whether a
+                // first tick is at a natural cue start (small elapsed) or a mid-cue rebuild caused
+                // by an automatic refresh (large elapsed).  Captured here — after wordStarts have
+                // been applied — so the tick is as close as possible to when the runs are ready.
+                _previewCueBuildTick = Environment.TickCount64;
+
                 // Defer Begin() to the next dispatcher iteration so the element has completed its
                 // layout pass in the visual tree before the storyboard targets it. Calling Begin()
                 // before layout is done causes WinUI 3 to silently drop the animation.
@@ -2957,17 +2993,24 @@ namespace Files_Tools.Pages
                 }
             }
 
-            // First-tick guard: on the very first call after a new cue is built
-            // (_previewActiveWordIndex == -1), the 16 ms timer may have fired a few
-            // milliseconds after a short first word's window already closed, so the
-            // primary scan lands on word 1 and word 0 appears instantly fully-lit.
-            // If position hasn't advanced more than 200 ms past word 0's start this is
-            // timer jitter, not a genuine seek — clamp back to word 0 so the sweep
-            // always begins from the first word.
+            // First-tick guard: on the very first call after a new active-cue build
+            // (_previewActiveWordIndex == -1) the scan may land past word 0 because:
+            //   (a) The 16 ms timer fired slightly after a short window closed (jitter).
+            //   (b) A mid-cue automatic refresh (style change, size change, …) rebuilt the
+            //       cue while playback was already deep inside it.
+            // In case (a) we want to clamp back to word 0 so the sweep always starts from
+            // the first word.  In case (b) we must NOT clamp — the user or the player is
+            // genuinely mid-cue and should see the correct "already spoken" state.
+            //
+            // We distinguish the two cases with a wall-clock delta: _previewCueBuildTick is
+            // captured at the END of BuildSubtitlePreviewContentCore (after wordStarts are
+            // applied) so it is very close in time to this first UpdateKaraokeHighlight call.
+            // A small delta (≤ 250 ms) means we are at the natural cue start; a large delta
+            // means a mid-cue rebuild happened and we should leave the scan result as-is.
             if (_previewActiveWordIndex < 0 && activeIndex > 0 && runs.Count > 0)
             {
-                var elapsedPastFirstWord = (position - runs[0].Start).TotalMilliseconds;
-                if (elapsedPastFirstWord < 200d)
+                var wallClockElapsedMs = Environment.TickCount64 - _previewCueBuildTick;
+                if (wallClockElapsedMs <= 250L)
                     activeIndex = 0;
             }
 
@@ -3143,28 +3186,41 @@ namespace Files_Tools.Pages
             if (sourceWords is { Count: > 0 })
             {
                 var inCue = sourceWords
-                    .Where(word => word.Start < cue.End && word.End > cue.Start)
+                    .Where(word => word.Start < cue.End && word.End > cue.Start
+                        // Mirror the boundary-spanning filter in BuildCueWordsFromSubtitleCue:
+                        // exclude words that started before this cue and extend only trivially
+                        // past cue.Start (< 100 ms). They belong to the previous segment and
+                        // would produce a near-zero first-word window.
+                        && !(word.Start < cue.Start
+                             && (word.End - cue.Start) < TimeSpan.FromMilliseconds(100)))
                     .OrderBy(word => word.Start)
                     .ToList();
                 if (inCue.Count == wordCount)
                 {
                     var wordStarts = inCue.Select(word => word.Start).ToArray();
 
-                    // Ensure strictly-increasing start times. The alignment model sometimes
-                    // assigns the same timestamp to consecutive words (zero-duration windows).
-                    // A zero-duration window [T, T) is never matched in the half-open scan,
-                    // so word 0 would appear instantly filled instead of sweeping progressively.
-                    // Spread any duplicate/out-of-order starts by a minimum visible gap so
-                    // the 16 ms timer can catch each word at least twice before advancing.
-                    var minGap = TimeSpan.FromMilliseconds(50);
-                    for (var i = 1; i < wordStarts.Length; i++)
+                    // Apply the same cursor-based clamping that BuildCueWordsFromSubtitleCue
+                    // uses when generating the .ass file.  If the raw alignment gives
+                    // word[i+1].Start < word[i].End (overlap), that word's start is clamped
+                    // to the previous word's end — exactly mirroring "if (start < cursor)
+                    // start = cursor; … cursor = end;" in the .ass generator.
+                    // Without this, the preview sees zero-duration windows [T,T) that the
+                    // half-open scan can never match, making the first word appear instantly
+                    // filled instead of sweeping progressively (most visible on even cues
+                    // whose raw alignment timestamps overlap).
+                    var clampCursor = cue.Start;
+                    for (var i = 0; i < wordStarts.Length; i++)
                     {
-                        if (wordStarts[i] - wordStarts[i - 1] < minGap)
-                        {
-                            var proposed = wordStarts[i - 1] + minGap;
-                            // Don't push past the cue end; fall back to a 1 ms nudge if needed.
-                            wordStarts[i] = proposed < cue.End ? proposed : wordStarts[i - 1] + TimeSpan.FromMilliseconds(1);
-                        }
+                        if (wordStarts[i] < clampCursor)
+                            wordStarts[i] = clampCursor;
+
+                        // Advance cursor to this word's end time, with a 1 ms floor to
+                        // guarantee forward progress (mirrors "if (end <= start) end = start
+                        // + MinimumPositiveDuration;" in BuildCueWordsFromSubtitleCue).
+                        var wordEnd = inCue[i].End;
+                        if (wordEnd <= wordStarts[i])
+                            wordEnd = wordStarts[i] + TimeSpan.FromMilliseconds(1);
+                        clampCursor = wordEnd;
                     }
 
                     return wordStarts;

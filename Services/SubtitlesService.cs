@@ -1293,6 +1293,23 @@ public sealed class SubtitlesService : ISubtitlesService
             {
                 if (word.Start < cueEnd && word.End > cueStart)
                 {
+                    // Exclude cross-segment boundary-spanning words: a word that starts
+                    // before this cue and extends only trivially past cueStart belongs
+                    // to the previous cue.  Wav2Vec2AlignmentService cursor-clamps within
+                    // each segment but NOT across segments, so the last word of segment N
+                    // can end slightly past the boundary that begins segment N+1.  If such
+                    // a word is mapped to the first text token of this cue, it produces a
+                    // near-zero effective duration (word.End − cueStart ≈ 1–10 ms) which
+                    // renders as an instant \kf sweep (the "first word fills entirely" bug
+                    // on even cues).  Filter it out so the count check below either
+                    // falls through to weight-based distribution or uses the genuine
+                    // in-cue words instead.
+                    if (word.Start < cueStart &&
+                        (word.End - cueStart) < TimeSpan.FromMilliseconds(100))
+                    {
+                        continue;
+                    }
+
                     overlapping.Add(word);
                 }
             }
