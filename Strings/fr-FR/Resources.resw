@@ -216,6 +216,18 @@
   <data name="AudioPage_PreparingPipeline.Text" xml:space="preserve">
     <value>Préparation du pipeline...</value>
   </data>
+  <data name="AudioPage_PreviewCodec.Text" xml:space="preserve">
+    <value>Codec : —</value>
+  </data>
+  <data name="AudioPage_PreviewRate.Text" xml:space="preserve">
+    <value>Fréquence d'échantillonnage : —</value>
+  </data>
+  <data name="AudioPage_PreviewChannels.Text" xml:space="preserve">
+    <value>Canaux : —</value>
+  </data>
+  <data name="AudioPage_PreviewDuration.Text" xml:space="preserve">
+    <value>Durée : —</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Image editor page
        ═══════════════════════════════════════════════════════════════ -->
@@ -1739,5 +1751,336 @@
   </data>
   <data name="VideoPage_BasePreset_Header" xml:space="preserve">
     <value>Préréglage de base</value>
+  </data>
+  <!-- Audio Editor page – code-behind strings -->
+  <data name="AudioPage_PreviewCodecFmt" xml:space="preserve">
+    <value>Codec : {0}</value>
+  </data>
+  <data name="AudioPage_PreviewRateFmt" xml:space="preserve">
+    <value>Fréquence d'échantillonnage : {0}</value>
+  </data>
+  <data name="AudioPage_PreviewChannelsFmt" xml:space="preserve">
+    <value>Canaux : {0}</value>
+  </data>
+  <data name="AudioPage_PreviewDurationFmt" xml:space="preserve">
+    <value>Durée : {0}</value>
+  </data>
+  <data name="AudioPage_Unknown" xml:space="preserve">
+    <value>Inconnu</value>
+  </data>
+  <data name="AudioPage_LoadedFmt" xml:space="preserve">
+    <value>Chargé : {0}</value>
+  </data>
+  <data name="AudioPage_SavedFmt" xml:space="preserve">
+    <value>Sauvegardé : {0}</value>
+  </data>
+  <data name="AudioPage_Preparing" xml:space="preserve">
+    <value>Préparation...</value>
+  </data>
+  <data name="AudioPage_FormatCard" xml:space="preserve">
+    <value>Format, codec et compression</value>
+  </data>
+  <data name="AudioPage_OutputFormat_Header" xml:space="preserve">
+    <value>Format de sortie</value>
+  </data>
+  <data name="AudioPage_KeepOriginal" xml:space="preserve">
+    <value>Conserver l'original</value>
+  </data>
+  <data name="AudioPage_Codec_Header" xml:space="preserve">
+    <value>Codec</value>
+  </data>
+  <data name="AudioPage_Auto" xml:space="preserve">
+    <value>Automatique</value>
+  </data>
+  <data name="AudioPage_Bitrate_Header" xml:space="preserve">
+    <value>Débit binaire (kbps)</value>
+  </data>
+  <data name="AudioPage_SampleRateHz_Header" xml:space="preserve">
+    <value>Fréquence d'échantillonnage (Hz)</value>
+  </data>
+  <data name="AudioPage_Channels_Header" xml:space="preserve">
+    <value>Canaux</value>
+  </data>
+  <data name="AudioPage_KeepSource" xml:space="preserve">
+    <value>Conserver la source</value>
+  </data>
+  <data name="AudioPage_Mono" xml:space="preserve">
+    <value>Mono</value>
+  </data>
+  <data name="AudioPage_Stereo" xml:space="preserve">
+    <value>Stéréo</value>
+  </data>
+  <data name="AudioPage_EnableCompression" xml:space="preserve">
+    <value>Activer l'étape de compression</value>
+  </data>
+  <data name="AudioPage_CompressionMode_Header" xml:space="preserve">
+    <value>Mode de compression</value>
+  </data>
+  <data name="AudioPage_Lossy" xml:space="preserve">
+    <value>Avec perte</value>
+  </data>
+  <data name="AudioPage_Lossless" xml:space="preserve">
+    <value>Sans perte</value>
+  </data>
+  <data name="AudioPage_CompressionCodec_Header" xml:space="preserve">
+    <value>Codec de compression</value>
+  </data>
+  <data name="AudioPage_TargetBitrate_Header" xml:space="preserve">
+    <value>Débit binaire cible (kbps)</value>
+  </data>
+  <data name="AudioPage_TargetSampleRate_Header" xml:space="preserve">
+    <value>Fréquence d'échantillonnage cible (Hz)</value>
+  </data>
+  <data name="AudioPage_MetadataCard" xml:space="preserve">
+    <value>Métadonnées</value>
+  </data>
+  <data name="AudioPage_RemoveMetadata" xml:space="preserve">
+    <value>Supprimer les métadonnées</value>
+  </data>
+  <data name="AudioPage_MetadataHint" xml:space="preserve">
+    <value>La suppression des métadonnées est une étape indépendante du pipeline.</value>
+  </data>
+  <data name="AudioPage_PodcastCard" xml:space="preserve">
+    <value>Mode podcast</value>
+  </data>
+  <data name="AudioPage_EnablePodcast" xml:space="preserve">
+    <value>Activer le mode podcast</value>
+  </data>
+  <data name="AudioPage_PodcastDenoise" xml:space="preserve">
+    <value>Réduction du bruit (DFN3)</value>
+  </data>
+  <data name="AudioPage_PodcastFullness" xml:space="preserve">
+    <value>Restaurer le spectre complet (FlashSR)</value>
+  </data>
+  <data name="AudioPage_PodcastMaster" xml:space="preserve">
+    <value>Masteriser (EQ + compression + loudnorm)</value>
+  </data>
+  <data name="AudioPage_PodcastHint" xml:space="preserve">
+    <value>Chaîne voix studio complète : débruitage DeepFilterNet3 + FlashSR + masterisation FFmpeg à -16 LUFS. Remplace la réduction de bruit indépendante. ~3–4 min CPU pour 2 min d'audio.</value>
+  </data>
+  <data name="AudioPage_TrimCard" xml:space="preserve">
+    <value>Découpage</value>
+  </data>
+  <data name="AudioPage_EnableTrim" xml:space="preserve">
+    <value>Activer le découpage</value>
+  </data>
+  <data name="AudioPage_TrimHint" xml:space="preserve">
+    <value>Utilisez la chronologie de découpage sous le lecteur pour choisir les points de début et de fin.</value>
+  </data>
+  <data name="AudioPage_ReEncodeOutput" xml:space="preserve">
+    <value>Réencoder la sortie</value>
+  </data>
+  <data name="AudioPage_SilenceTrimCard" xml:space="preserve">
+    <value>Découpage du silence</value>
+  </data>
+  <data name="AudioPage_EnableSilenceTrim" xml:space="preserve">
+    <value>Activer le découpage du silence</value>
+  </data>
+  <data name="AudioPage_Mode_Header" xml:space="preserve">
+    <value>Mode</value>
+  </data>
+  <data name="AudioPage_Leading" xml:space="preserve">
+    <value>Début</value>
+  </data>
+  <data name="AudioPage_Trailing" xml:space="preserve">
+    <value>Fin</value>
+  </data>
+  <data name="AudioPage_LeadingAndTrailing" xml:space="preserve">
+    <value>Début et fin</value>
+  </data>
+  <data name="AudioPage_Threshold_Header" xml:space="preserve">
+    <value>Seuil (dB)</value>
+  </data>
+  <data name="AudioPage_MinSilence_Header" xml:space="preserve">
+    <value>Silence minimum (ms)</value>
+  </data>
+  <data name="AudioPage_NormalizationCard" xml:space="preserve">
+    <value>Normalisation</value>
+  </data>
+  <data name="AudioPage_EnableNormalization" xml:space="preserve">
+    <value>Activer la normalisation</value>
+  </data>
+  <data name="AudioPage_Peak" xml:space="preserve">
+    <value>Crête</value>
+  </data>
+  <data name="AudioPage_LUFS" xml:space="preserve">
+    <value>LUFS</value>
+  </data>
+  <data name="AudioPage_TargetPeak_Header" xml:space="preserve">
+    <value>Crête cible (dB)</value>
+  </data>
+  <data name="AudioPage_TargetLUFS_Header" xml:space="preserve">
+    <value>LUFS cible</value>
+  </data>
+  <data name="AudioPage_UseLimiter" xml:space="preserve">
+    <value>Utiliser un limiteur</value>
+  </data>
+  <data name="AudioPage_PreventClipping" xml:space="preserve">
+    <value>Éviter l'écrêtage</value>
+  </data>
+  <data name="AudioPage_EqCard" xml:space="preserve">
+    <value>Égaliseur simple</value>
+  </data>
+  <data name="AudioPage_EnableEq" xml:space="preserve">
+    <value>Activer l'égaliseur</value>
+  </data>
+  <data name="AudioPage_Preset_Header" xml:space="preserve">
+    <value>Préréglage</value>
+  </data>
+  <data name="AudioPage_AddEqBand" xml:space="preserve">
+    <value>Ajouter une bande EQ</value>
+  </data>
+  <data name="AudioPage_EqFreq_Header" xml:space="preserve">
+    <value>Fréquence (Hz)</value>
+  </data>
+  <data name="AudioPage_EqGain_Header" xml:space="preserve">
+    <value>Gain (dB)</value>
+  </data>
+  <data name="AudioPage_EqWidth_Header" xml:space="preserve">
+    <value>Largeur</value>
+  </data>
+  <data name="AudioPage_Remove" xml:space="preserve">
+    <value>Supprimer</value>
+  </data>
+  <data name="AudioPage_DenoiseCard" xml:space="preserve">
+    <value>Réduction du bruit</value>
+  </data>
+  <data name="AudioPage_EnableDenoise" xml:space="preserve">
+    <value>Activer la réduction du bruit</value>
+  </data>
+  <data name="AudioPage_DenoiseHint" xml:space="preserve">
+    <value>Amélioration vocale DeepFilterNet3. Supprime le bruit et la réverbération. Remplacé par le mode podcast lorsque les deux sont activés.</value>
+  </data>
+  <data name="AudioPage_TranscriptionCard" xml:space="preserve">
+    <value>Transcription</value>
+  </data>
+  <data name="AudioPage_TranscriptionHint" xml:space="preserve">
+    <value>Générez du texte brut ou un fichier de sous-titres .srt simple à partir de l'audio chargé.</value>
+  </data>
+  <data name="AudioPage_DownloadTranscription" xml:space="preserve">
+    <value>Télécharger la fonction de transcription</value>
+  </data>
+  <data name="AudioPage_TranscriptionNotDownloaded" xml:space="preserve">
+    <value>Fonction de transcription pas encore téléchargée.</value>
+  </data>
+  <data name="AudioPage_OutputType_Header" xml:space="preserve">
+    <value>Type de sortie</value>
+  </data>
+  <data name="AudioPage_Text" xml:space="preserve">
+    <value>Texte</value>
+  </data>
+  <data name="AudioPage_Subtitles" xml:space="preserve">
+    <value>Sous-titres</value>
+  </data>
+  <data name="AudioPage_IncludeTimestamps" xml:space="preserve">
+    <value>Inclure les horodatages dans la sortie texte</value>
+  </data>
+  <data name="AudioPage_GenerateTranscription" xml:space="preserve">
+    <value>Générer une transcription</value>
+  </data>
+  <data name="AudioPage_TranscriptionPlaceholder" xml:space="preserve">
+    <value>Le texte de transcription généré apparaît ici.</value>
+  </data>
+  <data name="AudioPage_SaveTranscription" xml:space="preserve">
+    <value>Sauvegarder le texte de transcription</value>
+  </data>
+  <data name="AudioPage_NoTranscriptionYet" xml:space="preserve">
+    <value>Aucune transcription générée pour l'instant.</value>
+  </data>
+  <data name="AudioPage_GeneratingTranscription" xml:space="preserve">
+    <value>Génération de la transcription...</value>
+  </data>
+  <data name="AudioPage_TranscriptionDownloaded" xml:space="preserve">
+    <value>Fonction de transcription téléchargée.</value>
+  </data>
+  <data name="AudioPage_TextTranscriptionReady" xml:space="preserve">
+    <value>Transcription texte prête.</value>
+  </data>
+  <data name="AudioPage_SubtitleReadyFmt" xml:space="preserve">
+    <value>Fichier de sous-titres prêt : {0}</value>
+  </data>
+  <data name="AudioPage_TranscriptionSavedFmt" xml:space="preserve">
+    <value>Texte de transcription sauvegardé dans : {0}</value>
+  </data>
+  <data name="AudioPage_ConvertingAudio" xml:space="preserve">
+    <value>Conversion audio</value>
+  </data>
+  <data name="AudioPage_CompressingAudio" xml:space="preserve">
+    <value>Compression audio</value>
+  </data>
+  <data name="AudioPage_NormalizingAudio" xml:space="preserve">
+    <value>Normalisation audio</value>
+  </data>
+  <data name="AudioPage_TrimmingAudio" xml:space="preserve">
+    <value>Découpage audio</value>
+  </data>
+  <data name="AudioPage_RemovingSilence" xml:space="preserve">
+    <value>Suppression du silence</value>
+  </data>
+  <data name="AudioPage_ApplyingEq" xml:space="preserve">
+    <value>Application de l'égaliseur</value>
+  </data>
+  <data name="AudioPage_RemovingMetadata" xml:space="preserve">
+    <value>Suppression des métadonnées</value>
+  </data>
+  <data name="AudioPage_ProcessingPodcast" xml:space="preserve">
+    <value>Traitement de l'audio podcast...</value>
+  </data>
+  <data name="AudioPage_DenoisingAudio" xml:space="preserve">
+    <value>Débruitage audio...</value>
+  </data>
+  <data name="AudioPage_DenoisingDFN3" xml:space="preserve">
+    <value>Débruitage (DFN3)...</value>
+  </data>
+  <data name="AudioPage_Finalizing" xml:space="preserve">
+    <value>Finalisation...</value>
+  </data>
+  <data name="AudioPage_ExtractingAudio" xml:space="preserve">
+    <value>Extraction audio...</value>
+  </data>
+  <data name="AudioPage_RestoringFullness" xml:space="preserve">
+    <value>Restauration du spectre (FlashSR)...</value>
+  </data>
+  <data name="AudioPage_Mastering" xml:space="preserve">
+    <value>Masterisation...</value>
+  </data>
+  <data name="AudioPage_ProcessingComplete" xml:space="preserve">
+    <value>Traitement audio terminé</value>
+  </data>
+  <data name="AudioPage_AudioSaved" xml:space="preserve">
+    <value>Audio sauvegardé dans :</value>
+  </data>
+  <data name="AudioPage_Warnings" xml:space="preserve">
+    <value>Avertissements :</value>
+  </data>
+  <data name="AudioPage_Cancelled" xml:space="preserve">
+    <value>Annulé</value>
+  </data>
+  <data name="AudioPage_ProcessingCancelled" xml:space="preserve">
+    <value>Le traitement audio a été annulé.</value>
+  </data>
+  <data name="AudioPage_ProcessingFailed" xml:space="preserve">
+    <value>Échec du traitement</value>
+  </data>
+  <data name="Shared_OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="AudioPage_TranscriptionDownloadFailed" xml:space="preserve">
+    <value>Échec du téléchargement de la transcription</value>
+  </data>
+  <data name="AudioPage_TranscriptionRequired" xml:space="preserve">
+    <value>Fonction de transcription requise</value>
+  </data>
+  <data name="AudioPage_TranscriptionRequiredMessage" xml:space="preserve">
+    <value>Téléchargez la fonction de transcription avant de générer.</value>
+  </data>
+  <data name="AudioPage_TranscriptionFailed" xml:space="preserve">
+    <value>Échec de la transcription</value>
+  </data>
+  <data name="AudioPage_NothingToSave" xml:space="preserve">
+    <value>Rien à sauvegarder</value>
+  </data>
+  <data name="AudioPage_GenerateFirst" xml:space="preserve">
+    <value>Générez d'abord une transcription textuelle.</value>
   </data>
 </root>

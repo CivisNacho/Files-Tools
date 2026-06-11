@@ -42,6 +42,7 @@ namespace Files_Tools.Pages
         private readonly IVideoAudioDenoiseService _videoAudioDenoiseService;
         private readonly IAudioTranscriptionService _audioTranscriptionService;
         private readonly ISubtitlesService _subtitlesService;
+        private readonly VoiceStudioService _voiceStudioService = new();
 
         private StorageFile? _sourceAudioFile;
         private long? _sourceAudioFileSizeBytes;
@@ -70,8 +71,9 @@ namespace Files_Tools.Pages
         private CheckBox _enableMetadataRemovalCheckBox = null!;
 
         private CheckBox _enablePodcastModeCheckBox = null!;
-        private TextBlock _podcastProfileNameTextBlock = null!;
-        private TextBlock _podcastPresetDescriptionTextBlock = null!;
+        private CheckBox _podcastDenoiseCheckBox = null!;
+        private CheckBox _podcastFullnessCheckBox = null!;
+        private CheckBox _podcastMasterCheckBox = null!;
 
         private CheckBox _enableTrimCheckBox = null!;
         private CheckBox _trimReencodeCheckBox = null!;
@@ -95,9 +97,6 @@ namespace Files_Tools.Pages
         private Button _addEqBandButton = null!;
 
         private CheckBox _enableDenoiseCheckBox = null!;
-        private ComboBox _denoiseModeComboBox = null!;
-        private Slider _denoiseStrengthSlider = null!;
-        private TextBlock _denoiseStrengthTextBlock = null!;
 
         private TextBlock _mediaValidationTextBlock = null!;
         private TextBlock _transformValidationTextBlock = null!;
@@ -193,19 +192,19 @@ namespace Files_Tools.Pages
         private void BuildMediaPanel()
         {
             MediaPanel.Children.Clear();
-            var formatCard = CreateCard("Format, codec, and compression");
-            _outputFormatComboBox = CreateComboBox("Output format", "Keep original", "MP3", "AAC", "M4A", "WAV", "FLAC", "OPUS", "OGG");
-            _outputCodecComboBox = CreateComboBox("Codec", "Auto", "libmp3lame", "aac", "flac", "pcm_s16le", "libopus", "libvorbis");
-            _bitrateNumberBox = CreateNumberBox("Bitrate (kbps)", 1);
-            _sampleRateNumberBox = CreateNumberBox("Sample rate (Hz)", 8000);
-            _channelComboBox = CreateComboBox("Channels", "Keep source", "Mono", "Stereo");
+            var formatCard = CreateCard(Strings.Get("AudioPage_FormatCard"));
+            _outputFormatComboBox = CreateComboBox(Strings.Get("AudioPage_OutputFormat_Header"), Strings.Get("AudioPage_KeepOriginal"), "MP3", "AAC", "M4A", "WAV", "FLAC", "OPUS", "OGG");
+            _outputCodecComboBox = CreateComboBox(Strings.Get("AudioPage_Codec_Header"), Strings.Get("AudioPage_Auto"), "libmp3lame", "aac", "flac", "pcm_s16le", "libopus", "libvorbis");
+            _bitrateNumberBox = CreateNumberBox(Strings.Get("AudioPage_Bitrate_Header"), 1);
+            _sampleRateNumberBox = CreateNumberBox(Strings.Get("AudioPage_SampleRateHz_Header"), 8000);
+            _channelComboBox = CreateComboBox(Strings.Get("AudioPage_Channels_Header"), Strings.Get("AudioPage_KeepSource"), Strings.Get("AudioPage_Mono"), Strings.Get("AudioPage_Stereo"));
 
-            _enableCompressionCheckBox = CreateCheckBox("Enable compression step");
-            _compressionModeComboBox = CreateComboBox("Compression mode", "Lossy", "Lossless");
-            _compressionCodecComboBox = CreateComboBox("Compression codec", "Auto", "libmp3lame", "aac", "flac", "libopus", "libvorbis");
-            _compressionBitrateNumberBox = CreateNumberBox("Target bitrate (kbps)", 1);
-            _compressionSampleRateNumberBox = CreateNumberBox("Target sample rate (Hz)", 8000);
-            _compressionChannelsComboBox = CreateComboBox("Channels", "Keep source", "Mono", "Stereo");
+            _enableCompressionCheckBox = CreateCheckBox(Strings.Get("AudioPage_EnableCompression"));
+            _compressionModeComboBox = CreateComboBox(Strings.Get("AudioPage_CompressionMode_Header"), Strings.Get("AudioPage_Lossy"), Strings.Get("AudioPage_Lossless"));
+            _compressionCodecComboBox = CreateComboBox(Strings.Get("AudioPage_CompressionCodec_Header"), Strings.Get("AudioPage_Auto"), "libmp3lame", "aac", "flac", "libopus", "libvorbis");
+            _compressionBitrateNumberBox = CreateNumberBox(Strings.Get("AudioPage_TargetBitrate_Header"), 1);
+            _compressionSampleRateNumberBox = CreateNumberBox(Strings.Get("AudioPage_TargetSampleRate_Header"), 8000);
+            _compressionChannelsComboBox = CreateComboBox(Strings.Get("AudioPage_Channels_Header"), Strings.Get("AudioPage_KeepSource"), Strings.Get("AudioPage_Mono"), Strings.Get("AudioPage_Stereo"));
 
             formatCard.Children.Add(_outputFormatComboBox);
             formatCard.Children.Add(_outputCodecComboBox);
@@ -221,29 +220,28 @@ namespace Files_Tools.Pages
             _mediaFormatCardBorder = new Border { Style = (Style)Resources["SettingsCardStyle"], Child = formatCard };
             MediaPanel.Children.Add(_mediaFormatCardBorder);
 
-            var metadataCard = CreateCard("Metadata");
-            _enableMetadataRemovalCheckBox = CreateCheckBox("Remove metadata");
+            var metadataCard = CreateCard(Strings.Get("AudioPage_MetadataCard"));
+            _enableMetadataRemovalCheckBox = CreateCheckBox(Strings.Get("AudioPage_RemoveMetadata"));
             metadataCard.Children.Add(_enableMetadataRemovalCheckBox);
-            metadataCard.Children.Add(new TextBlock { Opacity = 0.72, Text = "Metadata remover is a standalone pipeline step.", TextWrapping = TextWrapping.Wrap });
+            metadataCard.Children.Add(new TextBlock { Opacity = 0.72, Text = Strings.Get("AudioPage_MetadataHint"), TextWrapping = TextWrapping.Wrap });
             _mediaMetadataCardBorder = new Border { Style = (Style)Resources["SettingsCardStyle"], Child = metadataCard };
             MediaPanel.Children.Add(_mediaMetadataCardBorder);
 
-            var podcastCard = CreateCard("Podcast mode");
-            _enablePodcastModeCheckBox = CreateCheckBox("Enable podcast mode");
-            _podcastProfileNameTextBlock = new TextBlock
-            {
-                FontWeight = FontWeights.SemiBold,
-                Text = "Default Podcast Profile"
-            };
-            _podcastPresetDescriptionTextBlock = new TextBlock
-            {
-                Opacity = 0.76,
-                Text = "Balanced spoken-word profile tuned for clarity and natural tone. If denoise is enabled, DTLN runs before podcast shaping.",
-                TextWrapping = TextWrapping.Wrap
-            };
+            var podcastCard = CreateCard(Strings.Get("AudioPage_PodcastCard"));
+            _enablePodcastModeCheckBox = CreateCheckBox(Strings.Get("AudioPage_EnablePodcast"));
+            _podcastDenoiseCheckBox = CreateCheckBox(Strings.Get("AudioPage_PodcastDenoise"), true);
+            _podcastFullnessCheckBox = CreateCheckBox(Strings.Get("AudioPage_PodcastFullness"), true);
+            _podcastMasterCheckBox = CreateCheckBox(Strings.Get("AudioPage_PodcastMaster"), true);
             podcastCard.Children.Add(_enablePodcastModeCheckBox);
-            podcastCard.Children.Add(_podcastProfileNameTextBlock);
-            podcastCard.Children.Add(_podcastPresetDescriptionTextBlock);
+            podcastCard.Children.Add(_podcastDenoiseCheckBox);
+            podcastCard.Children.Add(_podcastFullnessCheckBox);
+            podcastCard.Children.Add(_podcastMasterCheckBox);
+            podcastCard.Children.Add(new TextBlock
+            {
+                Opacity = 0.72,
+                Text = Strings.Get("AudioPage_PodcastHint"),
+                TextWrapping = TextWrapping.Wrap
+            });
             _mediaPodcastCardBorder = new Border { Style = (Style)Resources["SettingsCardStyle"], Child = podcastCard };
             MediaPanel.Children.Add(_mediaPodcastCardBorder);
 
@@ -254,25 +252,25 @@ namespace Files_Tools.Pages
         private void BuildTransformPanel()
         {
             TransformPanel.Children.Clear();
-            var trimCard = CreateCard("Trim");
-            _enableTrimCheckBox = CreateCheckBox("Enable trim");
-            _trimReencodeCheckBox = CreateCheckBox("Re-encode output", true);
+            var trimCard = CreateCard(Strings.Get("AudioPage_TrimCard"));
+            _enableTrimCheckBox = CreateCheckBox(Strings.Get("AudioPage_EnableTrim"));
+            _trimReencodeCheckBox = CreateCheckBox(Strings.Get("AudioPage_ReEncodeOutput"), true);
             trimCard.Children.Add(_enableTrimCheckBox);
             trimCard.Children.Add(new TextBlock
             {
                 Opacity = 0.76,
-                Text = "Use the trim timeline under the preview player to choose start and end points.",
+                Text = Strings.Get("AudioPage_TrimHint"),
                 TextWrapping = TextWrapping.Wrap
             });
             trimCard.Children.Add(_trimReencodeCheckBox);
             _transformTrimCardBorder = new Border { Style = (Style)Resources["SettingsCardStyle"], Child = trimCard };
             TransformPanel.Children.Add(_transformTrimCardBorder);
 
-            var silenceCard = CreateCard("Silence trim");
-            _enableSilenceTrimCheckBox = CreateCheckBox("Enable silence trim");
-            _silenceModeComboBox = CreateComboBox("Mode", "Leading", "Trailing", "Leading and trailing");
-            _silenceThresholdNumberBox = CreateNumberBox("Threshold (dB)", null, -40);
-            _silenceDurationMsNumberBox = CreateNumberBox("Minimum silence (ms)", 1, 500);
+            var silenceCard = CreateCard(Strings.Get("AudioPage_SilenceTrimCard"));
+            _enableSilenceTrimCheckBox = CreateCheckBox(Strings.Get("AudioPage_EnableSilenceTrim"));
+            _silenceModeComboBox = CreateComboBox(Strings.Get("AudioPage_Mode_Header"), Strings.Get("AudioPage_Leading"), Strings.Get("AudioPage_Trailing"), Strings.Get("AudioPage_LeadingAndTrailing"));
+            _silenceThresholdNumberBox = CreateNumberBox(Strings.Get("AudioPage_Threshold_Header"), null, -40);
+            _silenceDurationMsNumberBox = CreateNumberBox(Strings.Get("AudioPage_MinSilence_Header"), 1, 500);
             silenceCard.Children.Add(_enableSilenceTrimCheckBox);
             silenceCard.Children.Add(_silenceModeComboBox);
             silenceCard.Children.Add(_silenceThresholdNumberBox);
@@ -287,13 +285,13 @@ namespace Files_Tools.Pages
         private void BuildAdjustPanel()
         {
             AdjustPanel.Children.Clear();
-            var normalizeCard = CreateCard("Normalization");
-            _enableNormalizeCheckBox = CreateCheckBox("Enable normalization");
-            _normalizeModeComboBox = CreateComboBox("Mode", "Peak", "LUFS");
-            _normalizePeakNumberBox = CreateNumberBox("Target peak (dB)", null, -1);
-            _normalizeLufsNumberBox = CreateNumberBox("Target LUFS", null, -16);
-            _normalizeLimiterCheckBox = CreateCheckBox("Use limiter", true);
-            _normalizeClipCheckBox = CreateCheckBox("Prevent clipping", true);
+            var normalizeCard = CreateCard(Strings.Get("AudioPage_NormalizationCard"));
+            _enableNormalizeCheckBox = CreateCheckBox(Strings.Get("AudioPage_EnableNormalization"));
+            _normalizeModeComboBox = CreateComboBox(Strings.Get("AudioPage_Mode_Header"), Strings.Get("AudioPage_Peak"), Strings.Get("AudioPage_LUFS"));
+            _normalizePeakNumberBox = CreateNumberBox(Strings.Get("AudioPage_TargetPeak_Header"), null, -1);
+            _normalizeLufsNumberBox = CreateNumberBox(Strings.Get("AudioPage_TargetLUFS_Header"), null, -16);
+            _normalizeLimiterCheckBox = CreateCheckBox(Strings.Get("AudioPage_UseLimiter"), true);
+            _normalizeClipCheckBox = CreateCheckBox(Strings.Get("AudioPage_PreventClipping"), true);
             normalizeCard.Children.Add(_enableNormalizeCheckBox);
             normalizeCard.Children.Add(_normalizeModeComboBox);
             normalizeCard.Children.Add(_normalizePeakNumberBox);
@@ -303,12 +301,12 @@ namespace Files_Tools.Pages
             _adjustNormalizeCardBorder = new Border { Style = (Style)Resources["SettingsCardStyle"], Child = normalizeCard };
             AdjustPanel.Children.Add(_adjustNormalizeCardBorder);
 
-            var eqCard = CreateCard("Simple EQ");
-            _enableEqCheckBox = CreateCheckBox("Enable EQ");
-            _eqPresetComboBox = CreateComboBox("Preset", "None", "PodcastVoice", "VoiceClarity", "WarmVoice", "BrightVoice", "ReduceBass", "ReduceTreble", "PhoneVoice", "RadioVoice", "RemoveElectricalHum50Hz", "RemoveElectricalHum60Hz", "Custom");
-            _eqPreventClipCheckBox = CreateCheckBox("Prevent clipping", true);
+            var eqCard = CreateCard(Strings.Get("AudioPage_EqCard"));
+            _enableEqCheckBox = CreateCheckBox(Strings.Get("AudioPage_EnableEq"));
+            _eqPresetComboBox = CreateComboBox(Strings.Get("AudioPage_Preset_Header"), "None", "PodcastVoice", "VoiceClarity", "WarmVoice", "BrightVoice", "ReduceBass", "ReduceTreble", "PhoneVoice", "RadioVoice", "RemoveElectricalHum50Hz", "RemoveElectricalHum60Hz", "Custom");
+            _eqPreventClipCheckBox = CreateCheckBox(Strings.Get("AudioPage_PreventClipping"), true);
             _customEqBandsPanel = new StackPanel { Spacing = 8 };
-            _addEqBandButton = new Button { Content = "Add EQ band", HorizontalAlignment = HorizontalAlignment.Left };
+            _addEqBandButton = new Button { Content = Strings.Get("AudioPage_AddEqBand"), HorizontalAlignment = HorizontalAlignment.Left };
             _addEqBandButton.Click += AddEqBandButton_Click;
             _eqPresetComboBox.SelectionChanged += OnControlChanged;
             eqCard.Children.Add(_enableEqCheckBox);
@@ -322,21 +320,13 @@ namespace Files_Tools.Pages
             AddEqBand(1000, 0, 1);
             AddEqBand(5000, 0, 1);
 
-            var denoiseCard = CreateCard("Denoise");
-            _enableDenoiseCheckBox = CreateCheckBox("Enable denoise");
-            _denoiseModeComboBox = CreateComboBox("Mode", "Mono", "Stereo");
-            _denoiseModeComboBox.SelectionChanged += OnControlChanged;
-            _denoiseStrengthTextBlock = new TextBlock { Text = "Strength: 100%" };
-            _denoiseStrengthSlider = new Slider { Minimum = 0, Maximum = 100, StepFrequency = 1, Value = 100 };
-            _denoiseStrengthSlider.ValueChanged += DenoiseStrengthSlider_ValueChanged;
+            var denoiseCard = CreateCard(Strings.Get("AudioPage_DenoiseCard"));
+            _enableDenoiseCheckBox = CreateCheckBox(Strings.Get("AudioPage_EnableDenoise"));
             denoiseCard.Children.Add(_enableDenoiseCheckBox);
-            denoiseCard.Children.Add(_denoiseModeComboBox);
-            denoiseCard.Children.Add(_denoiseStrengthTextBlock);
-            denoiseCard.Children.Add(_denoiseStrengthSlider);
             denoiseCard.Children.Add(new TextBlock
             {
                 Opacity = 0.72,
-                Text = "DTLN denoise. Higher strengths use extra inference passes for stronger cleanup.",
+                Text = Strings.Get("AudioPage_DenoiseHint"),
                 TextWrapping = TextWrapping.Wrap
             });
             _adjustDenoiseCardBorder = new Border { Style = (Style)Resources["SettingsCardStyle"], Child = denoiseCard };
@@ -350,17 +340,17 @@ namespace Files_Tools.Pages
         {
             TranscriptionPanel.Children.Clear();
 
-            var card = CreateCard("Transcription");
+            var card = CreateCard(Strings.Get("AudioPage_TranscriptionCard"));
             card.Children.Add(new TextBlock
             {
                 Opacity = 0.76,
-                Text = "Generate plain text or a plain .srt subtitle file from the loaded audio.",
+                Text = Strings.Get("AudioPage_TranscriptionHint"),
                 TextWrapping = TextWrapping.Wrap
             });
 
             _downloadTranscriptionFeatureButton = new Button
             {
-                Content = "Download transcription feature",
+                Content = Strings.Get("AudioPage_DownloadTranscription"),
                 HorizontalAlignment = HorizontalAlignment.Left
             };
             _downloadTranscriptionFeatureButton.Click += DownloadTranscriptionFeatureButton_Click;
@@ -376,16 +366,16 @@ namespace Files_Tools.Pages
             _transcriptionDownloadStatusTextBlock = new TextBlock
             {
                 Opacity = 0.76,
-                Text = "Transcription feature not downloaded yet.",
+                Text = Strings.Get("AudioPage_TranscriptionNotDownloaded"),
                 TextWrapping = TextWrapping.Wrap
             };
 
-            _transcriptionOutputTypeComboBox = CreateComboBox("Output type", "Text", "Subtitles");
-            _includeTimestampsCheckBox = CreateCheckBox("Include timestamps in text output");
+            _transcriptionOutputTypeComboBox = CreateComboBox(Strings.Get("AudioPage_OutputType_Header"), Strings.Get("AudioPage_Text"), Strings.Get("AudioPage_Subtitles"));
+            _includeTimestampsCheckBox = CreateCheckBox(Strings.Get("AudioPage_IncludeTimestamps"));
 
             _generateTranscriptionButton = new Button
             {
-                Content = "Generate transcription",
+                Content = Strings.Get("AudioPage_GenerateTranscription"),
                 HorizontalAlignment = HorizontalAlignment.Left
             };
             _generateTranscriptionButton.Click += GenerateTranscriptionButton_Click;
@@ -402,7 +392,7 @@ namespace Files_Tools.Pages
             _transcriptionEtaTextBlock = new TextBlock
             {
                 Opacity = 0.76,
-                Text = "ETA calculating...",
+                Text = Strings.Get("EtaCalculating.Text"),
                 TextWrapping = TextWrapping.Wrap,
                 Visibility = Visibility.Collapsed
             };
@@ -410,13 +400,13 @@ namespace Files_Tools.Pages
             _transcriptionRichEditBox = new RichEditBox
             {
                 MinHeight = 180,
-                PlaceholderText = "Generated transcription text appears here.",
+                PlaceholderText = Strings.Get("AudioPage_TranscriptionPlaceholder"),
                 IsSpellCheckEnabled = false
             };
 
             _saveTranscriptionTextButton = new Button
             {
-                Content = "Save transcription text",
+                Content = Strings.Get("AudioPage_SaveTranscription"),
                 HorizontalAlignment = HorizontalAlignment.Left
             };
             _saveTranscriptionTextButton.Click += SaveTranscriptionTextButton_Click;
@@ -424,7 +414,7 @@ namespace Files_Tools.Pages
             _transcriptionStatusTextBlock = new TextBlock
             {
                 Opacity = 0.76,
-                Text = "No transcription generated yet.",
+                Text = Strings.Get("AudioPage_NoTranscriptionYet"),
                 TextWrapping = TextWrapping.Wrap
             };
 
@@ -521,10 +511,10 @@ namespace Files_Tools.Pages
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2, GridUnitType.Star) });
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2, GridUnitType.Star) });
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            var f = CreateNumberBox("Freq (Hz)", 1, frequency);
-            var g = CreateNumberBox("Gain (dB)", null, gain);
-            var w = CreateNumberBox("Width", 0.01, width);
-            var remove = new Button { Content = "Remove", VerticalAlignment = VerticalAlignment.Bottom };
+            var f = CreateNumberBox(Strings.Get("AudioPage_EqFreq_Header"), 1, frequency);
+            var g = CreateNumberBox(Strings.Get("AudioPage_EqGain_Header"), null, gain);
+            var w = CreateNumberBox(Strings.Get("AudioPage_EqWidth_Header"), 0.01, width);
+            var remove = new Button { Content = Strings.Get("AudioPage_Remove"), VerticalAlignment = VerticalAlignment.Bottom };
             remove.Click += (_, _) =>
             {
                 var match = _eqRows.FirstOrDefault(x => x.Root == row);
@@ -665,7 +655,7 @@ namespace Files_Tools.Pages
             _sourceAudioFile = file;
             _generatedTranscriptionPath = null;
             DropHintPanel.Visibility = Visibility.Collapsed;
-            LoadedAudioInfoTextBlock.Text = $"Loaded: {file.Name}";
+            LoadedAudioInfoTextBlock.Text = string.Format(Strings.Get("AudioPage_LoadedFmt"), file.Name);
             AudioPlayer.SetMediaPlayer(_audioPlayer);
             _audioPlayer.Source = MediaSource.CreateFromStorageFile(file);
             AudioPlayer.Visibility = Visibility.Visible;
@@ -719,31 +709,27 @@ namespace Files_Tools.Pages
             {
                 var probe = await _videoAudioDenoiseService.ProbeAudioAsync(path);
                 _audioDuration = probe.Duration;
-                PreviewCodecTextBlock.Text = $"Codec: {probe.CodecName ?? "Unknown"}";
-                PreviewRateTextBlock.Text = $"Sample rate: {probe.SampleRate} Hz";
-                PreviewChannelsTextBlock.Text = $"Channels: {probe.Channels}";
-                PreviewDurationTextBlock.Text = $"Duration: {probe.Duration?.ToString() ?? "Unknown"}";
+                var unknown = Strings.Get("AudioPage_Unknown");
+                PreviewCodecTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewCodecFmt"), probe.CodecName ?? unknown);
+                PreviewRateTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewRateFmt"), $"{probe.SampleRate} Hz");
+                PreviewChannelsTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewChannelsFmt"), probe.Channels);
+                PreviewDurationTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewDurationFmt"), probe.Duration?.ToString() ?? unknown);
             }
             catch
             {
                 _audioDuration = null;
-                PreviewCodecTextBlock.Text = "Codec: Unknown";
-                PreviewRateTextBlock.Text = "Sample rate: Unknown";
-                PreviewChannelsTextBlock.Text = "Channels: Unknown";
-                PreviewDurationTextBlock.Text = "Duration: Unknown";
+                var unknown = Strings.Get("AudioPage_Unknown");
+                PreviewCodecTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewCodecFmt"), unknown);
+                PreviewRateTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewRateFmt"), unknown);
+                PreviewChannelsTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewChannelsFmt"), unknown);
+                PreviewDurationTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewDurationFmt"), unknown);
             }
         }
 
         private void OnControlChanged(object sender, object e) => RefreshValidationAndState();
         private void OnNumberChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) => RefreshValidationAndState();
 
-        private void DenoiseStrengthSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
-        {
-            var strength = Math.Clamp((int)Math.Round(_denoiseStrengthSlider.Value), 0, 100);
-            var passes = GetDenoisePasses(strength);
-            _denoiseStrengthTextBlock.Text = passes > 1 ? $"Strength: {strength}% ({passes} DTLN passes)" : $"Strength: {strength}%";
-            RefreshValidationAndState();
-        }
+
 
         private async void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
@@ -761,7 +747,7 @@ namespace Files_Tools.Pages
             _isProcessing = true;
             _processingCancellation = new CancellationTokenSource();
             RefreshValidationAndState();
-            SetProcessingUi(true, "Preparing pipeline...", "ETA calculating...", "Preparing...", 0);
+            SetProcessingUi(true, Strings.Get("AudioPage_PreparingPipeline.Text"), Strings.Get("EtaCalculating.Text"), Strings.Get("AudioPage_Preparing"), 0);
 
             var tempFiles = new List<string>();
             var warnings = new List<string>();
@@ -774,23 +760,25 @@ namespace Files_Tools.Pages
                 for (var i = 0; i < steps.Count; i++)
                 {
                     var step = steps[i];
-                    var stepOutput = i == steps.Count - 1 ? finalOutput : CreateTemporaryAudioPath(finalOutput);
+                    var stepOutput = i == steps.Count - 1 ? finalOutput
+                        : (step == AudioPipelineStep.Denoise || step == AudioPipelineStep.Podcast) ? CreateTemporaryWavPath()
+                        : CreateTemporaryAudioPath(finalOutput);
                     if (i < steps.Count - 1) tempFiles.Add(stepOutput);
                     await ExecuteStepAsync(step, currentInput, stepOutput, warnings, _processingCancellation.Token);
                     currentInput = stepOutput;
                 }
 
-                await ShowSimpleDialogAsync("Audio processing complete", BuildCompletionMessage(finalOutput, warnings));
-                LoadedAudioInfoTextBlock.Text = $"Saved: {Path.GetFileName(finalOutput)}";
+                await ShowSimpleDialogAsync(Strings.Get("AudioPage_ProcessingComplete"), BuildCompletionMessage(finalOutput, warnings));
+                LoadedAudioInfoTextBlock.Text = string.Format(Strings.Get("AudioPage_SavedFmt"), Path.GetFileName(finalOutput));
                 await UpdatePreviewInfoAsync(finalOutput);
             }
             catch (OperationCanceledException)
             {
-                await ShowSimpleDialogAsync("Cancelled", "Audio processing was cancelled.");
+                await ShowSimpleDialogAsync(Strings.Get("AudioPage_Cancelled"), Strings.Get("AudioPage_ProcessingCancelled"));
             }
             catch (Exception ex)
             {
-                await ShowSimpleDialogAsync("Processing failed", ex.Message);
+                await ShowSimpleDialogAsync(Strings.Get("AudioPage_ProcessingFailed"), ex.Message);
             }
             finally
             {
@@ -830,7 +818,7 @@ namespace Files_Tools.Pages
             }
             catch (Exception ex)
             {
-                await ShowSimpleDialogAsync("Transcription download failed", ex.Message);
+                await ShowSimpleDialogAsync(Strings.Get("AudioPage_TranscriptionDownloadFailed"), ex.Message);
             }
             finally
             {
@@ -849,14 +837,14 @@ namespace Files_Tools.Pages
 
             if (!_audioTranscriptionService.IsInstalled())
             {
-                await ShowSimpleDialogAsync("Transcription feature required", "Download transcription feature before generating.");
+                await ShowSimpleDialogAsync(Strings.Get("AudioPage_TranscriptionRequired"), Strings.Get("AudioPage_TranscriptionRequiredMessage"));
                 return;
             }
 
             try
             {
                 _isGeneratingTranscription = true;
-                _transcriptionStatusTextBlock.Text = "Generating transcription...";
+                _transcriptionStatusTextBlock.Text = Strings.Get("AudioPage_GeneratingTranscription");
                 _transcriptionProgressBar.Visibility = Visibility.Visible;
                 _transcriptionProgressBar.IsIndeterminate = false;
                 _transcriptionProgressBar.Value = 0d;
@@ -864,7 +852,7 @@ namespace Files_Tools.Pages
                 _transcriptionEtaTextBlock.Text = "ETA calculating...";
                 RefreshValidationAndState();
 
-                var outputType = GetSelectedText(_transcriptionOutputTypeComboBox);
+                var isSubtitles = (_transcriptionOutputTypeComboBox?.SelectedIndex ?? 0) == 1;
                 var progress = new Progress<AudioTranscriptionProgress>(update =>
                 {
                     _transcriptionProgressBar.Visibility = Visibility.Visible;
@@ -873,11 +861,11 @@ namespace Files_Tools.Pages
                     _transcriptionEtaTextBlock.Visibility = Visibility.Visible;
                     _transcriptionEtaTextBlock.Text = update.EstimatedRemainingTime is TimeSpan eta
                         ? $"{update.StageDescription} - ETA {FormatDuration(eta)}"
-                        : $"{update.StageDescription} - ETA calculating...";
+                        : $"{update.StageDescription} - {Strings.Get("EtaCalculating.Text")}";
                     TaskbarProgressHelper.SetProgress(update.OverallPercent);
                 });
 
-                if (string.Equals(outputType, "Subtitles", StringComparison.Ordinal))
+                if (isSubtitles)
                 {
                     var subtitlePath = Path.Combine(
                         Path.GetTempPath(),
@@ -893,7 +881,7 @@ namespace Files_Tools.Pages
                     _generatedTranscriptionPath = await _subtitlesService.GenerateSrtAsync(_sourceAudioFile.Path, subtitlePath, progress);
                     var srt = await File.ReadAllTextAsync(_generatedTranscriptionPath);
                     _transcriptionRichEditBox.Document.SetText(TextSetOptions.None, srt);
-                    _transcriptionStatusTextBlock.Text = $"Subtitle file ready: {_generatedTranscriptionPath}";
+                    _transcriptionStatusTextBlock.Text = string.Format(Strings.Get("AudioPage_SubtitleReadyFmt"), _generatedTranscriptionPath);
                 }
                 else
                 {
@@ -909,12 +897,12 @@ namespace Files_Tools.Pages
 
                     _generatedTranscriptionPath = null;
                     _transcriptionRichEditBox.Document.SetText(TextSetOptions.None, text);
-                    _transcriptionStatusTextBlock.Text = "Text transcription ready.";
+                    _transcriptionStatusTextBlock.Text = Strings.Get("AudioPage_TextTranscriptionReady");
                 }
             }
             catch (Exception ex)
             {
-                await ShowSimpleDialogAsync("Transcription failed", ex.Message);
+                await ShowSimpleDialogAsync(Strings.Get("AudioPage_TranscriptionFailed"), ex.Message);
             }
             finally
             {
@@ -923,7 +911,7 @@ namespace Files_Tools.Pages
                 _transcriptionProgressBar.IsIndeterminate = false;
                 _transcriptionProgressBar.Value = 0d;
                 _transcriptionEtaTextBlock.Visibility = Visibility.Collapsed;
-                _transcriptionEtaTextBlock.Text = "ETA calculating...";
+                _transcriptionEtaTextBlock.Text = Strings.Get("EtaCalculating.Text");
                 TaskbarProgressHelper.Clear();
                 RefreshValidationAndState();
             }
@@ -940,7 +928,7 @@ namespace Files_Tools.Pages
             text = text?.TrimEnd('\r', '\n') ?? string.Empty;
             if (string.IsNullOrWhiteSpace(text))
             {
-                await ShowSimpleDialogAsync("Nothing to save", "Generate text transcription first.");
+                await ShowSimpleDialogAsync(Strings.Get("AudioPage_NothingToSave"), Strings.Get("AudioPage_GenerateFirst"));
                 return;
             }
 
@@ -962,7 +950,7 @@ namespace Files_Tools.Pages
             }
 
             await File.WriteAllTextAsync(file.Path, text);
-            _transcriptionStatusTextBlock.Text = $"Transcription text saved to: {file.Path}";
+            _transcriptionStatusTextBlock.Text = string.Format(Strings.Get("AudioPage_TranscriptionSavedFmt"), file.Path);
         }
 
         private async Task ExecuteStepAsync(AudioPipelineStep step, string inputPath, string outputPath, List<string> warnings, CancellationToken ct)
@@ -970,62 +958,59 @@ namespace Files_Tools.Pages
             switch (step)
             {
                 case AudioPipelineStep.Convert:
-                    warnings.AddRange((await _audioProcessingService.ConvertAsync(inputPath, outputPath, BuildConversionOptions(), CreateAudioProgress("Converting audio"), ct)).Warnings);
+                    warnings.AddRange((await _audioProcessingService.ConvertAsync(inputPath, outputPath, BuildConversionOptions(), CreateAudioProgress(Strings.Get("AudioPage_ConvertingAudio")), ct)).Warnings);
                     break;
                 case AudioPipelineStep.Compress:
-                    warnings.AddRange((await _audioProcessingService.CompressAsync(inputPath, outputPath, BuildCompressionOptions(), CreateAudioProgress("Compressing audio"), ct)).Warnings);
+                    warnings.AddRange((await _audioProcessingService.CompressAsync(inputPath, outputPath, BuildCompressionOptions(), CreateAudioProgress(Strings.Get("AudioPage_CompressingAudio")), ct)).Warnings);
                     break;
                 case AudioPipelineStep.Normalize:
-                    warnings.AddRange((await _audioProcessingService.NormalizeAsync(inputPath, outputPath, BuildNormalizationOptions(), CreateAudioProgress("Normalizing audio"), ct)).Warnings);
+                    warnings.AddRange((await _audioProcessingService.NormalizeAsync(inputPath, outputPath, BuildNormalizationOptions(), CreateAudioProgress(Strings.Get("AudioPage_NormalizingAudio")), ct)).Warnings);
                     break;
                 case AudioPipelineStep.Trim:
-                    warnings.AddRange((await _audioProcessingService.TrimAsync(inputPath, outputPath, BuildTrimOptions(), CreateAudioProgress("Trimming audio"), ct)).Warnings);
+                    warnings.AddRange((await _audioProcessingService.TrimAsync(inputPath, outputPath, BuildTrimOptions(), CreateAudioProgress(Strings.Get("AudioPage_TrimmingAudio")), ct)).Warnings);
                     break;
                 case AudioPipelineStep.SilenceTrim:
-                    warnings.AddRange((await _audioProcessingService.RemoveSilenceAsync(inputPath, outputPath, BuildSilenceOptions(), CreateAudioProgress("Removing silence"), ct)).Warnings);
+                    warnings.AddRange((await _audioProcessingService.RemoveSilenceAsync(inputPath, outputPath, BuildSilenceOptions(), CreateAudioProgress(Strings.Get("AudioPage_RemovingSilence")), ct)).Warnings);
                     break;
                 case AudioPipelineStep.Eq:
-                    warnings.AddRange((await _audioProcessingService.ApplyEqualizerAsync(inputPath, outputPath, BuildEqualizerOptions(), CreateAudioProgress("Applying equalizer"), ct)).Warnings);
+                    warnings.AddRange((await _audioProcessingService.ApplyEqualizerAsync(inputPath, outputPath, BuildEqualizerOptions(), CreateAudioProgress(Strings.Get("AudioPage_ApplyingEq")), ct)).Warnings);
                     break;
                 case AudioPipelineStep.Podcast:
-                    warnings.AddRange((await _audioProcessingService.ProcessPodcastAudioAsync(inputPath, outputPath, await BuildPodcastOptionsAsync(inputPath, warnings, ct), CreateAudioProgress("Processing podcast audio"), ct)).Warnings);
-                    break;
-                case AudioPipelineStep.Denoise:
                 {
-                    var options = BuildDenoiseOptions();
-                    var probe = await _videoAudioDenoiseService.ProbeAudioAsync(inputPath, cancellationToken: ct);
-                    if (options.Mode == AudioDenoiseMode.StrongStereo && probe.Channels != 2)
-                    {
-                        options = new AudioDenoiseOptions
-                        {
-                            Mode = AudioDenoiseMode.Mono,
-                            DenoiseAmount = options.DenoiseAmount,
-                            DenoisePasses = options.DenoisePasses,
-                            ModelSampleRate = options.ModelSampleRate,
-                            OutputSampleRate = options.OutputSampleRate,
-                            NormalizePeak = options.NormalizePeak,
-                            PreventClipping = options.PreventClipping,
-                            KeepTemporaryFiles = options.KeepTemporaryFiles
-                        };
-                        warnings.Add("Stereo denoise requested on non-stereo input. Falling back to mono denoise.");
-                    }
-                    var progress = new Progress<DenoiseProgress>(p =>
+                    var podOpts = BuildPodcastOptions();
+                    var podProgress = new Progress<VoiceStudioProgress>(p =>
                     {
                         var now = _progressUiThrottleStopwatch.ElapsedMilliseconds;
-                        var shouldForce = p.Stage == DenoiseProcessingStage.Completed || p.OverallPercent >= 1;
-                        if (!shouldForce && now - _lastProgressUiUpdateTick < 120)
-                        {
-                            return;
-                        }
-
+                        if (p.Stage != VoiceStudioStage.Completed && p.Fraction < 1 && now - _lastProgressUiUpdateTick < 120) return;
                         _lastProgressUiUpdateTick = now;
-                        SetProcessingUi(true, "Denoising audio...", FormatEta(p.EstimatedRemainingTime), p.StageDescription, p.OverallPercent);
+                        var detail = p.Stage switch
+                        {
+                            VoiceStudioStage.Extracting => Strings.Get("AudioPage_ExtractingAudio"),
+                            VoiceStudioStage.Denoising => Strings.Get("AudioPage_DenoisingDFN3"),
+                            VoiceStudioStage.RestoringFullness => Strings.Get("AudioPage_RestoringFullness"),
+                            VoiceStudioStage.Mastering => Strings.Get("AudioPage_Mastering"),
+                            _ => Strings.Get("AudioPage_Finalizing")
+                        };
+                        SetProcessingUi(true, Strings.Get("AudioPage_ProcessingPodcast"), FormatEta(null), detail, p.Fraction);
                     });
-                    warnings.AddRange((await _videoAudioDenoiseService.DenoiseAudioAsync(inputPath, outputPath, options, progress, ct)).Warnings);
+                    await _voiceStudioService.ProcessAudioAsync(inputPath, outputPath, podOpts, podProgress, ct);
+                    break;
+                }
+                case AudioPipelineStep.Denoise:
+                {
+                    var dnOpts = new VoiceStudioOptions { Denoise = true, SuperResolution = false, Master = false };
+                    var dnProgress = new Progress<VoiceStudioProgress>(p =>
+                    {
+                        var now = _progressUiThrottleStopwatch.ElapsedMilliseconds;
+                        if (p.Stage != VoiceStudioStage.Completed && p.Fraction < 1 && now - _lastProgressUiUpdateTick < 120) return;
+                        _lastProgressUiUpdateTick = now;
+                        SetProcessingUi(true, Strings.Get("AudioPage_DenoisingAudio"), FormatEta(null), p.Stage == VoiceStudioStage.Denoising ? Strings.Get("AudioPage_DenoisingDFN3") : Strings.Get("AudioPage_Finalizing"), p.Fraction);
+                    });
+                    await _voiceStudioService.ProcessAudioAsync(inputPath, outputPath, dnOpts, dnProgress, ct);
                     break;
                 }
                 case AudioPipelineStep.Metadata:
-                    warnings.AddRange((await _audioProcessingService.RemoveMetadataAsync(inputPath, outputPath, CreateAudioProgress("Removing metadata"), ct)).Warnings);
+                    warnings.AddRange((await _audioProcessingService.RemoveMetadataAsync(inputPath, outputPath, CreateAudioProgress(Strings.Get("AudioPage_RemovingMetadata")), ct)).Warnings);
                     break;
             }
         }
@@ -1035,7 +1020,7 @@ namespace Files_Tools.Pages
             SetProcessingUi(true, status, FormatEta(p.EstimatedRemainingTime), p.StageDescription, p.OverallPercent);
         });
 
-        private static string FormatEta(TimeSpan? eta) => eta.HasValue ? $"ETA {FormatDuration(eta.Value)}" : "ETA calculating...";
+        private static string FormatEta(TimeSpan? eta) => eta.HasValue ? $"ETA {FormatDuration(eta.Value)}" : Strings.Get("EtaCalculating.Text");
         private static string FormatDuration(TimeSpan value) => value.TotalHours >= 1 ? value.ToString(@"hh\:mm\:ss") : value.ToString(@"mm\:ss");
 
         private AudioConversionOptions BuildConversionOptions() => new()
@@ -1050,7 +1035,7 @@ namespace Files_Tools.Pages
 
         private AudioCompressionOptions BuildCompressionOptions() => new()
         {
-            Mode = GetSelectedText(_compressionModeComboBox) == "Lossless" ? AudioCompressionMode.Lossless : AudioCompressionMode.Lossy,
+            Mode = (_compressionModeComboBox?.SelectedIndex ?? 0) == 1 ? AudioCompressionMode.Lossless : AudioCompressionMode.Lossy,
             OutputCodec = ParseOptionalCodec(_compressionCodecComboBox),
             TargetBitrateKbps = ParseOptionalInt(_compressionBitrateNumberBox),
             SampleRate = ParseOptionalInt(_compressionSampleRateNumberBox),
@@ -1060,7 +1045,7 @@ namespace Files_Tools.Pages
 
         private AudioNormalizationOptions BuildNormalizationOptions() => new()
         {
-            Mode = GetSelectedText(_normalizeModeComboBox) == "LUFS" ? AudioNormalizationMode.Lufs : AudioNormalizationMode.Peak,
+            Mode = (_normalizeModeComboBox?.SelectedIndex ?? 0) == 1 ? AudioNormalizationMode.Lufs : AudioNormalizationMode.Peak,
             TargetPeakDb = ParseOptionalDouble(_normalizePeakNumberBox),
             TargetLufs = ParseOptionalDouble(_normalizeLufsNumberBox),
             UseLimiter = _normalizeLimiterCheckBox.IsChecked ?? true,
@@ -1097,60 +1082,25 @@ namespace Files_Tools.Pages
             return new AudioEqualizerOptions { Preset = preset, CustomBands = bands, PreventClipping = _eqPreventClipCheckBox.IsChecked ?? true };
         }
 
-        private async Task<AudioPodcastProcessingOptions> BuildPodcastOptionsAsync(string inputPath, List<string> warnings, CancellationToken cancellationToken)
+        private VoiceStudioOptions BuildPodcastOptions() => new()
         {
-            var enableDenoise = _enableDenoiseCheckBox?.IsChecked ?? false;
-            var denoiseMode = GetSelectedDenoiseMode();
-            if (enableDenoise && denoiseMode == AudioDenoiseMode.StrongStereo)
-            {
-                var probe = await _videoAudioDenoiseService.ProbeAudioAsync(inputPath, cancellationToken: cancellationToken);
-                if (probe.Channels != 2)
-                {
-                    denoiseMode = AudioDenoiseMode.Mono;
-                    warnings.Add("Stereo denoise requested on non-stereo input. Podcast processing used mono DTLN denoise.");
-                }
-            }
-
-            var denoiseAmount = GetDenoiseStrength();
-            return new AudioPodcastProcessingOptions
-            {
-                EnableDtlnDenoise = enableDenoise,
-                DtlnDenoiseMode = denoiseMode,
-                DtlnDenoiseAmount = denoiseAmount,
-                DtlnDenoisePasses = GetDenoisePasses(denoiseAmount),
-                HighPassFrequencyHz = 80,
-                EnableDeEsser = true,
-                EnableCompressor = true,
-                TargetLufs = -16,
-                LimiterLimit = 0.97,
-                PreserveMetadata = true
-            };
-        }
-
-        private AudioDenoiseOptions BuildDenoiseOptions()
-        {
-            var strength = GetDenoiseStrength();
-            return new AudioDenoiseOptions
-            {
-                Mode = GetSelectedDenoiseMode(),
-                DenoiseAmount = strength,
-                DenoisePasses = GetDenoisePasses(strength),
-                NormalizePeak = true,
-                PreventClipping = true
-            };
-        }
+            Denoise = _podcastDenoiseCheckBox?.IsChecked ?? true,
+            SuperResolution = _podcastFullnessCheckBox?.IsChecked ?? true,
+            Master = _podcastMasterCheckBox?.IsChecked ?? true,
+        };
 
         private List<AudioPipelineStep> BuildPipelineSteps()
         {
             var steps = new List<AudioPipelineStep>();
+            var podcastEnabled = _enablePodcastModeCheckBox?.IsChecked ?? false;
+            if (podcastEnabled) steps.Add(AudioPipelineStep.Podcast);
+            else if (_enableDenoiseCheckBox?.IsChecked ?? false) steps.Add(AudioPipelineStep.Denoise);
             steps.Add(AudioPipelineStep.Convert);
             if (_enableCompressionCheckBox?.IsChecked ?? false) steps.Add(AudioPipelineStep.Compress);
             if (_enableNormalizeCheckBox?.IsChecked ?? false) steps.Add(AudioPipelineStep.Normalize);
             if (_enableTrimCheckBox?.IsChecked ?? false) steps.Add(AudioPipelineStep.Trim);
             if (_enableSilenceTrimCheckBox?.IsChecked ?? false) steps.Add(AudioPipelineStep.SilenceTrim);
             if (_enableEqCheckBox?.IsChecked ?? false) steps.Add(AudioPipelineStep.Eq);
-            if (_enablePodcastModeCheckBox?.IsChecked ?? false) steps.Add(AudioPipelineStep.Podcast);
-            if ((_enableDenoiseCheckBox?.IsChecked ?? false) && !(_enablePodcastModeCheckBox?.IsChecked ?? false)) steps.Add(AudioPipelineStep.Denoise);
             if (_enableMetadataRemovalCheckBox?.IsChecked ?? false) steps.Add(AudioPipelineStep.Metadata);
             return steps;
         }
@@ -1162,7 +1112,7 @@ namespace Files_Tools.Pages
             if (BuildPipelineSteps().Count == 0) errors.Add("Media: Enable at least one operation in the pipeline.");
 
             if ((_enableCompressionCheckBox?.IsChecked ?? false) &&
-                GetSelectedText(_compressionModeComboBox) == "Lossless" &&
+                (_compressionModeComboBox?.SelectedIndex ?? 0) == 1 &&
                 ParseOptionalCodec(_compressionCodecComboBox) is string c &&
                 !string.Equals(c, "flac", StringComparison.OrdinalIgnoreCase))
             {
@@ -1222,6 +1172,9 @@ namespace Files_Tools.Pages
                 _customEqBandsPanel is null ||
                 _addEqBandButton is null ||
                 _eqPresetComboBox is null ||
+                _podcastDenoiseCheckBox is null ||
+                _podcastFullnessCheckBox is null ||
+                _podcastMasterCheckBox is null ||
                 _transcriptionOutputTypeComboBox is null ||
                 _includeTimestampsCheckBox is null ||
                 _saveTranscriptionTextButton is null ||
@@ -1242,7 +1195,7 @@ namespace Files_Tools.Pages
             _adjustValidationTextBlock.Text = string.Join("\n", errors.Where(e => e.StartsWith("Adjust:")).Select(e => e[7..].Trim()));
             _isTranscriptionModelInstalled = _audioTranscriptionService.IsInstalled();
             ApplyButton.IsEnabled = !_isProcessing && !_isGeneratingTranscription && !_isInstallingTranscriptionModel && _sourceAudioFile is not null && errors.Count == 0;
-            _customEqBandsPanel.Visibility = GetSelectedText(_eqPresetComboBox) == "Custom" ? Visibility.Visible : Visibility.Collapsed;
+            _customEqBandsPanel.Visibility = (_eqPresetComboBox?.SelectedIndex ?? 0) == 11 ? Visibility.Visible : Visibility.Collapsed;
             _addEqBandButton.Visibility = _customEqBandsPanel.Visibility;
             UpdateOptionUiState();
             UpdateTrimUiState();
@@ -1262,9 +1215,6 @@ namespace Files_Tools.Pages
             SetDependentOptionsState(_compressionSampleRateNumberBox, _enableCompressionCheckBox?.IsChecked ?? false);
             SetDependentOptionsState(_compressionChannelsComboBox, _enableCompressionCheckBox?.IsChecked ?? false);
 
-            SetDependentOptionsState(_podcastProfileNameTextBlock, _enablePodcastModeCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_podcastPresetDescriptionTextBlock, _enablePodcastModeCheckBox?.IsChecked ?? false);
-
             SetDependentOptionsState(_trimReencodeCheckBox, _enableTrimCheckBox?.IsChecked ?? false);
 
             SetDependentOptionsState(_silenceModeComboBox, _enableSilenceTrimCheckBox?.IsChecked ?? false);
@@ -1282,9 +1232,10 @@ namespace Files_Tools.Pages
             SetDependentOptionsState(_customEqBandsPanel, _enableEqCheckBox?.IsChecked ?? false);
             SetDependentOptionsState(_addEqBandButton, _enableEqCheckBox?.IsChecked ?? false);
 
-            SetDependentOptionsState(_denoiseModeComboBox, _enableDenoiseCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_denoiseStrengthTextBlock, _enableDenoiseCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_denoiseStrengthSlider, _enableDenoiseCheckBox?.IsChecked ?? false);
+            var podcastEnabled = _enablePodcastModeCheckBox?.IsChecked ?? false;
+            SetDependentOptionsState(_podcastDenoiseCheckBox, podcastEnabled);
+            SetDependentOptionsState(_podcastFullnessCheckBox, podcastEnabled);
+            SetDependentOptionsState(_podcastMasterCheckBox, podcastEnabled);
 
             var isBusy = _isProcessing || _isInstallingTranscriptionModel || _isGeneratingTranscription;
             _downloadTranscriptionFeatureButton.IsEnabled = !isBusy;
@@ -1295,8 +1246,7 @@ namespace Files_Tools.Pages
             _transcriptionDownloadProgressBar.Visibility = showDownloadUi ? Visibility.Visible : Visibility.Collapsed;
             _transcriptionDownloadStatusTextBlock.Visibility = showDownloadUi ? Visibility.Visible : Visibility.Collapsed;
 
-            var outputType = GetSelectedText(_transcriptionOutputTypeComboBox);
-            var isSubtitleOutput = string.Equals(outputType, "Subtitles", StringComparison.Ordinal);
+            var isSubtitleOutput = (_transcriptionOutputTypeComboBox?.SelectedIndex ?? 0) == 1;
             _includeTimestampsCheckBox.IsEnabled = !isBusy && !isSubtitleOutput;
             _saveTranscriptionTextButton.IsEnabled = !isBusy && !isSubtitleOutput;
 
@@ -1308,18 +1258,18 @@ namespace Files_Tools.Pages
             {
                 _transcriptionDownloadProgressBar.IsIndeterminate = false;
                 _transcriptionDownloadProgressBar.Value = 1d;
-                _transcriptionDownloadStatusTextBlock.Text = "Transcription feature downloaded.";
+                _transcriptionDownloadStatusTextBlock.Text = Strings.Get("AudioPage_TranscriptionDownloaded");
             }
             else
             {
                 _transcriptionDownloadProgressBar.IsIndeterminate = false;
                 _transcriptionDownloadProgressBar.Value = 0d;
-                _transcriptionDownloadStatusTextBlock.Text = "Transcription feature not downloaded yet.";
+                _transcriptionDownloadStatusTextBlock.Text = Strings.Get("AudioPage_TranscriptionNotDownloaded");
             }
 
             if (_isGeneratingTranscription)
             {
-                _transcriptionStatusTextBlock.Text = "Generating transcription...";
+                _transcriptionStatusTextBlock.Text = Strings.Get("AudioPage_GeneratingTranscription");
             }
         }
 
@@ -1531,8 +1481,7 @@ namespace Files_Tools.Pages
 
         private static string? ParseOptionalCodec(ComboBox combo)
         {
-            var selected = GetSelectedText(combo);
-            return string.Equals(selected, "Auto", StringComparison.OrdinalIgnoreCase) ? null : selected;
+            return combo.SelectedIndex == 0 ? null : GetSelectedText(combo);
         }
 
         private static string? ParseOutputFormat(ComboBox combo)
@@ -1550,50 +1499,35 @@ namespace Files_Tools.Pages
             };
         }
 
-        private static int? ParseChannels(ComboBox combo) => GetSelectedText(combo) switch
+        private static int? ParseChannels(ComboBox combo) => combo.SelectedIndex switch
         {
-            "Mono" => 1,
-            "Stereo" => 2,
+            1 => 1,
+            2 => 2,
             _ => null
         };
 
-        private static SilenceRemovalMode ParseSilenceMode(ComboBox combo) => GetSelectedText(combo) switch
+        private static SilenceRemovalMode ParseSilenceMode(ComboBox combo) => combo.SelectedIndex switch
         {
-            "Leading" => SilenceRemovalMode.Leading,
-            "Trailing" => SilenceRemovalMode.Trailing,
+            0 => SilenceRemovalMode.Leading,
+            1 => SilenceRemovalMode.Trailing,
             _ => SilenceRemovalMode.LeadingAndTrailing
         };
 
-        private static EqualizerPreset ParseEqPreset(ComboBox combo) => GetSelectedText(combo) switch
+        private static EqualizerPreset ParseEqPreset(ComboBox combo) => combo.SelectedIndex switch
         {
-            "PodcastVoice" => EqualizerPreset.PodcastVoice,
-            "VoiceClarity" => EqualizerPreset.VoiceClarity,
-            "WarmVoice" => EqualizerPreset.WarmVoice,
-            "BrightVoice" => EqualizerPreset.BrightVoice,
-            "ReduceBass" => EqualizerPreset.ReduceBass,
-            "ReduceTreble" => EqualizerPreset.ReduceTreble,
-            "PhoneVoice" => EqualizerPreset.PhoneVoice,
-            "RadioVoice" => EqualizerPreset.RadioVoice,
-            "RemoveElectricalHum50Hz" => EqualizerPreset.RemoveElectricalHum50Hz,
-            "RemoveElectricalHum60Hz" => EqualizerPreset.RemoveElectricalHum60Hz,
-            "Custom" => EqualizerPreset.Custom,
+            1 => EqualizerPreset.PodcastVoice,
+            2 => EqualizerPreset.VoiceClarity,
+            3 => EqualizerPreset.WarmVoice,
+            4 => EqualizerPreset.BrightVoice,
+            5 => EqualizerPreset.ReduceBass,
+            6 => EqualizerPreset.ReduceTreble,
+            7 => EqualizerPreset.PhoneVoice,
+            8 => EqualizerPreset.RadioVoice,
+            9 => EqualizerPreset.RemoveElectricalHum50Hz,
+            10 => EqualizerPreset.RemoveElectricalHum60Hz,
+            11 => EqualizerPreset.Custom,
             _ => EqualizerPreset.None
         };
-
-        private AudioDenoiseMode GetSelectedDenoiseMode()
-        {
-            return GetSelectedText(_denoiseModeComboBox) == "Stereo" ? AudioDenoiseMode.StrongStereo : AudioDenoiseMode.Mono;
-        }
-
-        private int GetDenoiseStrength()
-        {
-            return Math.Clamp((int)Math.Round(_denoiseStrengthSlider.Value), 0, 100);
-        }
-
-        private static int GetDenoisePasses(int strength)
-        {
-            return strength >= 95 ? 3 : strength >= 75 ? 2 : 1;
-        }
 
         private static string GetSelectedText(ComboBox combo) => (combo.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? string.Empty;
         private static int? ParseOptionalInt(NumberBox box) => double.IsNaN(box.Value) ? null : (int)Math.Round(box.Value);
@@ -1604,9 +1538,9 @@ namespace Files_Tools.Pages
         {
             if (App.MainWindow is null) return null;
             var extension = Path.GetExtension(sourceFile.Name);
-            var selectedFormat = GetSelectedText(_outputFormatComboBox);
-            if (!string.Equals(selectedFormat, "Keep original", StringComparison.OrdinalIgnoreCase))
+            if (_outputFormatComboBox?.SelectedIndex != 0)
             {
+                var selectedFormat = GetSelectedText(_outputFormatComboBox!);
                 extension = selectedFormat.ToLowerInvariant() switch
                 {
                     "opus" => ".opus",
@@ -1635,6 +1569,13 @@ namespace Files_Tools.Pages
             return Path.Combine(tempDirectory, Guid.NewGuid().ToString("N") + extension);
         }
 
+        private static string CreateTemporaryWavPath()
+        {
+            var tempDirectory = Path.Combine(Path.GetTempPath(), "files-tools-audio-stage");
+            Directory.CreateDirectory(tempDirectory);
+            return Path.Combine(tempDirectory, Guid.NewGuid().ToString("N") + ".wav");
+        }
+
         private static void CleanupTemporaryFiles(IEnumerable<string> files)
         {
             foreach (var file in files)
@@ -1651,9 +1592,10 @@ namespace Files_Tools.Pages
 
         private static string BuildCompletionMessage(string outputPath, IReadOnlyCollection<string> warnings)
         {
-            return warnings.Count == 0
-                ? $"Audio saved to:\n{outputPath}"
-                : $"Audio saved to:\n{outputPath}\n\nWarnings:\n- {string.Join("\n- ", warnings)}";
+            var msg = Strings.Get("AudioPage_AudioSaved") + "\n" + outputPath;
+            if (warnings.Count > 0)
+                msg += "\n\n" + Strings.Get("AudioPage_Warnings") + "\n- " + string.Join("\n- ", warnings);
+            return msg;
         }
 
         private async Task ShowSimpleDialogAsync(string title, string content)
@@ -1662,7 +1604,7 @@ namespace Files_Tools.Pages
             {
                 Title = title,
                 Content = content,
-                PrimaryButtonText = "OK",
+                PrimaryButtonText = Strings.Get("Shared_OK"),
                 XamlRoot = XamlRoot
             };
             _ = await dialog.ShowAsync();

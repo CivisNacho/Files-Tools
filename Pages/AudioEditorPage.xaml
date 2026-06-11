@@ -76,10 +76,10 @@
 
                                         <StackPanel Spacing="8">
                                             <TextBlock x:Uid="AudioPage_AudioDetails" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="18" FontWeight="SemiBold" Text="Audio details" />
-                                            <TextBlock x:Name="PreviewCodecTextBlock" Opacity="0.8" Text="Codec: -" />
-                                            <TextBlock x:Name="PreviewRateTextBlock" Opacity="0.8" Text="Sample rate: -" />
-                                            <TextBlock x:Name="PreviewChannelsTextBlock" Opacity="0.8" Text="Channels: -" />
-                                            <TextBlock x:Name="PreviewDurationTextBlock" Opacity="0.8" Text="Duration: -" />
+                                            <TextBlock x:Name="PreviewCodecTextBlock" x:Uid="AudioPage_PreviewCodec" Opacity="0.8" Text="Codec: —" />
+                                            <TextBlock x:Name="PreviewRateTextBlock" x:Uid="AudioPage_PreviewRate" Opacity="0.8" Text="Sample rate: —" />
+                                            <TextBlock x:Name="PreviewChannelsTextBlock" x:Uid="AudioPage_PreviewChannels" Opacity="0.8" Text="Channels: —" />
+                                            <TextBlock x:Name="PreviewDurationTextBlock" x:Uid="AudioPage_PreviewDuration" Opacity="0.8" Text="Duration: —" />
                                         </StackPanel>
                                     </StackPanel>
 

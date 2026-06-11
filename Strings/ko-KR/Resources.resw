@@ -216,6 +216,18 @@
   <data name="AudioPage_PreparingPipeline.Text" xml:space="preserve">
     <value>파이프라인 준비 중...</value>
   </data>
+  <data name="AudioPage_PreviewCodec.Text" xml:space="preserve">
+    <value>코덱: —</value>
+  </data>
+  <data name="AudioPage_PreviewRate.Text" xml:space="preserve">
+    <value>샘플 레이트: —</value>
+  </data>
+  <data name="AudioPage_PreviewChannels.Text" xml:space="preserve">
+    <value>채널: —</value>
+  </data>
+  <data name="AudioPage_PreviewDuration.Text" xml:space="preserve">
+    <value>재생 시간: —</value>
+  </data>
   <!-- ═══════════════════════════════════════════════════════════════
        Image editor page
        ═══════════════════════════════════════════════════════════════ -->
@@ -1739,5 +1751,336 @@
   </data>
   <data name="VideoPage_BasePreset_Header" xml:space="preserve">
     <value>기본 사전 설정</value>
+  </data>
+  <!-- Audio Editor page – code-behind strings -->
+  <data name="AudioPage_PreviewCodecFmt" xml:space="preserve">
+    <value>코덱: {0}</value>
+  </data>
+  <data name="AudioPage_PreviewRateFmt" xml:space="preserve">
+    <value>샘플레이트: {0}</value>
+  </data>
+  <data name="AudioPage_PreviewChannelsFmt" xml:space="preserve">
+    <value>채널: {0}</value>
+  </data>
+  <data name="AudioPage_PreviewDurationFmt" xml:space="preserve">
+    <value>재생 시간: {0}</value>
+  </data>
+  <data name="AudioPage_Unknown" xml:space="preserve">
+    <value>알 수 없음</value>
+  </data>
+  <data name="AudioPage_LoadedFmt" xml:space="preserve">
+    <value>로드됨: {0}</value>
+  </data>
+  <data name="AudioPage_SavedFmt" xml:space="preserve">
+    <value>저장됨: {0}</value>
+  </data>
+  <data name="AudioPage_Preparing" xml:space="preserve">
+    <value>준비 중...</value>
+  </data>
+  <data name="AudioPage_FormatCard" xml:space="preserve">
+    <value>포맷, 코덱 및 압축</value>
+  </data>
+  <data name="AudioPage_OutputFormat_Header" xml:space="preserve">
+    <value>출력 포맷</value>
+  </data>
+  <data name="AudioPage_KeepOriginal" xml:space="preserve">
+    <value>원본 유지</value>
+  </data>
+  <data name="AudioPage_Codec_Header" xml:space="preserve">
+    <value>코덱</value>
+  </data>
+  <data name="AudioPage_Auto" xml:space="preserve">
+    <value>자동</value>
+  </data>
+  <data name="AudioPage_Bitrate_Header" xml:space="preserve">
+    <value>비트레이트 (kbps)</value>
+  </data>
+  <data name="AudioPage_SampleRateHz_Header" xml:space="preserve">
+    <value>샘플레이트 (Hz)</value>
+  </data>
+  <data name="AudioPage_Channels_Header" xml:space="preserve">
+    <value>채널</value>
+  </data>
+  <data name="AudioPage_KeepSource" xml:space="preserve">
+    <value>소스 유지</value>
+  </data>
+  <data name="AudioPage_Mono" xml:space="preserve">
+    <value>모노</value>
+  </data>
+  <data name="AudioPage_Stereo" xml:space="preserve">
+    <value>스테레오</value>
+  </data>
+  <data name="AudioPage_EnableCompression" xml:space="preserve">
+    <value>압축 단계 활성화</value>
+  </data>
+  <data name="AudioPage_CompressionMode_Header" xml:space="preserve">
+    <value>압축 모드</value>
+  </data>
+  <data name="AudioPage_Lossy" xml:space="preserve">
+    <value>손실</value>
+  </data>
+  <data name="AudioPage_Lossless" xml:space="preserve">
+    <value>무손실</value>
+  </data>
+  <data name="AudioPage_CompressionCodec_Header" xml:space="preserve">
+    <value>압축 코덱</value>
+  </data>
+  <data name="AudioPage_TargetBitrate_Header" xml:space="preserve">
+    <value>목표 비트레이트 (kbps)</value>
+  </data>
+  <data name="AudioPage_TargetSampleRate_Header" xml:space="preserve">
+    <value>목표 샘플레이트 (Hz)</value>
+  </data>
+  <data name="AudioPage_MetadataCard" xml:space="preserve">
+    <value>메타데이터</value>
+  </data>
+  <data name="AudioPage_RemoveMetadata" xml:space="preserve">
+    <value>메타데이터 제거</value>
+  </data>
+  <data name="AudioPage_MetadataHint" xml:space="preserve">
+    <value>메타데이터 제거는 독립적인 파이프라인 단계입니다.</value>
+  </data>
+  <data name="AudioPage_PodcastCard" xml:space="preserve">
+    <value>팟캐스트 모드</value>
+  </data>
+  <data name="AudioPage_EnablePodcast" xml:space="preserve">
+    <value>팟캐스트 모드 활성화</value>
+  </data>
+  <data name="AudioPage_PodcastDenoise" xml:space="preserve">
+    <value>노이즈 제거 (DFN3)</value>
+  </data>
+  <data name="AudioPage_PodcastFullness" xml:space="preserve">
+    <value>음질 복원 (FlashSR)</value>
+  </data>
+  <data name="AudioPage_PodcastMaster" xml:space="preserve">
+    <value>마스터링 (EQ + 압축 + 라우드니스 정규화)</value>
+  </data>
+  <data name="AudioPage_PodcastHint" xml:space="preserve">
+    <value>풀 스튜디오 음성 체인: DeepFilterNet3 + FlashSR + FFmpeg 마스터링 (-16 LUFS). 독립 노이즈 제거보다 우선합니다. 2분 오디오 기준 CPU 약 3~4분 소요.</value>
+  </data>
+  <data name="AudioPage_TrimCard" xml:space="preserve">
+    <value>트림</value>
+  </data>
+  <data name="AudioPage_EnableTrim" xml:space="preserve">
+    <value>트림 활성화</value>
+  </data>
+  <data name="AudioPage_TrimHint" xml:space="preserve">
+    <value>미리보기 플레이어 아래의 트림 타임라인에서 시작점과 끝점을 선택하세요.</value>
+  </data>
+  <data name="AudioPage_ReEncodeOutput" xml:space="preserve">
+    <value>출력 재인코딩</value>
+  </data>
+  <data name="AudioPage_SilenceTrimCard" xml:space="preserve">
+    <value>무음 트림</value>
+  </data>
+  <data name="AudioPage_EnableSilenceTrim" xml:space="preserve">
+    <value>무음 트림 활성화</value>
+  </data>
+  <data name="AudioPage_Mode_Header" xml:space="preserve">
+    <value>모드</value>
+  </data>
+  <data name="AudioPage_Leading" xml:space="preserve">
+    <value>앞부분</value>
+  </data>
+  <data name="AudioPage_Trailing" xml:space="preserve">
+    <value>끝부분</value>
+  </data>
+  <data name="AudioPage_LeadingAndTrailing" xml:space="preserve">
+    <value>앞뒤 모두</value>
+  </data>
+  <data name="AudioPage_Threshold_Header" xml:space="preserve">
+    <value>임계값 (dB)</value>
+  </data>
+  <data name="AudioPage_MinSilence_Header" xml:space="preserve">
+    <value>최소 무음 시간 (ms)</value>
+  </data>
+  <data name="AudioPage_NormalizationCard" xml:space="preserve">
+    <value>정규화</value>
+  </data>
+  <data name="AudioPage_EnableNormalization" xml:space="preserve">
+    <value>정규화 활성화</value>
+  </data>
+  <data name="AudioPage_Peak" xml:space="preserve">
+    <value>피크</value>
+  </data>
+  <data name="AudioPage_LUFS" xml:space="preserve">
+    <value>LUFS</value>
+  </data>
+  <data name="AudioPage_TargetPeak_Header" xml:space="preserve">
+    <value>목표 피크 (dB)</value>
+  </data>
+  <data name="AudioPage_TargetLUFS_Header" xml:space="preserve">
+    <value>목표 LUFS</value>
+  </data>
+  <data name="AudioPage_UseLimiter" xml:space="preserve">
+    <value>리미터 사용</value>
+  </data>
+  <data name="AudioPage_PreventClipping" xml:space="preserve">
+    <value>클리핑 방지</value>
+  </data>
+  <data name="AudioPage_EqCard" xml:space="preserve">
+    <value>간단한 EQ</value>
+  </data>
+  <data name="AudioPage_EnableEq" xml:space="preserve">
+    <value>EQ 활성화</value>
+  </data>
+  <data name="AudioPage_Preset_Header" xml:space="preserve">
+    <value>프리셋</value>
+  </data>
+  <data name="AudioPage_AddEqBand" xml:space="preserve">
+    <value>EQ 밴드 추가</value>
+  </data>
+  <data name="AudioPage_EqFreq_Header" xml:space="preserve">
+    <value>주파수 (Hz)</value>
+  </data>
+  <data name="AudioPage_EqGain_Header" xml:space="preserve">
+    <value>게인 (dB)</value>
+  </data>
+  <data name="AudioPage_EqWidth_Header" xml:space="preserve">
+    <value>폭</value>
+  </data>
+  <data name="AudioPage_Remove" xml:space="preserve">
+    <value>제거</value>
+  </data>
+  <data name="AudioPage_DenoiseCard" xml:space="preserve">
+    <value>노이즈 제거</value>
+  </data>
+  <data name="AudioPage_EnableDenoise" xml:space="preserve">
+    <value>노이즈 제거 활성화</value>
+  </data>
+  <data name="AudioPage_DenoiseHint" xml:space="preserve">
+    <value>DeepFilterNet3 음성 향상. 노이즈와 잔향을 제거합니다. 둘 다 활성화된 경우 팟캐스트 모드로 대체됩니다.</value>
+  </data>
+  <data name="AudioPage_TranscriptionCard" xml:space="preserve">
+    <value>전사</value>
+  </data>
+  <data name="AudioPage_TranscriptionHint" xml:space="preserve">
+    <value>로드된 오디오에서 일반 텍스트 또는 .srt 자막 파일을 생성합니다.</value>
+  </data>
+  <data name="AudioPage_DownloadTranscription" xml:space="preserve">
+    <value>전사 기능 다운로드</value>
+  </data>
+  <data name="AudioPage_TranscriptionNotDownloaded" xml:space="preserve">
+    <value>전사 기능이 아직 다운로드되지 않았습니다.</value>
+  </data>
+  <data name="AudioPage_OutputType_Header" xml:space="preserve">
+    <value>출력 유형</value>
+  </data>
+  <data name="AudioPage_Text" xml:space="preserve">
+    <value>텍스트</value>
+  </data>
+  <data name="AudioPage_Subtitles" xml:space="preserve">
+    <value>자막</value>
+  </data>
+  <data name="AudioPage_IncludeTimestamps" xml:space="preserve">
+    <value>텍스트 출력에 타임스탬프 포함</value>
+  </data>
+  <data name="AudioPage_GenerateTranscription" xml:space="preserve">
+    <value>전사 생성</value>
+  </data>
+  <data name="AudioPage_TranscriptionPlaceholder" xml:space="preserve">
+    <value>생성된 전사 텍스트가 여기에 표시됩니다.</value>
+  </data>
+  <data name="AudioPage_SaveTranscription" xml:space="preserve">
+    <value>전사 텍스트 저장</value>
+  </data>
+  <data name="AudioPage_NoTranscriptionYet" xml:space="preserve">
+    <value>아직 전사가 생성되지 않았습니다.</value>
+  </data>
+  <data name="AudioPage_GeneratingTranscription" xml:space="preserve">
+    <value>전사 생성 중...</value>
+  </data>
+  <data name="AudioPage_TranscriptionDownloaded" xml:space="preserve">
+    <value>전사 기능이 다운로드되었습니다.</value>
+  </data>
+  <data name="AudioPage_TextTranscriptionReady" xml:space="preserve">
+    <value>텍스트 전사 완료.</value>
+  </data>
+  <data name="AudioPage_SubtitleReadyFmt" xml:space="preserve">
+    <value>자막 파일 완성: {0}</value>
+  </data>
+  <data name="AudioPage_TranscriptionSavedFmt" xml:space="preserve">
+    <value>전사 텍스트 저장됨: {0}</value>
+  </data>
+  <data name="AudioPage_ConvertingAudio" xml:space="preserve">
+    <value>오디오 변환 중</value>
+  </data>
+  <data name="AudioPage_CompressingAudio" xml:space="preserve">
+    <value>오디오 압축 중</value>
+  </data>
+  <data name="AudioPage_NormalizingAudio" xml:space="preserve">
+    <value>오디오 정규화 중</value>
+  </data>
+  <data name="AudioPage_TrimmingAudio" xml:space="preserve">
+    <value>오디오 트림 중</value>
+  </data>
+  <data name="AudioPage_RemovingSilence" xml:space="preserve">
+    <value>무음 제거 중</value>
+  </data>
+  <data name="AudioPage_ApplyingEq" xml:space="preserve">
+    <value>이퀄라이저 적용 중</value>
+  </data>
+  <data name="AudioPage_RemovingMetadata" xml:space="preserve">
+    <value>메타데이터 제거 중</value>
+  </data>
+  <data name="AudioPage_ProcessingPodcast" xml:space="preserve">
+    <value>팟캐스트 오디오 처리 중...</value>
+  </data>
+  <data name="AudioPage_DenoisingAudio" xml:space="preserve">
+    <value>오디오 노이즈 제거 중...</value>
+  </data>
+  <data name="AudioPage_DenoisingDFN3" xml:space="preserve">
+    <value>노이즈 제거 (DFN3)...</value>
+  </data>
+  <data name="AudioPage_Finalizing" xml:space="preserve">
+    <value>마무리 중...</value>
+  </data>
+  <data name="AudioPage_ExtractingAudio" xml:space="preserve">
+    <value>오디오 추출 중...</value>
+  </data>
+  <data name="AudioPage_RestoringFullness" xml:space="preserve">
+    <value>음질 복원 중 (FlashSR)...</value>
+  </data>
+  <data name="AudioPage_Mastering" xml:space="preserve">
+    <value>마스터링 중...</value>
+  </data>
+  <data name="AudioPage_ProcessingComplete" xml:space="preserve">
+    <value>오디오 처리 완료</value>
+  </data>
+  <data name="AudioPage_AudioSaved" xml:space="preserve">
+    <value>오디오가 저장되었습니다:</value>
+  </data>
+  <data name="AudioPage_Warnings" xml:space="preserve">
+    <value>경고:</value>
+  </data>
+  <data name="AudioPage_Cancelled" xml:space="preserve">
+    <value>취소됨</value>
+  </data>
+  <data name="AudioPage_ProcessingCancelled" xml:space="preserve">
+    <value>오디오 처리가 취소되었습니다.</value>
+  </data>
+  <data name="AudioPage_ProcessingFailed" xml:space="preserve">
+    <value>처리 실패</value>
+  </data>
+  <data name="Shared_OK" xml:space="preserve">
+    <value>확인</value>
+  </data>
+  <data name="AudioPage_TranscriptionDownloadFailed" xml:space="preserve">
+    <value>전사 다운로드 실패</value>
+  </data>
+  <data name="AudioPage_TranscriptionRequired" xml:space="preserve">
+    <value>전사 기능 필요</value>
+  </data>
+  <data name="AudioPage_TranscriptionRequiredMessage" xml:space="preserve">
+    <value>생성하기 전에 전사 기능을 다운로드하세요.</value>
+  </data>
+  <data name="AudioPage_TranscriptionFailed" xml:space="preserve">
+    <value>전사 실패</value>
+  </data>
+  <data name="AudioPage_NothingToSave" xml:space="preserve">
+    <value>저장할 내용이 없습니다</value>
+  </data>
+  <data name="AudioPage_GenerateFirst" xml:space="preserve">
+    <value>먼저 텍스트 전사를 생성하세요.</value>
   </data>
 </root>

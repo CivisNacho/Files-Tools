@@ -21,11 +21,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Fixtures\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="..\Services\ImageProcessingService.cs" Link="Services\ImageProcessingService.cs" />
     <Compile Include="..\Services\AudioProcessingService.cs" Link="Services\AudioProcessingService.cs" />
     <Compile Include="..\Services\FfmpegLocator.cs" Link="Services\FfmpegLocator.cs" />
     <Compile Include="..\Services\AudioTranscriptionService.cs" Link="Services\AudioTranscriptionService.cs" />
     <Compile Include="..\Services\Wav2Vec2AlignmentService.cs" Link="Services\Wav2Vec2AlignmentService.cs" />
+    <Compile Include="..\Services\DeepFilterNetDsp.cs" Link="Services\DeepFilterNetDsp.cs" />
+    <Compile Include="..\Services\DeepFilterNetService.cs" Link="Services\DeepFilterNetService.cs" />
+    <Compile Include="..\Services\FlashSrService.cs" Link="Services\FlashSrService.cs" />
+    <Compile Include="..\Services\VoiceStudioService.cs" Link="Services\VoiceStudioService.cs" />
     <Compile Include="..\Services\SubtitlesService.cs" Link="Services\SubtitlesService.cs" />
     <Compile Include="..\Services\Presets\SubtitlePresetDto.cs" Link="Services\Presets\SubtitlePresetDto.cs" />
     <Compile Include="..\Services\Presets\SubtitleColorJsonConverter.cs" Link="Services\Presets\SubtitleColorJsonConverter.cs" />

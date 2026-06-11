@@ -23,6 +23,8 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <TextBlock x:Uid="LicensesPage_Title" FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="34" FontWeight="SemiBold" Text="Licenses" />
@@ -72,6 +74,64 @@
                     BorderThickness="1"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Spacing="2">
+                            <TextBlock FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="DeepFilterNet pretrained ONNX model" />
+                            <TextBlock Opacity="0.82" Text="License: MIT OR Apache-2.0 (dual-licensed)" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Attribution: DeepFilterNet project (Hendrik Schröter and contributors) and bundled model file" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Usage: local speech enhancement — noise suppression and dereverberation (studio voice)" />
+                        </StackPanel>
+
+                        <Button
+                            x:Uid="LicensesPage_ShowLicense"
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Content="Show License"
+                            Click="ShowDeepFilterNetLicense_Click" />
+                    </Grid>
+                </Border>
+
+                <Border
+                    Grid.Row="4"
+                    Padding="16"
+                    CornerRadius="10"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <Grid ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Spacing="2">
+                            <TextBlock FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="FlashSR pretrained ONNX model" />
+                            <TextBlock Opacity="0.82" Text="License: Apache-2.0" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Attribution: FlashSR by Yatharth Sharma (architecture derived from HierSpeech++) and bundled model file" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Usage: local speech bandwidth extension / super-resolution, 16 kHz to 48 kHz (studio voice)" />
+                        </StackPanel>
+
+                        <Button
+                            x:Uid="LicensesPage_ShowLicense"
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Content="Show License"
+                            Click="ShowFlashSrLicense_Click" />
+                    </Grid>
+                </Border>
+
+                <Border
+                    Grid.Row="5"
+                    Padding="16"
+                    CornerRadius="10"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <StackPanel Spacing="2">
                         <TextBlock FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="Karaoke Effect Templates" />
                         <TextBlock Opacity="0.82" TextWrapping="Wrap">
@@ -85,7 +145,7 @@
                 </Border>
 
                 <Border
-                    Grid.Row="4"
+                    Grid.Row="6"
                     Padding="16"
                     CornerRadius="10"
                     BorderThickness="1"
@@ -114,7 +174,7 @@
                 </Border>
 
                 <Border
-                    Grid.Row="5"
+                    Grid.Row="7"
                     Padding="16"
                     CornerRadius="10"
                     BorderThickness="1"
@@ -143,7 +203,7 @@
                 </Border>
 
                 <Border
-                    Grid.Row="6"
+                    Grid.Row="8"
                     Padding="16"
                     CornerRadius="10"
                     BorderThickness="1"
@@ -172,7 +232,7 @@
                 </Border>
 
                 <Border
-                    Grid.Row="7"
+                    Grid.Row="9"
                     Padding="16"
                     CornerRadius="10"
                     BorderThickness="1"
@@ -188,7 +248,7 @@
                             <TextBlock FontFamily="{ThemeResource AppDisplayFontFamily}" FontSize="20" FontWeight="SemiBold" Text="ONNX Runtime" />
                             <TextBlock Opacity="0.82" Text="License: MIT" />
                             <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Attribution: Microsoft.ML.OnnxRuntime" />
-                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Usage: executing DTLN denoise and MMS forced-alignment ONNX models" />
+                            <TextBlock Opacity="0.82" TextWrapping="Wrap" Text="Usage: executing the DTLN denoise, DeepFilterNet, FlashSR, and MMS forced-alignment ONNX models" />
                         </StackPanel>
 
                         <Button
@@ -201,7 +261,7 @@
                 </Border>
 
                 <Border
-                    Grid.Row="8"
+                    Grid.Row="10"
                     Padding="16"
                     CornerRadius="10"
                     BorderThickness="1"
@@ -230,7 +290,7 @@
                 </Border>
 
                 <Border
-                    Grid.Row="9"
+                    Grid.Row="11"
                     Padding="16"
                     CornerRadius="10"
                     BorderThickness="1"
@@ -259,7 +319,7 @@
                 </Border>
 
                 <Border
-                    Grid.Row="10"
+                    Grid.Row="12"
                     Padding="16"
                     CornerRadius="10"
                     BorderThickness="1"
@@ -288,7 +348,7 @@
                 </Border>
 
                 <Border
-                    Grid.Row="11"
+                    Grid.Row="13"
                     Padding="16"
                     CornerRadius="10"
                     BorderThickness="1"
