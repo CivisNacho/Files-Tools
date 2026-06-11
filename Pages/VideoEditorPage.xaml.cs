@@ -71,6 +71,12 @@ namespace Files_Tools.Pages
 
         private readonly IVideoProcessingService _videoProcessingService = new VideoProcessingService();
         private readonly IVideoAudioDenoiseService _videoAudioDenoiseService = new VideoAudioDenoise();
+        private readonly VoiceStudioService _voiceStudioService = new();
+
+        // Position within the multi-phase processing run (FFmpeg → denoise → studio voice), so
+        // progress readouts show the percentage completed of the WHOLE run, not the current phase.
+        private int _processingPhaseIndex;
+        private int _processingPhaseCount = 1;
         private readonly IAudioTranscriptionService _audioTranscriptionService = new AudioTranscriptionService();
         private readonly ISubtitlesService _subtitlesService;
         private StorageFile? _sourceVideoFile;
@@ -536,6 +542,14 @@ namespace Files_Tools.Pages
                 return;
             }
 
+            // Podcast mode runs the full studio-voice chain (which includes DFN3 denoise),
+            // so it supersedes the plain denoise pass.
+            var podcastEnabled = (EnablePodcastModeCheckBox?.IsChecked ?? false) && !ShouldDisableOutputAudioVolume();
+            if (podcastEnabled)
+            {
+                denoise = null;
+            }
+
             string? temporaryOutputPath = null;
             try
             {
@@ -546,8 +560,9 @@ namespace Files_Tools.Pages
                 }
 
                 var outputPath = NormalizeVideoOutputPath(selectedOutputPath, options.Output.Format, _sourceVideoFile.FileType);
-                var processingOutputPath = denoise is null ? outputPath : CreateTemporaryVideoPath(outputPath);
-                temporaryOutputPath = denoise is null ? null : processingOutputPath;
+                var needsAudioPostPass = denoise is not null || podcastEnabled;
+                var processingOutputPath = needsAudioPostPass ? CreateTemporaryVideoPath(outputPath) : outputPath;
+                temporaryOutputPath = needsAudioPostPass ? processingOutputPath : null;
                 var estimate = await _videoProcessingService.EstimateProcessAsync(_sourceVideoFile.Path, options);
 
                 var preflightDialog = new ContentDialog
@@ -566,6 +581,8 @@ namespace Files_Tools.Pages
                 }
 
                 _isProcessing = true;
+                _processingPhaseIndex = 0;
+                _processingPhaseCount = 1 + (denoise is not null ? 1 : 0) + (podcastEnabled ? 1 : 0);
                 ShowProcessingState();
                 RefreshValidationAndState();
 
@@ -592,8 +609,25 @@ namespace Files_Tools.Pages
                         OutputAudioBitrateKbps = probe.BitrateKbps
                     };
 
+                    _processingPhaseIndex = 1;
                     var denoiseProgress = new Progress<DenoiseProgress>(UpdateDenoiseProgress);
                     await _videoAudioDenoiseService.DenoiseVideoAudioAsync(processingOutputPath, outputPath, denoiseOptions, denoiseProgress);
+                }
+
+                if (podcastEnabled)
+                {
+                    var podcastOptions = new VoiceStudioOptions
+                    {
+                        Denoise = PodcastDenoiseCheckBox?.IsChecked ?? true,
+                        SuperResolution = PodcastFullnessCheckBox?.IsChecked ?? true,
+                        Master = PodcastMasterCheckBox?.IsChecked ?? true,
+                        PostVolumePercent = (EnableAudioVolumeCheckBox?.IsChecked ?? false)
+                            ? Math.Clamp((int)Math.Round(AudioVolumeSlider?.Value ?? 100), 0, 200)
+                            : 100,
+                    };
+                    _processingPhaseIndex = _processingPhaseCount - 1;
+                    var podcastProgress = new Progress<VoiceStudioProgress>(UpdatePodcastProgress);
+                    await _voiceStudioService.ProcessVideoAsync(processingOutputPath, outputPath, podcastOptions, podcastProgress);
                 }
 
                 // For SoftMux of a styled .ass that the container can't carry (e.g. MP4), drop the
@@ -816,6 +850,15 @@ namespace Files_Tools.Pages
 
         private void AnyOptionChanged_CheckChanged(object sender, RoutedEventArgs e)
         {
+            if (ReferenceEquals(sender, EnableAudioDenoiseCheckBox) && EnableAudioDenoiseCheckBox?.IsChecked == true)
+            {
+                if (EnablePodcastModeCheckBox != null) EnablePodcastModeCheckBox.IsChecked = false;
+            }
+            else if (ReferenceEquals(sender, EnablePodcastModeCheckBox) && EnablePodcastModeCheckBox?.IsChecked == true)
+            {
+                if (EnableAudioDenoiseCheckBox != null) EnableAudioDenoiseCheckBox.IsChecked = false;
+            }
+
             if (ReferenceEquals(sender, EnableSubtitleMuxCheckBox))
             {
                 if (IsAdvancedTranscriptionReviewActive())
@@ -1248,10 +1291,7 @@ namespace Files_Tools.Pages
                     if (TranscriptionEtaTextBlock is not null)
                     {
                         TranscriptionEtaTextBlock.Visibility = Visibility.Visible;
-                        var pct = (int)Math.Round(update.OverallPercent * 100d);
-                        TranscriptionEtaTextBlock.Text = update.EstimatedRemainingTime is TimeSpan eta
-                            ? $"{update.StageDescription} · {pct}% · ETA {FormatEta(eta)}"
-                            : $"{update.StageDescription} · {pct}%";
+                        TranscriptionEtaTextBlock.Text = $"{update.StageDescription} · {FormatPercent(update.OverallPercent)}";
                     }
                 });
 
@@ -1323,7 +1363,7 @@ namespace Files_Tools.Pages
                 if (TranscriptionEtaTextBlock is not null)
                 {
                     TranscriptionEtaTextBlock.Visibility = Visibility.Collapsed;
-                    TranscriptionEtaTextBlock.Text = "ETA calculating...";
+                    TranscriptionEtaTextBlock.Text = FormatPercent(0);
                 }
 
                 TaskbarProgressHelper.Clear();
@@ -1381,12 +1421,15 @@ namespace Files_Tools.Pages
             SetDependentOptionsState(
                 AudioSyncPanel,
                 (EnableAudioSyncCheckBox?.IsChecked ?? false) && !ShouldDisableOutputAudioVolume());
+            var podcastModeOn = (EnablePodcastModeCheckBox?.IsChecked ?? false) && !ShouldDisableOutputAudioVolume();
+            SetDependentOptionsState(PodcastModePanel, podcastModeOn);
             SetDependentOptionsState(
                 AudioDenoisePanel,
-                (EnableAudioDenoiseCheckBox?.IsChecked ?? false) && !ShouldDisableOutputAudioVolume());
+                (EnableAudioDenoiseCheckBox?.IsChecked ?? false) && !podcastModeOn && !ShouldDisableOutputAudioVolume());
             SetDependentOptionsState(
                 AudioDenoiseStrengthPanel,
                 (EnableAudioDenoiseCheckBox?.IsChecked ?? false) &&
+                !podcastModeOn &&
                 IsStereoBlendDenoiseModeSelected() &&
                 !ShouldDisableOutputAudioVolume());
 
@@ -4031,16 +4074,19 @@ namespace Files_Tools.Pages
             AudioAdjustOptions? audioAdjust = null;
             var volumePercent = Math.Clamp((int)Math.Round(AudioVolumeSlider?.Value ?? 100), 0, 200);
             var syncOffset = GetSignedAudioSyncOffsetMilliseconds();
-            if (((EnableAudioVolumeCheckBox?.IsChecked ?? false) && volumePercent != 100 ||
-                 (EnableNormalizeAudioCheckBox?.IsChecked ?? false) ||
-                 (EnableAudioSyncCheckBox?.IsChecked ?? false && syncOffset != 0)) &&
-                !ShouldDisableOutputAudioVolume())
+            // Podcast mastering ends with loudnorm, so volume and normalize must be applied after the
+            // podcast chain (via VoiceStudioOptions.PostVolumePercent), not in the FFmpeg pre-pass.
+            var podcastModeActive = (EnablePodcastModeCheckBox?.IsChecked ?? false) && !ShouldDisableOutputAudioVolume();
+            var wantVolume = (EnableAudioVolumeCheckBox?.IsChecked ?? false) && volumePercent != 100 && !podcastModeActive;
+            var wantNormalize = (EnableNormalizeAudioCheckBox?.IsChecked ?? false) && !podcastModeActive;
+            var wantSync = (EnableAudioSyncCheckBox?.IsChecked ?? false) && syncOffset != 0;
+            if ((wantVolume || wantNormalize || wantSync) && !ShouldDisableOutputAudioVolume())
             {
                 audioAdjust = new AudioAdjustOptions
                 {
-                    VolumePercent = (EnableAudioVolumeCheckBox?.IsChecked ?? false) ? volumePercent : 100,
-                    NormalizeLoudness = EnableNormalizeAudioCheckBox?.IsChecked ?? false,
-                    SyncOffsetMilliseconds = (EnableAudioSyncCheckBox?.IsChecked ?? false) ? syncOffset : 0
+                    VolumePercent = wantVolume ? volumePercent : 100,
+                    NormalizeLoudness = wantNormalize,
+                    SyncOffsetMilliseconds = wantSync ? syncOffset : 0
                 };
             }
 
@@ -4453,7 +4499,7 @@ namespace Files_Tools.Pages
             ProcessingProgressBar.IsIndeterminate = false;
             ProcessingProgressBar.Value = 0;
             ProcessingStatusTextBlock.Text = "Processing video...";
-            ProcessingEtaTextBlock.Text = "ETA calculating...";
+            ProcessingEtaTextBlock.Text = FormatPercent(0);
             ProcessingDetailTextBlock.Text = "Preparing FFmpeg...";
             TaskbarProgressHelper.SetIndeterminate();
         }
@@ -4469,18 +4515,15 @@ namespace Files_Tools.Pages
                 return;
             }
 
+            var overall = PhaseOverallFraction(progress.IsCompleted ? 1d : progress.FractionComplete);
             ProcessingStatusPanel.Visibility = Visibility.Visible;
             ProcessingProgressBar.IsIndeterminate = false;
-            ProcessingProgressBar.Value = Math.Clamp(progress.FractionComplete, 0d, 1d);
-            TaskbarProgressHelper.SetProgress(progress.FractionComplete);
+            ProcessingProgressBar.Value = overall;
+            TaskbarProgressHelper.SetProgress(overall);
             ProcessingStatusTextBlock.Text = progress.IsCompleted
                 ? "Finalizing output..."
-                : $"Processing video... {(progress.FractionComplete * 100d):0}%";
-            ProcessingEtaTextBlock.Text = progress.IsCompleted
-                ? "ETA 00:00"
-                : progress.EstimatedTimeRemaining is TimeSpan eta
-                    ? $"ETA {FormatEta(eta)}"
-                    : "ETA calculating...";
+                : "Processing video...";
+            ProcessingEtaTextBlock.Text = FormatPercent(overall);
 
             var processed = FormatTimelineTime(progress.ProcessedDuration);
             var total = progress.TotalDuration is TimeSpan totalDuration
@@ -4503,16 +4546,15 @@ namespace Files_Tools.Pages
                 return;
             }
 
+            var overall = PhaseOverallFraction(progress.OverallPercent);
             ProcessingStatusPanel.Visibility = Visibility.Visible;
             ProcessingProgressBar.IsIndeterminate = false;
-            ProcessingProgressBar.Value = Math.Clamp(progress.OverallPercent, 0d, 1d);
-            TaskbarProgressHelper.SetProgress(progress.OverallPercent);
+            ProcessingProgressBar.Value = overall;
+            TaskbarProgressHelper.SetProgress(overall);
             ProcessingStatusTextBlock.Text = progress.Stage == DenoiseProcessingStage.Completed
                 ? "Finalizing denoised audio..."
-                : $"Denoising audio... {(progress.OverallPercent * 100d):0}%";
-            ProcessingEtaTextBlock.Text = progress.EstimatedRemainingTime is TimeSpan eta
-                ? $"ETA {FormatEta(eta)}"
-                : "ETA calculating...";
+                : "Denoising audio...";
+            ProcessingEtaTextBlock.Text = FormatPercent(overall);
 
             var processed = progress.ProcessedDuration is TimeSpan processedDuration
                 ? FormatTimelineTime(processedDuration)
@@ -4527,6 +4569,34 @@ namespace Files_Tools.Pages
                     : "Audio processing";
 
             ProcessingDetailTextBlock.Text = $"{progress.StageDescription} ({activity}) - {processed} of {total}.";
+        }
+
+        private void UpdatePodcastProgress(VoiceStudioProgress progress)
+        {
+            if (ProcessingStatusPanel is null ||
+                ProcessingProgressBar is null ||
+                ProcessingStatusTextBlock is null ||
+                ProcessingEtaTextBlock is null ||
+                ProcessingDetailTextBlock is null)
+            {
+                return;
+            }
+
+            var overall = PhaseOverallFraction(progress.Fraction);
+            ProcessingStatusPanel.Visibility = Visibility.Visible;
+            ProcessingProgressBar.IsIndeterminate = false;
+            ProcessingProgressBar.Value = overall;
+            TaskbarProgressHelper.SetProgress(overall);
+            ProcessingStatusTextBlock.Text = Strings.Get("AudioPage_ProcessingPodcast");
+            ProcessingEtaTextBlock.Text = FormatPercent(overall);
+            ProcessingDetailTextBlock.Text = progress.Stage switch
+            {
+                VoiceStudioStage.Extracting => Strings.Get("AudioPage_ExtractingAudio"),
+                VoiceStudioStage.Denoising => Strings.Get("AudioPage_DenoisingDFN3"),
+                VoiceStudioStage.RestoringFullness => Strings.Get("AudioPage_RestoringFullness"),
+                VoiceStudioStage.Mastering => Strings.Get("AudioPage_Mastering"),
+                _ => Strings.Get("AudioPage_Finalizing")
+            };
         }
 
         private void ResetProcessingState()
@@ -4544,20 +4614,17 @@ namespace Files_Tools.Pages
             ProcessingProgressBar.IsIndeterminate = false;
             ProcessingProgressBar.Value = 0;
             ProcessingStatusTextBlock.Text = "Processing video...";
-            ProcessingEtaTextBlock.Text = "ETA calculating...";
+            ProcessingEtaTextBlock.Text = FormatPercent(0);
             ProcessingDetailTextBlock.Text = "Preparing FFmpeg...";
             TaskbarProgressHelper.Clear();
         }
 
-        private static string FormatEta(TimeSpan value)
-        {
-            if (value.TotalHours >= 1)
-            {
-                return value.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture);
-            }
+        /// <summary>Maps the current phase's local fraction onto the whole processing run's 0..1 span.</summary>
+        private double PhaseOverallFraction(double phaseFraction) => _processingPhaseCount <= 0
+            ? Math.Clamp(phaseFraction, 0d, 1d)
+            : Math.Clamp((_processingPhaseIndex + Math.Clamp(phaseFraction, 0d, 1d)) / _processingPhaseCount, 0d, 1d);
 
-            return value.ToString(@"mm\:ss", CultureInfo.InvariantCulture);
-        }
+        private static string FormatPercent(double fraction) => $"{Math.Round(Math.Clamp(fraction, 0d, 1d) * 100)}%";
 
         private async Task<StorageFile?> PickSingleFileAsync(IEnumerable<string> extensions)
         {

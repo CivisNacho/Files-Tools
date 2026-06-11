@@ -28,6 +28,12 @@ public sealed class VoiceStudioOptions
         "treble=g=3:f=8000," +
         "acompressor=threshold=-18dB:ratio=3:attack=10:release=120:makeup=2," +
         "loudnorm=I=-16:TP=-1.5:LRA=11";
+
+    /// <summary>
+    /// Final output volume as a percentage (0–200, default 100 = unity). Applied during the remux
+    /// step, after mastering, so it is not overridden by the <c>loudnorm</c> filter.
+    /// </summary>
+    public int PostVolumePercent { get; init; } = 100;
 }
 
 /// <summary>Stage labels reported via <see cref="IProgress{T}"/> during processing.</summary>
@@ -88,9 +94,12 @@ public sealed class VoiceStudioService
             if (options.Denoise)
             {
                 progress?.Report(new(VoiceStudioStage.Denoising, 0.25));
-                var samples = WaveReader.ReadMono16k(stageWav);
+                var samples = WaveReader.ReadMonoFloatWav(stageWav);
                 using var dfn = new DeepFilterNetService(_dfnModelPath);
-                var enhanced = await dfn.EnhanceMonoAsync(samples, cancellationToken).ConfigureAwait(false);
+                var enhanced = await dfn.EnhanceMonoAsync(
+                        samples, cancellationToken,
+                        StageProgress(progress, VoiceStudioStage.Denoising, 0.25, 0.5))
+                    .ConfigureAwait(false);
                 var denoised = Path.Combine(temp, "denoised.wav");
                 WriteMonoFloat32Wav(denoised, enhanced, DeepFilterNetService.SampleRate);
                 stageWav = denoised;
@@ -104,9 +113,12 @@ public sealed class VoiceStudioService
                 await RunFfmpegAsync(
                     ["-y", "-i", stageWav, "-ac", "1", "-ar", FlashSrService.InputSampleRate.ToString(),
                      "-c:a", "pcm_f32le", low], cancellationToken).ConfigureAwait(false);
-                var low16 = WaveReader.ReadMono16k(low);
+                var low16 = WaveReader.ReadMonoFloatWav(low);
                 using var flash = new FlashSrService(_flashModelPath);
-                var full = await flash.UpsampleMonoAsync(low16, cancellationToken).ConfigureAwait(false);
+                var full = await flash.UpsampleMonoAsync(
+                        low16, cancellationToken,
+                        StageProgress(progress, VoiceStudioStage.RestoringFullness, 0.5, 0.8))
+                    .ConfigureAwait(false);
                 var restored = Path.Combine(temp, "restored.wav");
                 WriteMonoFloat32Wav(restored, full, FlashSrService.OutputSampleRate);
                 stageWav = restored;
@@ -134,6 +146,87 @@ public sealed class VoiceStudioService
         {
             TryDeleteDirectory(temp);
         }
+    }
+
+    /// <summary>
+    /// Applies the studio-voice chain to a video's audio track and writes a copy of the video at
+    /// <paramref name="outputVideoPath"/> with the enhanced audio: the audio is extracted and
+    /// processed via <see cref="ProcessAudioAsync"/>, then remuxed over the original video stream
+    /// (video and subtitles are stream-copied, audio is re-encoded as AAC).
+    /// </summary>
+    public async Task ProcessVideoAsync(
+        string inputVideoPath,
+        string outputVideoPath,
+        VoiceStudioOptions options,
+        IProgress<VoiceStudioProgress>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        var temp = Path.Combine(Path.GetTempPath(), "files-tools-voice", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(temp);
+        try
+        {
+            var enhancedWav = Path.Combine(temp, "enhanced.wav");
+            // Swallow the audio pass's Completed report; the remux below is the real final step.
+            var audioProgress = progress is null
+                ? null
+                : new FilteredProgress(p =>
+                {
+                    if (p.Stage != VoiceStudioStage.Completed)
+                    {
+                        progress.Report(p);
+                    }
+                });
+            await ProcessAudioAsync(inputVideoPath, enhancedWav, options, audioProgress, cancellationToken)
+                .ConfigureAwait(false);
+
+            // Remux: keep every original stream except audio, add the enhanced track. AAC is a safe
+            // encode target for the containers the editor outputs (MP4/MKV/MOV/WebM via libopus is
+            // nicer, but AAC keeps this simple and broadly compatible).
+            // PostVolumePercent is applied here — after mastering — so loudnorm doesn't override it.
+            progress?.Report(new(VoiceStudioStage.Finalizing, 0.95));
+            var remuxArgs = new List<string>
+            {
+                "-y", "-i", inputVideoPath, "-i", enhancedWav,
+                "-map", "0", "-map", "-0:a", "-map", "1:a",
+                "-c", "copy", "-c:a", "aac", "-b:a", "192k"
+            };
+            if (options.PostVolumePercent != 100)
+            {
+                remuxArgs.Add("-af");
+                remuxArgs.Add($"volume={(options.PostVolumePercent / 100.0).ToString("0.######", System.Globalization.CultureInfo.InvariantCulture)}");
+            }
+            remuxArgs.Add(outputVideoPath);
+            await RunFfmpegAsync(remuxArgs, cancellationToken).ConfigureAwait(false);
+
+            progress?.Report(new(VoiceStudioStage.Completed, 1.0));
+        }
+        finally
+        {
+            TryDeleteDirectory(temp);
+        }
+    }
+
+    private sealed class FilteredProgress(Action<VoiceStudioProgress> report) : IProgress<VoiceStudioProgress>
+    {
+        public void Report(VoiceStudioProgress value) => report(value);
+    }
+
+    /// <summary>
+    /// Maps a stage-local fraction (0..1) onto the overall pipeline span [from, to] so long ML
+    /// stages report steady intra-stage progress (chunk by chunk) that ETA estimators can use.
+    /// Reports synchronously on the worker thread; the caller's IProgress handles marshalling.
+    /// </summary>
+    private static IProgress<double>? StageProgress(
+        IProgress<VoiceStudioProgress>? progress, VoiceStudioStage stage, double from, double to)
+        => progress is null
+            ? null
+            : new SynchronousProgress(f =>
+                progress.Report(new(stage, from + (Math.Clamp(f, 0d, 1d) * (to - from)))));
+
+    private sealed class SynchronousProgress(Action<double> report) : IProgress<double>
+    {
+        public void Report(double value) => report(value);
     }
 
     private static async Task RunFfmpegAsync(IReadOnlyList<string> args, CancellationToken cancellationToken)
