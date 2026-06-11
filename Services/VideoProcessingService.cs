@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Files_Tools.Helpers;
 
 namespace Files_Tools.Services;
 
@@ -2102,7 +2103,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
             return null;
         }
 
-        var stopwatch = Stopwatch.StartNew();
+        var eta = new EtaEstimator();
         var lastProcessed = TimeSpan.Zero;
 
         progress.Report(new VideoProcessingProgress
@@ -2137,19 +2138,14 @@ public sealed class VideoProcessingService : IVideoProcessingService
                     ? 0d
                     : Math.Clamp(clampedProcessed.TotalMilliseconds / totalDuration.TotalMilliseconds, 0d, 1d);
 
-                TimeSpan? eta = null;
-                if (!isCompleted && fraction > 0d)
-                {
-                    var remainingMilliseconds = stopwatch.Elapsed.TotalMilliseconds * ((1d - fraction) / fraction);
-                    eta = TimeSpan.FromMilliseconds(Math.Max(0d, remainingMilliseconds));
-                }
+                var remaining = eta.AddSample(isCompleted ? 1d : fraction);
 
                 progress.Report(new VideoProcessingProgress
                 {
                     FractionComplete = isCompleted ? 1d : fraction,
                     ProcessedDuration = isCompleted ? totalDuration : clampedProcessed,
                     TotalDuration = totalDuration,
-                    EstimatedTimeRemaining = isCompleted ? TimeSpan.Zero : eta,
+                    EstimatedTimeRemaining = isCompleted ? TimeSpan.Zero : remaining,
                     IsCompleted = isCompleted
                 });
             }

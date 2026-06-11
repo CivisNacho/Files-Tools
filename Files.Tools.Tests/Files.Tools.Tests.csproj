@@ -2,6 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <!-- Pin to x64: the test project only pulls x64 natives, and QPdfNet's x86 payload is
+         incomplete (missing vcruntime140_1.dll) which breaks RID-less builds. -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -14,10 +17,24 @@
     <PackageReference Include="NetVips.Native.win-x64" Version="8.18.2" />
     <PackageReference Include="Whisper.net" Version="1.9.0" />
     <PackageReference Include="Whisper.net.Runtime" Version="1.9.0" />
+    <PackageReference Include="QPdfNet" Version="1.5.0" />
+    <PackageReference Include="TesseractOCR" Version="5.3.5" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+  </ItemGroup>
+
+  <!-- QPdfNet's package targets unconditionally copy an x86\vcruntime140_1.dll that does not
+       exist in the package, failing the build. The tests are x64-only; drop the x86 items. -->
+  <Target Name="RemoveBrokenQpdfX86Items" BeforeTargets="AssignTargetPaths">
+    <ItemGroup>
+      <None Remove="@(None)" Condition="$([System.String]::Copy('%(None.Link)').StartsWith('x86'))" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <Content Include="Fixtures\**\*.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,6 +43,10 @@
     <Compile Include="..\Services\FfmpegLocator.cs" Link="Services\FfmpegLocator.cs" />
     <Compile Include="..\Services\AudioTranscriptionService.cs" Link="Services\AudioTranscriptionService.cs" />
     <Compile Include="..\Services\Wav2Vec2AlignmentService.cs" Link="Services\Wav2Vec2AlignmentService.cs" />
+    <Compile Include="..\Services\DeepFilterNetDsp.cs" Link="Services\DeepFilterNetDsp.cs" />
+    <Compile Include="..\Services\DeepFilterNetService.cs" Link="Services\DeepFilterNetService.cs" />
+    <Compile Include="..\Services\FlashSrService.cs" Link="Services\FlashSrService.cs" />
+    <Compile Include="..\Services\VoiceStudioService.cs" Link="Services\VoiceStudioService.cs" />
     <Compile Include="..\Services\SubtitlesService.cs" Link="Services\SubtitlesService.cs" />
     <Compile Include="..\Services\Presets\SubtitlePresetDto.cs" Link="Services\Presets\SubtitlePresetDto.cs" />
     <Compile Include="..\Services\Presets\SubtitleColorJsonConverter.cs" Link="Services\Presets\SubtitleColorJsonConverter.cs" />
@@ -36,6 +57,9 @@
     <Compile Include="..\Services\VideoAudioDenoise.cs" Link="Services\VideoAudioDenoise.cs" />
     <Compile Include="..\Services\DocumentProcessingService.cs" Link="Services\DocumentProcessingService.cs" />
     <Compile Include="..\Services\LibreOfficeSetupService.cs" Link="Services\LibreOfficeSetupService.cs" />
+    <Compile Include="..\Helpers\EtaEstimator.cs" Link="Helpers\EtaEstimator.cs" />
+    <Compile Include="..\Services\PdfService.cs" Link="Services\PdfService.cs" />
+    <Compile Include="..\Services\PdfNativeCli.cs" Link="Services\PdfNativeCli.cs" />
   </ItemGroup>
 
 </Project>

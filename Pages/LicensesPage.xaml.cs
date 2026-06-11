@@ -60,8 +60,9 @@ public sealed partial class LicensesPage : Page
         "License: MIT\n\n" +
         "Project URL:\n" +
         "https://github.com/microsoft/onnxruntime\n\n" +
-        "Usage: Executes the bundled DTLN ONNX models for audio denoise and the MMS " +
-        "forced-alignment ONNX model for subtitle word-timing.\n\n" +
+        "Usage: Executes the bundled DTLN ONNX models for audio denoise, the DeepFilterNet and " +
+        "FlashSR ONNX models for the studio-voice feature, and the MMS forced-alignment ONNX " +
+        "model for subtitle word-timing.\n\n" +
         MitLicenseText;
 
     private const string CcByNc40LicenseSummary =
@@ -139,6 +140,37 @@ public sealed partial class LicensesPage : Page
         "CONDITIONS OF ANY KIND, either express or implied. See the License for the " +
         "specific language governing permissions and limitations under the License.\n\n" +
         "Full license text: https://www.apache.org/licenses/LICENSE-2.0";
+
+    private const string DeepFilterNetLicenseText =
+        "Component: DeepFilterNet (DeepFilterNet3 pretrained ONNX model)\n" +
+        "Copyright: Copyright (c) Hendrik Schröter and DeepFilterNet contributors\n" +
+        "License: MIT OR Apache-2.0 (dual-licensed, at your option)\n\n" +
+        "Project URL:\n" +
+        "https://github.com/Rikorose/DeepFilterNet\n\n" +
+        "Bundled model file:\n" +
+        "Assets/Models/DeepFilterNet/combined.onnx\n\n" +
+        "Usage: local full-band (48 kHz) speech enhancement — noise suppression and " +
+        "dereverberation — for the studio-voice feature. Runs entirely on the user's device.\n\n" +
+        "This component is dual-licensed; you may use it under the MIT License or the Apache " +
+        "License 2.0. The Apache-2.0 terms are reproduced below; the MIT terms are reproduced " +
+        "in the ONNX Runtime / DTLN entries.\n\n" +
+        Apache2LicenseSummary;
+
+    private const string FlashSrLicenseText =
+        "Component: FlashSR (audio super-resolution pretrained ONNX model)\n" +
+        "Copyright: Copyright (c) Yatharth Sharma\n" +
+        "License: Apache-2.0\n\n" +
+        "Project URL:\n" +
+        "https://github.com/ysharma3501/FlashSR\n\n" +
+        "Model:\n" +
+        "https://huggingface.co/YatharthS/FlashSR\n\n" +
+        "Architecture derived from HierSpeech++'s upsampler.\n\n" +
+        "Bundled model file:\n" +
+        "Assets/Models/FlashSr/model.onnx\n\n" +
+        "Usage: local speech bandwidth extension / super-resolution (16 kHz to 48 kHz) that " +
+        "restores high-frequency detail for the studio-voice feature. Runs entirely on the " +
+        "user's device.\n\n" +
+        Apache2LicenseSummary;
 
     private const string QpdfLicenseText =
         "Component: qpdf (via QPdfNet)\n" +
@@ -226,6 +258,16 @@ public sealed partial class LicensesPage : Page
     private void ShowLibreOfficeLicense_Click(object sender, RoutedEventArgs e)
     {
         ShowLicenseDialog("LibreOffice License", LibreOfficeLicenseText);
+    }
+
+    private void ShowDeepFilterNetLicense_Click(object sender, RoutedEventArgs e)
+    {
+        ShowLicenseDialog("DeepFilterNet Model License", DeepFilterNetLicenseText);
+    }
+
+    private void ShowFlashSrLicense_Click(object sender, RoutedEventArgs e)
+    {
+        ShowLicenseDialog("FlashSR Model License", FlashSrLicenseText);
     }
 
     private void ShowQpdfLicense_Click(object sender, RoutedEventArgs e)

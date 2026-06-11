@@ -594,6 +594,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
         public AudioTranscriptionStage? CurrentStage { get; set; }
         public DateTimeOffset? StageStartedAtUtc { get; set; }
         public double StageStartOverallPercent { get; set; }
+        public Helpers.EtaEstimator Eta { get; } = new();
     }
 
     private sealed class CallbackProgress<T> : IProgress<T>
@@ -1019,46 +1020,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             StageDescription = description,
             EstimatedRemainingTime = stage == AudioTranscriptionStage.Completed
                 ? TimeSpan.Zero
-                : ComputeEta(state, overallPercent, stagePercent)
+                : state.Eta.AddSample(overallPercent)
         });
-    }
-
-    private static TimeSpan? ComputeEta(ProgressState state, double overallPercent, double stagePercent)
-    {
-        if (overallPercent < 0.02d)
-        {
-            return null;
-        }
-
-        if (overallPercent >= 1d)
-        {
-            return TimeSpan.Zero;
-        }
-
-        // When the current stage has been running long enough to produce a reliable rate, use
-        // stage-local timing. This prevents the fast PreparingAudio stage (0–15%) from making
-        // the ETA optimistic once the slower Transcribing stage starts.
-        if (state.StageStartedAtUtc.HasValue && stagePercent > 0.05d)
-        {
-            var stageElapsed = DateTimeOffset.UtcNow - state.StageStartedAtUtc.Value;
-            var overallGainedInStage = overallPercent - state.StageStartOverallPercent;
-            if (stageElapsed.TotalSeconds > 2d && overallGainedInStage > 0.01d)
-            {
-                var ratePerSecond = overallGainedInStage / stageElapsed.TotalSeconds;
-                var remainingOverall = 1d - overallPercent;
-                return TimeSpan.FromSeconds(remainingOverall / ratePerSecond);
-            }
-        }
-
-        // Fall back to global rate (used during PreparingAudio and early in each stage).
-        var elapsed = DateTimeOffset.UtcNow - state.StartedAtUtc!.Value;
-        if (elapsed <= TimeSpan.Zero)
-        {
-            return null;
-        }
-
-        var totalTicksEstimate = elapsed.Ticks / overallPercent;
-        var remainingTicks = Math.Max(0d, totalTicksEstimate - elapsed.Ticks);
-        return TimeSpan.FromTicks((long)remainingTicks);
     }
 }

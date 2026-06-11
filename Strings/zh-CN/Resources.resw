@@ -1,5 +1,110 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -12,18 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Main Window
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="AppTitleBar.Title" xml:space="preserve">
     <value>Files Tools</value>
   </data>
   <data name="LicensesButton.Content" xml:space="preserve">
     <value>许可证</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Navigation items  (reused across all editor nav menus)
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="NavMedia.Content" xml:space="preserve">
     <value>媒体</value>
   </data>
@@ -150,9 +249,6 @@
   <data name="NavOutput.Content" xml:space="preserve">
     <value>输出</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Shared editor strings  (reused across multiple pages)
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="PreviewTitle.Text" xml:space="preserve">
     <value>预览</value>
   </data>
@@ -165,9 +261,6 @@
   <data name="EtaCalculating.Text" xml:space="preserve">
     <value>正在计算剩余时间...</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Home page
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="HomePage_Header.Text" xml:space="preserve">
     <value>拖放文件以开始</value>
   </data>
@@ -186,9 +279,6 @@
   <data name="HomePage_BatchFiles.Text" xml:space="preserve">
     <value>批量处理多个文件</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Audio editor page
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="AudioPage_Title.Text" xml:space="preserve">
     <value>音频编辑器</value>
   </data>
@@ -216,9 +306,18 @@
   <data name="AudioPage_PreparingPipeline.Text" xml:space="preserve">
     <value>正在准备处理管道...</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Image editor page
-       ═══════════════════════════════════════════════════════════════ -->
+  <data name="AudioPage_PreviewCodec.Text" xml:space="preserve">
+    <value>编解码器: —</value>
+  </data>
+  <data name="AudioPage_PreviewRate.Text" xml:space="preserve">
+    <value>采样率: —</value>
+  </data>
+  <data name="AudioPage_PreviewChannels.Text" xml:space="preserve">
+    <value>声道: —</value>
+  </data>
+  <data name="AudioPage_PreviewDuration.Text" xml:space="preserve">
+    <value>时长: —</value>
+  </data>
   <data name="ImagePage_Title.Text" xml:space="preserve">
     <value>图像编辑器</value>
   </data>
@@ -306,9 +405,6 @@
   <data name="ImagePage_EnableRGB.Content" xml:space="preserve">
     <value>启用 RGB 调整</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Video editor page
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="VideoPage_Title.Text" xml:space="preserve">
     <value>视频编辑器</value>
   </data>
@@ -403,7 +499,7 @@
     <value>延后</value>
   </data>
   <data name="VideoPage_ApplyDenoise.Content" xml:space="preserve">
-    <value>应用音频降噪</value>
+    <value>应用简单的降噪技术</value>
   </data>
   <data name="VideoPage_DenoiseMode.Header" xml:space="preserve">
     <value>降噪模式</value>
@@ -476,66 +572,6 @@
   </data>
   <data name="VideoPage_ConfigureAdvanced.Content" xml:space="preserve">
     <value>配置高级字幕</value>
-  </data>
-  <data name="VideoPage_ConfigureAdvancedTitle" xml:space="preserve">
-    <value>配置高级字幕</value>
-  </data>
-  <data name="VideoPage_ConfigureKaraokeSummary" xml:space="preserve">
-    <value>选择卡拉OK风格并调整用于渲染的排版和高亮重音。</value>
-  </data>
-  <data name="VideoPage_ConfigureStyledSummary" xml:space="preserve">
-    <value>调整用于风格化字幕渲染的排版和颜色。</value>
-  </data>
-  <data name="VideoPage_BasePreset.Header" xml:space="preserve">
-    <value>基础预设</value>
-  </data>
-  <data name="VideoPage_SystemFont.Header" xml:space="preserve">
-    <value>系统字体</value>
-  </data>
-  <data name="VideoPage_SelectInstalledFont" xml:space="preserve">
-    <value>选择已安装的字体</value>
-  </data>
-  <data name="VideoPage_FontSize.Header" xml:space="preserve">
-    <value>字体大小</value>
-  </data>
-  <data name="VideoPage_OutlineWidth.Header" xml:space="preserve">
-    <value>轮廓宽度</value>
-  </data>
-  <data name="VideoPage_VerticalMargin.Header" xml:space="preserve">
-    <value>垂直边距</value>
-  </data>
-  <data name="VideoPage_BoldText.Content" xml:space="preserve">
-    <value>粗体文本</value>
-  </data>
-  <data name="VideoPage_TextTransform.Header" xml:space="preserve">
-    <value>文本转换</value>
-  </data>
-  <data name="VideoPage_OriginalCase" xml:space="preserve">
-    <value>原始大小写</value>
-  </data>
-  <data name="VideoPage_Uppercase" xml:space="preserve">
-    <value>大写</value>
-  </data>
-  <data name="VideoPage_Lowercase" xml:space="preserve">
-    <value>小写</value>
-  </data>
-  <data name="VideoPage_FillingColor" xml:space="preserve">
-    <value>填充颜色</value>
-  </data>
-  <data name="VideoPage_PreFillingColor" xml:space="preserve">
-    <value>预填充颜色</value>
-  </data>
-  <data name="VideoPage_WordFillColor" xml:space="preserve">
-    <value>单词填充颜色</value>
-  </data>
-  <data name="VideoPage_OutlineColor" xml:space="preserve">
-    <value>轮廓颜色</value>
-  </data>
-  <data name="VideoPage_ConfigureAdvancedSave" xml:space="preserve">
-    <value>保存</value>
-  </data>
-  <data name="VideoPage_ConfigureAdvancedResetDefaults" xml:space="preserve">
-    <value>重置为默认值</value>
   </data>
   <data name="VideoPage_AdvancedPresetSummary.Text" xml:space="preserve">
     <value>预设摘要</value>
@@ -714,9 +750,6 @@
   <data name="VideoPage_SubtitleEditorStatus.Text" xml:space="preserve">
     <value>生成或选择字幕文件以进行编辑。</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       PDF editor page
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="PdfPage_Title.Text" xml:space="preserve">
     <value>PDF 编辑器</value>
   </data>
@@ -981,9 +1014,6 @@
   <data name="PdfPage_RepairReady.Text" xml:space="preserve">
     <value>已准备好修复。</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Document editor page
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="DocPage_Title.Text" xml:space="preserve">
     <value>文档处理</value>
   </data>
@@ -1104,9 +1134,6 @@
   <data name="DocPage_ExtractHint.Text" xml:space="preserve">
     <value>所有嵌入的图像将被提取并打包成 ZIP 压缩包，保存到您选择的位置。</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Batch editor page
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="BatchPage_Title.Text" xml:space="preserve">
     <value>批量处理器</value>
   </data>
@@ -1422,9 +1449,6 @@
   <data name="BatchPage_ImageHeight.Header" xml:space="preserve">
     <value>高度</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Licenses page
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="LicensesPage_Title.Text" xml:space="preserve">
     <value>许可证</value>
   </data>
@@ -1716,11 +1740,68 @@
   <data name="CB_Batch_AdvSubtitleSectionLength" xml:space="preserve">
     <value>高级字幕段落长度：最多 {0} 秒</value>
   </data>
-  <data name="VideoPage_VerticalMargin_Header" xml:space="preserve">
+  <data name="VideoPage_ConfigureAdvancedTitle" xml:space="preserve">
+    <value>配置高级字幕</value>
+  </data>
+  <data name="VideoPage_ConfigureKaraokeSummary" xml:space="preserve">
+    <value>选择卡拉OK风格并调整用于渲染的排版和高亮重音。</value>
+  </data>
+  <data name="VideoPage_ConfigureStyledSummary" xml:space="preserve">
+    <value>调整用于风格化字幕渲染的排版和颜色。</value>
+  </data>
+  <data name="VideoPage_BasePreset.Header" xml:space="preserve">
+    <value>基础预设</value>
+  </data>
+  <data name="VideoPage_SystemFont.Header" xml:space="preserve">
+    <value>系统字体</value>
+  </data>
+  <data name="VideoPage_SelectInstalledFont" xml:space="preserve">
+    <value>选择已安装的字体</value>
+  </data>
+  <data name="VideoPage_FontSize.Header" xml:space="preserve">
+    <value>字体大小</value>
+  </data>
+  <data name="VideoPage_OutlineWidth.Header" xml:space="preserve">
+    <value>轮廓宽度</value>
+  </data>
+  <data name="VideoPage_VerticalMargin.Header" xml:space="preserve">
     <value>垂直边距</value>
   </data>
-  <data name="Shared_Cancel" xml:space="preserve">
-    <value>取消</value>
+  <data name="VideoPage_BoldText.Content" xml:space="preserve">
+    <value>粗体文本</value>
+  </data>
+  <data name="VideoPage_TextTransform.Header" xml:space="preserve">
+    <value>文本转换</value>
+  </data>
+  <data name="VideoPage_OriginalCase" xml:space="preserve">
+    <value>原始大小写</value>
+  </data>
+  <data name="VideoPage_Uppercase" xml:space="preserve">
+    <value>大写</value>
+  </data>
+  <data name="VideoPage_Lowercase" xml:space="preserve">
+    <value>小写</value>
+  </data>
+  <data name="VideoPage_FillingColor" xml:space="preserve">
+    <value>填充颜色</value>
+  </data>
+  <data name="VideoPage_PreFillingColor" xml:space="preserve">
+    <value>预填充颜色</value>
+  </data>
+  <data name="VideoPage_WordFillColor" xml:space="preserve">
+    <value>单词填充颜色</value>
+  </data>
+  <data name="VideoPage_OutlineColor" xml:space="preserve">
+    <value>轮廓颜色</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvancedSave" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvancedResetDefaults" xml:space="preserve">
+    <value>重置为默认值</value>
+  </data>
+  <data name="VideoPage_VerticalMargin_Header" xml:space="preserve">
+    <value>垂直边距</value>
   </data>
   <data name="VideoPage_BoldText_Content" xml:space="preserve">
     <value>粗体文本</value>
@@ -1739,5 +1820,353 @@
   </data>
   <data name="VideoPage_BasePreset_Header" xml:space="preserve">
     <value>基础预设</value>
+  </data>
+  <data name="Shared_Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="AudioPage_PreviewCodecFmt" xml:space="preserve">
+    <value>编解码器: {0}</value>
+  </data>
+  <data name="AudioPage_PreviewRateFmt" xml:space="preserve">
+    <value>采样率: {0}</value>
+  </data>
+  <data name="AudioPage_PreviewChannelsFmt" xml:space="preserve">
+    <value>声道: {0}</value>
+  </data>
+  <data name="AudioPage_PreviewDurationFmt" xml:space="preserve">
+    <value>时长: {0}</value>
+  </data>
+  <data name="AudioPage_Unknown" xml:space="preserve">
+    <value>未知</value>
+  </data>
+  <data name="AudioPage_LoadedFmt" xml:space="preserve">
+    <value>已加载: {0}</value>
+  </data>
+  <data name="AudioPage_SavedFmt" xml:space="preserve">
+    <value>已保存: {0}</value>
+  </data>
+  <data name="AudioPage_Preparing" xml:space="preserve">
+    <value>正在准备...</value>
+  </data>
+  <data name="AudioPage_FormatCard" xml:space="preserve">
+    <value>格式、编解码器和压缩</value>
+  </data>
+  <data name="AudioPage_OutputFormat_Header" xml:space="preserve">
+    <value>输出格式</value>
+  </data>
+  <data name="AudioPage_KeepOriginal" xml:space="preserve">
+    <value>保持原格式</value>
+  </data>
+  <data name="AudioPage_Codec_Header" xml:space="preserve">
+    <value>编解码器</value>
+  </data>
+  <data name="AudioPage_Auto" xml:space="preserve">
+    <value>自动</value>
+  </data>
+  <data name="AudioPage_Bitrate_Header" xml:space="preserve">
+    <value>比特率 (kbps)</value>
+  </data>
+  <data name="AudioPage_SampleRateHz_Header" xml:space="preserve">
+    <value>采样率 (Hz)</value>
+  </data>
+  <data name="AudioPage_Channels_Header" xml:space="preserve">
+    <value>声道</value>
+  </data>
+  <data name="AudioPage_KeepSource" xml:space="preserve">
+    <value>保持源</value>
+  </data>
+  <data name="AudioPage_Mono" xml:space="preserve">
+    <value>单声道</value>
+  </data>
+  <data name="AudioPage_Stereo" xml:space="preserve">
+    <value>立体声</value>
+  </data>
+  <data name="AudioPage_EnableCompression" xml:space="preserve">
+    <value>启用压缩步骤</value>
+  </data>
+  <data name="AudioPage_CompressionMode_Header" xml:space="preserve">
+    <value>压缩模式</value>
+  </data>
+  <data name="AudioPage_Lossy" xml:space="preserve">
+    <value>有损</value>
+  </data>
+  <data name="AudioPage_Lossless" xml:space="preserve">
+    <value>无损</value>
+  </data>
+  <data name="AudioPage_CompressionCodec_Header" xml:space="preserve">
+    <value>压缩编解码器</value>
+  </data>
+  <data name="AudioPage_TargetBitrate_Header" xml:space="preserve">
+    <value>目标比特率 (kbps)</value>
+  </data>
+  <data name="AudioPage_TargetSampleRate_Header" xml:space="preserve">
+    <value>目标采样率 (Hz)</value>
+  </data>
+  <data name="AudioPage_MetadataCard" xml:space="preserve">
+    <value>元数据</value>
+  </data>
+  <data name="AudioPage_RemoveMetadata" xml:space="preserve">
+    <value>删除元数据</value>
+  </data>
+  <data name="AudioPage_MetadataHint" xml:space="preserve">
+    <value>元数据删除是独立的管道步骤。</value>
+  </data>
+  <data name="AudioPage_PodcastCard" xml:space="preserve">
+    <value>播客模式</value>
+  </data>
+  <data name="AudioPage_EnablePodcast" xml:space="preserve">
+    <value>启用播客模式</value>
+  </data>
+  <data name="AudioPage_PodcastDenoise" xml:space="preserve">
+    <value>降噪 (DFN3)</value>
+  </data>
+  <data name="AudioPage_PodcastFullness" xml:space="preserve">
+    <value>恢复音质丰满度 (FlashSR)</value>
+  </data>
+  <data name="AudioPage_PodcastMaster" xml:space="preserve">
+    <value>母带处理 (EQ + 压缩 + 响度归一化)</value>
+  </data>
+  <data name="AudioPage_PodcastHint" xml:space="preserve">
+    <value>完整录音室语音链: DeepFilterNet3 + FlashSR + FFmpeg 母带处理 (-16 LUFS)。优先于独立降噪。每2分钟音频约需CPU 3~4分钟。</value>
+  </data>
+  <data name="AudioPage_TrimCard" xml:space="preserve">
+    <value>修剪</value>
+  </data>
+  <data name="AudioPage_EnableTrim" xml:space="preserve">
+    <value>启用修剪</value>
+  </data>
+  <data name="AudioPage_TrimHint" xml:space="preserve">
+    <value>在预览播放器下方的修剪时间轴上选择起始点和结束点。</value>
+  </data>
+  <data name="AudioPage_ReEncodeOutput" xml:space="preserve">
+    <value>重新编码输出</value>
+  </data>
+  <data name="AudioPage_SilenceTrimCard" xml:space="preserve">
+    <value>静音修剪</value>
+  </data>
+  <data name="AudioPage_EnableSilenceTrim" xml:space="preserve">
+    <value>启用静音修剪</value>
+  </data>
+  <data name="AudioPage_Mode_Header" xml:space="preserve">
+    <value>模式</value>
+  </data>
+  <data name="AudioPage_Leading" xml:space="preserve">
+    <value>开头</value>
+  </data>
+  <data name="AudioPage_Trailing" xml:space="preserve">
+    <value>结尾</value>
+  </data>
+  <data name="AudioPage_LeadingAndTrailing" xml:space="preserve">
+    <value>开头和结尾</value>
+  </data>
+  <data name="AudioPage_Threshold_Header" xml:space="preserve">
+    <value>阈值 (dB)</value>
+  </data>
+  <data name="AudioPage_MinSilence_Header" xml:space="preserve">
+    <value>最小静音时长 (ms)</value>
+  </data>
+  <data name="AudioPage_NormalizationCard" xml:space="preserve">
+    <value>归一化</value>
+  </data>
+  <data name="AudioPage_EnableNormalization" xml:space="preserve">
+    <value>启用归一化</value>
+  </data>
+  <data name="AudioPage_Peak" xml:space="preserve">
+    <value>峰值</value>
+  </data>
+  <data name="AudioPage_LUFS" xml:space="preserve">
+    <value>LUFS</value>
+  </data>
+  <data name="AudioPage_TargetPeak_Header" xml:space="preserve">
+    <value>目标峰值 (dB)</value>
+  </data>
+  <data name="AudioPage_TargetLUFS_Header" xml:space="preserve">
+    <value>目标 LUFS</value>
+  </data>
+  <data name="AudioPage_UseLimiter" xml:space="preserve">
+    <value>使用限幅器</value>
+  </data>
+  <data name="AudioPage_PreventClipping" xml:space="preserve">
+    <value>防止削波</value>
+  </data>
+  <data name="AudioPage_EqCard" xml:space="preserve">
+    <value>简单均衡器</value>
+  </data>
+  <data name="AudioPage_EnableEq" xml:space="preserve">
+    <value>启用均衡器</value>
+  </data>
+  <data name="AudioPage_Preset_Header" xml:space="preserve">
+    <value>预设</value>
+  </data>
+  <data name="AudioPage_AddEqBand" xml:space="preserve">
+    <value>添加均衡器频段</value>
+  </data>
+  <data name="AudioPage_EqFreq_Header" xml:space="preserve">
+    <value>频率 (Hz)</value>
+  </data>
+  <data name="AudioPage_EqGain_Header" xml:space="preserve">
+    <value>增益 (dB)</value>
+  </data>
+  <data name="AudioPage_EqWidth_Header" xml:space="preserve">
+    <value>宽度</value>
+  </data>
+  <data name="AudioPage_Remove" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="AudioPage_DenoiseCard" xml:space="preserve">
+    <value>降噪</value>
+  </data>
+  <data name="AudioPage_EnableDenoise" xml:space="preserve">
+    <value>启用降噪</value>
+  </data>
+  <data name="AudioPage_DenoiseHint" xml:space="preserve">
+    <value>DeepFilterNet3 语音增强，去除噪音和混响。同时启用时被播客模式取代。</value>
+  </data>
+  <data name="AudioPage_TranscriptionCard" xml:space="preserve">
+    <value>转录</value>
+  </data>
+  <data name="AudioPage_TranscriptionHint" xml:space="preserve">
+    <value>从已加载的音频生成纯文本或 .srt 字幕文件。</value>
+  </data>
+  <data name="AudioPage_DownloadTranscription" xml:space="preserve">
+    <value>下载转录功能</value>
+  </data>
+  <data name="AudioPage_TranscriptionNotDownloaded" xml:space="preserve">
+    <value>转录功能尚未下载。</value>
+  </data>
+  <data name="AudioPage_OutputType_Header" xml:space="preserve">
+    <value>输出类型</value>
+  </data>
+  <data name="AudioPage_Text" xml:space="preserve">
+    <value>文本</value>
+  </data>
+  <data name="AudioPage_Subtitles" xml:space="preserve">
+    <value>字幕</value>
+  </data>
+  <data name="AudioPage_IncludeTimestamps" xml:space="preserve">
+    <value>在文本输出中包含时间戳</value>
+  </data>
+  <data name="AudioPage_GenerateTranscription" xml:space="preserve">
+    <value>生成转录</value>
+  </data>
+  <data name="AudioPage_TranscriptionPlaceholder" xml:space="preserve">
+    <value>生成的转录文本将显示在此处。</value>
+  </data>
+  <data name="AudioPage_SaveTranscription" xml:space="preserve">
+    <value>保存转录文本</value>
+  </data>
+  <data name="AudioPage_NoTranscriptionYet" xml:space="preserve">
+    <value>尚未生成转录。</value>
+  </data>
+  <data name="AudioPage_GeneratingTranscription" xml:space="preserve">
+    <value>正在生成转录...</value>
+  </data>
+  <data name="AudioPage_TranscriptionDownloaded" xml:space="preserve">
+    <value>转录功能已下载。</value>
+  </data>
+  <data name="AudioPage_TextTranscriptionReady" xml:space="preserve">
+    <value>文本转录已完成。</value>
+  </data>
+  <data name="AudioPage_SubtitleReadyFmt" xml:space="preserve">
+    <value>字幕文件已完成: {0}</value>
+  </data>
+  <data name="AudioPage_TranscriptionSavedFmt" xml:space="preserve">
+    <value>转录文本已保存: {0}</value>
+  </data>
+  <data name="AudioPage_ConvertingAudio" xml:space="preserve">
+    <value>正在转换音频</value>
+  </data>
+  <data name="AudioPage_CompressingAudio" xml:space="preserve">
+    <value>正在压缩音频</value>
+  </data>
+  <data name="AudioPage_NormalizingAudio" xml:space="preserve">
+    <value>正在归一化音频</value>
+  </data>
+  <data name="AudioPage_TrimmingAudio" xml:space="preserve">
+    <value>正在修剪音频</value>
+  </data>
+  <data name="AudioPage_RemovingSilence" xml:space="preserve">
+    <value>正在删除静音</value>
+  </data>
+  <data name="AudioPage_ApplyingEq" xml:space="preserve">
+    <value>正在应用均衡器</value>
+  </data>
+  <data name="AudioPage_RemovingMetadata" xml:space="preserve">
+    <value>正在删除元数据</value>
+  </data>
+  <data name="AudioPage_ProcessingPodcast" xml:space="preserve">
+    <value>正在处理播客音频...</value>
+  </data>
+  <data name="AudioPage_DenoisingAudio" xml:space="preserve">
+    <value>正在对音频降噪...</value>
+  </data>
+  <data name="AudioPage_DenoisingDFN3" xml:space="preserve">
+    <value>降噪 (DFN3)...</value>
+  </data>
+  <data name="AudioPage_Finalizing" xml:space="preserve">
+    <value>正在最终处理...</value>
+  </data>
+  <data name="AudioPage_ExtractingAudio" xml:space="preserve">
+    <value>正在提取音频...</value>
+  </data>
+  <data name="AudioPage_RestoringFullness" xml:space="preserve">
+    <value>正在恢复音质丰满度 (FlashSR)...</value>
+  </data>
+  <data name="AudioPage_Mastering" xml:space="preserve">
+    <value>正在进行母带处理...</value>
+  </data>
+  <data name="AudioPage_ProcessingComplete" xml:space="preserve">
+    <value>音频处理完成</value>
+  </data>
+  <data name="AudioPage_AudioSaved" xml:space="preserve">
+    <value>音频已保存至:</value>
+  </data>
+  <data name="AudioPage_Warnings" xml:space="preserve">
+    <value>警告:</value>
+  </data>
+  <data name="AudioPage_Cancelled" xml:space="preserve">
+    <value>已取消</value>
+  </data>
+  <data name="AudioPage_ProcessingCancelled" xml:space="preserve">
+    <value>音频处理已取消。</value>
+  </data>
+  <data name="AudioPage_ProcessingFailed" xml:space="preserve">
+    <value>处理失败</value>
+  </data>
+  <data name="Shared_OK" xml:space="preserve">
+    <value>确定</value>
+  </data>
+  <data name="AudioPage_TranscriptionDownloadFailed" xml:space="preserve">
+    <value>转录下载失败</value>
+  </data>
+  <data name="AudioPage_TranscriptionRequired" xml:space="preserve">
+    <value>需要转录功能</value>
+  </data>
+  <data name="AudioPage_TranscriptionRequiredMessage" xml:space="preserve">
+    <value>请在生成前下载转录功能。</value>
+  </data>
+  <data name="AudioPage_TranscriptionFailed" xml:space="preserve">
+    <value>转录失败</value>
+  </data>
+  <data name="AudioPage_NothingToSave" xml:space="preserve">
+    <value>没有可保存的内容</value>
+  </data>
+  <data name="AudioPage_GenerateFirst" xml:space="preserve">
+    <value>请先生成文本转录。</value>
+  </data>
+  <data name="VideoPage_EnablePodcastMode.Content" xml:space="preserve">
+    <value>启用播客模式</value>
+  </data>
+  <data name="VideoPage_PodcastDenoise.Content" xml:space="preserve">
+    <value>降噪 (DFN3)</value>
+  </data>
+  <data name="VideoPage_PodcastFullness.Content" xml:space="preserve">
+    <value>恢复音质丰满度 (FlashSR)</value>
+  </data>
+  <data name="VideoPage_PodcastMaster.Content" xml:space="preserve">
+    <value>母带处理 (EQ + 压缩 + 响度归一化)</value>
+  </data>
+  <data name="VideoPage_PodcastHint.Text" xml:space="preserve">
+    <value>提取音频，应用播客模式，然后重新插入。</value>
   </data>
 </root>

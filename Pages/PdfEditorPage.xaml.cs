@@ -17,7 +17,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Files_Tools.Helpers;
 using Files_Tools.Services;
 
 namespace Files_Tools.Pages
@@ -25,8 +24,8 @@ namespace Files_Tools.Pages
     public sealed partial class PdfEditorPage : Page
     {
         private PdfService _pdfService;
-        private StorageFile _currentPdfFile;
-        private PdfDocument _currentPdf;
+        private StorageFile? _currentPdfFile;
+        private PdfDocument? _currentPdf;
         private long? _currentPdfFileSizeBytes;
         private int _currentPageIndex;
         private bool _isProcessing;
@@ -1012,6 +1011,11 @@ namespace Files_Tools.Pages
             ProcessingStatusTextBlock.Text = "Processing PDF...";
             ProcessingDetailTextBlock.Text = "Preparing operations...";
 
+            if (_currentPdfFile is null)
+            {
+                return;
+            }
+
             var inputPath = _currentPdfFile.Path;
             var outputDir = Path.Combine(Path.GetTempPath(), $"ft_pdf_{Guid.NewGuid():N}");
             Directory.CreateDirectory(outputDir);
@@ -1098,7 +1102,7 @@ namespace Files_Tools.Pages
                             _ => 0
                         };
 
-                        string pageRange = RotationScopeComboBox.SelectedIndex switch
+                        string? pageRange = RotationScopeComboBox.SelectedIndex switch
                         {
                             0 => null,
                             1 => null,

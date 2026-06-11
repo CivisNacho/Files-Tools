@@ -3631,36 +3631,14 @@ public sealed class SubtitlesService : ISubtitlesService
             StageDescription = description,
             EstimatedRemainingTime = stage == AudioTranscriptionStage.Completed
                 ? TimeSpan.Zero
-                : ComputeEta(state.StartedAtUtc.Value, overallPercent)
+                : state.Eta.AddSample(overallPercent)
         });
-    }
-
-    private static TimeSpan? ComputeEta(DateTimeOffset startedAtUtc, double overallPercent)
-    {
-        if (overallPercent < 0.02d)
-        {
-            return null;
-        }
-
-        if (overallPercent >= 1d)
-        {
-            return TimeSpan.Zero;
-        }
-
-        var elapsed = DateTimeOffset.UtcNow - startedAtUtc;
-        if (elapsed <= TimeSpan.Zero)
-        {
-            return null;
-        }
-
-        var totalTicksEstimate = elapsed.Ticks / overallPercent;
-        var remainingTicks = Math.Max(0d, totalTicksEstimate - elapsed.Ticks);
-        return TimeSpan.FromTicks((long)remainingTicks);
     }
 
     private sealed class ProgressState
     {
         public DateTimeOffset? StartedAtUtc { get; set; }
+        public Helpers.EtaEstimator Eta { get; } = new();
     }
 
     private sealed class WorkingCue

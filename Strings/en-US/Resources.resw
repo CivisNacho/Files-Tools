@@ -306,6 +306,18 @@
   <data name="AudioPage_PreparingPipeline.Text" xml:space="preserve">
     <value>Preparing pipeline...</value>
   </data>
+  <data name="AudioPage_PreviewCodec.Text" xml:space="preserve">
+    <value>Codec: —</value>
+  </data>
+  <data name="AudioPage_PreviewRate.Text" xml:space="preserve">
+    <value>Sample rate: —</value>
+  </data>
+  <data name="AudioPage_PreviewChannels.Text" xml:space="preserve">
+    <value>Channels: —</value>
+  </data>
+  <data name="AudioPage_PreviewDuration.Text" xml:space="preserve">
+    <value>Duration: —</value>
+  </data>
   <data name="ImagePage_Title.Text" xml:space="preserve">
     <value>Image Editor</value>
   </data>
@@ -487,7 +499,7 @@
     <value>Later</value>
   </data>
   <data name="VideoPage_ApplyDenoise.Content" xml:space="preserve">
-    <value>Apply audio denoise</value>
+    <value>Apply simple audio denoise</value>
   </data>
   <data name="VideoPage_DenoiseMode.Header" xml:space="preserve">
     <value>Denoise mode</value>
@@ -560,66 +572,6 @@
   </data>
   <data name="VideoPage_ConfigureAdvanced.Content" xml:space="preserve">
     <value>Configure advanced subtitles</value>
-  </data>
-  <data name="VideoPage_ConfigureAdvancedTitle" xml:space="preserve">
-    <value>Configure advanced subtitles</value>
-  </data>
-  <data name="VideoPage_ConfigureKaraokeSummary" xml:space="preserve">
-    <value>Choose a karaoke style and tune the typography and highlight accent used for rendering.</value>
-  </data>
-  <data name="VideoPage_ConfigureStyledSummary" xml:space="preserve">
-    <value>Tune the typography and colours used for styled subtitle rendering.</value>
-  </data>
-  <data name="VideoPage_BasePreset.Header" xml:space="preserve">
-    <value>Base preset</value>
-  </data>
-  <data name="VideoPage_SystemFont.Header" xml:space="preserve">
-    <value>System font</value>
-  </data>
-  <data name="VideoPage_SelectInstalledFont" xml:space="preserve">
-    <value>Select an installed font</value>
-  </data>
-  <data name="VideoPage_FontSize.Header" xml:space="preserve">
-    <value>Font size</value>
-  </data>
-  <data name="VideoPage_OutlineWidth.Header" xml:space="preserve">
-    <value>Outline width</value>
-  </data>
-  <data name="VideoPage_VerticalMargin.Header" xml:space="preserve">
-    <value>Vertical margin</value>
-  </data>
-  <data name="VideoPage_BoldText.Content" xml:space="preserve">
-    <value>Bold text</value>
-  </data>
-  <data name="VideoPage_TextTransform.Header" xml:space="preserve">
-    <value>Text transform</value>
-  </data>
-  <data name="VideoPage_OriginalCase" xml:space="preserve">
-    <value>Original case</value>
-  </data>
-  <data name="VideoPage_Uppercase" xml:space="preserve">
-    <value>UPPERCASE</value>
-  </data>
-  <data name="VideoPage_Lowercase" xml:space="preserve">
-    <value>lowercase</value>
-  </data>
-  <data name="VideoPage_FillingColor" xml:space="preserve">
-    <value>Filling color</value>
-  </data>
-  <data name="VideoPage_PreFillingColor" xml:space="preserve">
-    <value>Pre-filling color</value>
-  </data>
-  <data name="VideoPage_WordFillColor" xml:space="preserve">
-    <value>Word fill color</value>
-  </data>
-  <data name="VideoPage_OutlineColor" xml:space="preserve">
-    <value>Outline color</value>
-  </data>
-  <data name="VideoPage_ConfigureAdvancedSave" xml:space="preserve">
-    <value>Save</value>
-  </data>
-  <data name="VideoPage_ConfigureAdvancedResetDefaults" xml:space="preserve">
-    <value>Reset defaults</value>
   </data>
   <data name="VideoPage_AdvancedPresetSummary.Text" xml:space="preserve">
     <value>Preset summary</value>
@@ -1509,6 +1461,78 @@
   <data name="LicensesPage_ShowLicense.Content" xml:space="preserve">
     <value>Show License</value>
   </data>
+  <data name="ImagePage_FileInfoSection.Text" xml:space="preserve">
+    <value>File info</value>
+  </data>
+  <data name="ImagePage_FileInfoName.Text" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="ImagePage_FileInfoDimensions.Text" xml:space="preserve">
+    <value>Dimensions</value>
+  </data>
+  <data name="ImagePage_FileInfoFormat.Text" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="ImagePage_FileInfoSize.Text" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="VideoPage_FileInfoSection.Text" xml:space="preserve">
+    <value>File info</value>
+  </data>
+  <data name="VideoPage_FileInfoName.Text" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="VideoPage_FileInfoDimensions.Text" xml:space="preserve">
+    <value>Dimensions</value>
+  </data>
+  <data name="VideoPage_FileInfoDuration.Text" xml:space="preserve">
+    <value>Duration</value>
+  </data>
+  <data name="VideoPage_FileInfoFormat.Text" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="VideoPage_FileInfoSize.Text" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="AudioPage_FileInfoSection.Text" xml:space="preserve">
+    <value>File info</value>
+  </data>
+  <data name="AudioPage_FileInfoName.Text" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="AudioPage_FileInfoDuration.Text" xml:space="preserve">
+    <value>Duration</value>
+  </data>
+  <data name="AudioPage_FileInfoFormat.Text" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="AudioPage_FileInfoSize.Text" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="PdfPage_FileInfoSection.Text" xml:space="preserve">
+    <value>File info</value>
+  </data>
+  <data name="PdfPage_FileInfoName.Text" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="PdfPage_FileInfoPages.Text" xml:space="preserve">
+    <value>Pages</value>
+  </data>
+  <data name="PdfPage_FileInfoSize.Text" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="DocPage_FileInfoSection.Text" xml:space="preserve">
+    <value>File info</value>
+  </data>
+  <data name="DocPage_FileInfoName.Text" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="DocPage_FileInfoFormat.Text" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="DocPage_FileInfoSize.Text" xml:space="preserve">
+    <value>Size</value>
+  </data>
   <data name="CB_Audio_GeneratingTranscription" xml:space="preserve">
     <value>Generating transcription...</value>
   </data>
@@ -1716,83 +1740,68 @@
   <data name="CB_Batch_AdvSubtitleSectionLength" xml:space="preserve">
     <value>Advanced subtitle section length: {0} s max</value>
   </data>
-  <data name="ImagePage_FileInfoSection.Text" xml:space="preserve">
-    <value>File info</value>
+  <data name="VideoPage_ConfigureAdvancedTitle" xml:space="preserve">
+    <value>Configure advanced subtitles</value>
   </data>
-  <data name="ImagePage_FileInfoName.Text" xml:space="preserve">
-    <value>Name</value>
+  <data name="VideoPage_ConfigureKaraokeSummary" xml:space="preserve">
+    <value>Choose a karaoke style and tune the typography and highlight accent used for rendering.</value>
   </data>
-  <data name="ImagePage_FileInfoDimensions.Text" xml:space="preserve">
-    <value>Dimensions</value>
+  <data name="VideoPage_ConfigureStyledSummary" xml:space="preserve">
+    <value>Tune the typography and colours used for styled subtitle rendering.</value>
   </data>
-  <data name="ImagePage_FileInfoFormat.Text" xml:space="preserve">
-    <value>Format</value>
+  <data name="VideoPage_BasePreset.Header" xml:space="preserve">
+    <value>Base preset</value>
   </data>
-  <data name="ImagePage_FileInfoSize.Text" xml:space="preserve">
-    <value>Size</value>
+  <data name="VideoPage_SystemFont.Header" xml:space="preserve">
+    <value>System font</value>
   </data>
-  <data name="VideoPage_FileInfoSection.Text" xml:space="preserve">
-    <value>File info</value>
+  <data name="VideoPage_SelectInstalledFont" xml:space="preserve">
+    <value>Select an installed font</value>
   </data>
-  <data name="VideoPage_FileInfoName.Text" xml:space="preserve">
-    <value>Name</value>
+  <data name="VideoPage_FontSize.Header" xml:space="preserve">
+    <value>Font size</value>
   </data>
-  <data name="VideoPage_FileInfoDimensions.Text" xml:space="preserve">
-    <value>Dimensions</value>
+  <data name="VideoPage_OutlineWidth.Header" xml:space="preserve">
+    <value>Outline width</value>
   </data>
-  <data name="VideoPage_FileInfoDuration.Text" xml:space="preserve">
-    <value>Duration</value>
+  <data name="VideoPage_VerticalMargin.Header" xml:space="preserve">
+    <value>Vertical margin</value>
   </data>
-  <data name="VideoPage_FileInfoFormat.Text" xml:space="preserve">
-    <value>Format</value>
+  <data name="VideoPage_BoldText.Content" xml:space="preserve">
+    <value>Bold text</value>
   </data>
-  <data name="VideoPage_FileInfoSize.Text" xml:space="preserve">
-    <value>Size</value>
+  <data name="VideoPage_TextTransform.Header" xml:space="preserve">
+    <value>Text transform</value>
   </data>
-  <data name="AudioPage_FileInfoSection.Text" xml:space="preserve">
-    <value>File info</value>
+  <data name="VideoPage_OriginalCase" xml:space="preserve">
+    <value>Original case</value>
   </data>
-  <data name="AudioPage_FileInfoName.Text" xml:space="preserve">
-    <value>Name</value>
+  <data name="VideoPage_Uppercase" xml:space="preserve">
+    <value>UPPERCASE</value>
   </data>
-  <data name="AudioPage_FileInfoDuration.Text" xml:space="preserve">
-    <value>Duration</value>
+  <data name="VideoPage_Lowercase" xml:space="preserve">
+    <value>lowercase</value>
   </data>
-  <data name="AudioPage_FileInfoFormat.Text" xml:space="preserve">
-    <value>Format</value>
+  <data name="VideoPage_FillingColor" xml:space="preserve">
+    <value>Filling color</value>
   </data>
-  <data name="AudioPage_FileInfoSize.Text" xml:space="preserve">
-    <value>Size</value>
+  <data name="VideoPage_PreFillingColor" xml:space="preserve">
+    <value>Pre-filling color</value>
   </data>
-  <data name="PdfPage_FileInfoSection.Text" xml:space="preserve">
-    <value>File info</value>
+  <data name="VideoPage_WordFillColor" xml:space="preserve">
+    <value>Word fill color</value>
   </data>
-  <data name="PdfPage_FileInfoName.Text" xml:space="preserve">
-    <value>Name</value>
+  <data name="VideoPage_OutlineColor" xml:space="preserve">
+    <value>Outline color</value>
   </data>
-  <data name="PdfPage_FileInfoPages.Text" xml:space="preserve">
-    <value>Pages</value>
+  <data name="VideoPage_ConfigureAdvancedSave" xml:space="preserve">
+    <value>Save</value>
   </data>
-  <data name="PdfPage_FileInfoSize.Text" xml:space="preserve">
-    <value>Size</value>
-  </data>
-  <data name="DocPage_FileInfoSection.Text" xml:space="preserve">
-    <value>File info</value>
-  </data>
-  <data name="DocPage_FileInfoName.Text" xml:space="preserve">
-    <value>Name</value>
-  </data>
-  <data name="DocPage_FileInfoFormat.Text" xml:space="preserve">
-    <value>Format</value>
-  </data>
-  <data name="DocPage_FileInfoSize.Text" xml:space="preserve">
-    <value>Size</value>
+  <data name="VideoPage_ConfigureAdvancedResetDefaults" xml:space="preserve">
+    <value>Reset defaults</value>
   </data>
   <data name="VideoPage_VerticalMargin_Header" xml:space="preserve">
     <value>Vertical margin</value>
-  </data>
-  <data name="Shared_Cancel" xml:space="preserve">
-    <value>Cancel</value>
   </data>
   <data name="VideoPage_BoldText_Content" xml:space="preserve">
     <value>Bold text</value>
@@ -1811,5 +1820,353 @@
   </data>
   <data name="VideoPage_BasePreset_Header" xml:space="preserve">
     <value>Base preset</value>
+  </data>
+  <data name="Shared_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="AudioPage_PreviewCodecFmt" xml:space="preserve">
+    <value>Codec: {0}</value>
+  </data>
+  <data name="AudioPage_PreviewRateFmt" xml:space="preserve">
+    <value>Sample rate: {0}</value>
+  </data>
+  <data name="AudioPage_PreviewChannelsFmt" xml:space="preserve">
+    <value>Channels: {0}</value>
+  </data>
+  <data name="AudioPage_PreviewDurationFmt" xml:space="preserve">
+    <value>Duration: {0}</value>
+  </data>
+  <data name="AudioPage_Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="AudioPage_LoadedFmt" xml:space="preserve">
+    <value>Loaded: {0}</value>
+  </data>
+  <data name="AudioPage_SavedFmt" xml:space="preserve">
+    <value>Saved: {0}</value>
+  </data>
+  <data name="AudioPage_Preparing" xml:space="preserve">
+    <value>Preparing...</value>
+  </data>
+  <data name="AudioPage_FormatCard" xml:space="preserve">
+    <value>Format, codec, and compression</value>
+  </data>
+  <data name="AudioPage_OutputFormat_Header" xml:space="preserve">
+    <value>Output format</value>
+  </data>
+  <data name="AudioPage_KeepOriginal" xml:space="preserve">
+    <value>Keep original</value>
+  </data>
+  <data name="AudioPage_Codec_Header" xml:space="preserve">
+    <value>Codec</value>
+  </data>
+  <data name="AudioPage_Auto" xml:space="preserve">
+    <value>Auto</value>
+  </data>
+  <data name="AudioPage_Bitrate_Header" xml:space="preserve">
+    <value>Bitrate (kbps)</value>
+  </data>
+  <data name="AudioPage_SampleRateHz_Header" xml:space="preserve">
+    <value>Sample rate (Hz)</value>
+  </data>
+  <data name="AudioPage_Channels_Header" xml:space="preserve">
+    <value>Channels</value>
+  </data>
+  <data name="AudioPage_KeepSource" xml:space="preserve">
+    <value>Keep source</value>
+  </data>
+  <data name="AudioPage_Mono" xml:space="preserve">
+    <value>Mono</value>
+  </data>
+  <data name="AudioPage_Stereo" xml:space="preserve">
+    <value>Stereo</value>
+  </data>
+  <data name="AudioPage_EnableCompression" xml:space="preserve">
+    <value>Enable compression step</value>
+  </data>
+  <data name="AudioPage_CompressionMode_Header" xml:space="preserve">
+    <value>Compression mode</value>
+  </data>
+  <data name="AudioPage_Lossy" xml:space="preserve">
+    <value>Lossy</value>
+  </data>
+  <data name="AudioPage_Lossless" xml:space="preserve">
+    <value>Lossless</value>
+  </data>
+  <data name="AudioPage_CompressionCodec_Header" xml:space="preserve">
+    <value>Compression codec</value>
+  </data>
+  <data name="AudioPage_TargetBitrate_Header" xml:space="preserve">
+    <value>Target bitrate (kbps)</value>
+  </data>
+  <data name="AudioPage_TargetSampleRate_Header" xml:space="preserve">
+    <value>Target sample rate (Hz)</value>
+  </data>
+  <data name="AudioPage_MetadataCard" xml:space="preserve">
+    <value>Metadata</value>
+  </data>
+  <data name="AudioPage_RemoveMetadata" xml:space="preserve">
+    <value>Remove metadata</value>
+  </data>
+  <data name="AudioPage_MetadataHint" xml:space="preserve">
+    <value>Metadata remover is a standalone pipeline step.</value>
+  </data>
+  <data name="AudioPage_PodcastCard" xml:space="preserve">
+    <value>Podcast mode</value>
+  </data>
+  <data name="AudioPage_EnablePodcast" xml:space="preserve">
+    <value>Enable podcast mode</value>
+  </data>
+  <data name="AudioPage_PodcastDenoise" xml:space="preserve">
+    <value>Denoise (DFN3)</value>
+  </data>
+  <data name="AudioPage_PodcastFullness" xml:space="preserve">
+    <value>Restore fullness (FlashSR)</value>
+  </data>
+  <data name="AudioPage_PodcastMaster" xml:space="preserve">
+    <value>Master (EQ + compression + loudnorm)</value>
+  </data>
+  <data name="AudioPage_PodcastHint" xml:space="preserve">
+    <value>Full studio voice chain: DeepFilterNet3 denoise + FlashSR bandwidth extension + FFmpeg mastering to -16 LUFS. Supersedes standalone denoise. ~3–4 min CPU per 2 min audio.</value>
+  </data>
+  <data name="AudioPage_TrimCard" xml:space="preserve">
+    <value>Trim</value>
+  </data>
+  <data name="AudioPage_EnableTrim" xml:space="preserve">
+    <value>Enable trim</value>
+  </data>
+  <data name="AudioPage_TrimHint" xml:space="preserve">
+    <value>Use the trim timeline under the preview player to choose start and end points.</value>
+  </data>
+  <data name="AudioPage_ReEncodeOutput" xml:space="preserve">
+    <value>Re-encode output</value>
+  </data>
+  <data name="AudioPage_SilenceTrimCard" xml:space="preserve">
+    <value>Silence trim</value>
+  </data>
+  <data name="AudioPage_EnableSilenceTrim" xml:space="preserve">
+    <value>Enable silence trim</value>
+  </data>
+  <data name="AudioPage_Mode_Header" xml:space="preserve">
+    <value>Mode</value>
+  </data>
+  <data name="AudioPage_Leading" xml:space="preserve">
+    <value>Leading</value>
+  </data>
+  <data name="AudioPage_Trailing" xml:space="preserve">
+    <value>Trailing</value>
+  </data>
+  <data name="AudioPage_LeadingAndTrailing" xml:space="preserve">
+    <value>Leading and trailing</value>
+  </data>
+  <data name="AudioPage_Threshold_Header" xml:space="preserve">
+    <value>Threshold (dB)</value>
+  </data>
+  <data name="AudioPage_MinSilence_Header" xml:space="preserve">
+    <value>Minimum silence (ms)</value>
+  </data>
+  <data name="AudioPage_NormalizationCard" xml:space="preserve">
+    <value>Normalization</value>
+  </data>
+  <data name="AudioPage_EnableNormalization" xml:space="preserve">
+    <value>Enable normalization</value>
+  </data>
+  <data name="AudioPage_Peak" xml:space="preserve">
+    <value>Peak</value>
+  </data>
+  <data name="AudioPage_LUFS" xml:space="preserve">
+    <value>LUFS</value>
+  </data>
+  <data name="AudioPage_TargetPeak_Header" xml:space="preserve">
+    <value>Target peak (dB)</value>
+  </data>
+  <data name="AudioPage_TargetLUFS_Header" xml:space="preserve">
+    <value>Target LUFS</value>
+  </data>
+  <data name="AudioPage_UseLimiter" xml:space="preserve">
+    <value>Use limiter</value>
+  </data>
+  <data name="AudioPage_PreventClipping" xml:space="preserve">
+    <value>Prevent clipping</value>
+  </data>
+  <data name="AudioPage_EqCard" xml:space="preserve">
+    <value>Simple EQ</value>
+  </data>
+  <data name="AudioPage_EnableEq" xml:space="preserve">
+    <value>Enable EQ</value>
+  </data>
+  <data name="AudioPage_Preset_Header" xml:space="preserve">
+    <value>Preset</value>
+  </data>
+  <data name="AudioPage_AddEqBand" xml:space="preserve">
+    <value>Add EQ band</value>
+  </data>
+  <data name="AudioPage_EqFreq_Header" xml:space="preserve">
+    <value>Freq (Hz)</value>
+  </data>
+  <data name="AudioPage_EqGain_Header" xml:space="preserve">
+    <value>Gain (dB)</value>
+  </data>
+  <data name="AudioPage_EqWidth_Header" xml:space="preserve">
+    <value>Width</value>
+  </data>
+  <data name="AudioPage_Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="AudioPage_DenoiseCard" xml:space="preserve">
+    <value>Denoise</value>
+  </data>
+  <data name="AudioPage_EnableDenoise" xml:space="preserve">
+    <value>Enable denoise</value>
+  </data>
+  <data name="AudioPage_DenoiseHint" xml:space="preserve">
+    <value>DeepFilterNet3 speech enhancement. Removes noise and reverberation. Superseded by Podcast mode when both are enabled.</value>
+  </data>
+  <data name="AudioPage_TranscriptionCard" xml:space="preserve">
+    <value>Transcription</value>
+  </data>
+  <data name="AudioPage_TranscriptionHint" xml:space="preserve">
+    <value>Generate plain text or a plain .srt subtitle file from the loaded audio.</value>
+  </data>
+  <data name="AudioPage_DownloadTranscription" xml:space="preserve">
+    <value>Download transcription feature</value>
+  </data>
+  <data name="AudioPage_TranscriptionNotDownloaded" xml:space="preserve">
+    <value>Transcription feature not downloaded yet.</value>
+  </data>
+  <data name="AudioPage_OutputType_Header" xml:space="preserve">
+    <value>Output type</value>
+  </data>
+  <data name="AudioPage_Text" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="AudioPage_Subtitles" xml:space="preserve">
+    <value>Subtitles</value>
+  </data>
+  <data name="AudioPage_IncludeTimestamps" xml:space="preserve">
+    <value>Include timestamps in text output</value>
+  </data>
+  <data name="AudioPage_GenerateTranscription" xml:space="preserve">
+    <value>Generate transcription</value>
+  </data>
+  <data name="AudioPage_TranscriptionPlaceholder" xml:space="preserve">
+    <value>Generated transcription text appears here.</value>
+  </data>
+  <data name="AudioPage_SaveTranscription" xml:space="preserve">
+    <value>Save transcription text</value>
+  </data>
+  <data name="AudioPage_NoTranscriptionYet" xml:space="preserve">
+    <value>No transcription generated yet.</value>
+  </data>
+  <data name="AudioPage_GeneratingTranscription" xml:space="preserve">
+    <value>Generating transcription...</value>
+  </data>
+  <data name="AudioPage_TranscriptionDownloaded" xml:space="preserve">
+    <value>Transcription feature downloaded.</value>
+  </data>
+  <data name="AudioPage_TextTranscriptionReady" xml:space="preserve">
+    <value>Text transcription ready.</value>
+  </data>
+  <data name="AudioPage_SubtitleReadyFmt" xml:space="preserve">
+    <value>Subtitle file ready: {0}</value>
+  </data>
+  <data name="AudioPage_TranscriptionSavedFmt" xml:space="preserve">
+    <value>Transcription text saved to: {0}</value>
+  </data>
+  <data name="AudioPage_ConvertingAudio" xml:space="preserve">
+    <value>Converting audio</value>
+  </data>
+  <data name="AudioPage_CompressingAudio" xml:space="preserve">
+    <value>Compressing audio</value>
+  </data>
+  <data name="AudioPage_NormalizingAudio" xml:space="preserve">
+    <value>Normalizing audio</value>
+  </data>
+  <data name="AudioPage_TrimmingAudio" xml:space="preserve">
+    <value>Trimming audio</value>
+  </data>
+  <data name="AudioPage_RemovingSilence" xml:space="preserve">
+    <value>Removing silence</value>
+  </data>
+  <data name="AudioPage_ApplyingEq" xml:space="preserve">
+    <value>Applying equalizer</value>
+  </data>
+  <data name="AudioPage_RemovingMetadata" xml:space="preserve">
+    <value>Removing metadata</value>
+  </data>
+  <data name="AudioPage_ProcessingPodcast" xml:space="preserve">
+    <value>Processing podcast audio...</value>
+  </data>
+  <data name="AudioPage_DenoisingAudio" xml:space="preserve">
+    <value>Denoising audio...</value>
+  </data>
+  <data name="AudioPage_DenoisingDFN3" xml:space="preserve">
+    <value>Denoising (DFN3)...</value>
+  </data>
+  <data name="AudioPage_Finalizing" xml:space="preserve">
+    <value>Finalizing...</value>
+  </data>
+  <data name="AudioPage_ExtractingAudio" xml:space="preserve">
+    <value>Extracting audio...</value>
+  </data>
+  <data name="AudioPage_RestoringFullness" xml:space="preserve">
+    <value>Restoring fullness (FlashSR)...</value>
+  </data>
+  <data name="AudioPage_Mastering" xml:space="preserve">
+    <value>Mastering...</value>
+  </data>
+  <data name="AudioPage_ProcessingComplete" xml:space="preserve">
+    <value>Audio processing complete</value>
+  </data>
+  <data name="AudioPage_AudioSaved" xml:space="preserve">
+    <value>Audio saved to:</value>
+  </data>
+  <data name="AudioPage_Warnings" xml:space="preserve">
+    <value>Warnings:</value>
+  </data>
+  <data name="AudioPage_Cancelled" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
+  <data name="AudioPage_ProcessingCancelled" xml:space="preserve">
+    <value>Audio processing was cancelled.</value>
+  </data>
+  <data name="AudioPage_ProcessingFailed" xml:space="preserve">
+    <value>Processing failed</value>
+  </data>
+  <data name="Shared_OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="AudioPage_TranscriptionDownloadFailed" xml:space="preserve">
+    <value>Transcription download failed</value>
+  </data>
+  <data name="AudioPage_TranscriptionRequired" xml:space="preserve">
+    <value>Transcription feature required</value>
+  </data>
+  <data name="AudioPage_TranscriptionRequiredMessage" xml:space="preserve">
+    <value>Download transcription feature before generating.</value>
+  </data>
+  <data name="AudioPage_TranscriptionFailed" xml:space="preserve">
+    <value>Transcription failed</value>
+  </data>
+  <data name="AudioPage_NothingToSave" xml:space="preserve">
+    <value>Nothing to save</value>
+  </data>
+  <data name="AudioPage_GenerateFirst" xml:space="preserve">
+    <value>Generate text transcription first.</value>
+  </data>
+  <data name="VideoPage_EnablePodcastMode.Content" xml:space="preserve">
+    <value>Enable podcast mode</value>
+  </data>
+  <data name="VideoPage_PodcastDenoise.Content" xml:space="preserve">
+    <value>Denoise (DFN3)</value>
+  </data>
+  <data name="VideoPage_PodcastFullness.Content" xml:space="preserve">
+    <value>Restore fullness (FlashSR)</value>
+  </data>
+  <data name="VideoPage_PodcastMaster.Content" xml:space="preserve">
+    <value>Master (EQ + compression + loudnorm)</value>
+  </data>
+  <data name="VideoPage_PodcastHint.Text" xml:space="preserve">
+    <value>Extract the audio, apply podcast mode, and reinsert it.</value>
   </data>
 </root>

@@ -275,11 +275,10 @@
                                         Text="Processing PDF..." />
                                     <TextBlock
                                         x:Name="ProcessingEtaTextBlock"
-                                        x:Uid="EtaCalculating"
                                         Grid.Column="1"
                                         Visibility="Collapsed"
                                         Opacity="0.76"
-                                        Text="ETA calculating..." />
+                                        Text="0%" />
                                 </Grid>
 
                                 <ProgressBar
