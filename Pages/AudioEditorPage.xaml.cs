@@ -55,6 +55,11 @@ namespace Files_Tools.Pages
         private readonly Stopwatch _progressUiThrottleStopwatch = Stopwatch.StartNew();
         private long _lastProgressUiUpdateTick;
 
+        // Position within the multi-step processing pipeline, so progress readouts show the
+        // percentage completed of the WHOLE pipeline rather than the current step only.
+        private int _pipelineStepIndex;
+        private int _pipelineStepCount;
+
         private ComboBox _outputFormatComboBox = null!;
         private ComboBox _outputCodecComboBox = null!;
         private NumberBox _bitrateNumberBox = null!;
@@ -392,7 +397,7 @@ namespace Files_Tools.Pages
             _transcriptionEtaTextBlock = new TextBlock
             {
                 Opacity = 0.76,
-                Text = Strings.Get("EtaCalculating.Text"),
+                Text = FormatPercent(0),
                 TextWrapping = TextWrapping.Wrap,
                 Visibility = Visibility.Collapsed
             };
@@ -747,7 +752,7 @@ namespace Files_Tools.Pages
             _isProcessing = true;
             _processingCancellation = new CancellationTokenSource();
             RefreshValidationAndState();
-            SetProcessingUi(true, Strings.Get("AudioPage_PreparingPipeline.Text"), Strings.Get("EtaCalculating.Text"), Strings.Get("AudioPage_Preparing"), 0);
+            SetProcessingUi(true, Strings.Get("AudioPage_PreparingPipeline.Text"), FormatPercent(0), Strings.Get("AudioPage_Preparing"), 0);
 
             var tempFiles = new List<string>();
             var warnings = new List<string>();
@@ -756,10 +761,12 @@ namespace Files_Tools.Pages
                 var steps = BuildPipelineSteps();
                 var currentInput = _sourceAudioFile.Path;
                 var finalOutput = Path.GetFullPath(outputPath);
+                _pipelineStepCount = steps.Count;
 
                 for (var i = 0; i < steps.Count; i++)
                 {
                     var step = steps[i];
+                    _pipelineStepIndex = i;
                     var stepOutput = i == steps.Count - 1 ? finalOutput
                         : (step == AudioPipelineStep.Denoise || step == AudioPipelineStep.Podcast) ? CreateTemporaryWavPath()
                         : CreateTemporaryAudioPath(finalOutput);
@@ -849,7 +856,7 @@ namespace Files_Tools.Pages
                 _transcriptionProgressBar.IsIndeterminate = false;
                 _transcriptionProgressBar.Value = 0d;
                 _transcriptionEtaTextBlock.Visibility = Visibility.Visible;
-                _transcriptionEtaTextBlock.Text = "ETA calculating...";
+                _transcriptionEtaTextBlock.Text = FormatPercent(0);
                 RefreshValidationAndState();
 
                 var isSubtitles = (_transcriptionOutputTypeComboBox?.SelectedIndex ?? 0) == 1;
@@ -859,9 +866,7 @@ namespace Files_Tools.Pages
                     _transcriptionProgressBar.IsIndeterminate = false;
                     _transcriptionProgressBar.Value = Math.Clamp(update.OverallPercent, 0d, 1d);
                     _transcriptionEtaTextBlock.Visibility = Visibility.Visible;
-                    _transcriptionEtaTextBlock.Text = update.EstimatedRemainingTime is TimeSpan eta
-                        ? $"{update.StageDescription} - ETA {FormatDuration(eta)}"
-                        : $"{update.StageDescription} - {Strings.Get("EtaCalculating.Text")}";
+                    _transcriptionEtaTextBlock.Text = $"{update.StageDescription} - {FormatPercent(update.OverallPercent)}";
                     TaskbarProgressHelper.SetProgress(update.OverallPercent);
                 });
 
@@ -911,7 +916,7 @@ namespace Files_Tools.Pages
                 _transcriptionProgressBar.IsIndeterminate = false;
                 _transcriptionProgressBar.Value = 0d;
                 _transcriptionEtaTextBlock.Visibility = Visibility.Collapsed;
-                _transcriptionEtaTextBlock.Text = Strings.Get("EtaCalculating.Text");
+                _transcriptionEtaTextBlock.Text = FormatPercent(0);
                 TaskbarProgressHelper.Clear();
                 RefreshValidationAndState();
             }
@@ -976,39 +981,16 @@ namespace Files_Tools.Pages
                     warnings.AddRange((await _audioProcessingService.ApplyEqualizerAsync(inputPath, outputPath, BuildEqualizerOptions(), CreateAudioProgress(Strings.Get("AudioPage_ApplyingEq")), ct)).Warnings);
                     break;
                 case AudioPipelineStep.Podcast:
-                {
-                    var podOpts = BuildPodcastOptions();
-                    var podProgress = new Progress<VoiceStudioProgress>(p =>
-                    {
-                        var now = _progressUiThrottleStopwatch.ElapsedMilliseconds;
-                        if (p.Stage != VoiceStudioStage.Completed && p.Fraction < 1 && now - _lastProgressUiUpdateTick < 120) return;
-                        _lastProgressUiUpdateTick = now;
-                        var detail = p.Stage switch
-                        {
-                            VoiceStudioStage.Extracting => Strings.Get("AudioPage_ExtractingAudio"),
-                            VoiceStudioStage.Denoising => Strings.Get("AudioPage_DenoisingDFN3"),
-                            VoiceStudioStage.RestoringFullness => Strings.Get("AudioPage_RestoringFullness"),
-                            VoiceStudioStage.Mastering => Strings.Get("AudioPage_Mastering"),
-                            _ => Strings.Get("AudioPage_Finalizing")
-                        };
-                        SetProcessingUi(true, Strings.Get("AudioPage_ProcessingPodcast"), FormatEta(null), detail, p.Fraction);
-                    });
-                    await _voiceStudioService.ProcessAudioAsync(inputPath, outputPath, podOpts, podProgress, ct);
+                    await _voiceStudioService.ProcessAudioAsync(
+                        inputPath, outputPath, BuildPodcastOptions(),
+                        CreateVoiceStudioProgress(Strings.Get("AudioPage_ProcessingPodcast")), ct);
                     break;
-                }
                 case AudioPipelineStep.Denoise:
-                {
-                    var dnOpts = new VoiceStudioOptions { Denoise = true, SuperResolution = false, Master = false };
-                    var dnProgress = new Progress<VoiceStudioProgress>(p =>
-                    {
-                        var now = _progressUiThrottleStopwatch.ElapsedMilliseconds;
-                        if (p.Stage != VoiceStudioStage.Completed && p.Fraction < 1 && now - _lastProgressUiUpdateTick < 120) return;
-                        _lastProgressUiUpdateTick = now;
-                        SetProcessingUi(true, Strings.Get("AudioPage_DenoisingAudio"), FormatEta(null), p.Stage == VoiceStudioStage.Denoising ? Strings.Get("AudioPage_DenoisingDFN3") : Strings.Get("AudioPage_Finalizing"), p.Fraction);
-                    });
-                    await _voiceStudioService.ProcessAudioAsync(inputPath, outputPath, dnOpts, dnProgress, ct);
+                    await _voiceStudioService.ProcessAudioAsync(
+                        inputPath, outputPath,
+                        new VoiceStudioOptions { Denoise = true, SuperResolution = false, Master = false },
+                        CreateVoiceStudioProgress(Strings.Get("AudioPage_DenoisingAudio")), ct);
                     break;
-                }
                 case AudioPipelineStep.Metadata:
                     warnings.AddRange((await _audioProcessingService.RemoveMetadataAsync(inputPath, outputPath, CreateAudioProgress(Strings.Get("AudioPage_RemovingMetadata")), ct)).Warnings);
                     break;
@@ -1017,10 +999,33 @@ namespace Files_Tools.Pages
 
         private IProgress<AudioProcessProgress> CreateAudioProgress(string status) => new Progress<AudioProcessProgress>(p =>
         {
-            SetProcessingUi(true, status, FormatEta(p.EstimatedRemainingTime), p.StageDescription, p.OverallPercent);
+            var overall = PipelineOverallFraction(p.OverallPercent);
+            SetProcessingUi(true, status, FormatPercent(overall), p.StageDescription, overall);
         });
 
-        private static string FormatEta(TimeSpan? eta) => eta.HasValue ? $"ETA {FormatDuration(eta.Value)}" : Strings.Get("EtaCalculating.Text");
+        private IProgress<VoiceStudioProgress> CreateVoiceStudioProgress(string status) => new Progress<VoiceStudioProgress>(p =>
+        {
+            var now = _progressUiThrottleStopwatch.ElapsedMilliseconds;
+            if (p.Stage != VoiceStudioStage.Completed && p.Fraction < 1 && now - _lastProgressUiUpdateTick < 120) return;
+            _lastProgressUiUpdateTick = now;
+            var detail = p.Stage switch
+            {
+                VoiceStudioStage.Extracting => Strings.Get("AudioPage_ExtractingAudio"),
+                VoiceStudioStage.Denoising => Strings.Get("AudioPage_DenoisingDFN3"),
+                VoiceStudioStage.RestoringFullness => Strings.Get("AudioPage_RestoringFullness"),
+                VoiceStudioStage.Mastering => Strings.Get("AudioPage_Mastering"),
+                _ => Strings.Get("AudioPage_Finalizing")
+            };
+            var overall = PipelineOverallFraction(p.Fraction);
+            SetProcessingUi(true, status, FormatPercent(overall), detail, overall);
+        });
+
+        /// <summary>Maps the current step's local fraction onto the whole pipeline's 0..1 span.</summary>
+        private double PipelineOverallFraction(double stepFraction) => _pipelineStepCount <= 0
+            ? Math.Clamp(stepFraction, 0d, 1d)
+            : Math.Clamp((_pipelineStepIndex + Math.Clamp(stepFraction, 0d, 1d)) / _pipelineStepCount, 0d, 1d);
+
+        private static string FormatPercent(double fraction) => $"{Math.Round(Math.Clamp(fraction, 0d, 1d) * 100)}%";
         private static string FormatDuration(TimeSpan value) => value.TotalHours >= 1 ? value.ToString(@"hh\:mm\:ss") : value.ToString(@"mm\:ss");
 
         private AudioConversionOptions BuildConversionOptions() => new()
@@ -1195,7 +1200,7 @@ namespace Files_Tools.Pages
             _adjustValidationTextBlock.Text = string.Join("\n", errors.Where(e => e.StartsWith("Adjust:")).Select(e => e[7..].Trim()));
             _isTranscriptionModelInstalled = _audioTranscriptionService.IsInstalled();
             ApplyButton.IsEnabled = !_isProcessing && !_isGeneratingTranscription && !_isInstallingTranscriptionModel && _sourceAudioFile is not null && errors.Count == 0;
-            _customEqBandsPanel.Visibility = (_eqPresetComboBox?.SelectedIndex ?? 0) == 11 ? Visibility.Visible : Visibility.Collapsed;
+            _customEqBandsPanel.Visibility = ParseEqPreset(_eqPresetComboBox) == EqualizerPreset.Custom ? Visibility.Visible : Visibility.Collapsed;
             _addEqBandButton.Visibility = _customEqBandsPanel.Visibility;
             UpdateOptionUiState();
             UpdateTrimUiState();

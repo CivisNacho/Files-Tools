@@ -56,7 +56,7 @@ public class StudioVoiceChunkingTests
         }
 
         // Real speech tiled to > 60 s so EnhanceMono takes the chunking path.
-        var unit = WaveReader.ReadMono16k(clip);
+        var unit = WaveReader.ReadMonoFloatWav(clip);
         int target = 70 * DeepFilterNetService.SampleRate;
         var input = new float[target];
         for (int i = 0; i < target; i++)
@@ -65,8 +65,10 @@ public class StudioVoiceChunkingTests
         }
 
         using var dfn = new DeepFilterNetService(model);
-        var output = dfn.EnhanceMono(input);
+        var reported = new List<double>();
+        var output = dfn.EnhanceMono(input, progress: new SynchronousProgress(reported.Add));
 
+        AssertProgressStream(reported);
         Assert.AreEqual(input.Length, output.Length, "chunked DFN output length should match input");
         Assert.IsTrue(output.All(float.IsFinite), "output must be finite (no NaN/Inf at seams)");
         double rms = Math.Sqrt(output.Select(v => (double)v * v).DefaultIfEmpty(0).Average());
@@ -87,11 +89,31 @@ public class StudioVoiceChunkingTests
 
         var input = SyntheticSpeech(13 * FlashSrService.InputSampleRate, FlashSrService.InputSampleRate); // > 10 s
         using var flash = new FlashSrService(model);
-        var output = flash.UpsampleMono(input);
+        var reported = new List<double>();
+        var output = flash.UpsampleMono(input, progress: new SynchronousProgress(reported.Add));
+
+        AssertProgressStream(reported);
 
         // 16 kHz -> 48 kHz is a 3x sample-count increase.
         Assert.IsTrue(Math.Abs(output.Length - (input.Length * 3)) < 16000,
             $"expected ~3x length, got {output.Length} for input {input.Length}");
         Assert.IsTrue(output.All(v => Math.Abs(v) < 4.0), "no sample should blow up at a crossfade seam");
+    }
+
+    /// <summary>Chunked inference must emit a monotonic 0→1 progress stream for ETA estimation.</summary>
+    private static void AssertProgressStream(List<double> reported)
+    {
+        Assert.IsTrue(reported.Count >= 3, $"expected per-chunk progress reports, got {reported.Count}");
+        Assert.AreEqual(0d, reported[0], "stream should start at 0");
+        Assert.AreEqual(1d, reported[^1], 1e-9, "stream should end at 1");
+        for (var i = 1; i < reported.Count; i++)
+        {
+            Assert.IsTrue(reported[i] >= reported[i - 1], "progress must be monotonic");
+        }
+    }
+
+    private sealed class SynchronousProgress(Action<double> report) : IProgress<double>
+    {
+        public void Report(double value) => report(value);
     }
 }

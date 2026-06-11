@@ -329,10 +329,9 @@
                                         Text="Processing video..." />
                                     <TextBlock
                                         x:Name="ProcessingEtaTextBlock"
-                                        x:Uid="EtaCalculating"
                                         Grid.Column="1"
                                         Opacity="0.76"
-                                        Text="ETA calculating..." />
+                                        Text="0%" />
                                 </Grid>
 
                                 <ProgressBar
@@ -524,6 +523,17 @@
                                                                 ValueChanged="AudioDenoiseStrengthSlider_ValueChanged" />
                                                         </StackPanel>
                                                     </StackPanel>
+                                                    <CheckBox x:Name="EnablePodcastModeCheckBox" x:Uid="VideoPage_EnablePodcastMode" Content="Podcast mode (studio voice)" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                    <StackPanel x:Name="PodcastModePanel" Spacing="8">
+                                                        <CheckBox x:Name="PodcastDenoiseCheckBox" x:Uid="VideoPage_PodcastDenoise" Content="Denoise and dereverb" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                        <CheckBox x:Name="PodcastFullnessCheckBox" x:Uid="VideoPage_PodcastFullness" Content="Restore fullness" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                        <CheckBox x:Name="PodcastMasterCheckBox" x:Uid="VideoPage_PodcastMaster" Content="Broadcast mastering" IsChecked="True" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
+                                                        <TextBlock
+                                                            x:Uid="VideoPage_PodcastHint"
+                                                            Opacity="0.76"
+                                                            Text="Extracts the audio, applies the local studio-voice chain (DeepFilterNet denoise, FlashSR fullness, mastering), and reassembles the video with the enhanced track. Replaces the plain denoise option when enabled."
+                                                            TextWrapping="Wrap" />
+                                                    </StackPanel>
                                                     <CheckBox x:Name="EnableAudioMuxCheckBox" x:Uid="VideoPage_AddReplaceAudio" Content="Add or replace audio track" Checked="AnyOptionChanged_CheckChanged" Unchecked="AnyOptionChanged_CheckChanged" />
                                                     <ContentControl x:Name="AudioMuxOptionsPanel">
                                                         <StackPanel Spacing="12">
@@ -690,9 +700,8 @@
                                                                 Visibility="Collapsed" />
                                                             <TextBlock
                                                                 x:Name="TranscriptionEtaTextBlock"
-                                                                x:Uid="EtaCalculating"
                                                                 Opacity="0.76"
-                                                                Text="ETA calculating..."
+                                                                Text="0%"
                                                                 TextWrapping="Wrap"
                                                                 Visibility="Collapsed" />
                                                         </StackPanel>

@@ -499,7 +499,7 @@
     <value>Después</value>
   </data>
   <data name="VideoPage_ApplyDenoise.Content" xml:space="preserve">
-    <value>Aplicar reducción de ruido</value>
+    <value>Aplicar reducción de ruido simple</value>
   </data>
   <data name="VideoPage_DenoiseMode.Header" xml:space="preserve">
     <value>Modo de reducción de ruido</value>
@@ -1824,7 +1824,6 @@
   <data name="Shared_Cancel" xml:space="preserve">
     <value>Cancelar</value>
   </data>
-  <!-- Audio Editor page – code-behind strings -->
   <data name="AudioPage_PreviewCodecFmt" xml:space="preserve">
     <value>Códec: {0}</value>
   </data>
@@ -2111,7 +2110,7 @@
     <value>Extrayendo audio...</value>
   </data>
   <data name="AudioPage_RestoringFullness" xml:space="preserve">
-    <value>Restaurando plenitud (FlashSR)...</value>
+    <value>Mejorando la voz (FlashSR)...</value>
   </data>
   <data name="AudioPage_Mastering" xml:space="preserve">
     <value>Masterizando...</value>
@@ -2154,5 +2153,20 @@
   </data>
   <data name="AudioPage_GenerateFirst" xml:space="preserve">
     <value>Genera primero una transcripción de texto.</value>
+  </data>
+  <data name="VideoPage_EnablePodcastMode.Content" xml:space="preserve">
+    <value>Activar modo podcast</value>
+  </data>
+  <data name="VideoPage_PodcastDenoise.Content" xml:space="preserve">
+    <value>Reducción de ruido (DFN3)</value>
+  </data>
+  <data name="VideoPage_PodcastFullness.Content" xml:space="preserve">
+    <value>Restaurar plenitud (FlashSR)</value>
+  </data>
+  <data name="VideoPage_PodcastMaster.Content" xml:space="preserve">
+    <value>Masterizar (EQ + compresión + loudnorm)</value>
+  </data>
+  <data name="VideoPage_PodcastHint.Text" xml:space="preserve">
+    <value>Extrae el audio, aplica la cadena de voz estudio local (reducción de ruido DeepFilterNet3 + plenitud FlashSR + masterización FFmpeg) y reensambla el vídeo con la pista mejorada. Reemplaza la reducción de ruido independiente.</value>
   </data>
 </root>

@@ -59,8 +59,10 @@ public sealed class DeepFilterNetService : IDisposable
 
     /// <summary>
     /// Enhances a mono 48 kHz signal and returns the denoised mono signal at the same rate.
+    /// <paramref name="progress"/> receives the fraction of input consumed (0..1), reported per
+    /// inference chunk, so callers can drive ETA estimates during long runs.
     /// </summary>
-    public float[] EnhanceMono(float[] samples, CancellationToken cancellationToken = default)
+    public float[] EnhanceMono(float[] samples, CancellationToken cancellationToken = default, IProgress<double>? progress = null)
     {
         ArgumentNullException.ThrowIfNull(samples);
         if (samples.Length < DeepFilterNetDsp.Fft)
@@ -68,9 +70,21 @@ public sealed class DeepFilterNetService : IDisposable
             return (float[])samples.Clone();
         }
 
+        progress?.Report(0d);
         if (samples.Length <= MaxWholeSamples)
         {
-            return EnhanceCore(samples, cancellationToken);
+            // EnhanceCore trims the algorithmic delay, so its result can be up to Delay samples
+            // short; zero-pad the tail so output length == input length, matching the chunked path.
+            var enh = EnhanceCore(samples, cancellationToken);
+            progress?.Report(1d);
+            if (enh.Length >= samples.Length)
+            {
+                return enh;
+            }
+
+            var padded = new float[samples.Length];
+            Array.Copy(enh, padded, enh.Length);
+            return padded;
         }
 
         var output = new float[samples.Length];
@@ -90,6 +104,8 @@ public sealed class DeepFilterNetService : IDisposable
                 int src = off + k;
                 output[a + k] = src < enh.Length ? enh[src] : 0f;
             }
+
+            progress?.Report(Math.Min(1d, (a + len) / (double)samples.Length));
         }
 
         return output;
@@ -139,8 +155,8 @@ public sealed class DeepFilterNetService : IDisposable
     }
 
     /// <summary>Runs <see cref="EnhanceMono"/> off the calling thread.</summary>
-    public Task<float[]> EnhanceMonoAsync(float[] samples, CancellationToken cancellationToken = default)
-        => Task.Run(() => EnhanceMono(samples, cancellationToken), cancellationToken);
+    public Task<float[]> EnhanceMonoAsync(float[] samples, CancellationToken cancellationToken = default, IProgress<double>? progress = null)
+        => Task.Run(() => EnhanceMono(samples, cancellationToken, progress), cancellationToken);
 
     private static float[] Pick(System.Collections.Generic.Dictionary<string, float[]> map, string name)
     {

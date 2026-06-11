@@ -1,5 +1,110 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -12,18 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Главное окно
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="AppTitleBar.Title" xml:space="preserve">
     <value>Files Tools</value>
   </data>
   <data name="LicensesButton.Content" xml:space="preserve">
     <value>Лицензии</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Элементы навигации  (используются во всех меню редакторов)
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="NavMedia.Content" xml:space="preserve">
     <value>Медиа</value>
   </data>
@@ -150,9 +249,6 @@
   <data name="NavOutput.Content" xml:space="preserve">
     <value>Вывод</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Общие строки редактора  (используются на нескольких страницах)
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="PreviewTitle.Text" xml:space="preserve">
     <value>Предпросмотр</value>
   </data>
@@ -165,9 +261,6 @@
   <data name="EtaCalculating.Text" xml:space="preserve">
     <value>Расчёт времени...</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Главная страница
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="HomePage_Header.Text" xml:space="preserve">
     <value>Перетащите файлы для начала работы</value>
   </data>
@@ -186,9 +279,6 @@
   <data name="HomePage_BatchFiles.Text" xml:space="preserve">
     <value>Несколько файлов для пакетной обработки</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Страница редактора аудио
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="AudioPage_Title.Text" xml:space="preserve">
     <value>Редактор аудио</value>
   </data>
@@ -228,9 +318,6 @@
   <data name="AudioPage_PreviewDuration.Text" xml:space="preserve">
     <value>Длительность: —</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Страница редактора изображений
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="ImagePage_Title.Text" xml:space="preserve">
     <value>Редактор изображений</value>
   </data>
@@ -318,9 +405,6 @@
   <data name="ImagePage_EnableRGB.Content" xml:space="preserve">
     <value>Включить настройку RGB</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Страница редактора видео
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="VideoPage_Title.Text" xml:space="preserve">
     <value>Редактор видео</value>
   </data>
@@ -415,7 +499,7 @@
     <value>Позже</value>
   </data>
   <data name="VideoPage_ApplyDenoise.Content" xml:space="preserve">
-    <value>Применить шумоподавление аудио</value>
+    <value>Примените простые методы снижения шума.</value>
   </data>
   <data name="VideoPage_DenoiseMode.Header" xml:space="preserve">
     <value>Режим шумоподавления</value>
@@ -488,66 +572,6 @@
   </data>
   <data name="VideoPage_ConfigureAdvanced.Content" xml:space="preserve">
     <value>Настроить расширенные субтитры</value>
-  </data>
-  <data name="VideoPage_ConfigureAdvancedTitle" xml:space="preserve">
-    <value>Настроить расширенные субтитры</value>
-  </data>
-  <data name="VideoPage_ConfigureKaraokeSummary" xml:space="preserve">
-    <value>Выберите стиль караоке и настройте типографику и акцент выделения, используемые для рендеринга.</value>
-  </data>
-  <data name="VideoPage_ConfigureStyledSummary" xml:space="preserve">
-    <value>Настройте типографику и цвета, используемые для рендеринга стилизованных субтитров.</value>
-  </data>
-  <data name="VideoPage_BasePreset.Header" xml:space="preserve">
-    <value>Базовая предустановка</value>
-  </data>
-  <data name="VideoPage_SystemFont.Header" xml:space="preserve">
-    <value>Системный шрифт</value>
-  </data>
-  <data name="VideoPage_SelectInstalledFont" xml:space="preserve">
-    <value>Выберите установленный шрифт</value>
-  </data>
-  <data name="VideoPage_FontSize.Header" xml:space="preserve">
-    <value>Размер шрифта</value>
-  </data>
-  <data name="VideoPage_OutlineWidth.Header" xml:space="preserve">
-    <value>Ширина контура</value>
-  </data>
-  <data name="VideoPage_VerticalMargin.Header" xml:space="preserve">
-    <value>Вертикальный отступ</value>
-  </data>
-  <data name="VideoPage_BoldText.Content" xml:space="preserve">
-    <value>Жирный текст</value>
-  </data>
-  <data name="VideoPage_TextTransform.Header" xml:space="preserve">
-    <value>Преобразование текста</value>
-  </data>
-  <data name="VideoPage_OriginalCase" xml:space="preserve">
-    <value>Исходный регистр</value>
-  </data>
-  <data name="VideoPage_Uppercase" xml:space="preserve">
-    <value>ПРОПИСНЫЕ БУКВЫ</value>
-  </data>
-  <data name="VideoPage_Lowercase" xml:space="preserve">
-    <value>строчные буквы</value>
-  </data>
-  <data name="VideoPage_FillingColor" xml:space="preserve">
-    <value>Цвет заливки</value>
-  </data>
-  <data name="VideoPage_PreFillingColor" xml:space="preserve">
-    <value>Цвет предварительной заливки</value>
-  </data>
-  <data name="VideoPage_WordFillColor" xml:space="preserve">
-    <value>Цвет заливки слова</value>
-  </data>
-  <data name="VideoPage_OutlineColor" xml:space="preserve">
-    <value>Цвет контура</value>
-  </data>
-  <data name="VideoPage_ConfigureAdvancedSave" xml:space="preserve">
-    <value>Сохранить</value>
-  </data>
-  <data name="VideoPage_ConfigureAdvancedResetDefaults" xml:space="preserve">
-    <value>Сбросить на значения по умолчанию</value>
   </data>
   <data name="VideoPage_AdvancedPresetSummary.Text" xml:space="preserve">
     <value>Сводка предустановки</value>
@@ -726,9 +750,6 @@
   <data name="VideoPage_SubtitleEditorStatus.Text" xml:space="preserve">
     <value>Создайте или выберите файл субтитров для редактирования.</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Страница редактора PDF
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="PdfPage_Title.Text" xml:space="preserve">
     <value>Редактор PDF</value>
   </data>
@@ -993,9 +1014,6 @@
   <data name="PdfPage_RepairReady.Text" xml:space="preserve">
     <value>Готово к восстановлению.</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Страница редактора документов
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="DocPage_Title.Text" xml:space="preserve">
     <value>Обработка документов</value>
   </data>
@@ -1116,9 +1134,6 @@
   <data name="DocPage_ExtractHint.Text" xml:space="preserve">
     <value>Все встроенные изображения будут извлечены и упакованы в ZIP-архив. Архив будет создан в выбранном вами месте.</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Страница пакетного редактора
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="BatchPage_Title.Text" xml:space="preserve">
     <value>Пакетная обработка</value>
   </data>
@@ -1434,9 +1449,6 @@
   <data name="BatchPage_ImageHeight.Header" xml:space="preserve">
     <value>Высота</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Страница лицензий
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="LicensesPage_Title.Text" xml:space="preserve">
     <value>Лицензии</value>
   </data>
@@ -1728,11 +1740,68 @@
   <data name="CB_Batch_AdvSubtitleSectionLength" xml:space="preserve">
     <value>Расширенная длина раздела субтитров: не более {0} с</value>
   </data>
-  <data name="VideoPage_VerticalMargin_Header" xml:space="preserve">
+  <data name="VideoPage_ConfigureAdvancedTitle" xml:space="preserve">
+    <value>Настроить расширенные субтитры</value>
+  </data>
+  <data name="VideoPage_ConfigureKaraokeSummary" xml:space="preserve">
+    <value>Выберите стиль караоке и настройте типографику и акцент выделения, используемые для рендеринга.</value>
+  </data>
+  <data name="VideoPage_ConfigureStyledSummary" xml:space="preserve">
+    <value>Настройте типографику и цвета, используемые для рендеринга стилизованных субтитров.</value>
+  </data>
+  <data name="VideoPage_BasePreset.Header" xml:space="preserve">
+    <value>Базовая предустановка</value>
+  </data>
+  <data name="VideoPage_SystemFont.Header" xml:space="preserve">
+    <value>Системный шрифт</value>
+  </data>
+  <data name="VideoPage_SelectInstalledFont" xml:space="preserve">
+    <value>Выберите установленный шрифт</value>
+  </data>
+  <data name="VideoPage_FontSize.Header" xml:space="preserve">
+    <value>Размер шрифта</value>
+  </data>
+  <data name="VideoPage_OutlineWidth.Header" xml:space="preserve">
+    <value>Ширина контура</value>
+  </data>
+  <data name="VideoPage_VerticalMargin.Header" xml:space="preserve">
     <value>Вертикальный отступ</value>
   </data>
-  <data name="Shared_Cancel" xml:space="preserve">
-    <value>Отмена</value>
+  <data name="VideoPage_BoldText.Content" xml:space="preserve">
+    <value>Жирный текст</value>
+  </data>
+  <data name="VideoPage_TextTransform.Header" xml:space="preserve">
+    <value>Преобразование текста</value>
+  </data>
+  <data name="VideoPage_OriginalCase" xml:space="preserve">
+    <value>Исходный регистр</value>
+  </data>
+  <data name="VideoPage_Uppercase" xml:space="preserve">
+    <value>ПРОПИСНЫЕ БУКВЫ</value>
+  </data>
+  <data name="VideoPage_Lowercase" xml:space="preserve">
+    <value>строчные буквы</value>
+  </data>
+  <data name="VideoPage_FillingColor" xml:space="preserve">
+    <value>Цвет заливки</value>
+  </data>
+  <data name="VideoPage_PreFillingColor" xml:space="preserve">
+    <value>Цвет предварительной заливки</value>
+  </data>
+  <data name="VideoPage_WordFillColor" xml:space="preserve">
+    <value>Цвет заливки слова</value>
+  </data>
+  <data name="VideoPage_OutlineColor" xml:space="preserve">
+    <value>Цвет контура</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvancedSave" xml:space="preserve">
+    <value>Сохранить</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvancedResetDefaults" xml:space="preserve">
+    <value>Сбросить на значения по умолчанию</value>
+  </data>
+  <data name="VideoPage_VerticalMargin_Header" xml:space="preserve">
+    <value>Вертикальный отступ</value>
   </data>
   <data name="VideoPage_BoldText_Content" xml:space="preserve">
     <value>Жирный текст</value>
@@ -1752,7 +1821,9 @@
   <data name="VideoPage_BasePreset_Header" xml:space="preserve">
     <value>Базовая предустановка</value>
   </data>
-  <!-- Audio Editor page – code-behind strings -->
+  <data name="Shared_Cancel" xml:space="preserve">
+    <value>Отмена</value>
+  </data>
   <data name="AudioPage_PreviewCodecFmt" xml:space="preserve">
     <value>Кодек: {0}</value>
   </data>
@@ -2082,5 +2153,20 @@
   </data>
   <data name="AudioPage_GenerateFirst" xml:space="preserve">
     <value>Сначала создайте текстовую транскрипцию.</value>
+  </data>
+  <data name="VideoPage_EnablePodcastMode.Content" xml:space="preserve">
+    <value>Включить режим подкаста</value>
+  </data>
+  <data name="VideoPage_PodcastDenoise.Content" xml:space="preserve">
+    <value>Шумоподавление (DFN3)</value>
+  </data>
+  <data name="VideoPage_PodcastFullness.Content" xml:space="preserve">
+    <value>Восстановление полноты звука (FlashSR)</value>
+  </data>
+  <data name="VideoPage_PodcastMaster.Content" xml:space="preserve">
+    <value>Мастеринг (EQ + компрессия + нормализация громкости)</value>
+  </data>
+  <data name="VideoPage_PodcastHint.Text" xml:space="preserve">
+    <value>Извлеките аудиофайл, примените режим подкаста и вставьте его обратно.</value>
   </data>
 </root>

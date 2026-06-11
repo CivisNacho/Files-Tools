@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Files_Tools.Helpers;
 
 namespace Files_Tools.Services;
 
@@ -1386,7 +1387,7 @@ public sealed class AudioProcessingService : IAudioProcessingService
             return null;
         }
 
-        var stopwatch = Stopwatch.StartNew();
+        var etaEstimator = new EtaEstimator();
         var lastProcessed = TimeSpan.Zero;
         return line =>
         {
@@ -1411,11 +1412,7 @@ public sealed class AudioProcessingService : IAudioProcessingService
             var isCompleted = string.Equals(line["progress=".Length..], "end", StringComparison.Ordinal);
             var clamped = lastProcessed > totalDuration.Value ? totalDuration.Value : lastProcessed;
             var fraction = Math.Clamp(clamped.TotalMilliseconds / totalDuration.Value.TotalMilliseconds, 0d, 1d);
-            TimeSpan? eta = null;
-            if (!isCompleted && fraction > 0)
-            {
-                eta = TimeSpan.FromMilliseconds(stopwatch.Elapsed.TotalMilliseconds * ((1d - fraction) / fraction));
-            }
+            var eta = etaEstimator.AddSample(isCompleted ? 1d : fraction);
 
             progress.Report(new AudioProcessProgress
             {

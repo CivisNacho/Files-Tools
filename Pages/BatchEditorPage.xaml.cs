@@ -78,11 +78,6 @@ namespace Files_Tools.Pages
         private readonly IReadOnlyList<string> _batchInstalledFontFamilies = LoadInstalledFontFamilies();
         private DispatcherTimer? _elapsedTimer;
 
-        // Sliding-window samples for smoothed throughput / ETA.
-        private readonly Queue<(DateTimeOffset Time, double Fraction)> _progressSamples = new();
-        private const int MaxSamples = 30;
-        private static readonly TimeSpan SampleWindow = TimeSpan.FromSeconds(15);
-        private double _smoothedRemainingSec = -1;
 
         public BatchEditorPage()
         {
@@ -850,15 +845,13 @@ namespace Files_Tools.Pages
             OpenOutputFolderButton.Visibility = Visibility.Collapsed;
 
             _processingStartTime             = DateTimeOffset.UtcNow;
-            _progressSamples.Clear();
-            _smoothedRemainingSec            = -1;
             ProcessProgressBar.IsIndeterminate = true;
             ProcessProgressBar.Value           = 0;
             ProcessProgressLabel.Text          = "Preparing…";
             ProcessProgressPercentTextBlock.Text = "—";
             ProcessCurrentFileTextBlock.Text   = string.Empty;
             ProcessElapsedTextBlock.Text       = "Elapsed 0s";
-            ProcessEtaTextBlock.Text           = "Estimating…";
+            ProcessEtaTextBlock.Text           = string.Empty;
             ProcessFileProgressBar.Visibility  = Visibility.Collapsed;
             ProcessingProgressPanel.Visibility = Visibility.Visible;
             ProcessStatusTextBlock.Visibility  = Visibility.Collapsed;
@@ -997,9 +990,6 @@ namespace Files_Tools.Pages
                     ProcessCurrentFileTextBlock.Text = string.Empty;
                 }
 
-                // ── Sample throughput and update ETA ──────────────────────────
-                UpdateEtaFromSample(progress.OverallFraction);
-
                 // ── Per-file sub-progress ─────────────────────────────────────
                 if (progress.FileProgress is { } fp)
                 {
@@ -1022,7 +1012,7 @@ namespace Files_Tools.Pages
             });
         }
 
-        // ── Progress: ETA smoothing + elapsed timer ──────────────────────────
+        // ── Progress: elapsed timer ───────────────────────────────────────────
 
         private void StartElapsedTimer()
         {
@@ -1044,73 +1034,9 @@ namespace Files_Tools.Pages
         {
             var elapsed = DateTimeOffset.UtcNow - _processingStartTime;
             ProcessElapsedTextBlock.Text = $"Elapsed {FormatDuration(elapsed)}";
-
-            // Decay the smoothed remaining estimate so it ticks down between samples.
-            if (_smoothedRemainingSec > 0)
-            {
-                _smoothedRemainingSec = Math.Max(0, _smoothedRemainingSec - 1);
-                ProcessEtaTextBlock.Text = $"{FormatDuration(TimeSpan.FromSeconds(_smoothedRemainingSec))} left";
-            }
         }
 
-        private void UpdateEtaFromSample(double fraction)
-        {
-            var now = DateTimeOffset.UtcNow;
-            var elapsed = now - _processingStartTime;
-
-            if (fraction <= 0 || fraction >= 1)
-            {
-                if (fraction >= 1) ProcessEtaTextBlock.Text = "Done";
-                return;
-            }
-
-            _progressSamples.Enqueue((now, fraction));
-            while (_progressSamples.Count > MaxSamples
-                   || (_progressSamples.Count > 2 && now - _progressSamples.Peek().Time > SampleWindow))
-            {
-                _progressSamples.Dequeue();
-            }
-
-            // Need ≥ 2 samples and ≥ 1 s of data to estimate; also gate on overall progress.
-            if (_progressSamples.Count < 2 || elapsed.TotalSeconds < 2 || fraction < 0.02)
-            {
-                ProcessEtaTextBlock.Text = "Estimating…";
-                return;
-            }
-
-            var first = _progressSamples.Peek();
-            var deltaFraction = fraction - first.Fraction;
-            var deltaSec = (now - first.Time).TotalSeconds;
-
-            double remainSec;
-            if (deltaFraction > 1e-4 && deltaSec > 0.5)
-            {
-                // Recent throughput: how many seconds per remaining unit of progress.
-                var ratePerSec = deltaFraction / deltaSec;
-                remainSec = (1.0 - fraction) / ratePerSec;
-            }
-            else
-            {
-                // Fallback to linear projection from start.
-                remainSec = elapsed.TotalSeconds * (1.0 - fraction) / fraction;
-            }
-
-            // Exponential smoothing to reduce jitter between samples.
-            const double alpha = 0.35;
-            _smoothedRemainingSec = _smoothedRemainingSec < 0
-                ? remainSec
-                : alpha * remainSec + (1 - alpha) * _smoothedRemainingSec;
-
-            ProcessEtaTextBlock.Text = $"{FormatDuration(TimeSpan.FromSeconds(_smoothedRemainingSec))} left";
-        }
-
-        private static string FormatDuration(TimeSpan t)
-        {
-            if (t.TotalSeconds < 1) return "0s";
-            if (t.TotalSeconds < 60) return $"{(int)t.TotalSeconds}s";
-            if (t.TotalMinutes < 60) return t.Seconds == 0 ? $"{(int)t.TotalMinutes}m" : $"{(int)t.TotalMinutes}m {t.Seconds}s";
-            return t.Minutes == 0 ? $"{(int)t.TotalHours}h" : $"{(int)t.TotalHours}h {t.Minutes}m";
-        }
+        private static string FormatDuration(TimeSpan t) => EtaEstimator.FormatDuration(t);
 
         private void ApplyResultsToItems(BatchResult result)
         {

@@ -53,8 +53,10 @@ public sealed class FlashSrService : IDisposable
 
     /// <summary>
     /// Upsamples mono 16 kHz audio to mono 48 kHz with restored high-frequency content.
+    /// <paramref name="progress"/> receives the fraction of input consumed (0..1), reported per
+    /// inference chunk, so callers can drive ETA estimates during long runs.
     /// </summary>
-    public float[] UpsampleMono(float[] samples16k, CancellationToken cancellationToken = default)
+    public float[] UpsampleMono(float[] samples16k, CancellationToken cancellationToken = default, IProgress<double>? progress = null)
     {
         ArgumentNullException.ThrowIfNull(samples16k);
         if (samples16k.Length == 0)
@@ -62,9 +64,12 @@ public sealed class FlashSrService : IDisposable
             return Array.Empty<float>();
         }
 
+        progress?.Report(0d);
         if (samples16k.Length <= ChunkSamples)
         {
-            return RunModel(samples16k, cancellationToken);
+            var result = RunModel(samples16k, cancellationToken);
+            progress?.Report(1d);
+            return result;
         }
 
         int hop = ChunkSamples - OverlapSamples;
@@ -102,6 +107,8 @@ public sealed class FlashSrService : IDisposable
 
                 output[idx] += y[k] * g;
             }
+
+            progress?.Report(Math.Min(1d, (start + segLen) / (double)samples16k.Length));
         }
 
         return output;
@@ -116,8 +123,8 @@ public sealed class FlashSrService : IDisposable
     }
 
     /// <summary>Runs <see cref="UpsampleMono"/> off the calling thread.</summary>
-    public Task<float[]> UpsampleMonoAsync(float[] samples16k, CancellationToken cancellationToken = default)
-        => Task.Run(() => UpsampleMono(samples16k, cancellationToken), cancellationToken);
+    public Task<float[]> UpsampleMonoAsync(float[] samples16k, CancellationToken cancellationToken = default, IProgress<double>? progress = null)
+        => Task.Run(() => UpsampleMono(samples16k, cancellationToken, progress), cancellationToken);
 
     public void Dispose()
     {

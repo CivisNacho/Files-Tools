@@ -1,5 +1,110 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -12,18 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Main Window
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="AppTitleBar.Title" xml:space="preserve">
     <value>Files Tools</value>
   </data>
   <data name="LicensesButton.Content" xml:space="preserve">
     <value>लाइसेंस</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Navigation items  (reused across all editor nav menus)
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="NavMedia.Content" xml:space="preserve">
     <value>मीडिया</value>
   </data>
@@ -150,9 +249,6 @@
   <data name="NavOutput.Content" xml:space="preserve">
     <value>आउटपुट</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Shared editor strings  (reused across multiple pages)
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="PreviewTitle.Text" xml:space="preserve">
     <value>प्रीव्यू</value>
   </data>
@@ -165,9 +261,6 @@
   <data name="EtaCalculating.Text" xml:space="preserve">
     <value>ETA की गणना हो रही है...</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Home page
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="HomePage_Header.Text" xml:space="preserve">
     <value>शुरू करने के लिए फ़ाइलें यहाँ छोड़ें</value>
   </data>
@@ -186,9 +279,6 @@
   <data name="HomePage_BatchFiles.Text" xml:space="preserve">
     <value>बैच के लिए कई फ़ाइलें</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Audio editor page
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="AudioPage_Title.Text" xml:space="preserve">
     <value>ऑडियो एडिटर</value>
   </data>
@@ -228,9 +318,6 @@
   <data name="AudioPage_PreviewDuration.Text" xml:space="preserve">
     <value>अवधि: —</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Image editor page
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="ImagePage_Title.Text" xml:space="preserve">
     <value>इमेज एडिटर</value>
   </data>
@@ -318,9 +405,6 @@
   <data name="ImagePage_EnableRGB.Content" xml:space="preserve">
     <value>RGB समायोजन सक्षम करें</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Video editor page
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="VideoPage_Title.Text" xml:space="preserve">
     <value>वीडियो एडिटर</value>
   </data>
@@ -415,7 +499,7 @@
     <value>बाद में</value>
   </data>
   <data name="VideoPage_ApplyDenoise.Content" xml:space="preserve">
-    <value>ऑडियो डिनॉइज़ लागू करें</value>
+    <value>सरल शोर में कमी लागू करें</value>
   </data>
   <data name="VideoPage_DenoiseMode.Header" xml:space="preserve">
     <value>डिनॉइज़ मोड</value>
@@ -488,66 +572,6 @@
   </data>
   <data name="VideoPage_ConfigureAdvanced.Content" xml:space="preserve">
     <value>उन्नत सबटाइटल कॉन्फ़िगर करें</value>
-  </data>
-  <data name="VideoPage_ConfigureAdvancedTitle" xml:space="preserve">
-    <value>उन्नत सबटाइटल कॉन्फ़िगर करें</value>
-  </data>
-  <data name="VideoPage_ConfigureKaraokeSummary" xml:space="preserve">
-    <value>एक करोके शैली चुनें और रेंडरिंग के लिए उपयोग किए जाने वाले टाइपोग्राफी और हाइलाइट एक्सेंट को समायोजित करें।</value>
-  </data>
-  <data name="VideoPage_ConfigureStyledSummary" xml:space="preserve">
-    <value>स्टाइल्ड सबटाइटल रेंडरिंग के लिए उपयोग किए जाने वाले टाइपोग्राफी और रंगों को समायोजित करें।</value>
-  </data>
-  <data name="VideoPage_BasePreset.Header" xml:space="preserve">
-    <value>आधार प्रीसेट</value>
-  </data>
-  <data name="VideoPage_SystemFont.Header" xml:space="preserve">
-    <value>सिस्टम फ़ॉन्ट</value>
-  </data>
-  <data name="VideoPage_SelectInstalledFont" xml:space="preserve">
-    <value>स्थापित फ़ॉन्ट का चयन करें</value>
-  </data>
-  <data name="VideoPage_FontSize.Header" xml:space="preserve">
-    <value>फ़ॉन्ट आकार</value>
-  </data>
-  <data name="VideoPage_OutlineWidth.Header" xml:space="preserve">
-    <value>रूपरेखा चौड़ाई</value>
-  </data>
-  <data name="VideoPage_VerticalMargin.Header" xml:space="preserve">
-    <value>ऊर्ध्वाधर मार्जिन</value>
-  </data>
-  <data name="VideoPage_BoldText.Content" xml:space="preserve">
-    <value>बोल्ड पाठ</value>
-  </data>
-  <data name="VideoPage_TextTransform.Header" xml:space="preserve">
-    <value>पाठ रूपांतरण</value>
-  </data>
-  <data name="VideoPage_OriginalCase" xml:space="preserve">
-    <value>मूल केस</value>
-  </data>
-  <data name="VideoPage_Uppercase" xml:space="preserve">
-    <value>बड़े अक्षर</value>
-  </data>
-  <data name="VideoPage_Lowercase" xml:space="preserve">
-    <value>छोटे अक्षर</value>
-  </data>
-  <data name="VideoPage_FillingColor" xml:space="preserve">
-    <value>रंग भरना</value>
-  </data>
-  <data name="VideoPage_PreFillingColor" xml:space="preserve">
-    <value>पूर्व-भरण रंग</value>
-  </data>
-  <data name="VideoPage_WordFillColor" xml:space="preserve">
-    <value>शब्द भरण रंग</value>
-  </data>
-  <data name="VideoPage_OutlineColor" xml:space="preserve">
-    <value>रूपरेखा रंग</value>
-  </data>
-  <data name="VideoPage_ConfigureAdvancedSave" xml:space="preserve">
-    <value>सहेजें</value>
-  </data>
-  <data name="VideoPage_ConfigureAdvancedResetDefaults" xml:space="preserve">
-    <value>डिफ़ॉल्ट रीसेट करें</value>
   </data>
   <data name="VideoPage_AdvancedPresetSummary.Text" xml:space="preserve">
     <value>प्रीसेट सारांश</value>
@@ -726,9 +750,6 @@
   <data name="VideoPage_SubtitleEditorStatus.Text" xml:space="preserve">
     <value>संपादन के लिए सबटाइटल जनरेट करें या फ़ाइल चुनें।</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       PDF editor page
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="PdfPage_Title.Text" xml:space="preserve">
     <value>PDF एडिटर</value>
   </data>
@@ -993,9 +1014,6 @@
   <data name="PdfPage_RepairReady.Text" xml:space="preserve">
     <value>मरम्मत के लिए तैयार।</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Document editor page
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="DocPage_Title.Text" xml:space="preserve">
     <value>दस्तावेज़ प्रोसेसिंग</value>
   </data>
@@ -1116,9 +1134,6 @@
   <data name="DocPage_ExtractHint.Text" xml:space="preserve">
     <value>सभी एम्बेडेड इमेज निकाली जाएँगी और ZIP आर्काइव में पैक की जाएँगी। आर्काइव आपके चुने गए स्थान पर बनाई जाएगी।</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Batch editor page
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="BatchPage_Title.Text" xml:space="preserve">
     <value>बैच प्रोसेसर</value>
   </data>
@@ -1434,9 +1449,6 @@
   <data name="BatchPage_ImageHeight.Header" xml:space="preserve">
     <value>ऊँचाई</value>
   </data>
-  <!-- ═══════════════════════════════════════════════════════════════
-       Licenses page
-       ═══════════════════════════════════════════════════════════════ -->
   <data name="LicensesPage_Title.Text" xml:space="preserve">
     <value>लाइसेंस</value>
   </data>
@@ -1728,11 +1740,68 @@
   <data name="CB_Batch_AdvSubtitleSectionLength" xml:space="preserve">
     <value>उन्नत उपशीर्षक अनुभाग लंबाई: अधिकतम {0} s</value>
   </data>
-  <data name="VideoPage_VerticalMargin_Header" xml:space="preserve">
+  <data name="VideoPage_ConfigureAdvancedTitle" xml:space="preserve">
+    <value>उन्नत सबटाइटल कॉन्फ़िगर करें</value>
+  </data>
+  <data name="VideoPage_ConfigureKaraokeSummary" xml:space="preserve">
+    <value>एक करोके शैली चुनें और रेंडरिंग के लिए उपयोग किए जाने वाले टाइपोग्राफी और हाइलाइट एक्सेंट को समायोजित करें।</value>
+  </data>
+  <data name="VideoPage_ConfigureStyledSummary" xml:space="preserve">
+    <value>स्टाइल्ड सबटाइटल रेंडरिंग के लिए उपयोग किए जाने वाले टाइपोग्राफी और रंगों को समायोजित करें।</value>
+  </data>
+  <data name="VideoPage_BasePreset.Header" xml:space="preserve">
+    <value>आधार प्रीसेट</value>
+  </data>
+  <data name="VideoPage_SystemFont.Header" xml:space="preserve">
+    <value>सिस्टम फ़ॉन्ट</value>
+  </data>
+  <data name="VideoPage_SelectInstalledFont" xml:space="preserve">
+    <value>स्थापित फ़ॉन्ट का चयन करें</value>
+  </data>
+  <data name="VideoPage_FontSize.Header" xml:space="preserve">
+    <value>फ़ॉन्ट आकार</value>
+  </data>
+  <data name="VideoPage_OutlineWidth.Header" xml:space="preserve">
+    <value>रूपरेखा चौड़ाई</value>
+  </data>
+  <data name="VideoPage_VerticalMargin.Header" xml:space="preserve">
     <value>ऊर्ध्वाधर मार्जिन</value>
   </data>
-  <data name="Shared_Cancel" xml:space="preserve">
-    <value>रद्द करें</value>
+  <data name="VideoPage_BoldText.Content" xml:space="preserve">
+    <value>बोल्ड पाठ</value>
+  </data>
+  <data name="VideoPage_TextTransform.Header" xml:space="preserve">
+    <value>पाठ रूपांतरण</value>
+  </data>
+  <data name="VideoPage_OriginalCase" xml:space="preserve">
+    <value>मूल केस</value>
+  </data>
+  <data name="VideoPage_Uppercase" xml:space="preserve">
+    <value>बड़े अक्षर</value>
+  </data>
+  <data name="VideoPage_Lowercase" xml:space="preserve">
+    <value>छोटे अक्षर</value>
+  </data>
+  <data name="VideoPage_FillingColor" xml:space="preserve">
+    <value>रंग भरना</value>
+  </data>
+  <data name="VideoPage_PreFillingColor" xml:space="preserve">
+    <value>पूर्व-भरण रंग</value>
+  </data>
+  <data name="VideoPage_WordFillColor" xml:space="preserve">
+    <value>शब्द भरण रंग</value>
+  </data>
+  <data name="VideoPage_OutlineColor" xml:space="preserve">
+    <value>रूपरेखा रंग</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvancedSave" xml:space="preserve">
+    <value>सहेजें</value>
+  </data>
+  <data name="VideoPage_ConfigureAdvancedResetDefaults" xml:space="preserve">
+    <value>डिफ़ॉल्ट रीसेट करें</value>
+  </data>
+  <data name="VideoPage_VerticalMargin_Header" xml:space="preserve">
+    <value>ऊर्ध्वाधर मार्जिन</value>
   </data>
   <data name="VideoPage_BoldText_Content" xml:space="preserve">
     <value>बोल्ड पाठ</value>
@@ -1752,7 +1821,9 @@
   <data name="VideoPage_BasePreset_Header" xml:space="preserve">
     <value>आधार प्रीसेट</value>
   </data>
-  <!-- Audio Editor page – code-behind strings -->
+  <data name="Shared_Cancel" xml:space="preserve">
+    <value>रद्द करें</value>
+  </data>
   <data name="AudioPage_PreviewCodecFmt" xml:space="preserve">
     <value>कोडेक: {0}</value>
   </data>
@@ -2082,5 +2153,20 @@
   </data>
   <data name="AudioPage_GenerateFirst" xml:space="preserve">
     <value>पहले पाठ ट्रांसक्रिप्शन बनाएं।</value>
+  </data>
+  <data name="VideoPage_EnablePodcastMode.Content" xml:space="preserve">
+    <value>पॉडकास्ट मोड सक्षम करें</value>
+  </data>
+  <data name="VideoPage_PodcastDenoise.Content" xml:space="preserve">
+    <value>शोर कम करना (DFN3)</value>
+  </data>
+  <data name="VideoPage_PodcastFullness.Content" xml:space="preserve">
+    <value>ध्वनि पूर्णता पुनर्स्थापित करें (FlashSR)</value>
+  </data>
+  <data name="VideoPage_PodcastMaster.Content" xml:space="preserve">
+    <value>मास्टरिंग (EQ + कंप्रेशन + लाउडनेस नॉर्मलाइज़ेशन)</value>
+  </data>
+  <data name="VideoPage_PodcastHint.Text" xml:space="preserve">
+    <value>ऑडियो निकालें, पॉडकास्ट मोड लागू करें, और इसे फिर से डालें।</value>
   </data>
 </root>

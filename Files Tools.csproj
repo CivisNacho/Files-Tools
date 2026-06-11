@@ -158,4 +158,29 @@
     <Copy SourceFiles="@(_FfmpegArm64PublishFiles)" DestinationFolder="$(PublishDir)ffmpeg\win-arm64" SkipUnchangedFiles="true" />
   </Target>
 
+  <!--
+    PDF tooling fallback for ARM64.
+    QPdfNet and TesseractOCR only ship x86/x64 in-process DLLs, which an ARM64 process cannot
+    load. Windows on ARM emulates x64 *processes*, so ARM64 builds bundle the official x64 CLI
+    tools instead (qpdf release zip + UB-Mannheim tesseract, stored under Binaries\qpdf\win-x64\
+    and Binaries\tesseract\win-x64\) and PdfNativeCli routes operations through them.
+  -->
+  <Target Name="CopyPdfCliFallbackBinaries" AfterTargets="Build" Condition="'$(Platform)'=='ARM64'">
+    <ItemGroup>
+      <_QpdfX64Files Include="$(MSBuildThisFileDirectory)Binaries\qpdf\win-x64\*" />
+      <_TesseractX64Files Include="$(MSBuildThisFileDirectory)Binaries\tesseract\win-x64\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_QpdfX64Files)" DestinationFolder="$(OutDir)qpdf\win-x64" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_TesseractX64Files)" DestinationFolder="$(OutDir)tesseract\win-x64" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="PublishPdfCliFallbackBinaries" AfterTargets="Publish" Condition="'$(Platform)'=='ARM64'">
+    <ItemGroup>
+      <_QpdfX64PublishFiles Include="$(MSBuildThisFileDirectory)Binaries\qpdf\win-x64\*" />
+      <_TesseractX64PublishFiles Include="$(MSBuildThisFileDirectory)Binaries\tesseract\win-x64\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_QpdfX64PublishFiles)" DestinationFolder="$(PublishDir)qpdf\win-x64" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_TesseractX64PublishFiles)" DestinationFolder="$(PublishDir)tesseract\win-x64" SkipUnchangedFiles="true" />
+  </Target>
+
 </Project>

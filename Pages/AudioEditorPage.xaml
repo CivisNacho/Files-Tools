@@ -181,7 +181,7 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock x:Name="ProcessingStatusTextBlock" x:Uid="AudioPage_Processing" FontWeight="SemiBold" Text="Processing audio..." />
-                                    <TextBlock x:Name="ProcessingEtaTextBlock" x:Uid="EtaCalculating" Grid.Column="1" Opacity="0.76" Text="ETA calculating..." />
+                                    <TextBlock x:Name="ProcessingEtaTextBlock" Grid.Column="1" Opacity="0.76" Text="0%" />
                                 </Grid>
 
                                 <ProgressBar x:Name="ProcessingProgressBar" Height="6" Minimum="0" Maximum="1" Value="0" />

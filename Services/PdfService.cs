@@ -1052,7 +1052,11 @@ public sealed class PdfService : IPdfService
                 int pageCount = GetPageCount(Path.GetFullPath(inputPath));
                 var perPagePdfs = new List<string>(pageCount);
 
-                using var engine = new Engine(options.TessDataPath, options.Languages, options.EngineMode);
+                // The TesseractOCR package only ships x86/x64 natives; on ARM64 the same OCR runs
+                // through the bundled x64 tesseract CLI instead of the in-process engine.
+                using var engine = PdfNativeCli.UseCli
+                    ? null
+                    : new Engine(options.TessDataPath, options.Languages, options.EngineMode);
 
                 for (int page = 0; page < pageCount; page++)
                 {
@@ -1064,16 +1068,25 @@ public sealed class PdfService : IPdfService
 
                     // Run Tesseract with its PDF renderer to produce a searchable page PDF.
                     var pageBaseName = Path.Combine(workDir, $"page_{page:D5}");
-                    using var renderer = TesseractOCR.Renderers.Result.CreatePdfRenderer(
-                        pageBaseName,
-                        options.TessDataPath,
-                        textonly: false);
-
-                    using var img = TesseractOCR.Pix.Image.LoadFromFile(tiffPath);
-                    using (renderer.BeginDocument(Path.GetFileNameWithoutExtension(inputPath)))
+                    if (engine is null)
                     {
-                        using var ocrPage = engine.Process(img);
-                        renderer.AddPage(ocrPage);
+                        PdfNativeCli.RunTesseractPdf(
+                            tiffPath, pageBaseName, options.TessDataPath, options.Languages,
+                            (int)options.EngineMode, options.Dpi);
+                    }
+                    else
+                    {
+                        using var renderer = TesseractOCR.Renderers.Result.CreatePdfRenderer(
+                            pageBaseName,
+                            options.TessDataPath,
+                            textonly: false);
+
+                        using var img = TesseractOCR.Pix.Image.LoadFromFile(tiffPath);
+                        using (renderer.BeginDocument(Path.GetFileNameWithoutExtension(inputPath)))
+                        {
+                            using var ocrPage = engine.Process(img);
+                            renderer.AddPage(ocrPage);
+                        }
                     }
 
                     perPagePdfs.Add(pageBaseName + ".pdf");
@@ -1115,6 +1128,12 @@ public sealed class PdfService : IPdfService
 
     private static void Execute(Job job)
     {
+        if (PdfNativeCli.UseCli)
+        {
+            ExecuteCli(job);
+            return;
+        }
+
         ExitCode code;
         try
         {
@@ -1133,6 +1152,11 @@ public sealed class PdfService : IPdfService
 
     private static string ExecuteAndCaptureOutput(Job job)
     {
+        if (PdfNativeCli.UseCli)
+        {
+            return Encoding.UTF8.GetString(ExecuteCli(job));
+        }
+
         try
         {
             var code = job.Run(out var output);
@@ -1152,6 +1176,11 @@ public sealed class PdfService : IPdfService
 
     private static byte[] ExecuteAndCaptureBinaryOutput(Job job)
     {
+        if (PdfNativeCli.UseCli)
+        {
+            return ExecuteCli(job);
+        }
+
         try
         {
             var code = job.Run(out _, out var data);
@@ -1167,6 +1196,34 @@ public sealed class PdfService : IPdfService
         {
             throw new PdfOperationException("qpdf threw while executing the job: " + ex.Message, null, ex);
         }
+    }
+
+    /// <summary>
+    /// Runs a job through the bundled x64 qpdf CLI (ARM64 fallback) and returns the raw stdout
+    /// bytes. qpdf exit codes use the same values as QPdfNet's <see cref="ExitCode"/>.
+    /// </summary>
+    private static byte[] ExecuteCli(Job job)
+    {
+        int exitCode;
+        byte[] stdOut;
+        string stdErr;
+        try
+        {
+            (exitCode, stdOut, stdErr) = PdfNativeCli.RunQpdfJob(PdfNativeCli.SerializeJob(job));
+        }
+        catch (Exception ex) when (ex is not PdfOperationException)
+        {
+            throw new PdfOperationException("qpdf threw while executing the job: " + ex.Message, null, ex);
+        }
+
+        if (!IsSuccess((ExitCode)exitCode))
+        {
+            throw new PdfOperationException(
+                $"qpdf returned non-success exit code: {(ExitCode)exitCode}. {stdErr}".TrimEnd(),
+                (ExitCode)exitCode);
+        }
+
+        return stdOut;
     }
 
     private static bool IsSuccess(ExitCode code) =>

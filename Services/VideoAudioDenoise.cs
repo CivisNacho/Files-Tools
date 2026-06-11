@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Files_Tools.Helpers;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 
@@ -1211,17 +1212,13 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         {
             var passOffset = stageProgressOffset + (stageProgressScale * pass / denoisePasses);
             var passScale = stageProgressScale / denoisePasses;
-            var stopwatch = Stopwatch.StartNew();
+            var etaEstimator = new EtaEstimator();
             var passDescription = denoisePasses == 1 ? stageDescription : $"{stageDescription} (pass {pass + 1} of {denoisePasses})";
             var inferenceProgress = new Progress<InferenceProgressInfo>(info =>
             {
                 var percent = Math.Clamp(info.Percent, 0d, 1d);
                 var scaledPercent = Math.Clamp(passOffset + (percent * passScale), 0d, 1d);
-                TimeSpan? eta = null;
-                if (percent > 0d && percent < 1d)
-                {
-                    eta = TimeSpan.FromMilliseconds(stopwatch.Elapsed.TotalMilliseconds * ((1d - percent) / percent));
-                }
+                var eta = percent < 1d ? etaEstimator.AddSample(percent) : TimeSpan.Zero;
 
                 Report(
                     progress,
@@ -1407,7 +1404,7 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
             return null;
         }
 
-        var stopwatch = Stopwatch.StartNew();
+        var etaEstimator = new EtaEstimator();
         var lastProcessed = TimeSpan.Zero;
 
         return line =>
@@ -1436,11 +1433,7 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
                 ? 0d
                 : Math.Clamp(clampedProcessed.TotalMilliseconds / duration.Value.TotalMilliseconds, 0d, 1d);
 
-            TimeSpan? eta = null;
-            if (!isCompleted && fraction > 0d)
-            {
-                eta = TimeSpan.FromMilliseconds(stopwatch.Elapsed.TotalMilliseconds * ((1d - fraction) / fraction));
-            }
+            var eta = etaEstimator.AddSample(isCompleted ? 1d : fraction);
 
             Report(progress, stage, isCompleted ? 1d : fraction, description, isCompleted ? duration : clampedProcessed, duration, false, true, eta);
         };

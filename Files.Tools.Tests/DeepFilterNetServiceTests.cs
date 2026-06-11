@@ -47,8 +47,8 @@ public class DeepFilterNetServiceTests
             return;
         }
 
-        var input = WaveReader.ReadMono16k(noisy);       // reads samples regardless of declared rate
-        var groundTruth = WaveReader.ReadMono16k(gt);
+        var input = WaveReader.ReadMonoFloatWav(noisy);       // reads samples regardless of declared rate
+        var groundTruth = WaveReader.ReadMonoFloatWav(gt);
 
         using var service = new DeepFilterNetService(model);
         var output = service.EnhanceMono(input);

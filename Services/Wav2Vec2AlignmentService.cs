@@ -243,7 +243,7 @@ public sealed class Wav2Vec2AlignmentService : IWordAligner
         var vocab = LoadVocab();
         Log($"model dir '{_modelDirectory}' | tokenizer={meta.TokenizerKind} blank={meta.BlankId} logProb={meta.LogitsAreLogProb} | segments={segments.Count}");
 
-        var samples = WaveReader.ReadMono16k(preparedWav16kMonoPath);
+        var samples = WaveReader.ReadMonoFloatWav(preparedWav16kMonoPath);
         if (samples.Length == 0)
         {
             Log($"aborting: no samples read from '{preparedWav16kMonoPath}'.");
@@ -757,10 +757,13 @@ internal static class CtcForcedAligner
     }
 }
 
-/// <summary>Minimal 16 kHz mono WAV reader for 16-bit PCM and 32-bit float, used by the aligner.</summary>
+/// <summary>
+/// Minimal mono WAV reader for 16-bit PCM and 32-bit float. Returns raw samples at whatever
+/// rate the file declares — callers are responsible for feeding it the rate they expect.
+/// </summary>
 internal static class WaveReader
 {
-    public static float[] ReadMono16k(string path)
+    public static float[] ReadMonoFloatWav(string path)
     {
         using var stream = File.OpenRead(path);
         using var reader = new BinaryReader(stream);
