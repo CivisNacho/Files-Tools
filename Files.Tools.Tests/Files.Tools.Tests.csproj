@@ -48,6 +48,7 @@
     <Compile Include="..\Services\FlashSrService.cs" Link="Services\FlashSrService.cs" />
     <Compile Include="..\Services\VoiceStudioService.cs" Link="Services\VoiceStudioService.cs" />
     <Compile Include="..\Services\SubtitlesService.cs" Link="Services\SubtitlesService.cs" />
+    <Compile Include="..\Services\SubtitlesService.AssRender.cs" Link="Services\SubtitlesService.AssRender.cs" />
     <Compile Include="..\Services\Presets\SubtitlePresetDto.cs" Link="Services\Presets\SubtitlePresetDto.cs" />
     <Compile Include="..\Services\Presets\SubtitleColorJsonConverter.cs" Link="Services\Presets\SubtitleColorJsonConverter.cs" />
     <Compile Include="..\Services\Presets\SubtitlePresetJsonContext.cs" Link="Services\Presets\SubtitlePresetJsonContext.cs" />
