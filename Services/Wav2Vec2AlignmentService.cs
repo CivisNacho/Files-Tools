@@ -48,6 +48,9 @@ public sealed class Wav2Vec2AlignmentService : IWordAligner
 {
     private const int SampleRate = 16000;
 
+    // wav2vec2 conv front-end needs at least ~400 samples to emit a single frame.
+    private const int MinimumSliceSamples = 400;
+
     // Pad each segment's audio slice so word onsets/offsets near the boundary have acoustic context.
     private static readonly TimeSpan SlicePadding = TimeSpan.FromMilliseconds(120);
     private static readonly TimeSpan MinimumWordDuration = TimeSpan.FromMilliseconds(1);
@@ -232,9 +235,10 @@ public sealed class Wav2Vec2AlignmentService : IWordAligner
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(segments);
-        if (segments.Count == 0 || !IsInstalled())
+        var installed = IsInstalled();
+        if (segments.Count == 0 || !installed)
         {
-            Log($"skipped (segments={segments.Count}, installed={IsInstalled()}, dir='{_modelDirectory}').");
+            Log($"skipped (segments={segments.Count}, installed={installed}, dir='{_modelDirectory}').");
             return segments;
         }
 
@@ -333,7 +337,7 @@ public sealed class Wav2Vec2AlignmentService : IWordAligner
         var startSample = (int)Math.Clamp(Math.Round(sliceStart.TotalSeconds * SampleRate), 0, samples.Length - 1);
         var endSample = (int)Math.Clamp(Math.Round(sliceEnd.TotalSeconds * SampleRate), startSample + 1, samples.Length);
         var sliceLength = endSample - startSample;
-        if (sliceLength < BlocksRequiredForOneFrame)
+        if (sliceLength < MinimumSliceSamples)
         {
             Log($"  seg#{segmentIndex}: slice too short ({sliceLength} samples) -> kept as-is.");
             return segment;
@@ -406,9 +410,6 @@ public sealed class Wav2Vec2AlignmentService : IWordAligner
     {
         Debug.WriteLine($"[Aligner] {message}");
     }
-
-    // wav2vec2 conv front-end needs at least ~400 samples to emit a single frame.
-    private const int BlocksRequiredForOneFrame = 400;
 
     private static IReadOnlyList<AudioTranscriptionWord> BuildAlignedWords(
         IReadOnlyList<string> words,
@@ -818,8 +819,7 @@ internal static class WaveReader
             return Array.Empty<float>();
         }
 
-        var mono = DecodeToMono(data, audioFormat, channels, bitsPerSample);
-        return mono;
+        return DecodeToMono(data, audioFormat, channels, bitsPerSample);
     }
 
     private static string ReadTag(BinaryReader reader)
