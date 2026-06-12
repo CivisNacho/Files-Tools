@@ -463,25 +463,6 @@ public sealed class DenoiseProcessException : DenoiseProcessingException
 }
 
 /// <summary>
-/// Placeholder engine used when no DTLN ONNX adapter has been supplied.
-/// </summary>
-public sealed class MissingDtlnDenoiseEngine : IDtlnDenoiseEngine
-{
-    /// <summary>
-    /// Always throws to make missing DTLN model wiring explicit.
-    /// </summary>
-    public Task<float[]> DenoiseMonoAsync(
-        IReadOnlyList<float> samples,
-        int sampleRate,
-        IProgress<InferenceProgressInfo>? progress = null,
-        CancellationToken cancellationToken = default)
-    {
-        throw new DenoiseModelException(
-            "No DTLN denoise engine is configured. Provide an IDtlnDenoiseEngine implementation backed by the selected DTLN ONNX model.");
-    }
-}
-
-/// <summary>
 /// ONNX Runtime implementation of the two-stage DTLN denoise model.
 /// </summary>
 public sealed class DtlnOnnxDenoiseEngine : IDtlnDenoiseEngine, IDisposable
@@ -868,10 +849,7 @@ public sealed class DtlnOnnxDenoiseEngine : IDtlnDenoiseEngine, IDisposable
         }
     }
 
-    private sealed record TensorBuffer(float[] Data, int[] Dimensions)
-    {
-        public int ElementCount => Data.Length;
-    }
+    private sealed record TensorBuffer(float[] Data, int[] Dimensions);
 }
 
 /// <summary>
@@ -881,6 +859,11 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
 {
     private const int DtlnSampleRate = 16000;
     private const string FfprobeJsonArgs = "-v error -print_format json -show_streams -show_format";
+
+    /// <summary>
+    /// Common FFmpeg prefix that enables machine-readable progress reporting on standard error.
+    /// </summary>
+    private static readonly string[] FfmpegBaseArgs = ["-y", "-hide_banner", "-progress", "pipe:2", "-nostats"];
 
     private static readonly IReadOnlyDictionary<DenoiseProcessingStage, double> StageWeights =
         new Dictionary<DenoiseProcessingStage, double>
@@ -924,10 +907,7 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         IProgress<DenoiseProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(options);
-        ValidateInputPath(inputAudioPath);
-        ValidateOutputPath(outputAudioPath);
-        ValidateOptions(options);
+        ValidateRequest(inputAudioPath, outputAudioPath, options);
 
         var tempFiles = new List<string>();
         var warnings = new List<string>();
@@ -953,7 +933,7 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
                 cancellationToken).ConfigureAwait(false);
 
             Report(progress, DenoiseProcessingStage.EncodingAudio, 0, "Encoding output audio", null, probe.Duration, false, true);
-            await EncodeAudioAsync(processedModelAudio.Path, outputAudioPath, targetOutputRate, options, null, progress, probe.Duration, cancellationToken).ConfigureAwait(false);
+            await EncodeAudioAsync(processedModelAudio.Path, outputAudioPath, targetOutputRate, progress, probe.Duration, cancellationToken).ConfigureAwait(false);
             Report(progress, DenoiseProcessingStage.Finalizing, 1, "Audio denoise completed", probe.Duration, probe.Duration, false, false);
 
             return new DenoiseResult
@@ -982,10 +962,7 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         IProgress<DenoiseProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(options);
-        ValidateInputPath(inputVideoPath);
-        ValidateOutputPath(outputVideoPath);
-        ValidateOptions(options);
+        ValidateRequest(inputVideoPath, outputVideoPath, options);
 
         var tempFiles = new List<string>();
         var warnings = new List<string>();
@@ -1114,13 +1091,13 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         await DecodeToModelWavAsync(inputPath, audioStreamIndex, modelInputPath, options.ModelSampleRate, modelInputChannels, progress, probe.Duration, cancellationToken).ConfigureAwait(false);
 
         Report(progress, DenoiseProcessingStage.DecodingAudio, 0, "Reading model input audio", null, probe.Duration, false, false);
-        var modelInput = ReadPcm16Wave(modelInputPath);
+        var (samples, sampleRate, channels) = ReadPcm16WavAsFloats(modelInputPath);
+        var modelInput = new WaveAudio(samples, sampleRate, channels);
 
         var processed = options.Mode switch
         {
             AudioDenoiseMode.Mono => await ProcessMonoAsync(modelInput, options, progress, cancellationToken).ConfigureAwait(false),
-            AudioDenoiseMode.MidSide => await ProcessStrongStereoAsync(modelInput, options, progress, cancellationToken).ConfigureAwait(false),
-            AudioDenoiseMode.StrongStereo => await ProcessStrongStereoAsync(modelInput, options, progress, cancellationToken).ConfigureAwait(false),
+            AudioDenoiseMode.MidSide or AudioDenoiseMode.StrongStereo => await ProcessStrongStereoAsync(modelInput, options, progress, cancellationToken).ConfigureAwait(false),
             _ => throw new DenoiseValidationException("Unsupported denoise mode.")
         };
 
@@ -1132,7 +1109,7 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         }
 
         var processedModelPath = CreateTempFile(tempFiles, ".wav");
-        WritePcm16Wave(processedModelPath, processed);
+        WriteFloatsAsPcm16Wav(processedModelPath, processed.Samples, processed.SampleRate, processed.Channels);
 
         if (outputSampleRate != options.ModelSampleRate)
         {
@@ -1206,6 +1183,7 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         string stageDescription = "Running DTLN inference")
     {
         var totalSamples = samples.Count;
+        var totalDuration = TimeSpan.FromSeconds(totalSamples / (double)sampleRate);
         IReadOnlyList<float> current = samples;
         float[] result = [];
         for (var pass = 0; pass < denoisePasses; pass++)
@@ -1226,13 +1204,13 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
                     scaledPercent,
                     passDescription,
                     TimeSpan.FromSeconds(totalSamples == 0 ? 0 : (totalSamples * percent) / sampleRate),
-                    TimeSpan.FromSeconds(totalSamples / (double)sampleRate),
+                    totalDuration,
                     true,
                     false,
                     eta);
             });
 
-            Report(progress, DenoiseProcessingStage.RunningInference, passOffset, passDescription, TimeSpan.Zero, TimeSpan.FromSeconds(totalSamples / (double)sampleRate), true, false);
+            Report(progress, DenoiseProcessingStage.RunningInference, passOffset, passDescription, TimeSpan.Zero, totalDuration, true, false);
             result = await _denoiseEngine.DenoiseMonoAsync(current, sampleRate, inferenceProgress, cancellationToken).ConfigureAwait(false);
             if (result.Length != samples.Count)
             {
@@ -1242,7 +1220,7 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
             current = result;
         }
 
-        Report(progress, DenoiseProcessingStage.RunningInference, Math.Clamp(stageProgressOffset + stageProgressScale, 0d, 1d), "DTLN inference complete", TimeSpan.FromSeconds(totalSamples / (double)sampleRate), TimeSpan.FromSeconds(totalSamples / (double)sampleRate), false, false);
+        Report(progress, DenoiseProcessingStage.RunningInference, Math.Clamp(stageProgressOffset + stageProgressScale, 0d, 1d), "DTLN inference complete", totalDuration, totalDuration, false, false);
         return result;
     }
 
@@ -1268,13 +1246,8 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         TimeSpan? duration,
         CancellationToken cancellationToken)
     {
-        var args = new List<string>
+        var args = new List<string>(FfmpegBaseArgs)
         {
-            "-y",
-            "-hide_banner",
-            "-progress",
-            "pipe:2",
-            "-nostats",
             "-i",
             Path.GetFullPath(inputPath),
             "-map",
@@ -1291,50 +1264,27 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
             Path.GetFullPath(outputWavPath)
         };
 
-        var observer = CreateFfmpegProgressObserver(DenoiseProcessingStage.ExtractingAudio, "Preparing model input audio", progress, duration);
-        await RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffmpeg"), args, cancellationToken, observer).ConfigureAwait(false);
+        await RunFfmpegAsync(args, DenoiseProcessingStage.ExtractingAudio, "Preparing model input audio", progress, duration, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task EncodeAudioAsync(
         string inputWavPath,
         string outputPath,
         int outputSampleRate,
-        AudioDenoiseOptions audioOptions,
-        VideoAudioDenoiseOptions? videoOptions,
         IProgress<DenoiseProgress>? progress,
         TimeSpan? duration,
         CancellationToken cancellationToken)
     {
-        var args = new List<string>
+        var args = new List<string>(FfmpegBaseArgs)
         {
-            "-y",
-            "-hide_banner",
-            "-progress",
-            "pipe:2",
-            "-nostats",
             "-i",
             Path.GetFullPath(inputWavPath),
             "-ar",
-            outputSampleRate.ToString(CultureInfo.InvariantCulture)
+            outputSampleRate.ToString(CultureInfo.InvariantCulture),
+            Path.GetFullPath(outputPath)
         };
 
-        var codec = videoOptions?.OutputAudioCodec;
-        if (!string.IsNullOrWhiteSpace(codec))
-        {
-            args.Add("-c:a");
-            args.Add(codec);
-        }
-
-        if (videoOptions?.OutputAudioBitrateKbps is int bitrate)
-        {
-            args.Add("-b:a");
-            args.Add(FormattableString.Invariant($"{bitrate}k"));
-        }
-
-        args.Add(Path.GetFullPath(outputPath));
-
-        var observer = CreateFfmpegProgressObserver(DenoiseProcessingStage.EncodingAudio, "Encoding output audio", progress, duration);
-        await RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffmpeg"), args, cancellationToken, observer).ConfigureAwait(false);
+        await RunFfmpegAsync(args, DenoiseProcessingStage.EncodingAudio, "Encoding output audio", progress, duration, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task RemuxVideoAsync(
@@ -1347,13 +1297,8 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         TimeSpan? duration,
         CancellationToken cancellationToken)
     {
-        var args = new List<string>
+        var args = new List<string>(FfmpegBaseArgs)
         {
-            "-y",
-            "-hide_banner",
-            "-progress",
-            "pipe:2",
-            "-nostats",
             "-i",
             Path.GetFullPath(inputVideoPath),
             "-i",
@@ -1382,15 +1327,29 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
             args.Insert(args.Count - 1, FormattableString.Invariant($"{bitrate}k"));
         }
 
-        var observer = CreateFfmpegProgressObserver(DenoiseProcessingStage.RemuxingVideo, "Remuxing processed audio", progress, duration);
         try
         {
-            await RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffmpeg"), args, cancellationToken, observer).ConfigureAwait(false);
+            await RunFfmpegAsync(args, DenoiseProcessingStage.RemuxingVideo, "Remuxing processed audio", progress, duration, cancellationToken).ConfigureAwait(false);
         }
         catch (DenoiseProcessException ex)
         {
             throw new DenoiseRemuxException("Failed to remux processed audio into the output video.", ex);
         }
+    }
+
+    /// <summary>
+    /// Runs FFmpeg with executable fallback and stage-scoped progress reporting parsed from its progress output.
+    /// </summary>
+    private static Task<ProcessResult> RunFfmpegAsync(
+        IReadOnlyList<string> arguments,
+        DenoiseProcessingStage stage,
+        string stageDescription,
+        IProgress<DenoiseProgress>? progress,
+        TimeSpan? duration,
+        CancellationToken cancellationToken)
+    {
+        var observer = CreateFfmpegProgressObserver(stage, stageDescription, progress, duration);
+        return RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffmpeg"), arguments, cancellationToken, observer);
     }
 
     private static Action<string>? CreateFfmpegProgressObserver(
@@ -1437,6 +1396,14 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
 
             Report(progress, stage, isCompleted ? 1d : fraction, description, isCompleted ? duration : clampedProcessed, duration, false, true, eta);
         };
+    }
+
+    private static void ValidateRequest(string inputPath, string outputPath, AudioDenoiseOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ValidateInputPath(inputPath);
+        ValidateOutputPath(outputPath);
+        ValidateOptions(options);
     }
 
     private static void ValidateOptions(AudioDenoiseOptions options)
@@ -1553,7 +1520,11 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         }
     }
 
-    private static WaveAudio ReadPcm16Wave(string path)
+    /// <summary>
+    /// Reads a 16-bit PCM WAV file into interleaved float samples normalized to [-1, 1).
+    /// Pure static helper; candidate for extraction into a shared WavIo utility.
+    /// </summary>
+    private static (float[] Samples, int SampleRate, int Channels) ReadPcm16WavAsFloats(string path)
     {
         using var stream = File.OpenRead(path);
         using var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: false);
@@ -1614,30 +1585,34 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
             samples[i] = value / 32768f;
         }
 
-        return new WaveAudio(samples, sampleRate.Value, channels.Value);
+        return (samples, sampleRate.Value, channels.Value);
     }
 
-    private static void WritePcm16Wave(string path, WaveAudio audio)
+    /// <summary>
+    /// Writes interleaved float samples as a 16-bit PCM WAV file, clamping to [-1, 1].
+    /// Pure static helper; candidate for extraction into a shared WavIo utility.
+    /// </summary>
+    private static void WriteFloatsAsPcm16Wav(string path, float[] samples, int sampleRate, int channels)
     {
         using var stream = File.Create(path);
         using var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: false);
 
-        var dataLength = audio.Samples.Length * 2;
+        var dataLength = samples.Length * 2;
         writer.Write(Encoding.ASCII.GetBytes("RIFF"));
         writer.Write(36 + dataLength);
         writer.Write(Encoding.ASCII.GetBytes("WAVE"));
         writer.Write(Encoding.ASCII.GetBytes("fmt "));
         writer.Write(16);
         writer.Write((short)1);
-        writer.Write((short)audio.Channels);
-        writer.Write(audio.SampleRate);
-        writer.Write(audio.SampleRate * audio.Channels * 2);
-        writer.Write((short)(audio.Channels * 2));
+        writer.Write((short)channels);
+        writer.Write(sampleRate);
+        writer.Write(sampleRate * channels * 2);
+        writer.Write((short)(channels * 2));
         writer.Write((short)16);
         writer.Write(Encoding.ASCII.GetBytes("data"));
         writer.Write(dataLength);
 
-        foreach (var sample in audio.Samples)
+        foreach (var sample in samples)
         {
             var clamped = Math.Clamp(sample, -1f, 1f);
             var pcm = (short)Math.Clamp(Math.Round(clamped * 32767f), short.MinValue, short.MaxValue);
