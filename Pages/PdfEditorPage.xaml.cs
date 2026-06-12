@@ -71,96 +71,48 @@ namespace Files_Tools.Pages
 
         public void HandleNavigationViewSelection(string tag)
         {
+            HideAllOperationPanels();
+
             if (string.IsNullOrEmpty(tag))
             {
-                HideAllOperationPanels();
                 UpdateFileInfoPanel();
                 return;
             }
-
-            HideAllOperationPanels();
 
             var parts = tag.Split(':');
             string category = parts[0];
             string subcategory = parts.Length > 1 ? parts[1] : "";
 
-            switch (category)
+            UIElement? categoryPanel = category switch
             {
-                case "Organization":
-                    OrganizationPanel.Visibility = Visibility.Visible;
-                    SelectedOptionHeaderTextBlock.Text = "Organization";
+                "Organization" => OrganizationPanel,
+                "Transform"    => TransformPanel,
+                "Security"     => SecurityPanel,
+                "Content"      => ContentPanel,
+                "Repair"       => RepairPanel,
+                _              => null
+            };
+            if (categoryPanel is null) return;
 
-                    if (!string.IsNullOrEmpty(subcategory))
-                    {
-                        switch (subcategory)
-                        {
-                            case "Merge":
-                                MergePanel.Visibility = Visibility.Visible;
-                                break;
-                            case "Split":
-                                SplitPanel.Visibility = Visibility.Visible;
-                                break;
-                            case "Reorder":
-                                ReorderPanel.Visibility = Visibility.Visible;
-                                break;
-                            case "Extract":
-                                ExtractPanel.Visibility = Visibility.Visible;
-                                break;
-                        }
-                    }
-                    break;
+            categoryPanel.Visibility = Visibility.Visible;
+            SelectedOptionHeaderTextBlock.Text = category;
 
-                case "Transform":
-                    TransformPanel.Visibility = Visibility.Visible;
-                    SelectedOptionHeaderTextBlock.Text = "Transform";
-                    if (subcategory == "Rotate")
-                        RotatePanel.Visibility = Visibility.Visible;
-                    break;
-
-                case "Security":
-                    SecurityPanel.Visibility = Visibility.Visible;
-                    SelectedOptionHeaderTextBlock.Text = "Security";
-
-                    if (!string.IsNullOrEmpty(subcategory))
-                    {
-                        switch (subcategory)
-                        {
-                            case "Encrypt":
-                                EncryptPanel.Visibility = Visibility.Visible;
-                                break;
-                            case "Password":
-                                PasswordManagementPanel.Visibility = Visibility.Visible;
-                                break;
-                            case "Permissions":
-                                PermissionsPanel.Visibility = Visibility.Visible;
-                                break;
-                        }
-                    }
-                    break;
-
-                case "Content":
-                    ContentPanel.Visibility = Visibility.Visible;
-                    SelectedOptionHeaderTextBlock.Text = "Content";
-
-                    if (!string.IsNullOrEmpty(subcategory))
-                    {
-                        switch (subcategory)
-                        {
-                            case "OCR":
-                                OcrPanel.Visibility = Visibility.Visible;
-                                break;
-                            case "Metadata":
-                                MetadataPanel.Visibility = Visibility.Visible;
-                                break;
-                        }
-                    }
-                    break;
-
-                case "Repair":
-                    RepairPanel.Visibility = Visibility.Visible;
-                    SelectedOptionHeaderTextBlock.Text = "Repair";
-                    break;
-            }
+            UIElement? subPanel = (category, subcategory) switch
+            {
+                ("Organization", "Merge")       => MergePanel,
+                ("Organization", "Split")       => SplitPanel,
+                ("Organization", "Reorder")     => ReorderPanel,
+                ("Organization", "Extract")     => ExtractPanel,
+                ("Transform",    "Rotate")      => RotatePanel,
+                ("Security",     "Encrypt")     => EncryptPanel,
+                ("Security",     "Password")    => PasswordManagementPanel,
+                ("Security",     "Permissions") => PermissionsPanel,
+                ("Content",      "OCR")         => OcrPanel,
+                ("Content",      "Metadata")    => MetadataPanel,
+                _                               => null
+            };
+            if (subPanel is not null)
+                subPanel.Visibility = Visibility.Visible;
         }
 
         private void UpdateFileInfoPanel()
@@ -251,6 +203,41 @@ namespace Files_Tools.Pages
             }
         }
 
+        // ── Picker helpers ───────────────────────────────────────────────────────
+
+        /// <summary>Associates a picker with the main window so it can be shown (WinUI 3 requirement).</summary>
+        private static T InitPickerForMainWindow<T>(T picker)
+        {
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+            return picker;
+        }
+
+        private static FileOpenPicker CreatePdfOpenPicker()
+        {
+            var picker = new FileOpenPicker();
+            picker.FileTypeFilter.Add(".pdf");
+            return InitPickerForMainWindow(picker);
+        }
+
+        private static FolderPicker CreateFolderPicker()
+        {
+            var picker = new FolderPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
+            picker.FileTypeFilter.Add("*");
+            return InitPickerForMainWindow(picker);
+        }
+
+        private static FileSavePicker CreatePdfSavePicker(string suggestedFileName)
+        {
+            var picker = new FileSavePicker
+            {
+                SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+                SuggestedFileName = suggestedFileName
+            };
+            picker.FileTypeChoices.Add("PDF document", new List<string> { ".pdf" });
+            return InitPickerForMainWindow(picker);
+        }
+
         private void UploadSurface_DragOver(object sender, DragEventArgs e)
         {
             e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Copy;
@@ -272,11 +259,7 @@ namespace Files_Tools.Pages
         private async void UploadSurface_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
             if (App.MainWindow is null || _currentPdf != null) return;
-            var picker = new FileOpenPicker();
-            picker.FileTypeFilter.Add(".pdf");
-            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
-            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
-            var file = await picker.PickSingleFileAsync();
+            var file = await CreatePdfOpenPicker().PickSingleFileAsync();
             if (file != null)
             {
                 await LoadPdfFile(file);
@@ -666,30 +649,8 @@ namespace Files_Tools.Pages
 
                 foreach (var range in ranges)
                 {
-                    var trimmed = range.Trim();
-                    if (trimmed.Contains('-'))
-                    {
-                        var parts = trimmed.Split('-');
-                        if (parts.Length != 2)
-                            return $"Invalid range format: '{trimmed}'. Use format like '1-3'";
-
-                        if (!int.TryParse(parts[0], out int start) || !int.TryParse(parts[1], out int end))
-                            return $"Invalid range: '{trimmed}'. Page numbers must be integers";
-
-                        if (start > end)
-                            return $"Invalid range: '{trimmed}'. Start page must be less than or equal to end page";
-
-                        if (start < 1 || end < 1)
-                            return "Page numbers must be greater than 0";
-                    }
-                    else
-                    {
-                        if (!int.TryParse(trimmed, out int page))
-                            return $"Invalid page number: '{trimmed}'. Must be an integer";
-
-                        if (page < 1)
-                            return "Page numbers must be greater than 0";
-                    }
+                    if (ValidatePageRangeToken(range.Trim(), enforceMaxPage: false) is string error)
+                        return error;
                 }
 
                 return "";
@@ -698,6 +659,45 @@ namespace Files_Tools.Pages
             {
                 return $"Error parsing ranges: {ex.Message}";
             }
+        }
+
+        /// <summary>
+        /// Validates a single page-range token ("5" or "1-3"). Returns an error message, or
+        /// <c>null</c> when valid. When <paramref name="enforceMaxPage"/> is true, page numbers
+        /// must also fall within the loaded document's page count.
+        /// </summary>
+        private string? ValidatePageRangeToken(string trimmed, bool enforceMaxPage)
+        {
+            if (trimmed.Contains('-'))
+            {
+                var parts = trimmed.Split('-');
+                if (parts.Length != 2)
+                    return $"Invalid range format: '{trimmed}'. Use format like '1-3'";
+
+                if (!int.TryParse(parts[0], out int start) || !int.TryParse(parts[1], out int end))
+                    return $"Invalid range: '{trimmed}'. Page numbers must be integers";
+
+                if (start > end)
+                    return $"Invalid range: '{trimmed}'. Start page must be less than or equal to end page";
+
+                return ValidatePageBounds(start, end, enforceMaxPage);
+            }
+
+            if (!int.TryParse(trimmed, out int page))
+                return $"Invalid page number: '{trimmed}'. Must be an integer";
+
+            return ValidatePageBounds(page, page, enforceMaxPage);
+        }
+
+        private string? ValidatePageBounds(int low, int high, bool enforceMaxPage)
+        {
+            if (!enforceMaxPage)
+                return low < 1 || high < 1 ? "Page numbers must be greater than 0" : null;
+
+            if (low < 1 || (_currentPdf != null && high > _currentPdf.PageCount))
+                return $"Page numbers must be between 1 and {_currentPdf?.PageCount ?? 1}";
+
+            return null;
         }
 
         private string ValidateReorderSequence(string input)
@@ -744,30 +744,8 @@ namespace Files_Tools.Pages
 
                 foreach (var range in ranges)
                 {
-                    var trimmed = range.Trim();
-                    if (trimmed.Contains('-'))
-                    {
-                        var parts = trimmed.Split('-');
-                        if (parts.Length != 2)
-                            return $"Invalid range format: '{trimmed}'. Use format like '1-3'";
-
-                        if (!int.TryParse(parts[0], out int start) || !int.TryParse(parts[1], out int end))
-                            return $"Invalid range: '{trimmed}'. Page numbers must be integers";
-
-                        if (start > end)
-                            return $"Invalid range: '{trimmed}'. Start page must be less than or equal to end page";
-
-                        if (start < 1 || (_currentPdf != null && end > _currentPdf.PageCount))
-                            return $"Page numbers must be between 1 and {_currentPdf?.PageCount ?? 1}";
-                    }
-                    else
-                    {
-                        if (!int.TryParse(trimmed, out int page))
-                            return $"Invalid page number: '{trimmed}'. Must be an integer";
-
-                        if (page < 1 || (_currentPdf != null && page > _currentPdf.PageCount))
-                            return $"Page numbers must be between 1 and {_currentPdf?.PageCount ?? 1}";
-                    }
+                    if (ValidatePageRangeToken(range.Trim(), enforceMaxPage: true) is string error)
+                        return error;
                 }
 
                 return "";
@@ -949,36 +927,22 @@ namespace Files_Tools.Pages
                 return;
 
             bool folderOutput = IsFolderOutputOperation();
-            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
 
             string destination;
             string destinationName;
 
             if (folderOutput)
             {
-                var folderPicker = new FolderPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
-                folderPicker.FileTypeFilter.Add("*");
-                WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, hwnd);
-
-                var folder = await folderPicker.PickSingleFolderAsync();
+                var folder = await CreateFolderPicker().PickSingleFolderAsync();
                 if (folder is null) return;
-                destination = folder.Path;
-                destinationName = folder.Name;
+                (destination, destinationName) = (folder.Path, folder.Name);
             }
             else
             {
-                var picker = new FileSavePicker
-                {
-                    SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
-                    SuggestedFileName = $"{Path.GetFileNameWithoutExtension(_currentPdfFile.Name)}_processed"
-                };
-                picker.FileTypeChoices.Add("PDF document", new List<string> { ".pdf" });
-                WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
-
-                var saveFile = await picker.PickSaveFileAsync();
+                var saveFile = await CreatePdfSavePicker(
+                    $"{Path.GetFileNameWithoutExtension(_currentPdfFile.Name)}_processed").PickSaveFileAsync();
                 if (saveFile is null) return;
-                destination = saveFile.Path;
-                destinationName = saveFile.Name;
+                (destination, destinationName) = (saveFile.Path, saveFile.Name);
             }
 
             _isProcessing = true;
@@ -1284,13 +1248,7 @@ namespace Files_Tools.Pages
         {
             if (App.MainWindow is null) return;
 
-            var picker = new FolderPicker();
-            picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-            picker.FileTypeFilter.Add("*");
-            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
-            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
-
-            var folder = await picker.PickSingleFolderAsync();
+            var folder = await CreateFolderPicker().PickSingleFolderAsync();
             if (folder is null) return;
 
             _tessDataPath = folder.Path;
@@ -1486,16 +1444,8 @@ namespace Files_Tools.Pages
         {
             if (_currentPdfFile == null || _isProcessing || App.MainWindow is null) return;
 
-            var picker = new FileSavePicker
-            {
-                SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
-                SuggestedFileName = $"{Path.GetFileNameWithoutExtension(_currentPdfFile.Name)}_repaired"
-            };
-            picker.FileTypeChoices.Add("PDF document", new List<string> { ".pdf" });
-            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
-            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
-
-            var saveFile = await picker.PickSaveFileAsync();
+            var saveFile = await CreatePdfSavePicker(
+                $"{Path.GetFileNameWithoutExtension(_currentPdfFile.Name)}_repaired").PickSaveFileAsync();
             if (saveFile is null) return;
 
             _isProcessing = true;
@@ -1522,12 +1472,7 @@ namespace Files_Tools.Pages
         {
             if (App.MainWindow is null) return;
 
-            var picker = new FileOpenPicker();
-            picker.FileTypeFilter.Add(".pdf");
-            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
-            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
-
-            var files = await picker.PickMultipleFilesAsync();
+            var files = await CreatePdfOpenPicker().PickMultipleFilesAsync();
             foreach (var file in files)
             {
                 if (!_mergeFilePaths.Any(p => p.Equals(file.Path, StringComparison.OrdinalIgnoreCase)))
