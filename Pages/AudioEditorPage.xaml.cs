@@ -649,8 +649,7 @@ namespace Files_Tools.Pages
             if (App.MainWindow is null) return;
             var picker = new FileOpenPicker();
             foreach (var ext in SupportedAudioExtensions) picker.FileTypeFilter.Add(ext);
-            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
-            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+            InitializePickerWithMainWindow(picker);
             var file = await picker.PickSingleFileAsync();
             if (file is not null) await LoadAudioAsync(file);
         }
@@ -710,25 +709,26 @@ namespace Files_Tools.Pages
 
         private async Task UpdatePreviewInfoAsync(string path)
         {
+            var unknown = Strings.Get("AudioPage_Unknown");
             try
             {
                 var probe = await _videoAudioDenoiseService.ProbeAudioAsync(path);
                 _audioDuration = probe.Duration;
-                var unknown = Strings.Get("AudioPage_Unknown");
-                PreviewCodecTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewCodecFmt"), probe.CodecName ?? unknown);
-                PreviewRateTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewRateFmt"), $"{probe.SampleRate} Hz");
-                PreviewChannelsTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewChannelsFmt"), probe.Channels);
-                PreviewDurationTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewDurationFmt"), probe.Duration?.ToString() ?? unknown);
+                SetPreviewInfo(probe.CodecName ?? unknown, $"{probe.SampleRate} Hz", probe.Channels.ToString(), probe.Duration?.ToString() ?? unknown);
             }
             catch
             {
                 _audioDuration = null;
-                var unknown = Strings.Get("AudioPage_Unknown");
-                PreviewCodecTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewCodecFmt"), unknown);
-                PreviewRateTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewRateFmt"), unknown);
-                PreviewChannelsTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewChannelsFmt"), unknown);
-                PreviewDurationTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewDurationFmt"), unknown);
+                SetPreviewInfo(unknown, unknown, unknown, unknown);
             }
+        }
+
+        private void SetPreviewInfo(string codec, string rate, string channels, string duration)
+        {
+            PreviewCodecTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewCodecFmt"), codec);
+            PreviewRateTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewRateFmt"), rate);
+            PreviewChannelsTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewChannelsFmt"), channels);
+            PreviewDurationTextBlock.Text = string.Format(Strings.Get("AudioPage_PreviewDurationFmt"), duration);
         }
 
         private void OnControlChanged(object sender, object e) => RefreshValidationAndState();
@@ -758,23 +758,8 @@ namespace Files_Tools.Pages
             var warnings = new List<string>();
             try
             {
-                var steps = BuildPipelineSteps();
-                var currentInput = _sourceAudioFile.Path;
                 var finalOutput = Path.GetFullPath(outputPath);
-                _pipelineStepCount = steps.Count;
-
-                for (var i = 0; i < steps.Count; i++)
-                {
-                    var step = steps[i];
-                    _pipelineStepIndex = i;
-                    var stepOutput = i == steps.Count - 1 ? finalOutput
-                        : (step == AudioPipelineStep.Denoise || step == AudioPipelineStep.Podcast) ? CreateTemporaryWavPath()
-                        : CreateTemporaryAudioPath(finalOutput);
-                    if (i < steps.Count - 1) tempFiles.Add(stepOutput);
-                    await ExecuteStepAsync(step, currentInput, stepOutput, warnings, _processingCancellation.Token);
-                    currentInput = stepOutput;
-                }
-
+                await RunPipelineAsync(finalOutput, tempFiles, warnings, _processingCancellation.Token);
                 await ShowSimpleDialogAsync(Strings.Get("AudioPage_ProcessingComplete"), BuildCompletionMessage(finalOutput, warnings));
                 LoadedAudioInfoTextBlock.Text = string.Format(Strings.Get("AudioPage_SavedFmt"), Path.GetFileName(finalOutput));
                 await UpdatePreviewInfoAsync(finalOutput);
@@ -946,8 +931,7 @@ namespace Files_Tools.Pages
             };
             picker.FileTypeChoices.Add("Text", new List<string> { ".txt" });
             picker.DefaultFileExtension = ".txt";
-            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
-            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+            InitializePickerWithMainWindow(picker);
             var file = await picker.PickSaveFileAsync();
             if (file is null)
             {
@@ -956,6 +940,36 @@ namespace Files_Tools.Pages
 
             await File.WriteAllTextAsync(file.Path, text);
             _transcriptionStatusTextBlock.Text = string.Format(Strings.Get("AudioPage_TranscriptionSavedFmt"), file.Path);
+        }
+
+        /// <summary>Runs every enabled pipeline step, chaining each step's output into the next step's input.</summary>
+        private async Task RunPipelineAsync(string finalOutput, List<string> tempFiles, List<string> warnings, CancellationToken ct)
+        {
+            var steps = BuildPipelineSteps();
+            var currentInput = _sourceAudioFile!.Path;
+            _pipelineStepCount = steps.Count;
+
+            for (var i = 0; i < steps.Count; i++)
+            {
+                var step = steps[i];
+                _pipelineStepIndex = i;
+                var isLastStep = i == steps.Count - 1;
+                var stepOutput = isLastStep ? finalOutput : CreateTemporaryStepOutputPath(step, finalOutput);
+                if (!isLastStep) tempFiles.Add(stepOutput);
+                await ExecuteStepAsync(step, currentInput, stepOutput, warnings, ct);
+                currentInput = stepOutput;
+            }
+        }
+
+        private static string CreateTemporaryStepOutputPath(AudioPipelineStep step, string finalOutputPath)
+        {
+            // VoiceStudio-backed steps always produce WAV; other steps keep the final extension.
+            var extension = step is AudioPipelineStep.Denoise or AudioPipelineStep.Podcast
+                ? ".wav"
+                : Path.GetExtension(finalOutputPath) is { Length: > 0 } ext ? ext : ".wav";
+            var tempDirectory = Path.Combine(Path.GetTempPath(), "files-tools-audio-stage");
+            Directory.CreateDirectory(tempDirectory);
+            return Path.Combine(tempDirectory, Guid.NewGuid().ToString("N") + extension);
         }
 
         private async Task ExecuteStepAsync(AudioPipelineStep step, string inputPath, string outputPath, List<string> warnings, CancellationToken ct)
@@ -1208,39 +1222,24 @@ namespace Files_Tools.Pages
 
         private void UpdateOptionUiState()
         {
-            SetDependentOptionsState(_outputFormatComboBox, true);
-            SetDependentOptionsState(_outputCodecComboBox, true);
-            SetDependentOptionsState(_bitrateNumberBox, true);
-            SetDependentOptionsState(_sampleRateNumberBox, true);
-            SetDependentOptionsState(_channelComboBox, true);
+            SetDependentOptionsState(true, _outputFormatComboBox, _outputCodecComboBox, _bitrateNumberBox, _sampleRateNumberBox, _channelComboBox);
 
-            SetDependentOptionsState(_compressionModeComboBox, _enableCompressionCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_compressionCodecComboBox, _enableCompressionCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_compressionBitrateNumberBox, _enableCompressionCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_compressionSampleRateNumberBox, _enableCompressionCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_compressionChannelsComboBox, _enableCompressionCheckBox?.IsChecked ?? false);
+            SetDependentOptionsState(_enableCompressionCheckBox?.IsChecked ?? false,
+                _compressionModeComboBox, _compressionCodecComboBox, _compressionBitrateNumberBox, _compressionSampleRateNumberBox, _compressionChannelsComboBox);
 
-            SetDependentOptionsState(_trimReencodeCheckBox, _enableTrimCheckBox?.IsChecked ?? false);
+            SetDependentOptionsState(_enableTrimCheckBox?.IsChecked ?? false, _trimReencodeCheckBox);
 
-            SetDependentOptionsState(_silenceModeComboBox, _enableSilenceTrimCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_silenceThresholdNumberBox, _enableSilenceTrimCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_silenceDurationMsNumberBox, _enableSilenceTrimCheckBox?.IsChecked ?? false);
+            SetDependentOptionsState(_enableSilenceTrimCheckBox?.IsChecked ?? false,
+                _silenceModeComboBox, _silenceThresholdNumberBox, _silenceDurationMsNumberBox);
 
-            SetDependentOptionsState(_normalizeModeComboBox, _enableNormalizeCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_normalizePeakNumberBox, _enableNormalizeCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_normalizeLufsNumberBox, _enableNormalizeCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_normalizeLimiterCheckBox, _enableNormalizeCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_normalizeClipCheckBox, _enableNormalizeCheckBox?.IsChecked ?? false);
+            SetDependentOptionsState(_enableNormalizeCheckBox?.IsChecked ?? false,
+                _normalizeModeComboBox, _normalizePeakNumberBox, _normalizeLufsNumberBox, _normalizeLimiterCheckBox, _normalizeClipCheckBox);
 
-            SetDependentOptionsState(_eqPresetComboBox, _enableEqCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_eqPreventClipCheckBox, _enableEqCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_customEqBandsPanel, _enableEqCheckBox?.IsChecked ?? false);
-            SetDependentOptionsState(_addEqBandButton, _enableEqCheckBox?.IsChecked ?? false);
+            SetDependentOptionsState(_enableEqCheckBox?.IsChecked ?? false,
+                _eqPresetComboBox, _eqPreventClipCheckBox, _customEqBandsPanel, _addEqBandButton);
 
-            var podcastEnabled = _enablePodcastModeCheckBox?.IsChecked ?? false;
-            SetDependentOptionsState(_podcastDenoiseCheckBox, podcastEnabled);
-            SetDependentOptionsState(_podcastFullnessCheckBox, podcastEnabled);
-            SetDependentOptionsState(_podcastMasterCheckBox, podcastEnabled);
+            SetDependentOptionsState(_enablePodcastModeCheckBox?.IsChecked ?? false,
+                _podcastDenoiseCheckBox, _podcastFullnessCheckBox, _podcastMasterCheckBox);
 
             var isBusy = _isProcessing || _isInstallingTranscriptionModel || _isGeneratingTranscription;
             _downloadTranscriptionFeatureButton.IsEnabled = !isBusy;
@@ -1278,20 +1277,23 @@ namespace Files_Tools.Pages
             }
         }
 
-        private static void SetDependentOptionsState(UIElement? element, bool isEnabled)
+        private static void SetDependentOptionsState(bool isEnabled, params UIElement?[] elements)
         {
-            if (element is null)
+            foreach (var element in elements)
             {
-                return;
-            }
+                if (element is null)
+                {
+                    continue;
+                }
 
-            if (element is Control control)
-            {
-                control.IsEnabled = isEnabled;
-            }
+                if (element is Control control)
+                {
+                    control.IsEnabled = isEnabled;
+                }
 
-            element.IsHitTestVisible = isEnabled;
-            element.Opacity = isEnabled ? 1d : 0.5d;
+                element.IsHitTestVisible = isEnabled;
+                element.Opacity = isEnabled ? 1d : 0.5d;
+            }
         }
 
         private void SetProcessingUi(bool visible, string status, string eta, string detail, double progress)
@@ -1559,26 +1561,15 @@ namespace Files_Tools.Pages
                 SuggestedFileName = $"{Path.GetFileNameWithoutExtension(sourceFile.Name)}_processed_{DateTime.Now:yyyyMMdd_HHmmss}"
             };
             picker.FileTypeChoices.Add("Audio", new List<string> { extension });
-            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
-            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
+            InitializePickerWithMainWindow(picker);
             var file = await picker.PickSaveFileAsync();
             return file?.Path;
         }
 
-        private static string CreateTemporaryAudioPath(string finalOutputPath)
+        private static void InitializePickerWithMainWindow(object picker)
         {
-            var extension = Path.GetExtension(finalOutputPath);
-            if (string.IsNullOrWhiteSpace(extension)) extension = ".wav";
-            var tempDirectory = Path.Combine(Path.GetTempPath(), "files-tools-audio-stage");
-            Directory.CreateDirectory(tempDirectory);
-            return Path.Combine(tempDirectory, Guid.NewGuid().ToString("N") + extension);
-        }
-
-        private static string CreateTemporaryWavPath()
-        {
-            var tempDirectory = Path.Combine(Path.GetTempPath(), "files-tools-audio-stage");
-            Directory.CreateDirectory(tempDirectory);
-            return Path.Combine(tempDirectory, Guid.NewGuid().ToString("N") + ".wav");
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
         }
 
         private static void CleanupTemporaryFiles(IEnumerable<string> files)
