@@ -560,24 +560,24 @@ public sealed class BatchProcessingValidationException : ArgumentException
 /// </summary>
 public sealed class BatchProcessingService : IBatchProcessingService
 {
-    private readonly IAudioProcessingService _audio;
-    private readonly IVideoProcessingService _video;
+    private readonly IAudioService _audio;
+    private readonly IVideoService _video;
     private readonly IDocumentService _document;
     private readonly IPdfService _pdf;
-    private readonly IImageProcessingService _image;
+    private readonly IImageService _image;
 
     public BatchProcessingService(
-        IAudioProcessingService audioProcessingService,
-        IVideoProcessingService videoProcessingService,
+        IAudioService AudioService,
+        IVideoService VideoService,
         IDocumentService documentService,
         IPdfService pdfService,
-        IImageProcessingService imageProcessingService)
+        IImageService ImageService)
     {
-        _audio    = audioProcessingService;
-        _video    = videoProcessingService;
+        _audio    = AudioService;
+        _video    = VideoService;
         _document = documentService;
         _pdf      = pdfService;
-        _image    = imageProcessingService;
+        _image    = ImageService;
     }
 
     // ── IBatchProcessingService ───────────────────────────────────────────────
@@ -1127,17 +1127,17 @@ public sealed class BatchProcessingService : IBatchProcessingService
               }
             : null;
 
-        var subtitlesService = new SubtitlesService();
+        var SubtitleService = new SubtitleService();
 
         if (op.UseAdvancedAss)
         {
             if (op.UseKaraoke)
-                await subtitlesService.GenerateKaraokeAssAsync(input, subtitlePath, postprocessingOptions, op.StylePreset, op.Placement, cancellationToken: ct).ConfigureAwait(false);
+                await SubtitleService.GenerateKaraokeAssAsync(input, subtitlePath, postprocessingOptions, op.StylePreset, op.Placement, cancellationToken: ct).ConfigureAwait(false);
             else
-                await subtitlesService.GenerateStyledAssAsync(input, subtitlePath, postprocessingOptions, op.StylePreset, op.Placement, cancellationToken: ct).ConfigureAwait(false);
+                await SubtitleService.GenerateStyledAssAsync(input, subtitlePath, postprocessingOptions, op.StylePreset, op.Placement, cancellationToken: ct).ConfigureAwait(false);
         }
         else
-            await subtitlesService.GenerateSrtAsync(input, subtitlePath, ct).ConfigureAwait(false);
+            await SubtitleService.GenerateSrtAsync(input, subtitlePath, ct).ConfigureAwait(false);
 
         var muxOptions = new MuxSubtitleOptions
         {

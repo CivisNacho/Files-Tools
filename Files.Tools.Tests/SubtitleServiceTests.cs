@@ -3,11 +3,11 @@ using Files_Tools.Services;
 namespace Files.Tools.Tests;
 
 [TestClass]
-public class SubtitlesServiceTests
+public class SubtitleServiceTests
 {
     private string _tempRoot = null!;
-    private FakeAudioTranscriptionService _audioTranscriptionService = null!;
-    private SubtitlesService _service = null!;
+    private FakeTranscriptionService _TranscriptionService = null!;
+    private SubtitleService _service = null!;
 
     [TestInitialize]
     public void Initialize()
@@ -15,8 +15,8 @@ public class SubtitlesServiceTests
         _tempRoot = Path.Combine(Path.GetTempPath(), "files-tools-subtitles-tests", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_tempRoot);
 
-        _audioTranscriptionService = new FakeAudioTranscriptionService();
-        _service = new SubtitlesService(_audioTranscriptionService);
+        _TranscriptionService = new FakeTranscriptionService();
+        _service = new SubtitleService(_TranscriptionService);
     }
 
     [TestCleanup]
@@ -40,7 +40,7 @@ public class SubtitlesServiceTests
     {
         var input = Path.Combine(_tempRoot, "input.wav");
         File.WriteAllBytes(input, [0x52, 0x49, 0x46, 0x46]);
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromMilliseconds(950), "First line"),
             new AudioTranscriptionSegment(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2), "  "),
@@ -64,7 +64,7 @@ public class SubtitlesServiceTests
     {
         var input = Path.Combine(_tempRoot, "input.wav");
         File.WriteAllBytes(input, [0x52, 0x49, 0x46, 0x46]);
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromMilliseconds(500), "First line")
         ];
@@ -82,7 +82,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public void BuildSrt_UsesMinimumPositiveDuration_WhenSegmentEndIsNotAfterStart()
     {
-        var srt = SubtitlesService.BuildSrt(
+        var srt = SubtitleService.BuildSrt(
         [
             new AudioTranscriptionSegment(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(3), "Static")
         ]);
@@ -93,7 +93,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task GenerateAdvancedTranscriptionDraftAsync_ReturnsNormalizedSegmentsWithoutPostprocessing()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.FromMilliseconds(-250), TimeSpan.FromSeconds(2), "  Hello \n world "),
             new AudioTranscriptionSegment(TimeSpan.FromSeconds(2.02), TimeSpan.FromSeconds(2.02), "Second line"),
@@ -113,7 +113,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task GenerateAdvancedDraftAsync_NormalizesText_AndRemovesEmptySegments()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.FromMilliseconds(-500), TimeSpan.FromSeconds(2), "  Hello \n world\t "),
             new AudioTranscriptionSegment(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(4), "   ")
@@ -130,7 +130,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task BuildSubtitleDraftFromTranscription_AppliesReviewedTextBeforePostprocessing()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(0.5), "Helo"),
             new AudioTranscriptionSegment(TimeSpan.FromSeconds(0.55), TimeSpan.FromSeconds(2.5), "wrld")
@@ -151,7 +151,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task BuildSubtitleDraftFromTranscription_UsesMaximumDurationToChangeSectionCount()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(8), "one two three four")
         ];
@@ -181,7 +181,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task BuildSubtitleDraftFromTranscription_UsesMaxWordsPerSectionToChangeSectionCount()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(6), "one two three four five six")
         ];
@@ -212,7 +212,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task BuildSubtitleDraftFromTranscription_EnforcesDurationAndWordCapsTogether()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(8), "one two three four five six seven eight")
         ];
@@ -236,12 +236,12 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task GenerateAdvancedDraftAsync_FixesOverlaps_ByTrimmingPreviousCue()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(3), "First subtitle"),
             new AudioTranscriptionSegment(TimeSpan.FromSeconds(2.5), TimeSpan.FromSeconds(4), "Second subtitle")
         ];
-        _audioTranscriptionService.Words =
+        _TranscriptionService.Words =
         [
             new AudioTranscriptionWord(TimeSpan.Zero, TimeSpan.FromSeconds(3), "First subtitle."),
             new AudioTranscriptionWord(TimeSpan.FromSeconds(2.5), TimeSpan.FromSeconds(4), "Second subtitle")
@@ -256,7 +256,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task GenerateAdvancedDraftAsync_MergesTinyFragments_WithClosestNeighbor()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(0.5), "Hi"),
             new AudioTranscriptionSegment(TimeSpan.FromSeconds(0.55), TimeSpan.FromSeconds(2.5), "there everyone")
@@ -273,7 +273,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task GenerateAdvancedDraftAsync_SplitsOversizedSegments_AndRedistributesTiming()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(
                 TimeSpan.Zero,
@@ -301,7 +301,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task GenerateAdvancedDraftAsync_ReflowsLines_ToTwoBalancedLines()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(
                 TimeSpan.Zero,
@@ -320,7 +320,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task GenerateAdvancedDraftAsync_ExtendsTiming_WhenReadableSlackExists()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(1), "Subtitle needs time now"),
             new AudioTranscriptionSegment(TimeSpan.FromSeconds(1.5), TimeSpan.FromSeconds(3.5), "Next cue")
@@ -336,14 +336,14 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task GenerateAdvancedDraftAsync_ClampsShortGaps_AndPreservesAcceptableAndIntentionalPauses()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(1), "One"),
             new AudioTranscriptionSegment(TimeSpan.FromSeconds(1.05), TimeSpan.FromSeconds(2.05), "Two"),
             new AudioTranscriptionSegment(TimeSpan.FromSeconds(2.23), TimeSpan.FromSeconds(3.23), "Three"),
             new AudioTranscriptionSegment(TimeSpan.FromSeconds(4.13), TimeSpan.FromSeconds(5.13), "Four")
         ];
-        _audioTranscriptionService.Words =
+        _TranscriptionService.Words =
         [
             new AudioTranscriptionWord(TimeSpan.Zero, TimeSpan.FromSeconds(1), "One."),
             new AudioTranscriptionWord(TimeSpan.FromSeconds(1.05), TimeSpan.FromSeconds(2.05), "Two."),
@@ -361,7 +361,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task ApplyCorrections_NormalizesTextOnlyEdits()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2), "Original text"),
             new AudioTranscriptionSegment(TimeSpan.FromSeconds(2.5), TimeSpan.FromSeconds(4), "Second subtitle")
@@ -380,12 +380,12 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task ApplyCorrections_RepairsTimingOnlyEdits_Locally()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(1.5), "One"),
             new AudioTranscriptionSegment(TimeSpan.FromSeconds(1.7), TimeSpan.FromSeconds(3), "Two")
         ];
-        _audioTranscriptionService.Words =
+        _TranscriptionService.Words =
         [
             new AudioTranscriptionWord(TimeSpan.Zero, TimeSpan.FromSeconds(1.5), "One."),
             new AudioTranscriptionWord(TimeSpan.FromSeconds(1.7), TimeSpan.FromSeconds(3), "Two")
@@ -404,7 +404,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task ApplyCorrections_HandlesCombinedTextAndTimingEdits()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(4), "Short subtitle")
         ];
@@ -428,7 +428,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task GenerateAdvancedDraftAsync_ReportsValidationIssues_ForResidualProblems()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromMilliseconds(500), "Hi")
         ];
@@ -441,7 +441,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task GenerateKaraokeAssAsync_WritesAssFile_AndNormalizesExtension()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2.1), "Hello world")
         ];
@@ -462,7 +462,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task GenerateKaraokeAssAsync_RendersTimedKaraokeTags_PerWord()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2.4), "One two")
         ];
@@ -480,7 +480,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task RenderKaraokeAss_UsesReviewedTranscriptionText()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2.5), "helo wrld")
         ];
@@ -530,7 +530,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task GenerateKaraokeAssAsync_PreservesIntentionalPauseBoundaries()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(1.2), "First"),
             new AudioTranscriptionSegment(TimeSpan.FromSeconds(2.2), TimeSpan.FromSeconds(3.2), "Second")
@@ -549,7 +549,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task GenerateStyledAssAsync_WritesAssFile_AndNormalizesExtension()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2), "Hello styled subtitle")
         ];
@@ -568,7 +568,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task BuildStyledAss_AfterCorrections_RendersCorrectedCueText()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2), "Original subtitle")
         ];
@@ -578,7 +578,7 @@ public class SubtitlesServiceTests
             draft,
             [new SubtitleSegmentCorrection(draft.Cues[0].Id, "Corrected subtitle", TimeSpan.Zero, TimeSpan.FromSeconds(2.2))]);
         var styled = _service.ApplyStylePreset(corrected);
-        var ass = SubtitlesService.BuildStyledAss(styled);
+        var ass = SubtitleService.BuildStyledAss(styled);
 
         StringAssert.Contains(ass, "CORRECTED SUBTITLE");
         StringAssert.Contains(ass, "Dialogue: 0,0:00:00.00,0:00:02.20,");
@@ -587,7 +587,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task BuildStyledAss_AfterTimingCorrections_RendersCorrectedCueTiming()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3), "Timing sample")
         ];
@@ -597,7 +597,7 @@ public class SubtitlesServiceTests
             draft,
             [new SubtitleSegmentCorrection(draft.Cues[0].Id, null, TimeSpan.FromSeconds(0.25), TimeSpan.FromSeconds(3.75))]);
         var styled = _service.ApplyStylePreset(corrected);
-        var ass = SubtitlesService.BuildStyledAss(styled);
+        var ass = SubtitleService.BuildStyledAss(styled);
 
         StringAssert.Contains(ass, "Dialogue: 0,0:00:00.25,0:00:03.75,");
     }
@@ -622,7 +622,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task ApplyStylePreset_UppercasesAndReflowsUsingPresetLimits()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(
                 TimeSpan.Zero,
@@ -644,7 +644,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task ApplyStylePreset_PreservesCueIdentityAndTiming()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3), "first subtitle")
         ];
@@ -660,7 +660,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task RenderKaraokeAss_WithGlowKaraoke_EmitsGlowAnimation()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2), "glow karaoke sample")
         ];
@@ -677,7 +677,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task RenderKaraokeAss_WithPunch_UsesWhiteBaseAndOrangeHighlight()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2), "punch karaoke sample")
         ];
@@ -786,7 +786,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task GenerateAdvancedDraftAsync_CarriesRealWordTiming_IntoEditorKaraoke()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(4), "alpha beta")
             {
@@ -811,7 +811,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task BuildSubtitleDraftFromTranscription_DropsRealWordTiming_WhenTextEdited()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(4), "alpha beta")
             {
@@ -1253,7 +1253,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task ApplyStylePreset_WithPlacement_UsesExactPositionOverrideMetadata()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2), "placed subtitle")
         ];
@@ -1277,7 +1277,7 @@ public class SubtitlesServiceTests
     [TestMethod]
     public async Task RenderKaraokeAss_WithPlacement_EmbedsAssPositionOverride()
     {
-        _audioTranscriptionService.Segments =
+        _TranscriptionService.Segments =
         [
             new AudioTranscriptionSegment(TimeSpan.Zero, TimeSpan.FromSeconds(2), "center cue")
         ];
@@ -1301,7 +1301,7 @@ public class SubtitlesServiceTests
         return input;
     }
 
-    private sealed class FakeAudioTranscriptionService : IAudioTranscriptionService
+    private sealed class FakeTranscriptionService : ITranscriptionService
     {
         public IReadOnlyList<AudioTranscriptionSegment> Segments { get; set; } = [];
         public IReadOnlyList<AudioTranscriptionWord>? Words { get; set; }

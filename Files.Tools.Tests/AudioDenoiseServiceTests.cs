@@ -6,7 +6,7 @@ using System.Text;
 namespace Files.Tools.Tests;
 
 [TestClass]
-public class VideoAudioDenoiseTests
+public class AudioDenoiseServiceTests
 {
     private string _tempRoot = null!;
 
@@ -39,7 +39,7 @@ public class VideoAudioDenoiseTests
         var input = Path.Combine(_tempRoot, "input.wav");
         var output = Path.Combine(_tempRoot, "output.wav");
         File.WriteAllText(input, "placeholder");
-        var service = new VideoAudioDenoise(new PassthroughDenoiseEngine());
+        var service = new AudioDenoiseService(new PassthroughDenoiseEngine());
 
         await AssertThrowsAsync<DenoiseValidationException>(async () =>
             await service.DenoiseAudioAsync(input, output, new AudioDenoiseOptions
@@ -54,7 +54,7 @@ public class VideoAudioDenoiseTests
         var input = Path.Combine(_tempRoot, "stereo-input.wav");
         var output = Path.Combine(_tempRoot, "mono-output.wav");
         WriteStereoSineWave(input);
-        var service = new VideoAudioDenoise(new PassthroughDenoiseEngine());
+        var service = new AudioDenoiseService(new PassthroughDenoiseEngine());
 
         var result = await service.DenoiseAudioAsync(input, output, new AudioDenoiseOptions
         {
@@ -80,7 +80,7 @@ public class VideoAudioDenoiseTests
         var input = Path.Combine(_tempRoot, "stereo-input.wav");
         var output = Path.Combine(_tempRoot, "strong-stereo-output.wav");
         WriteStereoSineWave(input);
-        var service = new VideoAudioDenoise(new ZeroDenoiseEngine());
+        var service = new AudioDenoiseService(new ZeroDenoiseEngine());
 
         var result = await service.DenoiseAudioAsync(input, output, new AudioDenoiseOptions
         {
@@ -106,7 +106,7 @@ public class VideoAudioDenoiseTests
         var input = Path.Combine(_tempRoot, "mono-input.wav");
         var output = Path.Combine(_tempRoot, "mono-amount-output.wav");
         WriteMonoSineWave(input);
-        var service = new VideoAudioDenoise(new ZeroDenoiseEngine());
+        var service = new AudioDenoiseService(new ZeroDenoiseEngine());
 
         await service.DenoiseAudioAsync(input, output, new AudioDenoiseOptions
         {
@@ -129,7 +129,7 @@ public class VideoAudioDenoiseTests
         var output = Path.Combine(_tempRoot, "mono-passes-output.wav");
         WriteMonoSineWave(input);
         var engine = new CountingDenoiseEngine();
-        var service = new VideoAudioDenoise(engine);
+        var service = new AudioDenoiseService(engine);
 
         await service.DenoiseAudioAsync(input, output, new AudioDenoiseOptions
         {
@@ -150,7 +150,7 @@ public class VideoAudioDenoiseTests
         var input = Path.Combine(_tempRoot, "input.wav");
         var output = Path.Combine(_tempRoot, "output.wav");
         WriteMonoSineWave(input);
-        var service = new VideoAudioDenoise();
+        var service = new AudioDenoiseService();
 
         var result = await service.DenoiseAudioAsync(input, output, new AudioDenoiseOptions
         {

@@ -1,4 +1,5 @@
 using Files_Tools.Services;
+using Files_Tools.Services.Infrastructure;
 
 namespace Files.Tools.Tests;
 
@@ -47,8 +48,8 @@ public class DeepFilterNetServiceTests
             return;
         }
 
-        var input = WaveReader.ReadMonoFloatWav(noisy);       // reads samples regardless of declared rate
-        var groundTruth = WaveReader.ReadMonoFloatWav(gt);
+        var input = WavIo.ReadMonoFloatWav(noisy);       // reads samples regardless of declared rate
+        var groundTruth = WavIo.ReadMonoFloatWav(gt);
 
         using var service = new DeepFilterNetService(model);
         var output = service.EnhanceMono(input);

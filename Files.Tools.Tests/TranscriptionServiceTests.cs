@@ -3,14 +3,14 @@ using Files_Tools.Services;
 namespace Files.Tools.Tests;
 
 [TestClass]
-public class AudioTranscriptionServiceTests
+public class TranscriptionServiceTests
 {
     private string _tempRoot = null!;
     private string _modelPath = null!;
     private FakeWhisperModelInstaller _installer = null!;
     private FakeWhisperTranscriber _transcriber = null!;
     private FakeMediaPreparationService _mediaPreparationService = null!;
-    private AudioTranscriptionService _service = null!;
+    private TranscriptionService _service = null!;
 
     [TestInitialize]
     public void Initialize()
@@ -22,7 +22,7 @@ public class AudioTranscriptionServiceTests
         _installer = new FakeWhisperModelInstaller();
         _transcriber = new FakeWhisperTranscriber();
         _mediaPreparationService = new FakeMediaPreparationService();
-        _service = new AudioTranscriptionService(_modelPath, _installer, _transcriber, _mediaPreparationService);
+        _service = new TranscriptionService(_modelPath, _installer, _transcriber, _mediaPreparationService);
     }
 
     [TestCleanup]
@@ -257,7 +257,7 @@ public class AudioTranscriptionServiceTests
         File.WriteAllText(_modelPath, "model");
     }
 
-    private sealed class FakeWhisperModelInstaller : AudioTranscriptionService.IWhisperModelInstaller
+    private sealed class FakeWhisperModelInstaller : TranscriptionService.IWhisperModelInstaller
     {
         public int CallCount { get; private set; }
 
@@ -272,7 +272,7 @@ public class AudioTranscriptionServiceTests
         }
     }
 
-    private sealed class FakeWhisperTranscriber : AudioTranscriptionService.IWhisperTranscriber
+    private sealed class FakeWhisperTranscriber : TranscriptionService.IWhisperTranscriber
     {
         public IReadOnlyList<AudioTranscriptionSegment> Segments { get; set; } = [];
 
@@ -284,11 +284,11 @@ public class AudioTranscriptionServiceTests
         }
     }
 
-    private sealed class FakeMediaPreparationService : AudioTranscriptionService.IMediaPreparationService
+    private sealed class FakeMediaPreparationService : TranscriptionService.IMediaPreparationService
     {
         public string? LastInputPath { get; private set; }
 
-        public Task<AudioTranscriptionService.PreparedAudio> PrepareAsync(string inputPath, IProgress<double>? progress, CancellationToken cancellationToken)
+        public Task<TranscriptionService.PreparedAudio> PrepareAsync(string inputPath, IProgress<double>? progress, CancellationToken cancellationToken)
         {
             LastInputPath = inputPath;
 
@@ -299,7 +299,7 @@ public class AudioTranscriptionServiceTests
             progress?.Report(0.5d);
             progress?.Report(1d);
 
-            return Task.FromResult(new AudioTranscriptionService.PreparedAudio(preparedPath, workingDirectory));
+            return Task.FromResult(new TranscriptionService.PreparedAudio(preparedPath, workingDirectory));
         }
     }
 

@@ -71,16 +71,16 @@ namespace Files_Tools.Pages
             [VideoContainerFormat.Avi] = new HashSet<string>(StringComparer.Ordinal) { "MP3", "AC3", "PCM_S16LE" }
         };
 
-        private readonly IVideoProcessingService _videoProcessingService = new VideoProcessingService();
-        private readonly IVideoAudioDenoiseService _videoAudioDenoiseService = new VideoAudioDenoise();
+        private readonly IVideoService _VideoService = new VideoService();
+        private readonly IAudioDenoiseService _audioDenoiseService = new AudioDenoiseService();
         private readonly VoiceStudioService _voiceStudioService = new();
 
         // Position within the multi-phase processing run (FFmpeg → denoise → studio voice), so
         // progress readouts show the percentage completed of the WHOLE run, not the current phase.
         private int _processingPhaseIndex;
         private int _processingPhaseCount = 1;
-        private readonly IAudioTranscriptionService _audioTranscriptionService = new AudioTranscriptionService();
-        private readonly ISubtitlesService _subtitlesService;
+        private readonly ITranscriptionService _TranscriptionService = new TranscriptionService();
+        private readonly ISubtitleService _SubtitleService;
         private StorageFile? _sourceVideoFile;
         private long? _sourceVideoFileSizeBytes;
         private string? _sourceVideoCodecName;
@@ -265,7 +265,7 @@ namespace Files_Tools.Pages
 
         public VideoEditorPage()
         {
-            _subtitlesService = new SubtitlesService(_audioTranscriptionService);
+            _SubtitleService = new SubtitleService(_TranscriptionService);
             InitializeComponent();
 
             InitializeDefaults();
@@ -276,7 +276,7 @@ namespace Files_Tools.Pages
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            _isTranscriptionModelInstalled = _audioTranscriptionService.IsInstalled();
+            _isTranscriptionModelInstalled = _TranscriptionService.IsInstalled();
             RefreshValidationAndState();
 
             if (e.Parameter is FileNavigationRequest navigationRequest &&
@@ -469,7 +469,7 @@ namespace Files_Tools.Pages
         {
             try
             {
-                var info = await _videoProcessingService.ProbeSourceAsync(path);
+                var info = await _VideoService.ProbeSourceAsync(path);
                 _sourceVideoCodecName = info.VideoCodecName;
                 _sourceAudioCodecName = info.AudioCodecName;
             }
@@ -581,7 +581,7 @@ namespace Files_Tools.Pages
                 var needsAudioPostPass = denoise is not null || podcastEnabled;
                 var processingOutputPath = needsAudioPostPass ? CreateTemporaryVideoPath(outputPath) : outputPath;
                 temporaryOutputPath = needsAudioPostPass ? processingOutputPath : null;
-                var estimate = await _videoProcessingService.EstimateProcessAsync(_sourceVideoFile.Path, options);
+                var estimate = await _VideoService.EstimateProcessAsync(_sourceVideoFile.Path, options);
 
                 var preflightDialog = new ContentDialog
                 {
@@ -605,12 +605,12 @@ namespace Files_Tools.Pages
                 RefreshValidationAndState();
 
                 var progress = new Progress<VideoProcessingProgress>(UpdateProcessingProgress);
-                await _videoProcessingService.ProcessVideoAsync(_sourceVideoFile.Path, processingOutputPath, options, progress);
+                await _VideoService.ProcessVideoAsync(_sourceVideoFile.Path, processingOutputPath, options, progress);
 
                 var warnings = new List<string>();
                 if (denoise is not null)
                 {
-                    var probe = await _videoAudioDenoiseService.ProbeAudioAsync(processingOutputPath);
+                    var probe = await _audioDenoiseService.ProbeAudioAsync(processingOutputPath);
                     var denoiseMode = denoise.Mode;
                     if (denoiseMode == AudioDenoiseMode.StrongStereo && probe.Channels != 2)
                     {
@@ -618,7 +618,7 @@ namespace Files_Tools.Pages
                         warnings.Add("Stereo denoise was selected, but staged output audio is not stereo. Denoise was applied in mono mode.");
                     }
 
-                    var denoiseOptions = new VideoAudioDenoiseOptions
+                    var denoiseOptions = new AudioDenoiseServiceOptions
                     {
                         Mode = denoiseMode,
                         DenoiseAmount = denoise.Strength,
@@ -629,7 +629,7 @@ namespace Files_Tools.Pages
 
                     _processingPhaseIndex = 1;
                     var denoiseProgress = new Progress<DenoiseProgress>(UpdateDenoiseProgress);
-                    await _videoAudioDenoiseService.DenoiseVideoAudioAsync(processingOutputPath, outputPath, denoiseOptions, denoiseProgress);
+                    await _audioDenoiseService.DenoiseVideoAudioAsync(processingOutputPath, outputPath, denoiseOptions, denoiseProgress);
                 }
 
                 if (podcastEnabled)
@@ -1177,7 +1177,7 @@ namespace Files_Tools.Pages
 
             try
             {
-                await _videoProcessingService.ExtractAudioAsync(_sourceVideoFile.Path, file.Path);
+                await _VideoService.ExtractAudioAsync(_sourceVideoFile.Path, file.Path);
                 await ShowSimpleDialogAsync("Audio extracted", $"Audio saved to:\n{file.Path}");
             }
             catch (Exception ex)
@@ -1267,8 +1267,8 @@ namespace Files_Tools.Pages
                     });
                 });
 
-                await _audioTranscriptionService.InstallAsync(progress, _transcriptionOperationCancellation.Token);
-                _isTranscriptionModelInstalled = _audioTranscriptionService.IsInstalled();
+                await _TranscriptionService.InstallAsync(progress, _transcriptionOperationCancellation.Token);
+                _isTranscriptionModelInstalled = _TranscriptionService.IsInstalled();
                 RefreshValidationAndState();
             }
             catch (OperationCanceledException)
@@ -1294,7 +1294,7 @@ namespace Files_Tools.Pages
                 return;
             }
 
-            if (!_audioTranscriptionService.IsInstalled())
+            if (!_TranscriptionService.IsInstalled())
             {
                 await ShowSimpleDialogAsync("Transcription feature required", "Download transcription feature before generating subtitles.");
                 return;
@@ -1333,7 +1333,7 @@ namespace Files_Tools.Pages
                 string generatedPath;
                 if (!isAdvanced)
                 {
-                    generatedPath = await _subtitlesService.GenerateSrtAsync(
+                    generatedPath = await _SubtitleService.GenerateSrtAsync(
                         _sourceVideoFile.Path,
                         outputPath,
                         progress,
@@ -1344,7 +1344,7 @@ namespace Files_Tools.Pages
                 }
                 else
                 {
-                    var draft = await _subtitlesService.GenerateAdvancedDraftAsync(
+                    var draft = await _SubtitleService.GenerateAdvancedDraftAsync(
                         _sourceVideoFile.Path,
                         subtitleOptions,
                         progress,
@@ -1429,7 +1429,7 @@ namespace Files_Tools.Pages
             TransformValidationTextBlock.Text = string.Join("\n", transformErrors);
             AdvancedValidationTextBlock.Text = string.Join("\n", advancedErrors);
 
-            _isTranscriptionModelInstalled = _audioTranscriptionService.IsInstalled();
+            _isTranscriptionModelInstalled = _TranscriptionService.IsInstalled();
             UpdateTranscriptionUiState();
             UpdateOptionUiState();
             ApplyButton.IsEnabled = !_isProcessing && _sourceVideoFile is not null && errors.Count == 0;
@@ -1922,7 +1922,7 @@ namespace Files_Tools.Pages
             {
                 try
                 {
-                    var info = await _videoProcessingService.ProbeSourceAsync(_sourceVideoFile.Path);
+                    var info = await _VideoService.ProbeSourceAsync(_sourceVideoFile.Path);
                     if (info.Width > 0 && info.Height > 0)
                     {
                         return new SubtitleRenderTarget(info.Width, info.Height);
@@ -2263,7 +2263,7 @@ namespace Files_Tools.Pages
             {
                 if (_sourceVideoFile is not null)
                 {
-                    var info = await _videoProcessingService.ProbeSourceAsync(_sourceVideoFile.Path);
+                    var info = await _VideoService.ProbeSourceAsync(_sourceVideoFile.Path);
                     if (info.Width > 0 && info.Height > 0)
                     {
                         _previewRenderTarget = new SubtitleRenderTarget(info.Width, info.Height);
@@ -2410,7 +2410,7 @@ namespace Files_Tools.Pages
                 }
 
                 var isAssMode = IsAdvancedSubtitleModeSelected();
-                var srtPreset = _subtitlesService.ApplyRenderTarget(
+                var srtPreset = _SubtitleService.ApplyRenderTarget(
                     isAssMode ? CreateAdvancedSubtitleStylePresetFromConfiguration() : CreateSrtPreviewPreset(),
                     target);
 
@@ -2456,7 +2456,7 @@ namespace Files_Tools.Pages
             // SAME render target the burn uses (probed encoded size), and apply the chunked karaoke
             // fit-to-frame clamp, so the preview matches the burned output rather than design-space size.
             var preset = CreateAdvancedSubtitleStylePresetFromConfiguration();
-            preset = _subtitlesService.ApplyRenderTarget(preset, target);
+            preset = _SubtitleService.ApplyRenderTarget(preset, target);
 
             var (words, starts, unitKey) = ResolvePreviewWords(cue, isActive, preset, position);
 
@@ -2964,7 +2964,7 @@ namespace Files_Tools.Pages
             _isRestylingAdvancedSubtitles = true;
             try
             {
-                var path = SubtitlesService.EnsureAssExtension(
+                var path = SubtitleService.EnsureAssExtension(
                     _generatedSubtitlePath
                     ?? _pendingAdvancedSubtitleOutputPath
                     ?? CreateGeneratedSubtitlePath(_sourceVideoFile, ".ass"));
@@ -2979,8 +2979,8 @@ namespace Files_Tools.Pages
                         : null);
 
                 var ass = IsKaraokeAdvancedSubtitleTypeSelected()
-                    ? _subtitlesService.RenderKaraokeAss(_advancedSubtitleDraft, preset, placement, target)
-                    : _subtitlesService.RenderStyledAss(_advancedSubtitleDraft, preset, placement, target);
+                    ? _SubtitleService.RenderKaraokeAss(_advancedSubtitleDraft, preset, placement, target)
+                    : _SubtitleService.RenderStyledAss(_advancedSubtitleDraft, preset, placement, target);
 
                 var directory = Path.GetDirectoryName(path);
                 if (!string.IsNullOrWhiteSpace(directory))
@@ -3215,7 +3215,7 @@ namespace Files_Tools.Pages
             storyboard.Begin();
         }
 
-        // Mirrors SubtitlesService.ResolveKaraokeFill for use in the preview without reaching
+        // Mirrors SubtitleService.ResolveKaraokeFill for use in the preview without reaching
         // into the service's private implementation.
         private static KaraokeFill ResolvePreviewKaraokeFill(SubtitleStylePreset preset)
         {
@@ -3240,7 +3240,7 @@ namespace Files_Tools.Pages
             };
         }
 
-        // Mirrors SubtitlesService.ResolveActiveWordScale.
+        // Mirrors SubtitleService.ResolveActiveWordScale.
         private static double ResolvePreviewActiveWordPopScale(SubtitleStylePreset preset)
         {
             if (preset.Effects is { Count: > 0 } effects)
@@ -3270,11 +3270,11 @@ namespace Files_Tools.Pages
             if (sourceWords is { Count: > 0 })
             {
                 // Same overlap + boundary-artifact filter as the .ass generator
-                // (SubtitlesService.BuildCueWordsFromSubtitleCue) so both paths map
+                // (SubtitleService.BuildCueWordsFromSubtitleCue) so both paths map
                 // the same source words to the same cue tokens.
                 var inCue = sourceWords
                     .Where(word => word.Start < cue.End && word.End > cue.Start
-                        && !SubtitlesService.IsBoundarySpanningArtifact(word, cue.Start))
+                        && !SubtitleService.IsBoundarySpanningArtifact(word, cue.Start))
                     .OrderBy(word => word.Start)
                     .ToList();
                 if (inCue.Count == wordCount)
@@ -3816,7 +3816,7 @@ namespace Files_Tools.Pages
                 var candidatePath = string.IsNullOrWhiteSpace(SubtitlePathTextBox?.Text)
                     ? _pendingAdvancedSubtitleOutputPath ?? CreateGeneratedSubtitlePath(_sourceVideoFile, ".ass")
                     : SubtitlePathTextBox.Text.Trim();
-                return await ApplyAdvancedDraftEditsAsync(SubtitlesService.EnsureAssExtension(candidatePath));
+                return await ApplyAdvancedDraftEditsAsync(SubtitleService.EnsureAssExtension(candidatePath));
             }
 
             await ShowSimpleDialogAsync("Subtitle editor", "This subtitle format is not editable in the current editor.");
@@ -3885,7 +3885,7 @@ namespace Files_Tools.Pages
 
             var reviewedDraft = corrections.Count == 0
                 ? _advancedSubtitleDraft
-                : _subtitlesService.ApplyCorrections(_advancedSubtitleDraft, corrections, _advancedSubtitleDraft.Options);
+                : _SubtitleService.ApplyCorrections(_advancedSubtitleDraft, corrections, _advancedSubtitleDraft.Options);
 
             await RenderAndStoreAdvancedAssAsync(reviewedDraft, path);
             return true;
@@ -3905,8 +3905,8 @@ namespace Files_Tools.Pages
             // video). Probe the source rather than trusting the 1920x1080 preview default.
             var target = await ResolveSubtitleRenderTargetAsync();
             var ass = IsKaraokeAdvancedSubtitleTypeSelected()
-                ? _subtitlesService.RenderKaraokeAss(reviewedDraft, preset, placement, target)
-                : _subtitlesService.RenderStyledAss(reviewedDraft, preset, placement, target);
+                ? _SubtitleService.RenderKaraokeAss(reviewedDraft, preset, placement, target)
+                : _SubtitleService.RenderStyledAss(reviewedDraft, preset, placement, target);
 
             var directory = Path.GetDirectoryName(path);
             if (!string.IsNullOrWhiteSpace(directory))
@@ -3960,11 +3960,11 @@ namespace Files_Tools.Pages
 
                     if (corrections.Count > 0)
                     {
-                        reviewedDraft = _subtitlesService.ApplyCorrections(_advancedSubtitleDraft, corrections, _advancedSubtitleDraft.Options);
+                        reviewedDraft = _SubtitleService.ApplyCorrections(_advancedSubtitleDraft, corrections, _advancedSubtitleDraft.Options);
                     }
                 }
 
-                var path = SubtitlesService.EnsureAssExtension(
+                var path = SubtitleService.EnsureAssExtension(
                     _generatedSubtitlePath
                     ?? _pendingAdvancedSubtitleOutputPath
                     ?? CreateGeneratedSubtitlePath(_sourceVideoFile, ".ass"));

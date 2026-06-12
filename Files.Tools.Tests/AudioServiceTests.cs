@@ -6,17 +6,17 @@ using System.Text;
 namespace Files.Tools.Tests;
 
 [TestClass]
-public class AudioProcessingServiceTests
+public class AudioServiceTests
 {
     private string _tempRoot = null!;
-    private AudioProcessingService _service = null!;
+    private AudioService _service = null!;
 
     [TestInitialize]
     public void Initialize()
     {
         _tempRoot = Path.Combine(Path.GetTempPath(), "files-tools-audio-tests", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_tempRoot);
-        _service = new AudioProcessingService();
+        _service = new AudioService();
     }
 
     [TestCleanup]
@@ -164,8 +164,8 @@ public class AudioProcessingServiceTests
     {
         var input = CreateTone("input.wav");
         var output = Path.Combine(_tempRoot, "podcast-denoise.wav");
-        var denoiseService = new PassthroughVideoAudioDenoiseService();
-        var service = new AudioProcessingService(denoiseService);
+        var denoiseService = new PassthroughAudioDenoiseService();
+        var service = new AudioService(denoiseService);
 
         var result = await service.ProcessPodcastAudioAsync(input, output, new AudioPodcastProcessingOptions
         {
@@ -383,7 +383,7 @@ public class AudioProcessingServiceTests
         Assert.Fail($"Expected exception of type {typeof(TException).Name}, but no exception was thrown.");
     }
 
-    private sealed class PassthroughVideoAudioDenoiseService : IVideoAudioDenoiseService
+    private sealed class PassthroughAudioDenoiseService : IAudioDenoiseService
     {
         public int AudioDenoiseCalls { get; private set; }
 
@@ -406,7 +406,7 @@ public class AudioProcessingServiceTests
             });
         }
 
-        public Task<DenoiseResult> DenoiseVideoAudioAsync(string inputVideoPath, string outputVideoPath, VideoAudioDenoiseOptions options, IProgress<DenoiseProgress>? progress = null, CancellationToken cancellationToken = default)
+        public Task<DenoiseResult> DenoiseVideoAudioAsync(string inputVideoPath, string outputVideoPath, AudioDenoiseServiceOptions options, IProgress<DenoiseProgress>? progress = null, CancellationToken cancellationToken = default)
         {
             throw new NotSupportedException();
         }

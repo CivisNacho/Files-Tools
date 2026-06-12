@@ -1,23 +1,21 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Files_Tools.Helpers;
+using Files_Tools.Services.Infrastructure;
 
 namespace Files_Tools.Services;
 
 /// <summary>
 /// Defines video and muxing operations backed by FFmpeg.
 /// </summary>
-public interface IVideoProcessingService
+public interface IVideoService
 {
     /// <summary>
     /// Uses FFprobe metadata to estimate how a processing request will behave before executing FFmpeg.
@@ -279,7 +277,7 @@ public sealed class ProcessVideoOptions
 }
 
 /// <summary>
-/// High-level denoise request options captured from UI. Execution is delegated to <see cref="IVideoAudioDenoiseService"/>.
+/// High-level denoise request options captured from UI. Execution is delegated to <see cref="IAudioDenoiseService"/>.
 /// </summary>
 public sealed class AudioDenoiseRequestOptions
 {
@@ -644,7 +642,7 @@ public sealed class VideoProcessingProgress
 /// <summary>
 /// Rich FFmpeg failure information used for debugging service operations.
 /// </summary>
-public sealed class VideoProcessingException : InvalidOperationException
+public sealed class VideoProcessingException : InvalidOperationException, Files_Tools.Services.Infrastructure.IHasExitCode
 {
     /// <summary>
     /// Creates an exception for a failed FFmpeg or FFprobe invocation.
@@ -702,15 +700,13 @@ public sealed class VideoProcessingException : InvalidOperationException
 /// <summary>
 /// FFmpeg-backed implementation for file-based video processing.
 /// </summary>
-public sealed class VideoProcessingService : IVideoProcessingService
+public sealed class VideoService : IVideoService
 {
     private const string FfprobeJsonArgs = "-v error -print_format json -show_streams -show_format";
     private static readonly object VideoEncoderPlanCacheLock = new();
     private static readonly Dictionary<string, VideoEncoderPlan> VideoEncoderPlanCache = new(StringComparer.OrdinalIgnoreCase);
 
     /// <inheritdoc />
-    #region Public API and pipeline orchestration
-
     public async Task<VideoProcessingEstimate> EstimateProcessAsync(string inputPath, ProcessVideoOptions options, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -939,22 +935,42 @@ public sealed class VideoProcessingService : IVideoProcessingService
         }
 
         var extractionTarget = ResolveAudioExtractionTarget(outputPath);
-        var canCopySourceAudio = string.Equals(inputInfo.PrimaryAudioStream.CodecName, extractionTarget.ProbeCodecName, StringComparison.OrdinalIgnoreCase);
-        var args = CreateBaseFfmpegArguments();
-        args.AddRange(
-        [
+        var args = new List<string>
+        {
+            "-y",
+            "-hide_banner",
+            "-progress",
+            "pipe:2",
+            "-nostats",
             "-i",
             Path.GetFullPath(inputPath),
             "-vn",
             "-map",
-            "0:a:0",
-            "-c:a",
-            canCopySourceAudio ? "copy" : extractionTarget.EncoderName,
-            Path.GetFullPath(outputPath)
-        ]);
+            "0:a:0"
+        };
+
+        if (string.Equals(inputInfo.PrimaryAudioStream.CodecName, extractionTarget.ProbeCodecName, StringComparison.OrdinalIgnoreCase))
+        {
+            args.Add("-c:a");
+            args.Add("copy");
+        }
+        else
+        {
+            args.Add("-c:a");
+            args.Add(extractionTarget.EncoderName);
+        }
+
+        args.Add(Path.GetFullPath(outputPath));
 
         var progressObserver = CreateProgressObserver(inputInfo.Duration ?? TimeSpan.Zero, progress);
-        await RunProcessWithFallbackAsync(ffmpegCandidates, args, cancellationToken, probeJson, progressObserver).ConfigureAwait(false);
+        var capturedProbeJson = probeJson;
+        await ProcessRunner.RunWithFallbackAsync(
+            ffmpegCandidates,
+            args,
+            cancellationToken,
+            progressObserver,
+            (message, binary, cmdLine, exitCode, stdout, stderr) =>
+                new VideoProcessingException(message, binary, cmdLine, exitCode, stdout, stderr, capturedProbeJson)).ConfigureAwait(false);
     }
 
     private static async Task ProcessVideoCoreAsync(string inputPath, string outputPath, ProcessVideoOptions options, CancellationToken cancellationToken, IProgress<VideoProcessingProgress>? progress = null)
@@ -979,18 +995,40 @@ public sealed class VideoProcessingService : IVideoProcessingService
             var ffmpegArgs = BuildFfmpegArguments(inputPath, finalOutputPath, outputFormat, options, inputInfo, streamPlan, videoEncoderPlan);
             var progressObserver = CreateProgressObserver(EstimateOutputDuration(inputInfo, options), progress);
 
-            await RunProcessWithFallbackAsync(ffmpegCandidates, ffmpegArgs, cancellationToken, probeJson, progressObserver).ConfigureAwait(false);
+            var capturedJson = probeJson;
+            await ProcessRunner.RunWithFallbackAsync(
+                ffmpegCandidates,
+                ffmpegArgs,
+                cancellationToken,
+                progressObserver,
+                (message, binary, cmdLine, exitCode, stdout, stderr) =>
+                    new VideoProcessingException(message, binary, cmdLine, exitCode, stdout, stderr, capturedJson)).ConfigureAwait(false);
 
             // SoftMux into a container that can't carry .ass natively: leave the video untouched and
             // drop the styled subtitle next to it as a sidecar the player loads automatically.
             WriteSidecarSubtitleIfNeeded(finalOutputPath, options, outputFormat);
         }
-        catch (Exception ex) when (ex is not (
-            VideoProcessingException or
-            ArgumentException or
-            FileNotFoundException or
-            NotSupportedException or
-            OperationCanceledException))
+        catch (VideoProcessingException)
+        {
+            throw;
+        }
+        catch (ArgumentException)
+        {
+            throw;
+        }
+        catch (FileNotFoundException)
+        {
+            throw;
+        }
+        catch (NotSupportedException)
+        {
+            throw;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
         {
             throw new VideoProcessingException(
                 "Video processing failed before FFmpeg completed.",
@@ -1004,26 +1042,16 @@ public sealed class VideoProcessingService : IVideoProcessingService
         }
     }
 
-    /// <summary>
-    /// Common FFmpeg prelude: overwrite output, no banner, and machine-readable progress
-    /// ("out_time="/"progress=" lines) emitted on stderr for <see cref="CreateProgressObserver"/>.
-    /// </summary>
-    #endregion
-
-    #region FFmpeg argument building
-
-    private static List<string> CreateBaseFfmpegArguments() =>
-    [
-        "-y",
-        "-hide_banner",
-        "-progress",
-        "pipe:2",
-        "-nostats"
-    ];
-
     private static List<string> BuildFfmpegArguments(string inputPath, string outputPath, VideoContainerFormat outputFormat, ProcessVideoOptions options, MediaInfo inputInfo, StreamPlan streamPlan, VideoEncoderPlan videoEncoderPlan)
     {
-        var args = CreateBaseFfmpegArguments();
+        var args = new List<string>
+        {
+            "-y",
+            "-hide_banner",
+            "-progress",
+            "pipe:2",
+            "-nostats"
+        };
 
         ApplyRepairInputArguments(args, options.Repair);
 
@@ -1081,7 +1109,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
         ApplyVideoCodecArguments(args, streamPlan, videoEncoderPlan);
         ApplyAudioCodecArguments(args, streamPlan, options);
         ApplySubtitleCodecArguments(args, streamPlan, options, outputFormat);
-        ApplyMetadataArguments(args, options);
+        ApplyMetadataArguments(args, options, inputInfo);
 
         if (options.AudioMux is not null && options.AudioMux.UseShortestDuration)
         {
@@ -1543,7 +1571,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
         }
     }
 
-    private static void ApplyMetadataArguments(List<string> args, ProcessVideoOptions options)
+    private static void ApplyMetadataArguments(List<string> args, ProcessVideoOptions options, MediaInfo inputInfo)
     {
         if (options.RemoveMetadata)
         {
@@ -1553,10 +1581,6 @@ public sealed class VideoProcessingService : IVideoProcessingService
             args.Add("-1");
         }
     }
-
-    #endregion
-
-    #region Video encoder planning (hardware/software)
 
     private static async Task<VideoEncoderPlan> ResolveVideoEncoderPlanAsync(IReadOnlyList<string> ffmpegCandidates, StreamPlan streamPlan, CancellationToken cancellationToken)
     {
@@ -1622,8 +1646,25 @@ public sealed class VideoProcessingService : IVideoProcessingService
             "-"
         };
 
-        var result = await TryRunProcessWithFallbackAsync(ffmpegCandidates, args, cancellationToken).ConfigureAwait(false);
-        return result?.ExitCode == 0;
+        try
+        {
+            await ProcessRunner.RunWithFallbackAsync(
+                ffmpegCandidates,
+                args,
+                cancellationToken,
+                standardErrorLineObserver: null,
+                static (message, binary, cmdLine, exitCode, stdout, stderr) =>
+                    new VideoProcessingException(message, binary, cmdLine, exitCode, stdout, stderr, probeJson: null)).ConfigureAwait(false);
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (VideoProcessingException)
+        {
+            return false;
+        }
     }
 
     private static bool CanUseHardwareEncoding(StreamPlan streamPlan)
@@ -1667,10 +1708,6 @@ public sealed class VideoProcessingService : IVideoProcessingService
     {
         return $"{string.Join("|", ffmpegCandidates)}::{streamPlan.VideoCodec}::{streamPlan.VideoNeedsEncoding}::{streamPlan.CopyAllStreams}::{streamPlan.VideoCrf.HasValue}";
     }
-
-    #endregion
-
-    #region Option validation
 
     private static void ValidateOptions(ProcessVideoOptions options)
     {
@@ -1807,10 +1844,6 @@ public sealed class VideoProcessingService : IVideoProcessingService
         }
     }
 
-    #endregion
-
-    #region FFprobe probing and media-info parsing
-
     private static async Task<(MediaInfo Info, string Json)> ProbeAsync(IReadOnlyList<string> ffprobeCandidates, string inputPath, CancellationToken cancellationToken)
     {
         var args = new List<string>(SplitArguments(FfprobeJsonArgs))
@@ -1818,7 +1851,14 @@ public sealed class VideoProcessingService : IVideoProcessingService
             Path.GetFullPath(inputPath)
         };
 
-        var result = await RunProcessWithFallbackAsync(ffprobeCandidates, args, cancellationToken, probeJson: null).ConfigureAwait(false);
+        var runResult = await ProcessRunner.RunWithFallbackAsync(
+            ffprobeCandidates,
+            args,
+            cancellationToken,
+            standardErrorLineObserver: null,
+            static (message, binary, cmdLine, exitCode, stdout, stderr) =>
+                new VideoProcessingException(message, binary, cmdLine, exitCode, stdout, stderr, probeJson: null)).ConfigureAwait(false);
+        var result = new ProcessResult(runResult.ExitCode, runResult.StandardOutput, runResult.StandardError);
 
         try
         {
@@ -1830,7 +1870,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
             throw new VideoProcessingException(
                 "FFprobe returned output that could not be parsed.",
                 ffprobeCandidates[0],
-                FormatCommandLine(ffprobeCandidates[0], args),
+                ProcessRunner.FormatCommandLine(ffprobeCandidates[0], args),
                 result.ExitCode,
                 result.StandardOutput,
                 result.StandardError,
@@ -1955,147 +1995,6 @@ public sealed class VideoProcessingService : IVideoProcessingService
         return null;
     }
 
-    #endregion
-
-    #region Process execution and progress reporting
-
-    private static async Task<ProcessResult> RunProcessWithFallbackAsync(IReadOnlyList<string> binaryCandidates, IReadOnlyList<string> arguments, CancellationToken cancellationToken, string? probeJson, Action<string>? standardErrorLineObserver = null)
-    {
-        VideoProcessingException? lastException = null;
-
-        foreach (var candidate in binaryCandidates)
-        {
-            try
-            {
-                return await RunProcessAsync(candidate, arguments, cancellationToken, probeJson, standardErrorLineObserver).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (VideoProcessingException ex) when (CanFallbackToPath(candidate, ex, binaryCandidates))
-            {
-                lastException = ex;
-            }
-        }
-
-        throw lastException ?? new InvalidOperationException("No FFmpeg executable candidates were available.");
-    }
-
-    private static async Task<ProcessResult?> TryRunProcessWithFallbackAsync(IReadOnlyList<string> binaryCandidates, IReadOnlyList<string> arguments, CancellationToken cancellationToken)
-    {
-        foreach (var candidate in binaryCandidates)
-        {
-            try
-            {
-                return await RunProcessAsync(candidate, arguments, cancellationToken, probeJson: null).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (VideoProcessingException)
-            {
-                // Silently continue to next candidate during testing
-            }
-        }
-
-        return null;
-    }
-
-    private static async Task<ProcessResult> RunProcessAsync(string binaryPath, IReadOnlyList<string> arguments, CancellationToken cancellationToken, string? probeJson, Action<string>? standardErrorLineObserver = null)
-    {
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = binaryPath,
-            RedirectStandardError = true,
-            RedirectStandardOutput = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            WorkingDirectory = Path.GetDirectoryName(binaryPath) ?? AppContext.BaseDirectory
-        };
-
-        foreach (var argument in arguments)
-        {
-            startInfo.ArgumentList.Add(argument);
-        }
-
-        using var process = new Process { StartInfo = startInfo, EnableRaisingEvents = true };
-
-        try
-        {
-            if (!process.Start())
-            {
-                throw new InvalidOperationException($"Unable to start process '{binaryPath}'.");
-            }
-        }
-        catch (Exception ex)
-        {
-            throw new VideoProcessingException(
-                "Failed to start FFmpeg/FFprobe process.",
-                binaryPath,
-                FormatCommandLine(binaryPath, arguments),
-                null,
-                string.Empty,
-                ex.Message,
-                probeJson,
-                ex);
-        }
-
-        using var cancellationRegistration = cancellationToken.Register(() =>
-        {
-            try
-            {
-                if (!process.HasExited)
-                {
-                    process.Kill(entireProcessTree: true);
-                }
-            }
-            catch
-            {
-                // Best effort kill on cancellation.
-            }
-        });
-
-        var stdoutTask = process.StandardOutput.ReadToEndAsync();
-        var stderrBuilder = new StringBuilder();
-        var stderrTask = Task.Run(async () =>
-        {
-            while (await process.StandardError.ReadLineAsync().ConfigureAwait(false) is string line)
-            {
-                stderrBuilder.AppendLine(line);
-                standardErrorLineObserver?.Invoke(line);
-            }
-        }, cancellationToken);
-
-        try
-        {
-            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
-
-        var stdout = await stdoutTask.ConfigureAwait(false);
-        await stderrTask.ConfigureAwait(false);
-        var stderr = stderrBuilder.ToString();
-
-        if (process.ExitCode != 0)
-        {
-            throw new VideoProcessingException(
-                "FFmpeg/FFprobe exited with a non-zero code.",
-                binaryPath,
-                FormatCommandLine(binaryPath, arguments),
-                process.ExitCode,
-                stdout,
-                stderr,
-                probeJson);
-        }
-
-        return new ProcessResult(process.ExitCode, stdout, stderr);
-    }
-
     private static Action<string>? CreateProgressObserver(TimeSpan totalDuration, IProgress<VideoProcessingProgress>? progress)
     {
         if (progress is null || totalDuration <= TimeSpan.Zero)
@@ -2117,16 +2016,9 @@ public sealed class VideoProcessingService : IVideoProcessingService
 
         return line =>
         {
-            if (line.StartsWith("out_time=", StringComparison.Ordinal))
+            if (FfmpegProgress.TryParseTime(line, out var parsed))
             {
-                lastProcessed = ParseProgressTimestamp(line["out_time=".Length..]);
-                return;
-            }
-
-            if (line.StartsWith("out_time_ms=", StringComparison.Ordinal) &&
-                long.TryParse(line["out_time_ms=".Length..], NumberStyles.Integer, CultureInfo.InvariantCulture, out var outTimeMs))
-            {
-                lastProcessed = TimeSpan.FromMilliseconds(outTimeMs / 1000d);
+                lastProcessed = parsed;
                 return;
             }
 
@@ -2151,30 +2043,6 @@ public sealed class VideoProcessingService : IVideoProcessingService
             }
         };
     }
-
-    private static TimeSpan ParseProgressTimestamp(string value)
-    {
-        if (TimeSpan.TryParseExact(value, @"hh\:mm\:ss\.ffffff", CultureInfo.InvariantCulture, out var precise))
-        {
-            return precise;
-        }
-
-        if (TimeSpan.TryParseExact(value, @"hh\:mm\:ss\.ff", CultureInfo.InvariantCulture, out var centiseconds))
-        {
-            return centiseconds;
-        }
-
-        if (TimeSpan.TryParse(value, CultureInfo.InvariantCulture, out var parsed))
-        {
-            return parsed;
-        }
-
-        return TimeSpan.Zero;
-    }
-
-    #endregion
-
-    #region Container, codec and subtitle mapping
 
     private static VideoContainerFormat ResolveOutputFormat(string inputPath, string outputPath, VideoContainerFormat? requestedFormat)
     {
@@ -2284,38 +2152,32 @@ public sealed class VideoProcessingService : IVideoProcessingService
         return true;
     }
 
-    private static readonly Dictionary<VideoContainerFormat, HashSet<VideoCodec>> SupportedVideoCodecsByContainer = new()
-    {
-        [VideoContainerFormat.Mp4] = [VideoCodec.H264, VideoCodec.H265, VideoCodec.Av1, VideoCodec.Mpeg4],
-        [VideoContainerFormat.Webm] = [VideoCodec.Vp8, VideoCodec.Vp9, VideoCodec.Av1],
-        [VideoContainerFormat.Gif] = [VideoCodec.Gif],
-        [VideoContainerFormat.Mkv] = [VideoCodec.H264, VideoCodec.H265, VideoCodec.Av1, VideoCodec.Vp8, VideoCodec.Vp9, VideoCodec.Mpeg4],
-        [VideoContainerFormat.Mov] = [VideoCodec.H264, VideoCodec.H265, VideoCodec.Av1, VideoCodec.Mpeg4],
-        [VideoContainerFormat.Avi] = [VideoCodec.H264, VideoCodec.Mpeg4]
-    };
-
-    private static readonly Dictionary<VideoContainerFormat, HashSet<AudioCodec>> SupportedAudioCodecsByContainer = new()
-    {
-        [VideoContainerFormat.Mp4] = [AudioCodec.Aac, AudioCodec.Mp3, AudioCodec.Ac3, AudioCodec.Flac],
-        [VideoContainerFormat.Webm] = [AudioCodec.Opus, AudioCodec.Vorbis],
-        [VideoContainerFormat.Gif] = [],
-        [VideoContainerFormat.Mkv] = [AudioCodec.Aac, AudioCodec.Opus, AudioCodec.Vorbis, AudioCodec.Mp3, AudioCodec.Ac3, AudioCodec.Flac, AudioCodec.PcmS16Le],
-        [VideoContainerFormat.Mov] = [AudioCodec.Aac, AudioCodec.Mp3, AudioCodec.Ac3, AudioCodec.Flac, AudioCodec.PcmS16Le],
-        [VideoContainerFormat.Avi] = [AudioCodec.Mp3, AudioCodec.Ac3, AudioCodec.PcmS16Le]
-    };
-
     private static HashSet<VideoCodec> GetSupportedVideoCodecs(VideoContainerFormat format)
     {
-        return SupportedVideoCodecsByContainer.TryGetValue(format, out var codecs)
-            ? codecs
-            : throw new ArgumentOutOfRangeException(nameof(format), format, null);
+        return format switch
+        {
+            VideoContainerFormat.Mp4 => new HashSet<VideoCodec> { VideoCodec.H264, VideoCodec.H265, VideoCodec.Av1, VideoCodec.Mpeg4 },
+            VideoContainerFormat.Webm => new HashSet<VideoCodec> { VideoCodec.Vp8, VideoCodec.Vp9, VideoCodec.Av1 },
+            VideoContainerFormat.Gif => new HashSet<VideoCodec> { VideoCodec.Gif },
+            VideoContainerFormat.Mkv => new HashSet<VideoCodec> { VideoCodec.H264, VideoCodec.H265, VideoCodec.Av1, VideoCodec.Vp8, VideoCodec.Vp9, VideoCodec.Mpeg4 },
+            VideoContainerFormat.Mov => new HashSet<VideoCodec> { VideoCodec.H264, VideoCodec.H265, VideoCodec.Av1, VideoCodec.Mpeg4 },
+            VideoContainerFormat.Avi => new HashSet<VideoCodec> { VideoCodec.H264, VideoCodec.Mpeg4 },
+            _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
+        };
     }
 
     private static HashSet<AudioCodec> GetSupportedAudioCodecs(VideoContainerFormat format)
     {
-        return SupportedAudioCodecsByContainer.TryGetValue(format, out var codecs)
-            ? codecs
-            : throw new ArgumentOutOfRangeException(nameof(format), format, null);
+        return format switch
+        {
+            VideoContainerFormat.Mp4 => new HashSet<AudioCodec> { AudioCodec.Aac, AudioCodec.Mp3, AudioCodec.Ac3, AudioCodec.Flac },
+            VideoContainerFormat.Webm => new HashSet<AudioCodec> { AudioCodec.Opus, AudioCodec.Vorbis },
+            VideoContainerFormat.Gif => new HashSet<AudioCodec>(),
+            VideoContainerFormat.Mkv => new HashSet<AudioCodec> { AudioCodec.Aac, AudioCodec.Opus, AudioCodec.Vorbis, AudioCodec.Mp3, AudioCodec.Ac3, AudioCodec.Flac, AudioCodec.PcmS16Le },
+            VideoContainerFormat.Mov => new HashSet<AudioCodec> { AudioCodec.Aac, AudioCodec.Mp3, AudioCodec.Ac3, AudioCodec.Flac, AudioCodec.PcmS16Le },
+            VideoContainerFormat.Avi => new HashSet<AudioCodec> { AudioCodec.Mp3, AudioCodec.Ac3, AudioCodec.PcmS16Le },
+            _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
+        };
     }
 
     private static VideoCodec GetDefaultVideoCodec(VideoContainerFormat format)
@@ -2356,16 +2218,13 @@ public sealed class VideoProcessingService : IVideoProcessingService
         return outputFormat switch
         {
             VideoContainerFormat.Mp4 or VideoContainerFormat.Mov => "mov_text",
-            VideoContainerFormat.Mkv => HasAnyExtension(options.SubtitlePath, ".ass", ".ssa") ? "ass" : "srt",
+            VideoContainerFormat.Mkv => Path.GetExtension(options.SubtitlePath).Equals(".ass", StringComparison.OrdinalIgnoreCase) ||
+                                         Path.GetExtension(options.SubtitlePath).Equals(".ssa", StringComparison.OrdinalIgnoreCase)
+                ? "ass"
+                : "srt",
             VideoContainerFormat.Webm => "webvtt",
             _ => null
         };
-    }
-
-    private static bool HasAnyExtension(string path, params string[] extensions)
-    {
-        var extension = Path.GetExtension(path);
-        return extensions.Contains(extension, StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -2391,7 +2250,9 @@ public sealed class VideoProcessingService : IVideoProcessingService
             return false;
         }
 
-        return HasAnyExtension(subtitleOptions.SubtitlePath, ".ass", ".ssa");
+        var extension = Path.GetExtension(subtitleOptions.SubtitlePath);
+        return extension.Equals(".ass", StringComparison.OrdinalIgnoreCase) ||
+               extension.Equals(".ssa", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -2403,11 +2264,15 @@ public sealed class VideoProcessingService : IVideoProcessingService
     /// </summary>
     private static string ResolveSubtitleEmbedCodec(string subtitlePath, VideoContainerFormat outputFormat, string plannedCodec)
     {
+        var extension = Path.GetExtension(subtitlePath);
         var isCopyNative = outputFormat switch
         {
             // Matroska carries ass/ssa/srt/vtt as-is.
-            VideoContainerFormat.Mkv => HasAnyExtension(subtitlePath, ".ass", ".ssa", ".srt", ".vtt"),
-            VideoContainerFormat.Webm => HasAnyExtension(subtitlePath, ".vtt"),
+            VideoContainerFormat.Mkv => extension.Equals(".ass", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".ssa", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".srt", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".vtt", StringComparison.OrdinalIgnoreCase),
+            VideoContainerFormat.Webm => extension.Equals(".vtt", StringComparison.OrdinalIgnoreCase),
             _ => false
         };
 
@@ -2639,33 +2504,6 @@ public sealed class VideoProcessingService : IVideoProcessingService
         return normalized;
     }
 
-    private static string FormatCommandLine(string binaryPath, IReadOnlyList<string> arguments)
-    {
-        var builder = new StringBuilder(binaryPath);
-        foreach (var argument in arguments)
-        {
-            builder.Append(' ');
-            builder.Append(QuoteArgument(argument));
-        }
-
-        return builder.ToString();
-    }
-
-    private static string QuoteArgument(string value)
-    {
-        if (string.IsNullOrEmpty(value))
-        {
-            return "\"\"";
-        }
-
-        if (!value.Any(char.IsWhiteSpace) && !value.Contains('"'))
-        {
-            return value;
-        }
-
-        return "\"" + value.Replace("\"", "\\\"") + "\"";
-    }
-
     private static void ApplyRepairInputArguments(List<string> args, RepairOptions? repair)
     {
         if (repair is null)
@@ -2692,10 +2530,6 @@ public sealed class VideoProcessingService : IVideoProcessingService
     {
         return options.Repair?.DropNonEssentialStreams == true;
     }
-
-    #endregion
-
-    #region Output estimation
 
     private static (int Width, int Height) EstimateOutputDimensions(MediaInfo inputInfo, ProcessVideoOptions options)
     {
@@ -2851,25 +2685,6 @@ public sealed class VideoProcessingService : IVideoProcessingService
 
     private static readonly string[] SupportedBurnInSubtitleExtensions = [".srt", ".ass", ".ssa", ".vtt"];
 
-    private static bool CanFallbackToPath(string candidate, VideoProcessingException exception, IReadOnlyList<string> candidates)
-    {
-        if (candidates.Count <= 1)
-        {
-            return false;
-        }
-
-        if (!Path.IsPathRooted(candidate))
-        {
-            return false;
-        }
-
-        return exception.ExitCode is -1073741515 or unchecked((int)0xC0000135);
-    }
-
-    #endregion
-
-    #region Nested types
-
     private sealed record AudioExtractionTarget(string EncoderName, string ProbeCodecName);
 
     internal sealed record VideoEncoderPlan(string EncoderName, bool IsHardwareAccelerated);
@@ -2930,6 +2745,4 @@ public sealed class VideoProcessingService : IVideoProcessingService
     }
 
     private sealed record ProcessResult(int ExitCode, string StandardOutput, string StandardError);
-
-    #endregion
 }

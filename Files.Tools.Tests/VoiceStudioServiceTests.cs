@@ -1,4 +1,5 @@
 using Files_Tools.Services;
+using Files_Tools.Services.Infrastructure;
 
 namespace Files.Tools.Tests;
 
@@ -69,7 +70,7 @@ public class VoiceStudioServiceTests
         await service.ProcessAudioAsync(input, output, new VoiceStudioOptions(), progress);
 
         Assert.IsTrue(File.Exists(output), "output wav should be produced");
-        var samples = WaveReader.ReadMonoFloatWav(output);
+        var samples = WavIo.ReadMonoFloatWav(output);
         Assert.IsTrue(samples.Length > 48000, $"output too short ({samples.Length} samples)");
 
         double rms = Math.Sqrt(samples.Select(v => (double)v * v).DefaultIfEmpty(0).Average());

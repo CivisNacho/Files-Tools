@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Files_Tools.Services.Infrastructure;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 
@@ -47,9 +48,6 @@ public interface IWordAligner
 public sealed class Wav2Vec2AlignmentService : IWordAligner
 {
     private const int SampleRate = 16000;
-
-    // wav2vec2 conv front-end needs at least ~400 samples to emit a single frame.
-    private const int MinimumSliceSamples = 400;
 
     // Pad each segment's audio slice so word onsets/offsets near the boundary have acoustic context.
     private static readonly TimeSpan SlicePadding = TimeSpan.FromMilliseconds(120);
@@ -235,10 +233,9 @@ public sealed class Wav2Vec2AlignmentService : IWordAligner
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(segments);
-        var installed = IsInstalled();
-        if (segments.Count == 0 || !installed)
+        if (segments.Count == 0 || !IsInstalled())
         {
-            Log($"skipped (segments={segments.Count}, installed={installed}, dir='{_modelDirectory}').");
+            Log($"skipped (segments={segments.Count}, installed={IsInstalled()}, dir='{_modelDirectory}').");
             return segments;
         }
 
@@ -247,7 +244,7 @@ public sealed class Wav2Vec2AlignmentService : IWordAligner
         var vocab = LoadVocab();
         Log($"model dir '{_modelDirectory}' | tokenizer={meta.TokenizerKind} blank={meta.BlankId} logProb={meta.LogitsAreLogProb} | segments={segments.Count}");
 
-        var samples = WaveReader.ReadMonoFloatWav(preparedWav16kMonoPath);
+        var samples = WavIo.ReadMonoFloatWav(preparedWav16kMonoPath);
         if (samples.Length == 0)
         {
             Log($"aborting: no samples read from '{preparedWav16kMonoPath}'.");
@@ -337,7 +334,7 @@ public sealed class Wav2Vec2AlignmentService : IWordAligner
         var startSample = (int)Math.Clamp(Math.Round(sliceStart.TotalSeconds * SampleRate), 0, samples.Length - 1);
         var endSample = (int)Math.Clamp(Math.Round(sliceEnd.TotalSeconds * SampleRate), startSample + 1, samples.Length);
         var sliceLength = endSample - startSample;
-        if (sliceLength < MinimumSliceSamples)
+        if (sliceLength < BlocksRequiredForOneFrame)
         {
             Log($"  seg#{segmentIndex}: slice too short ({sliceLength} samples) -> kept as-is.");
             return segment;
@@ -410,6 +407,9 @@ public sealed class Wav2Vec2AlignmentService : IWordAligner
     {
         Debug.WriteLine($"[Aligner] {message}");
     }
+
+    // wav2vec2 conv front-end needs at least ~400 samples to emit a single frame.
+    private const int BlocksRequiredForOneFrame = 400;
 
     private static IReadOnlyList<AudioTranscriptionWord> BuildAlignedWords(
         IReadOnlyList<string> words,
@@ -758,115 +758,4 @@ internal static class CtcForcedAligner
     }
 }
 
-/// <summary>
-/// Minimal mono WAV reader for 16-bit PCM and 32-bit float. Returns raw samples at whatever
-/// rate the file declares — callers are responsible for feeding it the rate they expect.
-/// </summary>
-internal static class WaveReader
-{
-    public static float[] ReadMonoFloatWav(string path)
-    {
-        using var stream = File.OpenRead(path);
-        using var reader = new BinaryReader(stream);
-
-        if (ReadTag(reader) != "RIFF")
-        {
-            throw new InvalidDataException("Not a RIFF/WAV file.");
-        }
-
-        reader.ReadInt32(); // overall size
-        if (ReadTag(reader) != "WAVE")
-        {
-            throw new InvalidDataException("Not a WAVE file.");
-        }
-
-        short audioFormat = 1;
-        short channels = 1;
-        short bitsPerSample = 16;
-        byte[]? data = null;
-
-        while (stream.Position + 8 <= stream.Length)
-        {
-            var chunkId = ReadTag(reader);
-            var chunkSize = reader.ReadInt32();
-
-            if (chunkId == "fmt ")
-            {
-                audioFormat = reader.ReadInt16();
-                channels = reader.ReadInt16();
-                reader.ReadInt32(); // sample rate
-                reader.ReadInt32(); // byte rate
-                reader.ReadInt16(); // block align
-                bitsPerSample = reader.ReadInt16();
-                var consumed = 16;
-                if (chunkSize > consumed)
-                {
-                    reader.ReadBytes(chunkSize - consumed);
-                }
-            }
-            else if (chunkId == "data")
-            {
-                data = reader.ReadBytes(chunkSize);
-            }
-            else
-            {
-                reader.ReadBytes(chunkSize + (chunkSize & 1)); // skip, honouring word alignment
-            }
-        }
-
-        if (data is null)
-        {
-            return Array.Empty<float>();
-        }
-
-        return DecodeToMono(data, audioFormat, channels, bitsPerSample);
-    }
-
-    private static string ReadTag(BinaryReader reader)
-    {
-        return Encoding.ASCII.GetString(reader.ReadBytes(4));
-    }
-
-    private static float[] DecodeToMono(byte[] data, short audioFormat, short channels, short bitsPerSample)
-    {
-        var bytesPerSample = bitsPerSample / 8;
-        if (bytesPerSample <= 0 || channels <= 0)
-        {
-            return Array.Empty<float>();
-        }
-
-        var frameCount = data.Length / (bytesPerSample * channels);
-        var result = new float[frameCount];
-
-        for (var frame = 0; frame < frameCount; frame++)
-        {
-            double sum = 0;
-            for (var channel = 0; channel < channels; channel++)
-            {
-                var index = ((frame * channels) + channel) * bytesPerSample;
-                sum += ReadSample(data, index, audioFormat, bitsPerSample);
-            }
-
-            result[frame] = (float)(sum / channels);
-        }
-
-        return result;
-    }
-
-    private static double ReadSample(byte[] data, int index, short audioFormat, short bitsPerSample)
-    {
-        if (audioFormat == 3 && bitsPerSample == 32)
-        {
-            return BitConverter.ToSingle(data, index);
-        }
-
-        return bitsPerSample switch
-        {
-            16 => BitConverter.ToInt16(data, index) / 32768.0,
-            32 => BitConverter.ToInt32(data, index) / 2147483648.0,
-            8 => (data[index] - 128) / 128.0,
-            _ => 0
-        };
-    }
-}
 

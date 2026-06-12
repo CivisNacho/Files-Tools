@@ -6,17 +6,17 @@ using System.Text.Json;
 namespace Files.Tools.Tests;
 
 [TestClass]
-public class VideoProcessingServiceTests
+public class VideoServiceTests
 {
     private string _tempRoot = null!;
-    private VideoProcessingService _service = null!;
+    private VideoService _service = null!;
 
     [TestInitialize]
     public void Initialize()
     {
         _tempRoot = Path.Combine(Path.GetTempPath(), "files-tools-video-tests", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_tempRoot);
-        _service = new VideoProcessingService();
+        _service = new VideoService();
     }
 
     [TestCleanup]
@@ -495,7 +495,7 @@ public class VideoProcessingServiceTests
     [TestMethod]
     public void CreateVideoEncoderPlan_PrefersVerifiedHardwareEncoder()
     {
-        var plan = VideoProcessingService.CreateVideoEncoderPlan(
+        var plan = VideoService.CreateVideoEncoderPlan(
             VideoCodec.H264,
             new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "h264_qsv" },
             preferHardwareEncoding: true);
@@ -507,7 +507,7 @@ public class VideoProcessingServiceTests
     [TestMethod]
     public void CreateVideoEncoderPlan_FallsBackToSoftwareWhenHardwareIsUnavailable()
     {
-        var plan = VideoProcessingService.CreateVideoEncoderPlan(
+        var plan = VideoService.CreateVideoEncoderPlan(
             VideoCodec.H265,
             new HashSet<string>(StringComparer.OrdinalIgnoreCase),
             preferHardwareEncoding: true);
@@ -521,7 +521,7 @@ public class VideoProcessingServiceTests
     {
         CollectionAssert.AreEqual(
             new[] { "h264_nvenc", "h264_amf", "h264_qsv" },
-            VideoProcessingService.GetHardwareEncoderCandidates(VideoCodec.H264).ToArray());
+            VideoService.GetHardwareEncoderCandidates(VideoCodec.H264).ToArray());
     }
 
     private string CreateSampleVideo(string fileName, int width = 160, int height = 120, int durationSeconds = 2, string? metadataTitle = null)
