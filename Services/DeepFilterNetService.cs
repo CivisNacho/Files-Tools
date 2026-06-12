@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -158,7 +159,7 @@ public sealed class DeepFilterNetService : IDisposable
     public Task<float[]> EnhanceMonoAsync(float[] samples, CancellationToken cancellationToken = default, IProgress<double>? progress = null)
         => Task.Run(() => EnhanceMono(samples, cancellationToken, progress), cancellationToken);
 
-    private static float[] Pick(System.Collections.Generic.Dictionary<string, float[]> map, string name)
+    private static float[] Pick(Dictionary<string, float[]> map, string name)
     {
         if (map.TryGetValue(name, out var exact))
         {

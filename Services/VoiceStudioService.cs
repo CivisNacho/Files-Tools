@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -78,8 +79,7 @@ public sealed class VoiceStudioService
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
-        var temp = Path.Combine(Path.GetTempPath(), "files-tools-voice", Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(temp);
+        var temp = CreateTempWorkDir();
         try
         {
             // 1. Extract to 48 kHz mono float WAV.
@@ -94,7 +94,7 @@ public sealed class VoiceStudioService
             if (options.Denoise)
             {
                 progress?.Report(new(VoiceStudioStage.Denoising, 0.25));
-                var samples = WaveReader.ReadMonoFloatWav(stageWav);
+                var samples = ReadMonoFloatWav(stageWav);
                 using var dfn = new DeepFilterNetService(_dfnModelPath);
                 var enhanced = await dfn.EnhanceMonoAsync(
                         samples, cancellationToken,
@@ -113,7 +113,7 @@ public sealed class VoiceStudioService
                 await RunFfmpegAsync(
                     ["-y", "-i", stageWav, "-ac", "1", "-ar", FlashSrService.InputSampleRate.ToString(),
                      "-c:a", "pcm_f32le", low], cancellationToken).ConfigureAwait(false);
-                var low16 = WaveReader.ReadMonoFloatWav(low);
+                var low16 = ReadMonoFloatWav(low);
                 using var flash = new FlashSrService(_flashModelPath);
                 var full = await flash.UpsampleMonoAsync(
                         low16, cancellationToken,
@@ -162,15 +162,14 @@ public sealed class VoiceStudioService
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
-        var temp = Path.Combine(Path.GetTempPath(), "files-tools-voice", Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(temp);
+        var temp = CreateTempWorkDir();
         try
         {
             var enhancedWav = Path.Combine(temp, "enhanced.wav");
             // Swallow the audio pass's Completed report; the remux below is the real final step.
             var audioProgress = progress is null
                 ? null
-                : new FilteredProgress(p =>
+                : new DelegateProgress<VoiceStudioProgress>(p =>
                 {
                     if (p.Stage != VoiceStudioStage.Completed)
                     {
@@ -194,7 +193,7 @@ public sealed class VoiceStudioService
             if (options.PostVolumePercent != 100)
             {
                 remuxArgs.Add("-af");
-                remuxArgs.Add($"volume={(options.PostVolumePercent / 100.0).ToString("0.######", System.Globalization.CultureInfo.InvariantCulture)}");
+                remuxArgs.Add($"volume={(options.PostVolumePercent / 100.0).ToString("0.######", CultureInfo.InvariantCulture)}");
             }
             remuxArgs.Add(outputVideoPath);
             await RunFfmpegAsync(remuxArgs, cancellationToken).ConfigureAwait(false);
@@ -207,9 +206,13 @@ public sealed class VoiceStudioService
         }
     }
 
-    private sealed class FilteredProgress(Action<VoiceStudioProgress> report) : IProgress<VoiceStudioProgress>
+    /// <summary>
+    /// IProgress wrapper that reports synchronously on the calling thread (unlike
+    /// <see cref="Progress{T}"/>, which posts to a sync context); callers marshal as needed.
+    /// </summary>
+    private sealed class DelegateProgress<T>(Action<T> report) : IProgress<T>
     {
-        public void Report(VoiceStudioProgress value) => report(value);
+        public void Report(T value) => report(value);
     }
 
     /// <summary>
@@ -221,13 +224,8 @@ public sealed class VoiceStudioService
         IProgress<VoiceStudioProgress>? progress, VoiceStudioStage stage, double from, double to)
         => progress is null
             ? null
-            : new SynchronousProgress(f =>
+            : new DelegateProgress<double>(f =>
                 progress.Report(new(stage, from + (Math.Clamp(f, 0d, 1d) * (to - from)))));
-
-    private sealed class SynchronousProgress(Action<double> report) : IProgress<double>
-    {
-        public void Report(double value) => report(value);
-    }
 
     private static async Task RunFfmpegAsync(IReadOnlyList<string> args, CancellationToken cancellationToken)
     {
@@ -292,8 +290,18 @@ public sealed class VoiceStudioService
         return s.Length <= 400 ? s : s[^400..];
     }
 
+    // ---------------------------------------------------------------------------------------------
+    // WAV I/O — pure static helpers (candidates for extraction into a shared WavIo in a later pass).
+    // ---------------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// Reads a mono WAV (16-bit PCM or 32-bit float) as float samples. The declared sample rate is
+    /// not validated — callers must feed it files at the rate they expect.
+    /// </summary>
+    private static float[] ReadMonoFloatWav(string path) => WaveReader.ReadMonoFloatWav(path);
+
     /// <summary>Writes mono 32-bit float PCM as a WAV file.</summary>
-    internal static void WriteMonoFloat32Wav(string path, float[] samples, int sampleRate)
+    private static void WriteMonoFloat32Wav(string path, float[] samples, int sampleRate)
     {
         using var stream = File.Create(path);
         using var w = new BinaryWriter(stream);
@@ -319,6 +327,14 @@ public sealed class VoiceStudioService
         {
             w.Write(s);
         }
+    }
+
+    /// <summary>Creates a unique per-run scratch directory under the system temp folder.</summary>
+    private static string CreateTempWorkDir()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "files-tools-voice", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        return dir;
     }
 
     private static void TryDeleteDirectory(string dir)
