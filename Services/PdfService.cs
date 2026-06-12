@@ -444,12 +444,7 @@ public sealed class PdfService : IPdfService
             // ── Images ────────────────────────────────────────────────────
             // Use qpdf --json to enumerate objects, then extract each image XObject's
             // raw stream data with a per-object Job invocation.
-            var jsonJob = new Job()
-                .InputFile(fullInput)
-                .Json(JsonVersion.Version2);
-
-            byte[] jsonBytes = ExecuteAndCaptureBinaryOutput(jsonJob);
-            string jsonOutput = Encoding.UTF8.GetString(jsonBytes);
+            string jsonOutput = DumpStructureJson(fullInput);
             int imageCount = ExtractImagesFromJson(fullInput, jsonOutput, imagesDir, cancellationToken);
 
             // ── Attachments ───────────────────────────────────────────────
@@ -591,12 +586,7 @@ public sealed class PdfService : IPdfService
             try
             {
                 // Dump structure only (no stream data; UpdateFromJson reads streams from the original PDF).
-                var jsonBytes = ExecuteAndCaptureBinaryOutput(new Job()
-                    .InputFile(fullInput)
-                    .Json(JsonVersion.Version2));
-                var structureJson = Encoding.UTF8.GetString(jsonBytes);
-
-                var patch = BuildInfoPatchJson(structureJson, metadata);
+                var patch = BuildInfoPatchJson(DumpStructureJson(fullInput), metadata);
                 // qpdf's JSON parser rejects a UTF-8 BOM ("offset 0: unexpected character"),
                 // and Encoding.UTF8 emits one — write without a BOM.
                 File.WriteAllText(patchJson, patch, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
@@ -622,35 +612,14 @@ public sealed class PdfService : IPdfService
     private static string BuildInfoPatchJson(string structureJson, PdfMetadata metadata)
     {
         using var doc = JsonDocument.Parse(structureJson);
-        var root = doc.RootElement;
 
-        if (!root.TryGetProperty("qpdf", out var qpdfArr) ||
-            qpdfArr.ValueKind != JsonValueKind.Array ||
-            qpdfArr.GetArrayLength() < 2)
+        if (!TryGetQpdfStructure(doc.RootElement, out var header, out var objects))
             throw new PdfOperationException("Unexpected qpdf JSON shape: missing 'qpdf' array.");
 
-        var header = qpdfArr[0];
-        var objects = qpdfArr[1];
-
-        // Locate the /Info object reference from the trailer.
-        string? infoObjKey = null;
-        if (objects.TryGetProperty("trailer", out var trailer) &&
-            trailer.TryGetProperty("value", out var trailerValue) &&
-            trailerValue.TryGetProperty("/Info", out var infoRef) &&
-            infoRef.ValueKind == JsonValueKind.String)
-        {
-            infoObjKey = "obj:" + infoRef.GetString();
-        }
+        var infoObjKey = FindInfoObjectKey(objects);
 
         // Read existing /Info fields so we can preserve anything we're not overwriting.
-        JsonElement existingInfoDict = default;
-        if (infoObjKey is not null &&
-            objects.TryGetProperty(infoObjKey, out var infoObj) &&
-            infoObj.TryGetProperty("value", out var infoValue) &&
-            infoValue.ValueKind == JsonValueKind.Object)
-        {
-            existingInfoDict = infoValue;
-        }
+        var existingInfoDict = GetInfoDict(objects, infoObjKey) ?? default;
 
         using var ms = new MemoryStream();
         using (var w = new Utf8JsonWriter(ms, new JsonWriterOptions { Indented = true }))
@@ -749,28 +718,11 @@ public sealed class PdfService : IPdfService
     private static PdfMetadata ParseInfoMetadata(string structureJson)
     {
         using var doc = JsonDocument.Parse(structureJson);
-        var root = doc.RootElement;
 
-        if (!root.TryGetProperty("qpdf", out var qpdfArr) ||
-            qpdfArr.ValueKind != JsonValueKind.Array ||
-            qpdfArr.GetArrayLength() < 2)
+        if (!TryGetQpdfStructure(doc.RootElement, out _, out var objects))
             return new PdfMetadata();
 
-        var objects = qpdfArr[1];
-
-        string? infoObjKey = null;
-        if (objects.TryGetProperty("trailer", out var trailer) &&
-            trailer.TryGetProperty("value", out var trailerValue) &&
-            trailerValue.TryGetProperty("/Info", out var infoRef) &&
-            infoRef.ValueKind == JsonValueKind.String)
-        {
-            infoObjKey = "obj:" + infoRef.GetString();
-        }
-
-        if (infoObjKey is null ||
-            !objects.TryGetProperty(infoObjKey, out var infoObj) ||
-            !infoObj.TryGetProperty("value", out var info) ||
-            info.ValueKind != JsonValueKind.Object)
+        if (GetInfoDict(objects, FindInfoObjectKey(objects)) is not { } info)
             return new PdfMetadata();
 
         return new PdfMetadata
@@ -782,6 +734,62 @@ public sealed class PdfService : IPdfService
             Creator  = ReadInfoString(info, "/Creator"),
             Producer = ReadInfoString(info, "/Producer"),
         };
+    }
+
+    // ── qpdf structure-JSON helpers ──────────────────────────────────────────
+
+    /// <summary>Dumps the PDF structure as qpdf JSON v2 (no stream data) and returns it as text.</summary>
+    private static string DumpStructureJson(string fullInputPath) =>
+        Encoding.UTF8.GetString(ExecuteAndCaptureBinaryOutput(new Job()
+            .InputFile(fullInputPath)
+            .Json(JsonVersion.Version2)));
+
+    /// <summary>
+    /// Extracts the two elements of the top-level <c>qpdf</c> array: the header (jsonversion,
+    /// pdfversion, maxobjectid) and the object map.
+    /// </summary>
+    private static bool TryGetQpdfStructure(JsonElement root, out JsonElement header, out JsonElement objects)
+    {
+        if (root.TryGetProperty("qpdf", out var qpdfArr) &&
+            qpdfArr.ValueKind == JsonValueKind.Array &&
+            qpdfArr.GetArrayLength() >= 2)
+        {
+            header = qpdfArr[0];
+            objects = qpdfArr[1];
+            return true;
+        }
+
+        header = default;
+        objects = default;
+        return false;
+    }
+
+    /// <summary>Resolves the trailer's /Info reference to its object-map key (e.g. <c>"obj:12 0 R"</c>).</summary>
+    private static string? FindInfoObjectKey(JsonElement objects)
+    {
+        if (objects.TryGetProperty("trailer", out var trailer) &&
+            trailer.TryGetProperty("value", out var trailerValue) &&
+            trailerValue.TryGetProperty("/Info", out var infoRef) &&
+            infoRef.ValueKind == JsonValueKind.String)
+        {
+            return "obj:" + infoRef.GetString();
+        }
+
+        return null;
+    }
+
+    /// <summary>Returns the /Info dictionary value when present and well-formed, otherwise null.</summary>
+    private static JsonElement? GetInfoDict(JsonElement objects, string? infoObjKey)
+    {
+        if (infoObjKey is not null &&
+            objects.TryGetProperty(infoObjKey, out var infoObj) &&
+            infoObj.TryGetProperty("value", out var infoValue) &&
+            infoValue.ValueKind == JsonValueKind.Object)
+        {
+            return infoValue;
+        }
+
+        return null;
     }
 
     private static string? ReadInfoString(JsonElement info, string key)
@@ -1134,20 +1142,7 @@ public sealed class PdfService : IPdfService
             return;
         }
 
-        ExitCode code;
-        try
-        {
-            code = job.Run(out _);
-        }
-        catch (Exception ex) when (ex is not PdfOperationException)
-        {
-            throw new PdfOperationException("qpdf threw while executing the job: " + ex.Message, null, ex);
-        }
-
-        if (!IsSuccess(code))
-        {
-            throw new PdfOperationException($"qpdf returned non-success exit code: {code}.", code);
-        }
+        ThrowIfFailed(GuardQpdf(() => job.Run(out _)));
     }
 
     private static string ExecuteAndCaptureOutput(Job job)
@@ -1157,21 +1152,9 @@ public sealed class PdfService : IPdfService
             return Encoding.UTF8.GetString(ExecuteCli(job));
         }
 
-        try
-        {
-            var code = job.Run(out var output);
-            if (!IsSuccess(code))
-                throw new PdfOperationException($"qpdf returned non-success exit code: {code}.", code);
-            return output ?? string.Empty;
-        }
-        catch (PdfOperationException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            throw new PdfOperationException("qpdf threw while executing the job: " + ex.Message, null, ex);
-        }
+        string? output = null;
+        ThrowIfFailed(GuardQpdf(() => job.Run(out output)));
+        return output ?? string.Empty;
     }
 
     private static byte[] ExecuteAndCaptureBinaryOutput(Job job)
@@ -1181,21 +1164,9 @@ public sealed class PdfService : IPdfService
             return ExecuteCli(job);
         }
 
-        try
-        {
-            var code = job.Run(out _, out var data);
-            if (!IsSuccess(code))
-                throw new PdfOperationException($"qpdf returned non-success exit code: {code}.", code);
-            return data ?? Array.Empty<byte>();
-        }
-        catch (PdfOperationException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            throw new PdfOperationException("qpdf threw while executing the job: " + ex.Message, null, ex);
-        }
+        byte[]? data = null;
+        ThrowIfFailed(GuardQpdf(() => job.Run(out _, out data)));
+        return data ?? Array.Empty<byte>();
     }
 
     /// <summary>
@@ -1204,26 +1175,34 @@ public sealed class PdfService : IPdfService
     /// </summary>
     private static byte[] ExecuteCli(Job job)
     {
-        int exitCode;
-        byte[] stdOut;
-        string stdErr;
+        var (exitCode, stdOut, stdErr) =
+            GuardQpdf(() => PdfNativeCli.RunQpdfJob(PdfNativeCli.SerializeJob(job)));
+
+        ThrowIfFailed((ExitCode)exitCode, stdErr);
+        return stdOut;
+    }
+
+    /// <summary>Wraps any non-domain exception thrown while invoking qpdf in a <see cref="PdfOperationException"/>.</summary>
+    private static T GuardQpdf<T>(Func<T> run)
+    {
         try
         {
-            (exitCode, stdOut, stdErr) = PdfNativeCli.RunQpdfJob(PdfNativeCli.SerializeJob(job));
+            return run();
         }
         catch (Exception ex) when (ex is not PdfOperationException)
         {
             throw new PdfOperationException("qpdf threw while executing the job: " + ex.Message, null, ex);
         }
+    }
 
-        if (!IsSuccess((ExitCode)exitCode))
-        {
-            throw new PdfOperationException(
-                $"qpdf returned non-success exit code: {(ExitCode)exitCode}. {stdErr}".TrimEnd(),
-                (ExitCode)exitCode);
-        }
+    private static void ThrowIfFailed(ExitCode code, string? stdErr = null)
+    {
+        if (IsSuccess(code)) return;
 
-        return stdOut;
+        var message = string.IsNullOrEmpty(stdErr)
+            ? $"qpdf returned non-success exit code: {code}."
+            : $"qpdf returned non-success exit code: {code}. {stdErr}".TrimEnd();
+        throw new PdfOperationException(message, code);
     }
 
     private static bool IsSuccess(ExitCode code) =>
