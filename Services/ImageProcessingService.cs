@@ -1,7 +1,6 @@
 using NetVips;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -382,21 +381,16 @@ public sealed class ImageProcessingService : IImageProcessingService
     {
         outputOptions ??= new OutputOptions();
 
-        return ProcessImageAsync(
-            inputPath,
-            outputPath,
-            new ProcessImageOptions
-            {
-                Output = new OutputOptions
-                {
-                    Format = format,
-                    QualityMode = outputOptions.QualityMode,
-                    Quality = outputOptions.Quality,
-                    Lossless = outputOptions.Lossless,
-                    KeepMetadata = outputOptions.KeepMetadata
-                }
-            },
-            cancellationToken);
+        var output = new OutputOptions
+        {
+            Format = format,
+            QualityMode = outputOptions.QualityMode,
+            Quality = outputOptions.Quality,
+            Lossless = outputOptions.Lossless,
+            KeepMetadata = outputOptions.KeepMetadata
+        };
+
+        return ProcessImageAsync(inputPath, outputPath, new ProcessImageOptions { Output = output }, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -514,14 +508,9 @@ public sealed class ImageProcessingService : IImageProcessingService
 
     private static Image LoadForProcessing(string inputPath, ImageFormat format)
     {
-        if (format == ImageFormat.Gif)
-        {
-            var kwargs = new VOption();
-            kwargs.Add("n", -1);
-            return Image.NewFromFile(inputPath, access: Enums.Access.Sequential, kwargs: kwargs);
-        }
-
-        return Image.NewFromFile(inputPath, access: Enums.Access.Sequential);
+        // For GIF, load all frames ("n" = -1) so animations survive processing.
+        var kwargs = format == ImageFormat.Gif ? new VOption { { "n", -1 } } : null;
+        return Image.NewFromFile(inputPath, access: Enums.Access.Sequential, kwargs: kwargs);
     }
 
     private static Image ApplyPipelineOperations(Image source, ProcessImageOptions options)
@@ -860,29 +849,12 @@ public sealed class ImageProcessingService : IImageProcessingService
             return options.Quality.Value;
         }
 
-        if (options.QualityMode == ImageQualityMode.ExplicitQuality)
-        {
-            return format switch
-            {
-                ImageFormat.Jpeg => 90,
-                ImageFormat.Png => 90,
-                ImageFormat.Webp => 85,
-                ImageFormat.Avif => 50,
-                ImageFormat.Heif => 50,
-                ImageFormat.Tiff => 90,
-                ImageFormat.Gif => 80,
-                _ => 85
-            };
-        }
-
+        // Per-format default quality, used by both quality modes when no explicit value is given.
         return format switch
         {
-            ImageFormat.Jpeg => 90,
-            ImageFormat.Png => 90,
+            ImageFormat.Jpeg or ImageFormat.Png or ImageFormat.Tiff => 90,
             ImageFormat.Webp => 85,
-            ImageFormat.Avif => 50,
-            ImageFormat.Heif => 50,
-            ImageFormat.Tiff => 90,
+            ImageFormat.Avif or ImageFormat.Heif => 50,
             ImageFormat.Gif => 80,
             _ => 85
         };
@@ -967,35 +939,12 @@ public sealed class ImageProcessingService : IImageProcessingService
         }
     }
 
-    private static bool CanCopyWithoutReencode(string inputPath, string outputPath, ImageFormat inputFormat, ImageFormat outputFormat, ProcessImageOptions options)
-    {
-        if (options.Output.QualityMode != ImageQualityMode.MaintainOriginal)
-        {
-            return false;
-        }
-
-        if (options.Output.Quality.HasValue)
-        {
-            return false;
-        }
-
-        if (options.Output.Lossless)
-        {
-            return false;
-        }
-
-        if (inputFormat != outputFormat)
-        {
-            return false;
-        }
-
-        if (options.HasPixelOperations)
-        {
-            return false;
-        }
-
-        return true;
-    }
+    private static bool CanCopyWithoutReencode(string inputPath, string outputPath, ImageFormat inputFormat, ImageFormat outputFormat, ProcessImageOptions options) =>
+        options.Output.QualityMode == ImageQualityMode.MaintainOriginal &&
+        !options.Output.Quality.HasValue &&
+        !options.Output.Lossless &&
+        inputFormat == outputFormat &&
+        !options.HasPixelOperations;
 
     private static void CopyInputToOutput(string inputPath, string outputPath)
     {
