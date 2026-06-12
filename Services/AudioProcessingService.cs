@@ -798,8 +798,7 @@ public sealed class AudioProcessingService : IAudioProcessingService
         }
 
         var args = CreateBaseFfmpegArgs(inputPath);
-        args.Add("-af");
-        args.Add(string.Join(",", filters));
+        ApplyAudioFilters(args, string.Join(",", filters));
         args.Add(Path.GetFullPath(outputPath));
 
         await RunFfmpegOperationAsync(args, input.Duration, "Normalizing audio", progress, cancellationToken).ConfigureAwait(false);
@@ -825,8 +824,7 @@ public sealed class AudioProcessingService : IAudioProcessingService
             if (denoiseEnabled)
             {
                 Report(progress, AudioProcessStage.Preparing, 0.9, "Running DTLN denoise before podcast processing", null, input.Duration, true);
-                temporaryDenoisedPath = Path.Combine(Path.GetTempPath(), "files-tools-audio", Guid.NewGuid().ToString("N"), "dtln-denoised.wav");
-                Directory.CreateDirectory(Path.GetDirectoryName(temporaryDenoisedPath)!);
+                temporaryDenoisedPath = CreateTemporaryFilePath("dtln-denoised.wav");
                 await _dtlnDenoiseService.Value.DenoiseAudioAsync(
                     inputPath,
                     temporaryDenoisedPath,
@@ -846,18 +844,17 @@ public sealed class AudioProcessingService : IAudioProcessingService
                 warnings.Add("DTLN denoise was applied before podcast EQ, dynamics, limiting, and LUFS normalization.");
             }
 
-        var filters = BuildPodcastFilterChain(options);
-        var codec = ResolveCodec(outputPath, options.OutputCodec);
-        var args = CreateBaseFfmpegArgs(processingInputPath);
-        ApplyMetadata(args, options.PreserveMetadata);
-        args.Add("-af");
-        args.Add(string.Join(",", filters));
-        ApplyAudioShape(args, codec, options.BitrateKbps, options.SampleRate, options.Channels);
-        args.Add(Path.GetFullPath(outputPath));
+            var filters = BuildPodcastFilterChain(options);
+            var codec = ResolveCodec(outputPath, options.OutputCodec);
+            var args = CreateBaseFfmpegArgs(processingInputPath);
+            ApplyMetadata(args, options.PreserveMetadata);
+            ApplyAudioFilters(args, string.Join(",", filters));
+            ApplyAudioShape(args, codec, options.BitrateKbps, options.SampleRate, options.Channels);
+            args.Add(Path.GetFullPath(outputPath));
 
-        warnings.Add("Podcast processing changes tone and dynamics with EQ, compression, limiting, and LUFS normalization.");
-        await RunFfmpegOperationAsync(args, input.Duration, "Processing podcast audio", progress, cancellationToken).ConfigureAwait(false);
-        return await BuildResultAsync(outputPath, warnings, progress, cancellationToken, analysis).ConfigureAwait(false);
+            warnings.Add("Podcast processing changes tone and dynamics with EQ, compression, limiting, and LUFS normalization.");
+            await RunFfmpegOperationAsync(args, input.Duration, "Processing podcast audio", progress, cancellationToken).ConfigureAwait(false);
+            return await BuildResultAsync(outputPath, warnings, progress, cancellationToken, analysis).ConfigureAwait(false);
         }
         finally
         {
@@ -919,8 +916,7 @@ public sealed class AudioProcessingService : IAudioProcessingService
         var input = await ProbeInputAudioAsync(inputPath, progress, cancellationToken).ConfigureAwait(false);
         var filter = BuildSilenceFilter(options);
         var args = CreateBaseFfmpegArgs(inputPath);
-        args.Add("-af");
-        args.Add(filter);
+        ApplyAudioFilters(args, filter);
         args.Add("-c:a");
         args.Add(ResolveCodec(outputPath, null));
         args.Add(Path.GetFullPath(outputPath));
@@ -944,8 +940,7 @@ public sealed class AudioProcessingService : IAudioProcessingService
         var args = CreateBaseFfmpegArgs(inputPath);
         if (!string.IsNullOrWhiteSpace(filter))
         {
-            args.Add("-af");
-            args.Add(filter);
+            ApplyAudioFilters(args, filter);
         }
 
         args.Add(Path.GetFullPath(outputPath));
@@ -1043,35 +1038,11 @@ public sealed class AudioProcessingService : IAudioProcessingService
     private static async Task<AudioAnalysisResult> AnalyzeAudioAsync(string inputPath, double targetLufs, IProgress<AudioProcessProgress>? progress, CancellationToken cancellationToken)
     {
         Report(progress, AudioProcessStage.Preparing, 0.25, "Analyzing loudness and peaks", null, null, true);
-        var absoluteInput = Path.GetFullPath(inputPath);
-        var volumeArgs = new List<string>
-        {
-            "-hide_banner",
-            "-nostats",
-            "-i",
-            absoluteInput,
-            "-af",
-            "volumedetect",
-            "-f",
-            "null",
-            "-"
-        };
+        var volumeArgs = CreateNullOutputAnalysisArgs(inputPath, "volumedetect");
+        var loudnessArgs = CreateNullOutputAnalysisArgs(inputPath, FormattableString.Invariant($"loudnorm=I={targetLufs:0.###}:TP=-1.5:LRA=11:print_format=json"));
 
-        var loudnessArgs = new List<string>
-        {
-            "-hide_banner",
-            "-nostats",
-            "-i",
-            absoluteInput,
-            "-af",
-            FormattableString.Invariant($"loudnorm=I={targetLufs:0.###}:TP=-1.5:LRA=11:print_format=json"),
-            "-f",
-            "null",
-            "-"
-        };
-
-        var volumeResult = await RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffmpeg"), volumeArgs, cancellationToken, null).ConfigureAwait(false);
-        var loudnessResult = await RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffmpeg"), loudnessArgs, cancellationToken, null).ConfigureAwait(false);
+        var volumeResult = await RunFfmpegAsync(volumeArgs, cancellationToken).ConfigureAwait(false);
+        var loudnessResult = await RunFfmpegAsync(loudnessArgs, cancellationToken).ConfigureAwait(false);
         Report(progress, AudioProcessStage.Preparing, 0.75, "Audio analysis completed", null, null, false);
 
         var loudnormJson = ExtractLastJsonObject(loudnessResult.StandardError);
@@ -1096,6 +1067,27 @@ public sealed class AudioProcessingService : IAudioProcessingService
     private static List<string> CreateBaseFfmpegArgs(string inputPath)
     {
         return ["-y", "-hide_banner", "-progress", "pipe:2", "-nostats", "-i", Path.GetFullPath(inputPath), "-vn"];
+    }
+
+    private static List<string> CreateNullOutputAnalysisArgs(string inputPath, string filter)
+    {
+        return ["-hide_banner", "-nostats", "-i", Path.GetFullPath(inputPath), "-af", filter, "-f", "null", "-"];
+    }
+
+    private static void ApplyAudioFilters(List<string> args, string filterChain)
+    {
+        args.Add("-af");
+        args.Add(filterChain);
+    }
+
+    /// <summary>
+    /// Creates a unique service-owned temporary directory and returns a path for <paramref name="fileName"/> inside it.
+    /// </summary>
+    private static string CreateTemporaryFilePath(string fileName)
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "files-tools-audio", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        return Path.Combine(directory, fileName);
     }
 
     private static void ApplyAudioShape(List<string> args, string codec, int? bitrateKbps, int? sampleRate, int? channels)
@@ -1377,7 +1369,12 @@ public sealed class AudioProcessingService : IAudioProcessingService
     {
         Report(progress, AudioProcessStage.Preparing, 1, "Audio command prepared", null, duration, false);
         var observer = CreateProgressObserver(duration, description, progress);
-        await RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffmpeg"), args, cancellationToken, observer).ConfigureAwait(false);
+        await RunFfmpegAsync(args, cancellationToken, observer).ConfigureAwait(false);
+    }
+
+    private static Task<ProcessResult> RunFfmpegAsync(IReadOnlyList<string> args, CancellationToken cancellationToken, Action<string>? standardErrorLineObserver = null)
+    {
+        return RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffmpeg"), args, cancellationToken, standardErrorLineObserver);
     }
 
     private static Action<string>? CreateProgressObserver(TimeSpan? totalDuration, string description, IProgress<AudioProcessProgress>? progress)
