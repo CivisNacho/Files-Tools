@@ -8,11 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
@@ -20,7 +18,6 @@ using Windows.Storage.Pickers;
 using Windows.Storage.Streams;
 using Windows.System;
 using Microsoft.UI.Xaml.Navigation;
-using Rectangle = Microsoft.UI.Xaml.Shapes.Rectangle;
 
 namespace Files_Tools.Pages
 {
@@ -348,105 +345,80 @@ namespace Files_Tools.Pages
 
         private async void RgbSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
-            if (RedSliderTextBlock is not null && RedSlider is not null)
-            {
-                RedSliderTextBlock.Text = $"Red: {(int)Math.Round(RedSlider.Value)}%";
-            }
-
-            if (GreenSliderTextBlock is not null && GreenSlider is not null)
-            {
-                GreenSliderTextBlock.Text = $"Green: {(int)Math.Round(GreenSlider.Value)}%";
-            }
-
-            if (BlueSliderTextBlock is not null && BlueSlider is not null)
-            {
-                BlueSliderTextBlock.Text = $"Blue: {(int)Math.Round(BlueSlider.Value)}%";
-            }
+            UpdateSliderLabel(RedSliderTextBlock, RedSlider, "Red");
+            UpdateSliderLabel(GreenSliderTextBlock, GreenSlider, "Green");
+            UpdateSliderLabel(BlueSliderTextBlock, BlueSlider, "Blue");
 
             await UpdatePreviewFromLiveTransformsAsync();
             RefreshValidation();
         }
 
+        private static void UpdateSliderLabel(TextBlock? label, Slider? slider, string prefix)
+        {
+            if (label is not null && slider is not null)
+            {
+                label.Text = $"{prefix}: {(int)Math.Round(slider.Value)}%";
+            }
+        }
+
         private void UpscaleDimensionNumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
         {
             ClampUpscaleNumberBoxesToBounds();
-
-            if (_syncingUpscaleDimensions || !(PreserveUpscaleAspectRatioCheckBox?.IsChecked ?? false))
-            {
-                RefreshValidation();
-                return;
-            }
-
-            if (!_previewImageWidth.HasValue || !_previewImageHeight.HasValue || _previewImageWidth.Value <= 0 || _previewImageHeight.Value <= 0)
-            {
-                RefreshValidation();
-                return;
-            }
-
-            var sourceRatio = (double)_previewImageWidth.Value / _previewImageHeight.Value;
-            _syncingUpscaleDimensions = true;
-            try
-            {
-                if (ReferenceEquals(sender, UpscaleWidthNumberBox))
-                {
-                    var width = Math.Max(1, (int)Math.Round(UpscaleWidthNumberBox.Value));
-                    var computedHeight = Math.Max(1, (int)Math.Round(width / sourceRatio));
-                    UpscaleHeightNumberBox.Value = computedHeight;
-                }
-                else if (ReferenceEquals(sender, UpscaleHeightNumberBox))
-                {
-                    var height = Math.Max(1, (int)Math.Round(UpscaleHeightNumberBox.Value));
-                    var computedWidth = Math.Max(1, (int)Math.Round(height * sourceRatio));
-                    UpscaleWidthNumberBox.Value = computedWidth;
-                }
-            }
-            finally
-            {
-                _syncingUpscaleDimensions = false;
-            }
-
+            SyncAspectRatioDimensions(
+                sender,
+                UpscaleWidthNumberBox,
+                UpscaleHeightNumberBox,
+                PreserveUpscaleAspectRatioCheckBox?.IsChecked ?? false,
+                ref _syncingUpscaleDimensions);
             RefreshValidation();
         }
 
         private void ResizeDimensionNumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
         {
             ClampResizeNumberBoxesToBounds();
+            SyncAspectRatioDimensions(
+                sender,
+                ResizeWidthNumberBox,
+                ResizeHeightNumberBox,
+                PreserveAspectRatioCheckBox?.IsChecked ?? false,
+                ref _syncingResizeDimensions);
+            RefreshValidation();
+        }
 
-            if (_syncingResizeDimensions || !(PreserveAspectRatioCheckBox?.IsChecked ?? false))
+        /// <summary>
+        /// Recomputes the opposite dimension box to keep the working-image aspect ratio.
+        /// </summary>
+        private void SyncAspectRatioDimensions(NumberBox sender, NumberBox widthBox, NumberBox heightBox, bool preserveAspectRatio, ref bool syncing)
+        {
+            if (syncing || !preserveAspectRatio)
             {
-                RefreshValidation();
                 return;
             }
 
             if (!_previewImageWidth.HasValue || !_previewImageHeight.HasValue || _previewImageWidth.Value <= 0 || _previewImageHeight.Value <= 0)
             {
-                RefreshValidation();
                 return;
             }
 
             var sourceRatio = (double)_previewImageWidth.Value / _previewImageHeight.Value;
-            _syncingResizeDimensions = true;
+            syncing = true;
             try
             {
-                if (ReferenceEquals(sender, ResizeWidthNumberBox))
+                if (ReferenceEquals(sender, widthBox))
                 {
-                    var width = Math.Max(1, (int)Math.Round(ResizeWidthNumberBox.Value));
-                    var computedHeight = Math.Max(1, (int)Math.Round(width / sourceRatio));
-                    ResizeHeightNumberBox.Value = computedHeight;
+                    var width = Math.Max(1, (int)Math.Round(widthBox.Value));
+                    heightBox.Value = Math.Max(1, (int)Math.Round(width / sourceRatio));
                 }
-                else if (ReferenceEquals(sender, ResizeHeightNumberBox))
+                else if (ReferenceEquals(sender, heightBox))
                 {
-                    var height = Math.Max(1, (int)Math.Round(ResizeHeightNumberBox.Value));
-                    var computedWidth = Math.Max(1, (int)Math.Round(height * sourceRatio));
-                    ResizeWidthNumberBox.Value = computedWidth;
+                    var height = Math.Max(1, (int)Math.Round(heightBox.Value));
+                    widthBox.Value = Math.Max(1, (int)Math.Round(height * sourceRatio));
                 }
             }
             finally
             {
-                _syncingResizeDimensions = false;
+                syncing = false;
             }
-
-            RefreshValidation();
         }
 
         private async void OptionsCheckBox_Changed(object sender, RoutedEventArgs e)
@@ -460,6 +432,7 @@ namespace Files_Tools.Pages
         {
             if (EnableCropCheckBox?.IsChecked ?? false)
             {
+                // Cropping is exclusive with these operations; uncheck them before sizing the crop rect.
                 EnableResizeCheckBox.IsChecked = false;
                 EnableUpscaleCheckBox.IsChecked = false;
                 MirrorHorizontalCheckBox.IsChecked = false;
@@ -513,28 +486,25 @@ namespace Files_Tools.Pages
                 var processOptions = BuildProcessOptions(options);
                 await _imageProcessingService.ProcessImageAsync(_sourceImageFile.Path, outputPath, processOptions, CancellationToken.None);
 
-                var dialog = new ContentDialog
-                {
-                    Title = "Done",
-                    Content = $"Image saved to:\n{outputPath}",
-                    PrimaryButtonText = "OK",
-                    XamlRoot = XamlRoot
-                };
-
-                _ = await dialog.ShowAsync();
+                await ShowMessageDialogAsync("Done", $"Image saved to:\n{outputPath}");
             }
             catch (Exception ex)
             {
-                var dialog = new ContentDialog
-                {
-                    Title = "Processing error",
-                    Content = $"Could not process image with the selected options.\n\nDetails: {ex.Message}",
-                    PrimaryButtonText = "OK",
-                    XamlRoot = XamlRoot
-                };
-
-                _ = await dialog.ShowAsync();
+                await ShowMessageDialogAsync("Processing error", $"Could not process image with the selected options.\n\nDetails: {ex.Message}");
             }
+        }
+
+        private async Task ShowMessageDialogAsync(string title, string content)
+        {
+            var dialog = new ContentDialog
+            {
+                Title = title,
+                Content = content,
+                PrimaryButtonText = "OK",
+                XamlRoot = XamlRoot
+            };
+
+            _ = await dialog.ShowAsync();
         }
 
         private void UpdateOptionUiState()
@@ -644,8 +614,7 @@ namespace Files_Tools.Pages
 
         private ImageEditOptions BuildCurrentOptions()
         {
-            var rotationTag = (RotationComboBox?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "0";
-            _ = int.TryParse(rotationTag, out var rotationDegrees);
+            var rotationDegrees = GetSelectedRotationDegrees();
             var crop = GetEffectiveCropForProcessing();
             var cropPixels = crop ?? (0, 0, _originalImageWidth ?? 1, _originalImageHeight ?? 1);
 
@@ -791,15 +760,7 @@ namespace Files_Tools.Pages
             }
             catch (Exception ex)
             {
-                var dialog = new ContentDialog
-                {
-                    Title = "Crop error",
-                    Content = $"Could not apply the selected crop.\n\nDetails: {ex.Message}",
-                    PrimaryButtonText = "OK",
-                    XamlRoot = XamlRoot
-                };
-
-                _ = await dialog.ShowAsync();
+                await ShowMessageDialogAsync("Crop error", $"Could not apply the selected crop.\n\nDetails: {ex.Message}");
             }
             finally
             {
@@ -1106,10 +1067,10 @@ namespace Files_Tools.Pages
             CropOverlayCanvas.Visibility = Visibility.Visible;
             _cropRect = ClampCropRect(_cropRect.Width <= 0 || _cropRect.Height <= 0 ? _displayedImageRect : _cropRect);
 
-            SetRectangle(CropDimTopRectangle, _displayedImageRect.Left, _displayedImageRect.Top, _displayedImageRect.Width, Math.Max(0, _cropRect.Top - _displayedImageRect.Top));
-            SetRectangle(CropDimLeftRectangle, _displayedImageRect.Left, _cropRect.Top, Math.Max(0, _cropRect.Left - _displayedImageRect.Left), _cropRect.Height);
-            SetRectangle(CropDimRightRectangle, _cropRect.Right, _cropRect.Top, Math.Max(0, _displayedImageRect.Right - _cropRect.Right), _cropRect.Height);
-            SetRectangle(CropDimBottomRectangle, _displayedImageRect.Left, _cropRect.Bottom, _displayedImageRect.Width, Math.Max(0, _displayedImageRect.Bottom - _cropRect.Bottom));
+            SetElementBounds(CropDimTopRectangle, _displayedImageRect.Left, _displayedImageRect.Top, _displayedImageRect.Width, Math.Max(0, _cropRect.Top - _displayedImageRect.Top));
+            SetElementBounds(CropDimLeftRectangle, _displayedImageRect.Left, _cropRect.Top, Math.Max(0, _cropRect.Left - _displayedImageRect.Left), _cropRect.Height);
+            SetElementBounds(CropDimRightRectangle, _cropRect.Right, _cropRect.Top, Math.Max(0, _displayedImageRect.Right - _cropRect.Right), _cropRect.Height);
+            SetElementBounds(CropDimBottomRectangle, _displayedImageRect.Left, _cropRect.Bottom, _displayedImageRect.Width, Math.Max(0, _displayedImageRect.Bottom - _cropRect.Bottom));
 
             SetElementBounds(CropSelectionBorder, _cropRect.Left, _cropRect.Top, _cropRect.Width, _cropRect.Height);
             PositionCropHandle(CropHandleTopLeft, _cropRect.Left, _cropRect.Top);
@@ -1121,14 +1082,6 @@ namespace Files_Tools.Pages
             PositionCropHandle(CropHandleBottomLeft, _cropRect.Left, _cropRect.Bottom);
             PositionCropHandle(CropHandleLeft, _cropRect.Left, _cropRect.Top + _cropRect.Height / 2);
             UpdateCropInfoText();
-        }
-
-        private static void SetRectangle(Rectangle rectangle, double left, double top, double width, double height)
-        {
-            rectangle.Width = width;
-            rectangle.Height = height;
-            Canvas.SetLeft(rectangle, left);
-            Canvas.SetTop(rectangle, top);
         }
 
         private static void SetElementBounds(FrameworkElement element, double left, double top, double width, double height)
