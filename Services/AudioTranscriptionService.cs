@@ -247,35 +247,13 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
 
         if (!File.Exists(_modelPath))
         {
-            var copyProgress = progress is null
-                ? null
-                : new ThrottledProgress<double>(value =>
-                {
-                    var fraction = Math.Clamp(value, 0d, 1d) * WhisperShare;
-                    progress.Report(new AudioTranscriptionInstallProgress
-                    {
-                        Stage = "Downloading transcription model...",
-                        FractionComplete = fraction
-                    });
-                }, throttleMilliseconds: 200);
-
+            var copyProgress = CreateInstallProgress(progress, "Downloading transcription model...", offset: 0d, share: WhisperShare);
             await _modelInstaller.InstallBaseModelAsync(_modelPath, copyProgress, cancellationToken).ConfigureAwait(false);
         }
 
         if (_wordAligner is not null && !_wordAligner.IsInstalled())
         {
-            var alignerProgress = progress is null
-                ? null
-                : new ThrottledProgress<double>(value =>
-                {
-                    var fraction = WhisperShare + (Math.Clamp(value, 0d, 1d) * (1d - WhisperShare));
-                    progress.Report(new AudioTranscriptionInstallProgress
-                    {
-                        Stage = "Downloading alignment model...",
-                        FractionComplete = fraction
-                    });
-                }, throttleMilliseconds: 200);
-
+            var alignerProgress = CreateInstallProgress(progress, "Downloading alignment model...", offset: WhisperShare, share: 1d - WhisperShare);
             await _wordAligner.InstallAsync(alignerProgress, cancellationToken).ConfigureAwait(false);
         }
 
@@ -284,6 +262,21 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             Stage = "Transcription feature downloaded.",
             FractionComplete = 1d
         });
+    }
+
+    /// <summary>
+    /// Maps a download's fraction-complete onto the [offset, offset + share] slice of the overall
+    /// install progress, throttled so the UI is not flooded with reports.
+    /// </summary>
+    private static IProgress<double>? CreateInstallProgress(IProgress<AudioTranscriptionInstallProgress>? progress, string stage, double offset, double share)
+    {
+        return progress is null
+            ? null
+            : new ThrottledProgress<double>(value => progress.Report(new AudioTranscriptionInstallProgress
+            {
+                Stage = stage,
+                FractionComplete = offset + (Math.Clamp(value, 0d, 1d) * share)
+            }), throttleMilliseconds: 200);
     }
 
     /// <inheritdoc />
@@ -329,7 +322,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
 
         var progressState = new ProgressState();
         var segments = await TranscribeSegmentsCoreAsync(inputPath, progress, progressState, cancellationToken).ConfigureAwait(false);
-        var text = string.Join(" ", segments.Select(segment => segment.Text.Trim()).Where(text => text.Length > 0)).Trim();
+        var text = string.Join(" ", segments.Select(segment => segment.Text.Trim()).Where(trimmed => trimmed.Length > 0)).Trim();
         Report(progress, progressState, AudioTranscriptionStage.Completed, 1d, "Transcription complete");
         return text;
     }
@@ -367,14 +360,10 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
 
         try
         {
-            var preparationProgress = progress is null
-                ? null
-                : new CallbackProgress<double>(value => Report(progress, progressState, AudioTranscriptionStage.PreparingAudio, value, "Preparing audio for transcription"));
+            var preparationProgress = CreateStageProgress(progress, progressState, AudioTranscriptionStage.PreparingAudio, "Preparing audio for transcription");
             preparedAudio = await _mediaPreparationService.PrepareAsync(inputPath, preparationProgress, cancellationToken).ConfigureAwait(false);
 
-            var transcriptionProgress = progress is null
-                ? null
-                : new CallbackProgress<double>(value => Report(progress, progressState, AudioTranscriptionStage.Transcribing, value, "Transcribing audio"));
+            var transcriptionProgress = CreateStageProgress(progress, progressState, AudioTranscriptionStage.Transcribing, "Transcribing audio");
             var segments = await _transcriber.TranscribeAsync(_modelPath, preparedAudio.AudioPath, transcriptionProgress, cancellationToken).ConfigureAwait(false);
             System.Diagnostics.Debug.WriteLine($"[Transcription] Whisper produced {segments.Count} segments from '{System.IO.Path.GetFileName(inputPath)}'.");
 
@@ -385,9 +374,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             System.Diagnostics.Debug.WriteLine($"[Transcription] Word aligner {(alignerInstalled ? "available -> refining word timings" : "unavailable -> using Whisper token timings")}.");
             if (alignerInstalled)
             {
-                var alignmentProgress = progress is null
-                    ? null
-                    : new CallbackProgress<double>(value => Report(progress, progressState, AudioTranscriptionStage.Aligning, value, "Aligning word timings"));
+                var alignmentProgress = CreateStageProgress(progress, progressState, AudioTranscriptionStage.Aligning, "Aligning word timings");
                 try
                 {
                     segments = await Task.Run(
@@ -419,6 +406,17 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
         {
             preparedAudio?.Dispose();
         }
+    }
+
+    /// <summary>
+    /// Wraps the caller's progress so a stage's local [0, 1] fraction is reported as overall
+    /// transcription progress for <paramref name="stage"/>. Returns null when the caller passed no progress.
+    /// </summary>
+    private static IProgress<double>? CreateStageProgress(IProgress<AudioTranscriptionProgress>? progress, ProgressState state, AudioTranscriptionStage stage, string description)
+    {
+        return progress is null
+            ? null
+            : new CallbackProgress<double>(value => Report(progress, state, stage, value, description));
     }
 
     private void EnsureInstalled()
@@ -651,17 +649,23 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
 
         public void Dispose()
         {
-            try
+            TryDeleteDirectory(WorkingDirectory);
+        }
+    }
+
+    /// <summary>Best-effort recursive delete used for temporary working directories.</summary>
+    private static void TryDeleteDirectory(string path)
+    {
+        try
+        {
+            if (Directory.Exists(path))
             {
-                if (Directory.Exists(WorkingDirectory))
-                {
-                    Directory.Delete(WorkingDirectory, recursive: true);
-                }
+                Directory.Delete(path, recursive: true);
             }
-            catch
-            {
-                // Best effort cleanup only.
-            }
+        }
+        catch
+        {
+            // Best effort cleanup only.
         }
     }
 
@@ -888,8 +892,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
 
         public async Task<PreparedAudio> PrepareAsync(string inputPath, IProgress<double>? progress, CancellationToken cancellationToken)
         {
-            var workingDirectory = Path.Combine(Path.GetTempPath(), "files-tools-whisper", Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(workingDirectory);
+            var workingDirectory = CreateTempWorkingDirectory();
 
             try
             {
@@ -915,31 +918,34 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
             }
             catch
             {
-                try
-                {
-                    if (Directory.Exists(workingDirectory))
-                    {
-                        Directory.Delete(workingDirectory, recursive: true);
-                    }
-                }
-                catch
-                {
-                    // Best effort cleanup only.
-                }
-
+                TryDeleteDirectory(workingDirectory);
                 throw;
             }
         }
 
-        private async Task ConvertToWhisperWaveAsync(string inputPath, string outputPath, IProgress<double>? progress, double progressOffset, double progressScale, CancellationToken cancellationToken)
+        /// <summary>Creates a unique temp working directory for one preparation run.</summary>
+        private static string CreateTempWorkingDirectory()
         {
-            var convertProgress = progress is null
+            var workingDirectory = Path.Combine(Path.GetTempPath(), "files-tools-whisper", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(workingDirectory);
+            return workingDirectory;
+        }
+
+        /// <summary>
+        /// Maps an audio-processing step's [0, 1] progress onto the [offset, offset + scale] slice of
+        /// the overall preparation progress.
+        /// </summary>
+        private static IProgress<AudioProcessProgress>? CreateScaledProgress(IProgress<double>? progress, double offset, double scale)
+        {
+            return progress is null
                 ? null
                 : new CallbackProgress<AudioProcessProgress>(update =>
-                {
-                    var value = Math.Clamp(progressOffset + (update.OverallPercent * progressScale), 0d, 1d);
-                    progress.Report(value);
-                });
+                    progress.Report(Math.Clamp(offset + (update.OverallPercent * scale), 0d, 1d)));
+        }
+
+        private async Task ConvertToWhisperWaveAsync(string inputPath, string outputPath, IProgress<double>? progress, double progressOffset, double progressScale, CancellationToken cancellationToken)
+        {
+            var convertProgress = CreateScaledProgress(progress, progressOffset, progressScale);
 
             await _audioProcessingService.ConvertAsync(inputPath, outputPath, new AudioConversionOptions
             {
@@ -951,13 +957,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
 
         private async Task DenoiseVideoAudioForTranscriptionAsync(string inputPath, string outputPath, IProgress<double>? progress, double progressOffset, double progressScale, CancellationToken cancellationToken)
         {
-            var denoiseProgress = progress is null
-                ? null
-                : new CallbackProgress<AudioProcessProgress>(update =>
-                {
-                    var value = Math.Clamp(progressOffset + (update.OverallPercent * progressScale), 0d, 1d);
-                    progress.Report(value);
-                });
+            var denoiseProgress = CreateScaledProgress(progress, progressOffset, progressScale);
 
             await _audioProcessingService.ProcessPodcastAudioAsync(inputPath, outputPath, new AudioPodcastProcessingOptions
             {
