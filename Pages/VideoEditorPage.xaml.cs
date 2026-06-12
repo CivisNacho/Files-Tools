@@ -29,6 +29,8 @@ namespace Files_Tools.Pages
 {
     public sealed partial class VideoEditorPage : Page
     {
+        #region Fields and nested types
+
         private const double MinimumTwoColumnBreakpoint = 980;
         private const double OuterHorizontalPadding = 64;
         private const double WideColumnSpacing = 18;
@@ -257,6 +259,10 @@ namespace Files_Tools.Pages
             }
         }
 
+        #endregion
+
+        #region Initialization and navigation
+
         public VideoEditorPage()
         {
             _subtitlesService = new SubtitlesService(_audioTranscriptionService);
@@ -316,6 +322,10 @@ namespace Files_Tools.Pages
             UpdateAdvancedSubtitlePresetSummary();
         }
 
+        #endregion
+
+        #region Layout and responsive design
+
         private void PageRoot_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             ApplyResponsiveLayout(e.NewSize.Width);
@@ -361,6 +371,10 @@ namespace Files_Tools.Pages
             var availableOptionsWidth = Math.Max(0, (contentWidth * OptionsColumnRatio) - WideColumnSpacing);
             return availableOptionsWidth < OptionsPanelMinimumWidth;
         }
+
+        #endregion
+
+        #region Video file loading
 
         private async void UploadSurface_PointerPressed(object sender, PointerRoutedEventArgs e)
         {
@@ -522,6 +536,10 @@ namespace Files_Tools.Pages
         {
             return SupportedVideoExtensions.Contains(file.FileType, StringComparer.OrdinalIgnoreCase);
         }
+
+        #endregion
+
+        #region Apply and processing pipeline
 
         private async void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
@@ -721,6 +739,10 @@ namespace Files_Tools.Pages
             return Path.Combine(tempDirectory, Guid.NewGuid().ToString("N") + extension);
         }
 
+        #endregion
+
+        #region Panel navigation and display
+
         private void ShowOptionPanel(string selected)
         {
             MediaPanel.Visibility = selected == "Media" ? Visibility.Visible : Visibility.Collapsed;
@@ -847,6 +869,10 @@ namespace Files_Tools.Pages
             AdvancedMetadataPanel.Visibility = selected == "Metadata" ? Visibility.Visible : Visibility.Collapsed;
             AdvancedRepairPanel.Visibility = selected == "Repair" ? Visibility.Visible : Visibility.Collapsed;
         }
+
+        #endregion
+
+        #region Option-change event handlers
 
         private void AnyOptionChanged_CheckChanged(object sender, RoutedEventArgs e)
         {
@@ -1108,6 +1134,10 @@ namespace Files_Tools.Pages
             ApplySubtitlePlacementValue(DefaultSubtitlePlacementX * 100d, DefaultSubtitlePlacementY * 100d, synchronizeX: true, synchronizeY: true);
         }
 
+        #endregion
+
+        #region File-picker and action button handlers
+
         private async void ExtractAudioButton_Click(object sender, RoutedEventArgs e)
         {
             if (_sourceVideoFile is null || App.MainWindow is null)
@@ -1188,6 +1218,10 @@ namespace Files_Tools.Pages
             TryLoadSubtitleEditorFromPath(file.Path);
             RefreshValidationAndState();
         }
+
+        #endregion
+
+        #region Transcription model download and subtitle generation
 
         private async void DownloadTranscriptionFeatureButton_Click(object sender, RoutedEventArgs e)
         {
@@ -1370,6 +1404,10 @@ namespace Files_Tools.Pages
                 RefreshValidationAndState();
             }
         }
+
+        #endregion
+
+        #region Validation and UI state
 
         private void RefreshValidationAndState(IReadOnlyList<string>? forcedErrors = null)
         {
@@ -1567,6 +1605,10 @@ namespace Files_Tools.Pages
             // locale-independent (the Content is localized via x:Uid).
             return AdvancedSubtitleTypeComboBox?.SelectedIndex == 1;
         }
+
+        #endregion
+
+        #region Advanced subtitle configuration
 
         private async void ConfigureAdvancedSubtitlesButton_Click(object sender, RoutedEventArgs e)
         {
@@ -2067,6 +2109,10 @@ namespace Files_Tools.Pages
             return new SubtitleColor((byte)(255 - color.A), color.R, color.G, color.B);
         }
 
+        #endregion
+
+        #region Subtitle placement
+
         private SubtitlePostprocessingOptions CreateSubtitlePostprocessingOptionsFromUi()
         {
             var maximumDurationSeconds = SubtitleSectionDurationSlider?.Value ?? 6.5d;
@@ -2204,6 +2250,10 @@ namespace Files_Tools.Pages
 
             return hasSrtRows;
         }
+
+        #endregion
+
+        #region Subtitle preview
 
         // Caches the same render target the burn uses (probed encoded size) so the preview can size
         // text identically. Probing is async, so we cache it and refresh the preview when it arrives.
@@ -3365,6 +3415,10 @@ namespace Files_Tools.Pages
             return new Rect(0d, (hostHeight - displayHeight) / 2d, hostWidth, displayHeight);
         }
 
+        #endregion
+
+        #region Subtitle editor
+
         private bool ShouldShowSubtitlePlacementControls()
         {
             // When the live preview is up (advanced or SRT), the subtitle text is the drag handle.
@@ -3928,6 +3982,10 @@ namespace Files_Tools.Pages
             }
         }
 
+        #endregion
+
+        #region Advanced style picker
+
         /// <summary>
         /// Fills the inline style picker from the style catalog for the currently selected output
         /// kind (Styled/Karaoke) and selects the configured preset. Catalog-driven, so registering a
@@ -4022,6 +4080,10 @@ namespace Files_Tools.Pages
             configuration.Bold = preset.Bold;
             configuration.TextTransform = preset.TextTransform;
         }
+
+        #endregion
+
+        #region Building options and estimate
 
         private void CleanupPreviewFiles()
         {
@@ -4410,6 +4472,10 @@ namespace Files_Tools.Pages
             AudioSyncOffsetTextBlock.Text = $"Audio offset: {magnitude} ms {directionText}";
         }
 
+        #endregion
+
+        #region UI helpers and file pickers
+
         private async Task ShowSimpleDialogAsync(string title, string content)
         {
             var dialog = new ContentDialog
@@ -4483,6 +4549,10 @@ namespace Files_Tools.Pages
             var normalizedPath = Path.ChangeExtension(selectedOutputPath, desiredExtension);
             return normalizedPath ?? selectedOutputPath;
         }
+
+        #endregion
+
+        #region Processing progress
 
         private void ShowProcessingState()
         {
@@ -4644,6 +4714,10 @@ namespace Files_Tools.Pages
             return await picker.PickSingleFileAsync();
         }
 
+        #endregion
+
+        #region Option parsing
+
         private static VideoContainerFormat? ParseContainer(ComboBox? comboBox)
         {
             var content = (comboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
@@ -4742,6 +4816,10 @@ namespace Files_Tools.Pages
             var content = (comboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString();
             return int.TryParse(content, out var rotation) ? rotation : 0;
         }
+
+        #endregion
+
+        #region Trim timeline
 
         private void TrimTimelineCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -4953,5 +5031,7 @@ namespace Files_Tools.Pages
                 ? value.ToString(@"hh\:mm\:ss\.ff", CultureInfo.InvariantCulture)
                 : value.ToString(@"mm\:ss\.ff", CultureInfo.InvariantCulture);
         }
+
+        #endregion
     }
 }

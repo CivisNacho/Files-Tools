@@ -709,6 +709,8 @@ public sealed class VideoProcessingService : IVideoProcessingService
     private static readonly Dictionary<string, VideoEncoderPlan> VideoEncoderPlanCache = new(StringComparer.OrdinalIgnoreCase);
 
     /// <inheritdoc />
+    #region Public API and pipeline orchestration
+
     public async Task<VideoProcessingEstimate> EstimateProcessAsync(string inputPath, ProcessVideoOptions options, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -937,32 +939,19 @@ public sealed class VideoProcessingService : IVideoProcessingService
         }
 
         var extractionTarget = ResolveAudioExtractionTarget(outputPath);
-        var args = new List<string>
-        {
-            "-y",
-            "-hide_banner",
-            "-progress",
-            "pipe:2",
-            "-nostats",
+        var canCopySourceAudio = string.Equals(inputInfo.PrimaryAudioStream.CodecName, extractionTarget.ProbeCodecName, StringComparison.OrdinalIgnoreCase);
+        var args = CreateBaseFfmpegArguments();
+        args.AddRange(
+        [
             "-i",
             Path.GetFullPath(inputPath),
             "-vn",
             "-map",
-            "0:a:0"
-        };
-
-        if (string.Equals(inputInfo.PrimaryAudioStream.CodecName, extractionTarget.ProbeCodecName, StringComparison.OrdinalIgnoreCase))
-        {
-            args.Add("-c:a");
-            args.Add("copy");
-        }
-        else
-        {
-            args.Add("-c:a");
-            args.Add(extractionTarget.EncoderName);
-        }
-
-        args.Add(Path.GetFullPath(outputPath));
+            "0:a:0",
+            "-c:a",
+            canCopySourceAudio ? "copy" : extractionTarget.EncoderName,
+            Path.GetFullPath(outputPath)
+        ]);
 
         var progressObserver = CreateProgressObserver(inputInfo.Duration ?? TimeSpan.Zero, progress);
         await RunProcessWithFallbackAsync(ffmpegCandidates, args, cancellationToken, probeJson, progressObserver).ConfigureAwait(false);
@@ -996,27 +985,12 @@ public sealed class VideoProcessingService : IVideoProcessingService
             // drop the styled subtitle next to it as a sidecar the player loads automatically.
             WriteSidecarSubtitleIfNeeded(finalOutputPath, options, outputFormat);
         }
-        catch (VideoProcessingException)
-        {
-            throw;
-        }
-        catch (ArgumentException)
-        {
-            throw;
-        }
-        catch (FileNotFoundException)
-        {
-            throw;
-        }
-        catch (NotSupportedException)
-        {
-            throw;
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not (
+            VideoProcessingException or
+            ArgumentException or
+            FileNotFoundException or
+            NotSupportedException or
+            OperationCanceledException))
         {
             throw new VideoProcessingException(
                 "Video processing failed before FFmpeg completed.",
@@ -1030,16 +1004,26 @@ public sealed class VideoProcessingService : IVideoProcessingService
         }
     }
 
+    /// <summary>
+    /// Common FFmpeg prelude: overwrite output, no banner, and machine-readable progress
+    /// ("out_time="/"progress=" lines) emitted on stderr for <see cref="CreateProgressObserver"/>.
+    /// </summary>
+    #endregion
+
+    #region FFmpeg argument building
+
+    private static List<string> CreateBaseFfmpegArguments() =>
+    [
+        "-y",
+        "-hide_banner",
+        "-progress",
+        "pipe:2",
+        "-nostats"
+    ];
+
     private static List<string> BuildFfmpegArguments(string inputPath, string outputPath, VideoContainerFormat outputFormat, ProcessVideoOptions options, MediaInfo inputInfo, StreamPlan streamPlan, VideoEncoderPlan videoEncoderPlan)
     {
-        var args = new List<string>
-        {
-            "-y",
-            "-hide_banner",
-            "-progress",
-            "pipe:2",
-            "-nostats"
-        };
+        var args = CreateBaseFfmpegArguments();
 
         ApplyRepairInputArguments(args, options.Repair);
 
@@ -1097,7 +1081,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
         ApplyVideoCodecArguments(args, streamPlan, videoEncoderPlan);
         ApplyAudioCodecArguments(args, streamPlan, options);
         ApplySubtitleCodecArguments(args, streamPlan, options, outputFormat);
-        ApplyMetadataArguments(args, options, inputInfo);
+        ApplyMetadataArguments(args, options);
 
         if (options.AudioMux is not null && options.AudioMux.UseShortestDuration)
         {
@@ -1559,7 +1543,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
         }
     }
 
-    private static void ApplyMetadataArguments(List<string> args, ProcessVideoOptions options, MediaInfo inputInfo)
+    private static void ApplyMetadataArguments(List<string> args, ProcessVideoOptions options)
     {
         if (options.RemoveMetadata)
         {
@@ -1569,6 +1553,10 @@ public sealed class VideoProcessingService : IVideoProcessingService
             args.Add("-1");
         }
     }
+
+    #endregion
+
+    #region Video encoder planning (hardware/software)
 
     private static async Task<VideoEncoderPlan> ResolveVideoEncoderPlanAsync(IReadOnlyList<string> ffmpegCandidates, StreamPlan streamPlan, CancellationToken cancellationToken)
     {
@@ -1679,6 +1667,10 @@ public sealed class VideoProcessingService : IVideoProcessingService
     {
         return $"{string.Join("|", ffmpegCandidates)}::{streamPlan.VideoCodec}::{streamPlan.VideoNeedsEncoding}::{streamPlan.CopyAllStreams}::{streamPlan.VideoCrf.HasValue}";
     }
+
+    #endregion
+
+    #region Option validation
 
     private static void ValidateOptions(ProcessVideoOptions options)
     {
@@ -1814,6 +1806,10 @@ public sealed class VideoProcessingService : IVideoProcessingService
             throw new ArgumentException("Output path cannot be null or whitespace.", nameof(path));
         }
     }
+
+    #endregion
+
+    #region FFprobe probing and media-info parsing
 
     private static async Task<(MediaInfo Info, string Json)> ProbeAsync(IReadOnlyList<string> ffprobeCandidates, string inputPath, CancellationToken cancellationToken)
     {
@@ -1958,6 +1954,10 @@ public sealed class VideoProcessingService : IVideoProcessingService
 
         return null;
     }
+
+    #endregion
+
+    #region Process execution and progress reporting
 
     private static async Task<ProcessResult> RunProcessWithFallbackAsync(IReadOnlyList<string> binaryCandidates, IReadOnlyList<string> arguments, CancellationToken cancellationToken, string? probeJson, Action<string>? standardErrorLineObserver = null)
     {
@@ -2172,6 +2172,10 @@ public sealed class VideoProcessingService : IVideoProcessingService
         return TimeSpan.Zero;
     }
 
+    #endregion
+
+    #region Container, codec and subtitle mapping
+
     private static VideoContainerFormat ResolveOutputFormat(string inputPath, string outputPath, VideoContainerFormat? requestedFormat)
     {
         if (requestedFormat.HasValue)
@@ -2280,32 +2284,38 @@ public sealed class VideoProcessingService : IVideoProcessingService
         return true;
     }
 
+    private static readonly Dictionary<VideoContainerFormat, HashSet<VideoCodec>> SupportedVideoCodecsByContainer = new()
+    {
+        [VideoContainerFormat.Mp4] = [VideoCodec.H264, VideoCodec.H265, VideoCodec.Av1, VideoCodec.Mpeg4],
+        [VideoContainerFormat.Webm] = [VideoCodec.Vp8, VideoCodec.Vp9, VideoCodec.Av1],
+        [VideoContainerFormat.Gif] = [VideoCodec.Gif],
+        [VideoContainerFormat.Mkv] = [VideoCodec.H264, VideoCodec.H265, VideoCodec.Av1, VideoCodec.Vp8, VideoCodec.Vp9, VideoCodec.Mpeg4],
+        [VideoContainerFormat.Mov] = [VideoCodec.H264, VideoCodec.H265, VideoCodec.Av1, VideoCodec.Mpeg4],
+        [VideoContainerFormat.Avi] = [VideoCodec.H264, VideoCodec.Mpeg4]
+    };
+
+    private static readonly Dictionary<VideoContainerFormat, HashSet<AudioCodec>> SupportedAudioCodecsByContainer = new()
+    {
+        [VideoContainerFormat.Mp4] = [AudioCodec.Aac, AudioCodec.Mp3, AudioCodec.Ac3, AudioCodec.Flac],
+        [VideoContainerFormat.Webm] = [AudioCodec.Opus, AudioCodec.Vorbis],
+        [VideoContainerFormat.Gif] = [],
+        [VideoContainerFormat.Mkv] = [AudioCodec.Aac, AudioCodec.Opus, AudioCodec.Vorbis, AudioCodec.Mp3, AudioCodec.Ac3, AudioCodec.Flac, AudioCodec.PcmS16Le],
+        [VideoContainerFormat.Mov] = [AudioCodec.Aac, AudioCodec.Mp3, AudioCodec.Ac3, AudioCodec.Flac, AudioCodec.PcmS16Le],
+        [VideoContainerFormat.Avi] = [AudioCodec.Mp3, AudioCodec.Ac3, AudioCodec.PcmS16Le]
+    };
+
     private static HashSet<VideoCodec> GetSupportedVideoCodecs(VideoContainerFormat format)
     {
-        return format switch
-        {
-            VideoContainerFormat.Mp4 => new HashSet<VideoCodec> { VideoCodec.H264, VideoCodec.H265, VideoCodec.Av1, VideoCodec.Mpeg4 },
-            VideoContainerFormat.Webm => new HashSet<VideoCodec> { VideoCodec.Vp8, VideoCodec.Vp9, VideoCodec.Av1 },
-            VideoContainerFormat.Gif => new HashSet<VideoCodec> { VideoCodec.Gif },
-            VideoContainerFormat.Mkv => new HashSet<VideoCodec> { VideoCodec.H264, VideoCodec.H265, VideoCodec.Av1, VideoCodec.Vp8, VideoCodec.Vp9, VideoCodec.Mpeg4 },
-            VideoContainerFormat.Mov => new HashSet<VideoCodec> { VideoCodec.H264, VideoCodec.H265, VideoCodec.Av1, VideoCodec.Mpeg4 },
-            VideoContainerFormat.Avi => new HashSet<VideoCodec> { VideoCodec.H264, VideoCodec.Mpeg4 },
-            _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
-        };
+        return SupportedVideoCodecsByContainer.TryGetValue(format, out var codecs)
+            ? codecs
+            : throw new ArgumentOutOfRangeException(nameof(format), format, null);
     }
 
     private static HashSet<AudioCodec> GetSupportedAudioCodecs(VideoContainerFormat format)
     {
-        return format switch
-        {
-            VideoContainerFormat.Mp4 => new HashSet<AudioCodec> { AudioCodec.Aac, AudioCodec.Mp3, AudioCodec.Ac3, AudioCodec.Flac },
-            VideoContainerFormat.Webm => new HashSet<AudioCodec> { AudioCodec.Opus, AudioCodec.Vorbis },
-            VideoContainerFormat.Gif => new HashSet<AudioCodec>(),
-            VideoContainerFormat.Mkv => new HashSet<AudioCodec> { AudioCodec.Aac, AudioCodec.Opus, AudioCodec.Vorbis, AudioCodec.Mp3, AudioCodec.Ac3, AudioCodec.Flac, AudioCodec.PcmS16Le },
-            VideoContainerFormat.Mov => new HashSet<AudioCodec> { AudioCodec.Aac, AudioCodec.Mp3, AudioCodec.Ac3, AudioCodec.Flac, AudioCodec.PcmS16Le },
-            VideoContainerFormat.Avi => new HashSet<AudioCodec> { AudioCodec.Mp3, AudioCodec.Ac3, AudioCodec.PcmS16Le },
-            _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
-        };
+        return SupportedAudioCodecsByContainer.TryGetValue(format, out var codecs)
+            ? codecs
+            : throw new ArgumentOutOfRangeException(nameof(format), format, null);
     }
 
     private static VideoCodec GetDefaultVideoCodec(VideoContainerFormat format)
@@ -2346,13 +2356,16 @@ public sealed class VideoProcessingService : IVideoProcessingService
         return outputFormat switch
         {
             VideoContainerFormat.Mp4 or VideoContainerFormat.Mov => "mov_text",
-            VideoContainerFormat.Mkv => Path.GetExtension(options.SubtitlePath).Equals(".ass", StringComparison.OrdinalIgnoreCase) ||
-                                         Path.GetExtension(options.SubtitlePath).Equals(".ssa", StringComparison.OrdinalIgnoreCase)
-                ? "ass"
-                : "srt",
+            VideoContainerFormat.Mkv => HasAnyExtension(options.SubtitlePath, ".ass", ".ssa") ? "ass" : "srt",
             VideoContainerFormat.Webm => "webvtt",
             _ => null
         };
+    }
+
+    private static bool HasAnyExtension(string path, params string[] extensions)
+    {
+        var extension = Path.GetExtension(path);
+        return extensions.Contains(extension, StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -2378,9 +2391,7 @@ public sealed class VideoProcessingService : IVideoProcessingService
             return false;
         }
 
-        var extension = Path.GetExtension(subtitleOptions.SubtitlePath);
-        return extension.Equals(".ass", StringComparison.OrdinalIgnoreCase) ||
-               extension.Equals(".ssa", StringComparison.OrdinalIgnoreCase);
+        return HasAnyExtension(subtitleOptions.SubtitlePath, ".ass", ".ssa");
     }
 
     /// <summary>
@@ -2392,15 +2403,11 @@ public sealed class VideoProcessingService : IVideoProcessingService
     /// </summary>
     private static string ResolveSubtitleEmbedCodec(string subtitlePath, VideoContainerFormat outputFormat, string plannedCodec)
     {
-        var extension = Path.GetExtension(subtitlePath);
         var isCopyNative = outputFormat switch
         {
             // Matroska carries ass/ssa/srt/vtt as-is.
-            VideoContainerFormat.Mkv => extension.Equals(".ass", StringComparison.OrdinalIgnoreCase)
-                || extension.Equals(".ssa", StringComparison.OrdinalIgnoreCase)
-                || extension.Equals(".srt", StringComparison.OrdinalIgnoreCase)
-                || extension.Equals(".vtt", StringComparison.OrdinalIgnoreCase),
-            VideoContainerFormat.Webm => extension.Equals(".vtt", StringComparison.OrdinalIgnoreCase),
+            VideoContainerFormat.Mkv => HasAnyExtension(subtitlePath, ".ass", ".ssa", ".srt", ".vtt"),
+            VideoContainerFormat.Webm => HasAnyExtension(subtitlePath, ".vtt"),
             _ => false
         };
 
@@ -2686,6 +2693,10 @@ public sealed class VideoProcessingService : IVideoProcessingService
         return options.Repair?.DropNonEssentialStreams == true;
     }
 
+    #endregion
+
+    #region Output estimation
+
     private static (int Width, int Height) EstimateOutputDimensions(MediaInfo inputInfo, ProcessVideoOptions options)
     {
         var width = inputInfo.PrimaryVideoStream?.Width ?? 0;
@@ -2855,6 +2866,10 @@ public sealed class VideoProcessingService : IVideoProcessingService
         return exception.ExitCode is -1073741515 or unchecked((int)0xC0000135);
     }
 
+    #endregion
+
+    #region Nested types
+
     private sealed record AudioExtractionTarget(string EncoderName, string ProbeCodecName);
 
     internal sealed record VideoEncoderPlan(string EncoderName, bool IsHardwareAccelerated);
@@ -2915,4 +2930,6 @@ public sealed class VideoProcessingService : IVideoProcessingService
     }
 
     private sealed record ProcessResult(int ExitCode, string StandardOutput, string StandardError);
+
+    #endregion
 }
