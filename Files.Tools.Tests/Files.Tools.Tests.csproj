@@ -55,8 +55,7 @@
     <Compile Include="..\Services\Presets\SubtitlePresetLoader.cs" Link="Services\Presets\SubtitlePresetLoader.cs" />
     <Compile Include="..\Services\VideoProcessingService.cs" Link="Services\VideoProcessingService.cs" />
     <Compile Include="..\Services\VideoAudioDenoise.cs" Link="Services\VideoAudioDenoise.cs" />
-    <Compile Include="..\Services\DocumentProcessingService.cs" Link="Services\DocumentProcessingService.cs" />
-    <Compile Include="..\Services\LibreOfficeSetupService.cs" Link="Services\LibreOfficeSetupService.cs" />
+    <Compile Include="..\Services\DocumentService.cs" Link="Services\DocumentService.cs" />
     <Compile Include="..\Helpers\EtaEstimator.cs" Link="Helpers\EtaEstimator.cs" />
     <Compile Include="..\Services\PdfService.cs" Link="Services\PdfService.cs" />
     <Compile Include="..\Services\PdfNativeCli.cs" Link="Services\PdfNativeCli.cs" />

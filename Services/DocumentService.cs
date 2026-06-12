@@ -4,8 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -253,7 +255,7 @@ public sealed class DocumentConversionException : InvalidOperationException
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Implementation
+// Document service
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// <summary>
@@ -315,61 +317,10 @@ public sealed class DocumentService : IDocumentService
                 $"Supported formats: {string.Join(", ", AllSupportedExtensions())}.");
         }
 
-        var candidates = ResolveExecutableCandidates();
-        var convertToArg = BuildConvertToArgument(ext, options);
-
-        // LibreOffice always names the output <basename>.pdf inside --outdir.
-        // We write to a private temp directory and then move to the exact outputPath.
-        var tempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-        Directory.CreateDirectory(tempDir);
-
-        try
-        {
-            var args = new List<string>
-            {
-                "--headless",
-                "--convert-to",
-                convertToArg,
-                "--outdir",
-                tempDir,
-                Path.GetFullPath(inputPath)
-            };
-
-            await RunProcessWithFallbackAsync(candidates, args, cancellationToken).ConfigureAwait(false);
-
-            var expectedName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
-            var tempOutputPath = Path.Combine(tempDir, expectedName);
-
-            if (!File.Exists(tempOutputPath))
-            {
-                throw new DocumentConversionException(
-                    $"LibreOffice completed without producing the expected output file '{expectedName}'.",
-                    candidates.Count > 0 ? candidates[0] : string.Empty,
-                    string.Empty,
-                    null,
-                    string.Empty,
-                    string.Empty);
-            }
-
-            var outputDir = Path.GetDirectoryName(Path.GetFullPath(outputPath));
-            if (outputDir is not null && !Directory.Exists(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
-
-            File.Move(tempOutputPath, Path.GetFullPath(outputPath), overwrite: true);
-        }
-        finally
-        {
-            try { Directory.Delete(tempDir, recursive: true); }
-            catch
-            {
-                // Best-effort cleanup; the OS will sweep temp files eventually.
-            }
-        }
+        await ConvertToOutputPathAsync(
+            inputPath, outputPath, BuildConvertToArgument(ext, options), ".pdf", cancellationToken)
+            .ConfigureAwait(false);
     }
-
-    // ── ExtractImagesAsync ───────────────────────────────────────────────────
 
     /// <inheritdoc />
     public async Task ExtractImagesAsync(
@@ -398,37 +349,13 @@ public sealed class DocumentService : IDocumentService
         {
             if (IsLegacyBinaryFormat(ext))
             {
-                tempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-                Directory.CreateDirectory(tempDir);
-
+                tempDir = CreateTempDirectory();
                 var modernFormat = GetModernConversionFormat(ext);
-                var candidates = ResolveExecutableCandidates();
-                var args = new List<string>
-                {
-                    "--headless",
-                    "--convert-to",
-                    modernFormat,
-                    "--outdir",
-                    tempDir,
-                    Path.GetFullPath(inputPath)
-                };
 
-                await RunProcessWithFallbackAsync(candidates, args, cancellationToken).ConfigureAwait(false);
-
-                var convertedName = Path.GetFileNameWithoutExtension(inputPath) + "." + modernFormat;
-                sourceForExtraction = Path.Combine(tempDir, convertedName);
+                sourceForExtraction = await RunConversionAsync(
+                    inputPath, modernFormat, tempDir, "." + modernFormat, cancellationToken)
+                    .ConfigureAwait(false);
                 effectiveExt = "." + modernFormat;
-
-                if (!File.Exists(sourceForExtraction))
-                {
-                    throw new DocumentConversionException(
-                        $"LibreOffice did not produce the expected intermediate file '{convertedName}'.",
-                        candidates.Count > 0 ? candidates[0] : string.Empty,
-                        string.Empty,
-                        null,
-                        string.Empty,
-                        string.Empty);
-                }
             }
 
             var mediaPrefix = GetMediaFolderPrefix(effectiveExt);
@@ -437,7 +364,7 @@ public sealed class DocumentService : IDocumentService
             if (imageCount == 0)
             {
                 // Remove the empty archive so the caller is not left with a useless file.
-                TryDeleteFile(outputZipPath);
+                SetupHelpers.TryDeleteFile(outputZipPath);
                 throw new InvalidOperationException(
                     "No embedded images were found in the document.");
             }
@@ -445,17 +372,9 @@ public sealed class DocumentService : IDocumentService
         finally
         {
             if (tempDir is not null)
-            {
-                try { Directory.Delete(tempDir, recursive: true); }
-                catch
-                {
-                    // Best-effort cleanup.
-                }
-            }
+                SetupHelpers.TryDeleteDirectory(tempDir);
         }
     }
-
-    // ── RepairAsync ──────────────────────────────────────────────────────────
 
     /// <inheritdoc />
     public async Task RepairAsync(
@@ -483,60 +402,86 @@ public sealed class DocumentService : IDocumentService
                 $"Supported formats: {string.Join(", ", AllSupportedExtensions())}.");
         }
 
-        var candidates    = ResolveExecutableCandidates();
-        var outputFormat  = ResolveRepairFormatString(outputExt);
+        // The repair is a full load-and-save cycle: the --convert-to format string is simply
+        // the lowercased output extension; LibreOffice resolves the save filter from it.
+        await ConvertToOutputPathAsync(
+            inputPath, outputPath, outputExt.TrimStart('.').ToLowerInvariant(), outputExt, cancellationToken)
+            .ConfigureAwait(false);
+    }
 
-        // LibreOffice names its output after the input basename with the requested extension.
-        // Write to a temp directory so we can then move the result to the exact outputPath,
-        // including the in-place repair case where outputPath == inputPath.
-        var tempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-        Directory.CreateDirectory(tempDir);
+    // ── Conversion plumbing ──────────────────────────────────────────────────
 
+    /// <summary>
+    /// Runs a LibreOffice conversion through a private temp directory and moves the produced
+    /// file to the exact <paramref name="outputPath"/>. LibreOffice always names its output
+    /// after the input basename inside <c>--outdir</c>, so the temp-dir hop is what lets the
+    /// caller pick an arbitrary destination — including in-place repair where input == output.
+    /// </summary>
+    private static async Task ConvertToOutputPathAsync(
+        string inputPath,
+        string outputPath,
+        string convertToArg,
+        string outputExtension,
+        CancellationToken cancellationToken)
+    {
+        var tempDir = CreateTempDirectory();
         try
         {
-            var args = new List<string>
-            {
-                "--headless",
-                "--convert-to",
-                outputFormat,
-                "--outdir",
-                tempDir,
-                Path.GetFullPath(inputPath)
-            };
+            var producedPath = await RunConversionAsync(
+                inputPath, convertToArg, tempDir, outputExtension, cancellationToken)
+                .ConfigureAwait(false);
 
-            await RunProcessWithFallbackAsync(candidates, args, cancellationToken).ConfigureAwait(false);
-
-            // LibreOffice uses the input basename regardless of any output rename the caller wants.
-            var expectedName    = Path.GetFileNameWithoutExtension(inputPath) + outputExt;
-            var tempOutputPath  = Path.Combine(tempDir, expectedName);
-
-            if (!File.Exists(tempOutputPath))
-            {
-                throw new DocumentConversionException(
-                    $"LibreOffice completed without producing the expected output file '{expectedName}'.",
-                    candidates.Count > 0 ? candidates[0] : string.Empty,
-                    string.Empty,
-                    null,
-                    string.Empty,
-                    string.Empty);
-            }
-
-            var outputDir = Path.GetDirectoryName(Path.GetFullPath(outputPath));
-            if (outputDir is not null && !Directory.Exists(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
-
-            File.Move(tempOutputPath, Path.GetFullPath(outputPath), overwrite: true);
+            var fullOutputPath = Path.GetFullPath(outputPath);
+            EnsureParentDirectoryExists(fullOutputPath);
+            File.Move(producedPath, fullOutputPath, overwrite: true);
         }
         finally
         {
-            try { Directory.Delete(tempDir, recursive: true); }
-            catch
-            {
-                // Best-effort cleanup; the OS will sweep temp files eventually.
-            }
+            // Best-effort cleanup; the OS will sweep temp files eventually.
+            SetupHelpers.TryDeleteDirectory(tempDir);
         }
+    }
+
+    /// <summary>
+    /// Invokes <c>soffice --headless --convert-to &lt;convertToArg&gt; --outdir &lt;outDir&gt;</c>
+    /// and returns the path of the produced file (input basename + <paramref name="outputExtension"/>).
+    /// Throws <see cref="DocumentConversionException"/> if the expected file is missing afterwards.
+    /// </summary>
+    private static async Task<string> RunConversionAsync(
+        string inputPath,
+        string convertToArg,
+        string outDir,
+        string outputExtension,
+        CancellationToken cancellationToken)
+    {
+        var candidates = ResolveExecutableCandidates();
+        var args = new List<string>
+        {
+            "--headless",
+            "--convert-to",
+            convertToArg,
+            "--outdir",
+            outDir,
+            Path.GetFullPath(inputPath)
+        };
+
+        await RunProcessWithFallbackAsync(candidates, args, cancellationToken).ConfigureAwait(false);
+
+        var expectedName = Path.GetFileNameWithoutExtension(inputPath) + outputExtension;
+        var producedPath = Path.Combine(outDir, expectedName);
+
+        if (!File.Exists(producedPath))
+        {
+            throw new DocumentConversionException(
+                $"LibreOffice completed without producing the expected output file '{expectedName}'.",
+                candidates.Count > 0 ? candidates[0] : string.Empty,
+                string.Empty,
+                null,
+                string.Empty,
+                string.Empty);
+        }
+
+        return producedPath;
     }
 
     // ── Filter argument builder ──────────────────────────────────────────────
@@ -608,16 +553,11 @@ public sealed class DocumentService : IDocumentService
     /// </summary>
     private static string ResolveFilterName(string extension)
     {
-        if (WriterExtensions.Any(e => e.Equals(extension, StringComparison.OrdinalIgnoreCase)))
-            return "writer_pdf_Export";
+        if (MatchesAny(extension, WriterExtensions))  return "writer_pdf_Export";
+        if (MatchesAny(extension, ImpressExtensions)) return "impress_pdf_Export";
+        if (MatchesAny(extension, CalcExtensions))    return "calc_pdf_Export";
 
-        if (ImpressExtensions.Any(e => e.Equals(extension, StringComparison.OrdinalIgnoreCase)))
-            return "impress_pdf_Export";
-
-        if (CalcExtensions.Any(e => e.Equals(extension, StringComparison.OrdinalIgnoreCase)))
-            return "calc_pdf_Export";
-
-        // Should not happen after ValidateInputExtension, but safer than throwing here.
+        // Should not happen after the extension check, but safer than throwing here.
         return "writer_pdf_Export";
     }
 
@@ -648,7 +588,7 @@ public sealed class DocumentService : IDocumentService
     /// </summary>
     private static List<string> ResolveExecutableCandidates()
     {
-        var executableName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "soffice.exe" : "soffice";
+        var executableName = SetupHelpers.SofficeExecutableName;
         var candidates     = new List<string>();
 
         // 1. On-demand downloaded copy — installed by LibreOfficeSetupService.
@@ -656,7 +596,7 @@ public sealed class DocumentService : IDocumentService
             candidates.Add(LibreOfficeSetupService.ExecutablePath);
 
         // 2. Manually bundled copy in the app directory (developer convenience).
-        var rid         = GetCurrentRid();
+        var rid         = SetupHelpers.GetCurrentRid();
         var bundledPath = Path.Combine(AppContext.BaseDirectory, "libreoffice", rid, "program", executableName);
         if (File.Exists(bundledPath))
             candidates.Add(bundledPath);
@@ -696,49 +636,6 @@ public sealed class DocumentService : IDocumentService
         return candidates;
     }
 
-    /// <summary>
-    /// Returns the runtime identifier that matches the current process architecture,
-    /// used to locate the correct bundled LibreOffice binary subfolder.
-    /// </summary>
-    private static string GetCurrentRid()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            return RuntimeInformation.ProcessArchitecture switch
-            {
-                Architecture.X64   => "win-x64",
-                Architecture.X86   => "win-x86",
-                Architecture.Arm64 => "win-arm64",
-                _ => throw new PlatformNotSupportedException(
-                    $"Unsupported Windows architecture '{RuntimeInformation.ProcessArchitecture}'.")
-            };
-        }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            return RuntimeInformation.ProcessArchitecture switch
-            {
-                Architecture.X64   => "osx-x64",
-                Architecture.Arm64 => "osx-arm64",
-                _ => throw new PlatformNotSupportedException(
-                    $"Unsupported macOS architecture '{RuntimeInformation.ProcessArchitecture}'.")
-            };
-        }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            return RuntimeInformation.ProcessArchitecture switch
-            {
-                Architecture.X64   => "linux-x64",
-                Architecture.Arm64 => "linux-arm64",
-                _ => throw new PlatformNotSupportedException(
-                    $"Unsupported Linux architecture '{RuntimeInformation.ProcessArchitecture}'.")
-            };
-        }
-
-        throw new PlatformNotSupportedException("Current operating system is not supported.");
-    }
-
     // ── Process execution ────────────────────────────────────────────────────
 
     private static async Task RunProcessWithFallbackAsync(
@@ -772,8 +669,8 @@ public sealed class DocumentService : IDocumentService
         }
 
         var expectedPath = Path.Combine(
-            AppContext.BaseDirectory, "libreoffice", GetCurrentRid(), "program",
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "soffice.exe" : "soffice");
+            AppContext.BaseDirectory, "libreoffice", SetupHelpers.GetCurrentRid(), "program",
+            SetupHelpers.SofficeExecutableName);
 
         throw lastException ?? new DocumentConversionException(
             $"The bundled LibreOffice executable was not found. " +
@@ -859,14 +756,7 @@ public sealed class DocumentService : IDocumentService
         var stdoutTask = process.StandardOutput.ReadToEndAsync();
         var stderrTask = process.StandardError.ReadToEndAsync();
 
-        try
-        {
-            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
+        await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
 
         var stdout = await stdoutTask.ConfigureAwait(false);
         var stderr = await stderrTask.ConfigureAwait(false);
@@ -924,16 +814,31 @@ public sealed class DocumentService : IDocumentService
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
-    private static bool IsSupportedExtension(string ext) =>
-        WriterExtensions.Any(e => e.Equals(ext, StringComparison.OrdinalIgnoreCase)) ||
-        ImpressExtensions.Any(e => e.Equals(ext, StringComparison.OrdinalIgnoreCase)) ||
-        CalcExtensions.Any(e => e.Equals(ext, StringComparison.OrdinalIgnoreCase));
+    private static bool MatchesAny(string extension, string[] extensions) =>
+        extensions.Any(e => e.Equals(extension, StringComparison.OrdinalIgnoreCase));
 
-    private static IEnumerable<string> AllSupportedExtensions()
+    private static bool IsSupportedExtension(string ext) =>
+        MatchesAny(ext, WriterExtensions) ||
+        MatchesAny(ext, ImpressExtensions) ||
+        MatchesAny(ext, CalcExtensions);
+
+    private static IEnumerable<string> AllSupportedExtensions() =>
+        WriterExtensions.Concat(ImpressExtensions).Concat(CalcExtensions);
+
+    private static string CreateTempDirectory()
     {
-        foreach (var e in WriterExtensions)  yield return e;
-        foreach (var e in ImpressExtensions) yield return e;
-        foreach (var e in CalcExtensions)    yield return e;
+        var tempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        Directory.CreateDirectory(tempDir);
+        return tempDir;
+    }
+
+    private static void EnsureParentDirectoryExists(string fullPath)
+    {
+        var dir = Path.GetDirectoryName(fullPath);
+        if (dir is not null && !Directory.Exists(dir))
+        {
+            Directory.CreateDirectory(dir);
+        }
     }
 
     // ── Image extraction helpers ─────────────────────────────────────────────
@@ -949,11 +854,7 @@ public sealed class DocumentService : IDocumentService
     /// </summary>
     private static int PackImagesToZip(string sourceZipPath, string mediaPrefix, string outputZipPath)
     {
-        var outputDir = Path.GetDirectoryName(Path.GetFullPath(outputZipPath));
-        if (outputDir is not null && !Directory.Exists(outputDir))
-        {
-            Directory.CreateDirectory(outputDir);
-        }
+        EnsureParentDirectoryExists(Path.GetFullPath(outputZipPath));
 
         // Open both archives simultaneously to stream entries directly.
         using var sourceArchive = ZipFile.OpenRead(sourceZipPath);
@@ -1057,23 +958,6 @@ public sealed class DocumentService : IDocumentService
         return candidate;
     }
 
-    /// <summary>
-    /// Maps a file extension to the <c>--convert-to</c> format string that LibreOffice expects.
-    /// For all supported document formats the format string is simply the lowercased extension
-    /// without the leading dot; LibreOffice resolves the correct save filter from it automatically.
-    /// </summary>
-    private static string ResolveRepairFormatString(string extension) =>
-        extension.TrimStart('.').ToLowerInvariant();
-
-    private static void TryDeleteFile(string path)
-    {
-        try { File.Delete(path); }
-        catch
-        {
-            // Best-effort.
-        }
-    }
-
     private static string FormatCommandLine(string binaryPath, List<string> arguments)
     {
         var sb = new StringBuilder();
@@ -1083,5 +967,534 @@ public sealed class DocumentService : IDocumentService
             sb.Append(" \"").Append(arg.Replace("\"", "\\\"")).Append('"');
         }
         return sb.ToString();
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LibreOffice setup — progress types
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// <summary>
+/// Stage reported while LibreOffice is being downloaded and installed.
+/// </summary>
+public enum LibreOfficeSetupStage
+{
+    /// <summary>Downloading the installer from the LibreOffice foundation server.</summary>
+    Downloading,
+
+    /// <summary>
+    /// Unpacking the MSI payload via <c>msiexec /a</c> (administrative install).
+    /// Progress percentage is -1 (indeterminate) during this stage.
+    /// </summary>
+    Extracting,
+
+    /// <summary>Copying the extracted files to the local install directory.</summary>
+    Copying,
+
+    /// <summary>Installation finished successfully. <see cref="LibreOfficeSetupService.IsAvailable"/> is now <c>true</c>.</summary>
+    Complete
+}
+
+/// <summary>
+/// Progress snapshot reported through <see cref="IProgress{T}"/> during
+/// <see cref="LibreOfficeSetupService.DownloadAndInstallAsync"/>.
+/// </summary>
+public sealed class LibreOfficeSetupProgress
+{
+    /// <summary>Current installation stage.</summary>
+    public LibreOfficeSetupStage Stage { get; init; }
+
+    /// <summary>
+    /// Completion percentage 0–100.
+    /// <c>-1</c> indicates that the current stage is indeterminate (no progress can be calculated).
+    /// </summary>
+    public double Percentage { get; init; }
+
+    /// <summary>Human-readable status line suitable for display in the UI.</summary>
+    public string StatusText { get; init; } = "";
+
+    /// <summary>Bytes downloaded so far (only meaningful during <see cref="LibreOfficeSetupStage.Downloading"/>).</summary>
+    public long BytesDownloaded { get; init; }
+
+    /// <summary>Total bytes to download (only meaningful during <see cref="LibreOfficeSetupStage.Downloading"/>).</summary>
+    public long TotalBytes { get; init; }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LibreOffice setup — service
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// <summary>
+/// Manages the on-demand download and local installation of the LibreOffice CLI.
+/// <para>
+/// LibreOffice is downloaded once from the official LibreOffice Foundation distribution
+/// servers and stored in the user's local application data folder. It persists across
+/// app updates and does not need to be re-downloaded unless the user removes it.
+/// </para>
+/// <para>
+/// Install location: <c>%LOCALAPPDATA%\FilesTools\libreoffice\&lt;rid&gt;\</c>
+/// where <c>&lt;rid&gt;</c> is the current runtime identifier (e.g. <c>win-x64</c>).
+/// </para>
+/// <para>
+/// The download is approximately 350–450 MB depending on platform. Extraction uses
+/// <c>msiexec /a</c> (administrative install), which unpacks the MSI payload to a
+/// temporary directory without writing to the system registry or requiring elevation.
+/// </para>
+/// </summary>
+public static class LibreOfficeSetupService
+{
+    // ── Constants ─────────────────────────────────────────────────────────────
+
+    private const string AppDataFolderName = "FilesTools";
+
+    /// <summary>
+    /// Fallback version used when the stable-directory lookup fails.
+    /// Keep this in sync with the latest confirmed stable LibreOffice release.
+    /// </summary>
+    private const string FallbackVersion = "26.2.3";
+
+    /// <summary>
+    /// LibreOffice stable-releases directory index.
+    /// Returns an HTML page whose links include every currently hosted version folder,
+    /// e.g. <c>26.2.3/</c>. We parse these to discover the highest available version.
+    /// </summary>
+    private const string StableDirectoryUrl =
+        "https://download.documentfoundation.org/libreoffice/stable/";
+
+    private static readonly HttpClient SharedHttpClient = new(new SocketsHttpHandler
+    {
+        PooledConnectionLifetime = TimeSpan.FromMinutes(5),
+        ConnectTimeout           = TimeSpan.FromSeconds(30)
+    });
+
+    // ── Public surface ────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Root directory containing all per-RID LibreOffice installations.
+    /// Resolves to <c>%LOCALAPPDATA%\FilesTools\libreoffice\</c>.
+    /// </summary>
+    public static string InstallRoot =>
+        Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            AppDataFolderName, "libreoffice");
+
+    /// <summary>
+    /// Directory where the LibreOffice build matching the current architecture is installed.
+    /// Resolves to <c>%LOCALAPPDATA%\FilesTools\libreoffice\win-x64\</c> on a 64-bit Windows machine.
+    /// </summary>
+    public static string InstallDirectory =>
+        Path.Combine(InstallRoot, SetupHelpers.GetCurrentRid());
+
+    /// <summary>
+    /// Full path to the LibreOffice entry-point binary.
+    /// <c>soffice.exe</c> on Windows, <c>soffice</c> on Unix.
+    /// The file exists when <see cref="IsAvailable"/> returns <c>true</c>.
+    /// </summary>
+    public static string ExecutablePath =>
+        Path.Combine(InstallDirectory, "program", SetupHelpers.SofficeExecutableName);
+
+    /// <summary>
+    /// Returns <c>true</c> when the LibreOffice executable has been downloaded and is ready.
+    /// </summary>
+    public static bool IsAvailable => File.Exists(ExecutablePath);
+
+    /// <summary>
+    /// Approximate installer size in bytes for the current platform.
+    /// Used as a progress denominator before the HTTP Content-Length header is received.
+    /// </summary>
+    public static long EstimatedDownloadBytes => GetEstimatedBytes(SetupHelpers.GetCurrentRid());
+
+    /// <summary>
+    /// Fallback LibreOffice version string shown in the UI before the live version is resolved.
+    /// The actual download always uses the version returned by the update-check endpoint.
+    /// </summary>
+    public static string DisplayVersion => FallbackVersion;
+
+    // ── Download & install ────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Downloads LibreOffice from the official LibreOffice Foundation server and
+    /// installs it to <see cref="InstallDirectory"/>.
+    /// <para>
+    /// Progress is reported through four stages in order:
+    /// <list type="number">
+    ///   <item><see cref="LibreOfficeSetupStage.Downloading"/> — live byte-count progress.</item>
+    ///   <item><see cref="LibreOfficeSetupStage.Extracting"/>  — MSI unpack (indeterminate).</item>
+    ///   <item><see cref="LibreOfficeSetupStage.Copying"/>     — file copy with count progress.</item>
+    ///   <item><see cref="LibreOfficeSetupStage.Complete"/>    — <see cref="IsAvailable"/> becomes <c>true</c>.</item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// If the operation is cancelled or fails, any partial installation is removed
+    /// so that <see cref="IsAvailable"/> stays <c>false</c>.
+    /// </para>
+    /// </summary>
+    /// <param name="progress">Optional progress receiver; called from a thread-pool thread.</param>
+    /// <param name="cancellationToken">Token that cancels the download and cleans up partial files.</param>
+    /// <exception cref="OperationCanceledException">Thrown when <paramref name="cancellationToken"/> is cancelled.</exception>
+    /// <exception cref="HttpRequestException">Thrown when the download request fails.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when extraction fails or the expected binary is absent after installation.
+    /// </exception>
+    public static async Task DownloadAndInstallAsync(
+        IProgress<LibreOfficeSetupProgress>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        var rid = SetupHelpers.GetCurrentRid();
+
+        // ── Resolve the current stable version from the update-check endpoint ──
+        // download.documentfoundation.org/stable/ only serves the live release;
+        // any hardcoded version older than today's stable returns 404.
+        Report(progress, LibreOfficeSetupStage.Downloading, -1, "Resolving current LibreOffice version…");
+        var version    = await ResolveCurrentVersionAsync(cancellationToken).ConfigureAwait(false);
+        var msiUrl     = GetDownloadUrl(rid, version);
+        var msiPath    = Path.Combine(Path.GetTempPath(), $"LibreOffice_{version}_{rid}.msi");
+        var extractDir = Path.Combine(Path.GetTempPath(), $"lo-extract-{Guid.NewGuid():N}");
+
+        try
+        {
+            // ── Stage 1: Download ─────────────────────────────────────────────
+            await DownloadFileAsync(msiUrl, msiPath, progress, cancellationToken)
+                .ConfigureAwait(false);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // ── Stage 2: Extract via msiexec administrative install ───────────
+            Report(progress, LibreOfficeSetupStage.Extracting, -1,
+                "Extracting LibreOffice — this may take a minute…");
+
+            Directory.CreateDirectory(extractDir);
+            await ExtractMsiAsync(msiPath, extractDir, cancellationToken).ConfigureAwait(false);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // ── Stage 3: Locate installation root and copy ───────────────────
+            var loRoot = FindLibreOfficeRoot(extractDir)
+                ?? throw new InvalidOperationException(
+                    "Extraction completed but soffice.exe was not found inside the extracted payload. " +
+                    $"Extract directory: {extractDir}");
+
+            await CopyDirectoryAsync(loRoot, InstallDirectory, progress, cancellationToken)
+                .ConfigureAwait(false);
+
+            // ── Stage 4: Verify ───────────────────────────────────────────────
+            if (!File.Exists(ExecutablePath))
+                throw new InvalidOperationException(
+                    $"Installation completed but soffice.exe is missing at the expected path: {ExecutablePath}");
+
+            Report(progress, LibreOfficeSetupStage.Complete, 100, "LibreOffice is ready.");
+        }
+        catch
+        {
+            // Roll back any partial installation so IsAvailable stays false.
+            SetupHelpers.TryDeleteDirectory(InstallDirectory);
+            throw;
+        }
+        finally
+        {
+            SetupHelpers.TryDeleteFile(msiPath);
+            SetupHelpers.TryDeleteDirectory(extractDir);
+        }
+    }
+
+    /// <summary>
+    /// Removes the downloaded LibreOffice installation from <see cref="InstallDirectory"/>.
+    /// Safe to call when LibreOffice has not been downloaded yet.
+    /// </summary>
+    public static void Remove() => SetupHelpers.TryDeleteDirectory(InstallDirectory);
+
+    // ── Private: download ─────────────────────────────────────────────────────
+
+    private static async Task DownloadFileAsync(
+        string url,
+        string destination,
+        IProgress<LibreOfficeSetupProgress>? progress,
+        CancellationToken cancellationToken)
+    {
+        using var response = await SharedHttpClient
+            .GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
+            .ConfigureAwait(false);
+
+        response.EnsureSuccessStatusCode();
+
+        var totalBytes = response.Content.Headers.ContentLength ?? EstimatedDownloadBytes;
+        using var source = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        using var dest   = File.Create(destination);
+
+        var buffer    = new byte[81_920];
+        long received = 0;
+        int  read;
+
+        while ((read = await source.ReadAsync(buffer, cancellationToken).ConfigureAwait(false)) > 0)
+        {
+            await dest.WriteAsync(buffer.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
+            received += read;
+
+            var pct = totalBytes > 0 ? received * 100.0 / totalBytes : -1;
+            progress?.Report(new LibreOfficeSetupProgress
+            {
+                Stage           = LibreOfficeSetupStage.Downloading,
+                Percentage      = pct,
+                StatusText      = $"Downloading — {FormatBytes(received)} / {FormatBytes(totalBytes)}",
+                BytesDownloaded = received,
+                TotalBytes      = totalBytes
+            });
+        }
+    }
+
+    // ── Private: extraction ───────────────────────────────────────────────────
+
+    private static async Task ExtractMsiAsync(
+        string msiPath,
+        string targetDir,
+        CancellationToken cancellationToken)
+    {
+        // msiexec /a (administrative install) unpacks the MSI file tree to targetDir
+        // without writing registry entries or requiring elevation.
+        var psi = new ProcessStartInfo
+        {
+            FileName               = "msiexec.exe",
+            UseShellExecute        = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError  = true,
+            CreateNoWindow         = true
+        };
+        psi.ArgumentList.Add("/a");
+        psi.ArgumentList.Add(msiPath);
+        psi.ArgumentList.Add("/qn");
+        psi.ArgumentList.Add($"TARGETDIR={targetDir}");
+
+        using var process = new Process { StartInfo = psi };
+
+        try
+        {
+            if (!process.Start())
+                throw new InvalidOperationException("msiexec.exe failed to start.");
+        }
+        catch (Exception ex) when (ex is not InvalidOperationException)
+        {
+            throw new InvalidOperationException($"Could not launch msiexec.exe: {ex.Message}", ex);
+        }
+
+        using var _ = cancellationToken.Register(() =>
+        {
+            try { if (!process.HasExited) process.Kill(entireProcessTree: true); } catch { }
+        });
+
+        var stderrTask = process.StandardError.ReadToEndAsync(cancellationToken);
+        await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+        var stderr = await stderrTask.ConfigureAwait(false);
+
+        if (process.ExitCode != 0)
+        {
+            throw new InvalidOperationException(
+                $"msiexec /a exited with code {process.ExitCode}." +
+                (string.IsNullOrWhiteSpace(stderr) ? "" : $" Error: {stderr.Trim()}"));
+        }
+    }
+
+    /// <summary>
+    /// Recursively searches <paramref name="extractDir"/> for <c>program\soffice.exe</c>
+    /// and returns the parent of the <c>program\</c> directory (the LibreOffice root).
+    /// Returns <c>null</c> if not found.
+    /// </summary>
+    private static string? FindLibreOfficeRoot(string extractDir)
+    {
+        foreach (var soffice in Directory.EnumerateFiles(
+            extractDir, SetupHelpers.SofficeExecutableName, SearchOption.AllDirectories))
+        {
+            var programDir = Path.GetDirectoryName(soffice);
+            if (programDir is null) continue;
+            var loRoot = Path.GetDirectoryName(programDir);
+            if (loRoot is not null) return loRoot;
+        }
+        return null;
+    }
+
+    // ── Private: copy ─────────────────────────────────────────────────────────
+
+    private static async Task CopyDirectoryAsync(
+        string sourceDir,
+        string destinationDir,
+        IProgress<LibreOfficeSetupProgress>? progress,
+        CancellationToken cancellationToken)
+    {
+        var allFiles = Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories);
+        var total    = allFiles.Length;
+        var copied   = 0;
+
+        Directory.CreateDirectory(destinationDir);
+
+        foreach (var sourceFile in allFiles)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var relativePath = Path.GetRelativePath(sourceDir, sourceFile);
+            var destFile     = Path.Combine(destinationDir, relativePath);
+            Directory.CreateDirectory(Path.GetDirectoryName(destFile)!);
+            File.Copy(sourceFile, destFile, overwrite: true);
+            copied++;
+
+            if (copied % 100 == 0 || copied == total)
+            {
+                progress?.Report(new LibreOfficeSetupProgress
+                {
+                    Stage      = LibreOfficeSetupStage.Copying,
+                    Percentage = total > 0 ? copied * 100.0 / total : -1,
+                    StatusText = $"Installing — {copied:N0} / {total:N0} files"
+                });
+            }
+        }
+    }
+
+    // ── Private: version resolution & URL ────────────────────────────────────
+
+    /// <summary>
+    /// Discovers the highest available LibreOffice version by parsing the stable-releases
+    /// directory index at <see cref="StableDirectoryUrl"/>.
+    /// <para>
+    /// The directory lists every currently hosted version folder (e.g. <c>26.2.3/</c>).
+    /// We collect all <c>MAJOR.MINOR.PATCH</c> matches, pick the numerically highest one,
+    /// and use that as the download version. This avoids hardcoding a version that will
+    /// go stale as new LibreOffice releases are published.
+    /// </para>
+    /// Falls back to <see cref="FallbackVersion"/> when the directory is unreachable or
+    /// contains no parseable version strings.
+    /// </summary>
+    private static async Task<string> ResolveCurrentVersionAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Short timeout — the directory index is a small HTML document.
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(TimeSpan.FromSeconds(10));
+
+            var html    = await SharedHttpClient.GetStringAsync(StableDirectoryUrl, cts.Token).ConfigureAwait(false);
+            var matches = Regex.Matches(html, @"(\d+\.\d+\.\d+)/");
+
+            Version? best = null;
+            foreach (Match m in matches)
+            {
+                if (Version.TryParse(m.Groups[1].Value, out var v) && (best is null || v > best))
+                    best = v;
+            }
+
+            if (best is not null)
+                return best.ToString();
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            // Timeout from the inner CTS — fall through to fallback.
+        }
+        catch
+        {
+            // Network error, parse failure — fall through to fallback.
+        }
+
+        return FallbackVersion;
+    }
+
+    private static string GetDownloadUrl(string rid, string version) => rid switch
+    {
+        "win-x64"   => $"https://download.documentfoundation.org/libreoffice/stable/{version}/win/x86_64/LibreOffice_{version}_Win_x86-64.msi",
+        "win-arm64" => $"https://download.documentfoundation.org/libreoffice/stable/{version}/win/aarch64/LibreOffice_{version}_Win_aarch64.msi",
+        "win-x86"   => $"https://download.documentfoundation.org/libreoffice/stable/{version}/win/x86/LibreOffice_{version}_Win_x86.msi",
+        _ => throw new PlatformNotSupportedException($"No LibreOffice download URL available for RID '{rid}'.")
+    };
+
+    private static long GetEstimatedBytes(string rid) => rid switch
+    {
+        "win-x64"   => 420_000_000L,
+        "win-arm64" => 350_000_000L,
+        "win-x86"   => 390_000_000L,
+        _           => 400_000_000L
+    };
+
+    // ── Private: utilities ────────────────────────────────────────────────────
+
+    private static void Report(
+        IProgress<LibreOfficeSetupProgress>? progress,
+        LibreOfficeSetupStage stage,
+        double percentage,
+        string text)
+    {
+        progress?.Report(new LibreOfficeSetupProgress
+        {
+            Stage      = stage,
+            Percentage = percentage,
+            StatusText = text
+        });
+    }
+
+    private static string FormatBytes(long bytes) => bytes switch
+    {
+        >= 1_000_000_000L => $"{bytes / 1_000_000_000.0:F1} GB",
+        >= 1_000_000L     => $"{bytes / 1_000_000.0:F0} MB",
+        >= 1_000L         => $"{bytes / 1_000.0:F0} KB",
+        _                 => $"{bytes} B"
+    };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Shared helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// <summary>
+/// Small platform/file utilities shared by <see cref="DocumentService"/> and
+/// <see cref="LibreOfficeSetupService"/>.
+/// </summary>
+internal static class SetupHelpers
+{
+    /// <summary>Platform-specific LibreOffice entry-point binary name.</summary>
+    internal static string SofficeExecutableName =>
+        RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "soffice.exe" : "soffice";
+
+    /// <summary>
+    /// Returns the runtime identifier matching the current OS and process architecture
+    /// (e.g. <c>win-x64</c>), used to locate the correct LibreOffice binary subfolder.
+    /// </summary>
+    internal static string GetCurrentRid()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            return RuntimeInformation.ProcessArchitecture switch
+            {
+                Architecture.X64   => "win-x64",
+                Architecture.X86   => "win-x86",
+                Architecture.Arm64 => "win-arm64",
+                _ => throw new PlatformNotSupportedException(
+                    $"Unsupported Windows architecture: {RuntimeInformation.ProcessArchitecture}")
+            };
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            return RuntimeInformation.ProcessArchitecture switch
+            {
+                Architecture.X64   => "osx-x64",
+                Architecture.Arm64 => "osx-arm64",
+                _ => throw new PlatformNotSupportedException(
+                    $"Unsupported macOS architecture: {RuntimeInformation.ProcessArchitecture}")
+            };
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            return RuntimeInformation.ProcessArchitecture switch
+            {
+                Architecture.X64   => "linux-x64",
+                Architecture.Arm64 => "linux-arm64",
+                _ => throw new PlatformNotSupportedException(
+                    $"Unsupported Linux architecture: {RuntimeInformation.ProcessArchitecture}")
+            };
+
+        throw new PlatformNotSupportedException("Current operating system is not supported.");
+    }
+
+    /// <summary>Deletes a file, swallowing any error (best-effort cleanup).</summary>
+    internal static void TryDeleteFile(string path)
+    {
+        try { File.Delete(path); } catch { }
+    }
+
+    /// <summary>Deletes a directory tree, swallowing any error (best-effort cleanup).</summary>
+    internal static void TryDeleteDirectory(string path)
+    {
+        try { if (Directory.Exists(path)) Directory.Delete(path, recursive: true); } catch { }
     }
 }
