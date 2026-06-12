@@ -1,4 +1,5 @@
 using Files_Tools.Services;
+using Files_Tools.Services.Infrastructure;
 
 namespace Files.Tools.Tests;
 
@@ -56,7 +57,7 @@ public class StudioVoiceChunkingTests
         }
 
         // Real speech tiled to > 60 s so EnhanceMono takes the chunking path.
-        var unit = WaveReader.ReadMonoFloatWav(clip);
+        var unit = WavIo.ReadMonoFloatWav(clip);
         int target = 70 * DeepFilterNetService.SampleRate;
         var input = new float[target];
         for (int i = 0; i < target; i++)

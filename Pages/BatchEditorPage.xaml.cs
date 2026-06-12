@@ -84,11 +84,11 @@ namespace Files_Tools.Pages
             InitializeComponent();
 
             _batchService = new BatchProcessingService(
-                new AudioProcessingService(),
-                new VideoProcessingService(),
+                new AudioService(),
+                new VideoService(),
                 new DocumentService(),
                 new PdfService(),
-                new ImageProcessingService());
+                new ImageService());
 
             FileListView.ItemsSource = _fileItems;
         }
@@ -392,7 +392,7 @@ namespace Files_Tools.Pages
 
         private void RefreshTranscriptionDownloadUi()
         {
-            var isInstalled = new AudioTranscriptionService().IsInstalled();
+            var isInstalled = new TranscriptionService().IsInstalled();
             var downloadVisible = isInstalled ? Visibility.Collapsed : Visibility.Visible;
 
             BatchDownloadTranscriptionButton.Visibility          = downloadVisible;
@@ -436,7 +436,7 @@ namespace Files_Tools.Pages
 
             try
             {
-                var transcriptionService = new AudioTranscriptionService();
+                var transcriptionService = new TranscriptionService();
                 var progress = new Progress<AudioTranscriptionInstallProgress>(p =>
                 {
                     DispatcherQueue.TryEnqueue(() =>

@@ -38,10 +38,10 @@ namespace Files_Tools.Pages
 
         private static readonly string[] SupportedAudioExtensions = [".mp3", ".aac", ".m4a", ".wav", ".flac", ".opus", ".ogg"];
 
-        private readonly IAudioProcessingService _audioProcessingService;
-        private readonly IVideoAudioDenoiseService _videoAudioDenoiseService;
-        private readonly IAudioTranscriptionService _audioTranscriptionService;
-        private readonly ISubtitlesService _subtitlesService;
+        private readonly IAudioService _AudioService;
+        private readonly IAudioDenoiseService _audioDenoiseService;
+        private readonly ITranscriptionService _TranscriptionService;
+        private readonly ISubtitleService _SubtitleService;
         private readonly VoiceStudioService _voiceStudioService = new();
 
         private StorageFile? _sourceAudioFile;
@@ -158,13 +158,13 @@ namespace Files_Tools.Pages
 
         public AudioEditorPage()
         {
-            _videoAudioDenoiseService = new VideoAudioDenoise();
-            _audioProcessingService = new AudioProcessingService(_videoAudioDenoiseService);
-            _audioTranscriptionService = new AudioTranscriptionService();
-            _subtitlesService = new SubtitlesService(_audioTranscriptionService);
+            _audioDenoiseService = new AudioDenoiseService();
+            _AudioService = new AudioService(_audioDenoiseService);
+            _TranscriptionService = new TranscriptionService();
+            _SubtitleService = new SubtitleService(_TranscriptionService);
             InitializeComponent();
             BuildOptionUi();
-            _isTranscriptionModelInstalled = _audioTranscriptionService.IsInstalled();
+            _isTranscriptionModelInstalled = _TranscriptionService.IsInstalled();
             RefreshValidationAndState();
         }
 
@@ -712,7 +712,7 @@ namespace Files_Tools.Pages
             var unknown = Strings.Get("AudioPage_Unknown");
             try
             {
-                var probe = await _videoAudioDenoiseService.ProbeAudioAsync(path);
+                var probe = await _audioDenoiseService.ProbeAudioAsync(path);
                 _audioDuration = probe.Duration;
                 SetPreviewInfo(probe.CodecName ?? unknown, $"{probe.SampleRate} Hz", probe.Channels.ToString(), probe.Duration?.ToString() ?? unknown);
             }
@@ -804,8 +804,8 @@ namespace Files_Tools.Pages
                     TaskbarProgressHelper.SetProgress(fraction);
                 });
 
-                await _audioTranscriptionService.InstallAsync(progress);
-                _isTranscriptionModelInstalled = _audioTranscriptionService.IsInstalled();
+                await _TranscriptionService.InstallAsync(progress);
+                _isTranscriptionModelInstalled = _TranscriptionService.IsInstalled();
                 RefreshValidationAndState();
             }
             catch (Exception ex)
@@ -827,7 +827,7 @@ namespace Files_Tools.Pages
                 return;
             }
 
-            if (!_audioTranscriptionService.IsInstalled())
+            if (!_TranscriptionService.IsInstalled())
             {
                 await ShowSimpleDialogAsync(Strings.Get("AudioPage_TranscriptionRequired"), Strings.Get("AudioPage_TranscriptionRequiredMessage"));
                 return;
@@ -868,7 +868,7 @@ namespace Files_Tools.Pages
                         Directory.CreateDirectory(directory);
                     }
 
-                    _generatedTranscriptionPath = await _subtitlesService.GenerateSrtAsync(_sourceAudioFile.Path, subtitlePath, progress);
+                    _generatedTranscriptionPath = await _SubtitleService.GenerateSrtAsync(_sourceAudioFile.Path, subtitlePath, progress);
                     var srt = await File.ReadAllTextAsync(_generatedTranscriptionPath);
                     _transcriptionRichEditBox.Document.SetText(TextSetOptions.None, srt);
                     _transcriptionStatusTextBlock.Text = string.Format(Strings.Get("AudioPage_SubtitleReadyFmt"), _generatedTranscriptionPath);
@@ -878,11 +878,11 @@ namespace Files_Tools.Pages
                     string text;
                     if (_includeTimestampsCheckBox.IsChecked ?? false)
                     {
-                        text = await _audioTranscriptionService.TranscribeToTimestampedTextAsync(_sourceAudioFile.Path, progress);
+                        text = await _TranscriptionService.TranscribeToTimestampedTextAsync(_sourceAudioFile.Path, progress);
                     }
                     else
                     {
-                        text = await _audioTranscriptionService.TranscribeToTextAsync(_sourceAudioFile.Path, progress);
+                        text = await _TranscriptionService.TranscribeToTextAsync(_sourceAudioFile.Path, progress);
                     }
 
                     _generatedTranscriptionPath = null;
@@ -977,22 +977,22 @@ namespace Files_Tools.Pages
             switch (step)
             {
                 case AudioPipelineStep.Convert:
-                    warnings.AddRange((await _audioProcessingService.ConvertAsync(inputPath, outputPath, BuildConversionOptions(), CreateAudioProgress(Strings.Get("AudioPage_ConvertingAudio")), ct)).Warnings);
+                    warnings.AddRange((await _AudioService.ConvertAsync(inputPath, outputPath, BuildConversionOptions(), CreateAudioProgress(Strings.Get("AudioPage_ConvertingAudio")), ct)).Warnings);
                     break;
                 case AudioPipelineStep.Compress:
-                    warnings.AddRange((await _audioProcessingService.CompressAsync(inputPath, outputPath, BuildCompressionOptions(), CreateAudioProgress(Strings.Get("AudioPage_CompressingAudio")), ct)).Warnings);
+                    warnings.AddRange((await _AudioService.CompressAsync(inputPath, outputPath, BuildCompressionOptions(), CreateAudioProgress(Strings.Get("AudioPage_CompressingAudio")), ct)).Warnings);
                     break;
                 case AudioPipelineStep.Normalize:
-                    warnings.AddRange((await _audioProcessingService.NormalizeAsync(inputPath, outputPath, BuildNormalizationOptions(), CreateAudioProgress(Strings.Get("AudioPage_NormalizingAudio")), ct)).Warnings);
+                    warnings.AddRange((await _AudioService.NormalizeAsync(inputPath, outputPath, BuildNormalizationOptions(), CreateAudioProgress(Strings.Get("AudioPage_NormalizingAudio")), ct)).Warnings);
                     break;
                 case AudioPipelineStep.Trim:
-                    warnings.AddRange((await _audioProcessingService.TrimAsync(inputPath, outputPath, BuildTrimOptions(), CreateAudioProgress(Strings.Get("AudioPage_TrimmingAudio")), ct)).Warnings);
+                    warnings.AddRange((await _AudioService.TrimAsync(inputPath, outputPath, BuildTrimOptions(), CreateAudioProgress(Strings.Get("AudioPage_TrimmingAudio")), ct)).Warnings);
                     break;
                 case AudioPipelineStep.SilenceTrim:
-                    warnings.AddRange((await _audioProcessingService.RemoveSilenceAsync(inputPath, outputPath, BuildSilenceOptions(), CreateAudioProgress(Strings.Get("AudioPage_RemovingSilence")), ct)).Warnings);
+                    warnings.AddRange((await _AudioService.RemoveSilenceAsync(inputPath, outputPath, BuildSilenceOptions(), CreateAudioProgress(Strings.Get("AudioPage_RemovingSilence")), ct)).Warnings);
                     break;
                 case AudioPipelineStep.Eq:
-                    warnings.AddRange((await _audioProcessingService.ApplyEqualizerAsync(inputPath, outputPath, BuildEqualizerOptions(), CreateAudioProgress(Strings.Get("AudioPage_ApplyingEq")), ct)).Warnings);
+                    warnings.AddRange((await _AudioService.ApplyEqualizerAsync(inputPath, outputPath, BuildEqualizerOptions(), CreateAudioProgress(Strings.Get("AudioPage_ApplyingEq")), ct)).Warnings);
                     break;
                 case AudioPipelineStep.Podcast:
                     await _voiceStudioService.ProcessAudioAsync(
@@ -1006,7 +1006,7 @@ namespace Files_Tools.Pages
                         CreateVoiceStudioProgress(Strings.Get("AudioPage_DenoisingAudio")), ct);
                     break;
                 case AudioPipelineStep.Metadata:
-                    warnings.AddRange((await _audioProcessingService.RemoveMetadataAsync(inputPath, outputPath, CreateAudioProgress(Strings.Get("AudioPage_RemovingMetadata")), ct)).Warnings);
+                    warnings.AddRange((await _AudioService.RemoveMetadataAsync(inputPath, outputPath, CreateAudioProgress(Strings.Get("AudioPage_RemovingMetadata")), ct)).Warnings);
                     break;
             }
         }
@@ -1212,7 +1212,7 @@ namespace Files_Tools.Pages
             _mediaValidationTextBlock.Text = string.Join("\n", errors.Where(e => e.StartsWith("Media:")).Select(e => e[6..].Trim()));
             _transformValidationTextBlock.Text = string.Join("\n", errors.Where(e => e.StartsWith("Transform:")).Select(e => e[10..].Trim()));
             _adjustValidationTextBlock.Text = string.Join("\n", errors.Where(e => e.StartsWith("Adjust:")).Select(e => e[7..].Trim()));
-            _isTranscriptionModelInstalled = _audioTranscriptionService.IsInstalled();
+            _isTranscriptionModelInstalled = _TranscriptionService.IsInstalled();
             ApplyButton.IsEnabled = !_isProcessing && !_isGeneratingTranscription && !_isInstallingTranscriptionModel && _sourceAudioFile is not null && errors.Count == 0;
             _customEqBandsPanel.Visibility = ParseEqPreset(_eqPresetComboBox) == EqualizerPreset.Custom ? Visibility.Visible : Visibility.Collapsed;
             _addEqBandButton.Visibility = _customEqBandsPanel.Visibility;

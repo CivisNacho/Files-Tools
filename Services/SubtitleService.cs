@@ -718,7 +718,7 @@ public sealed record SubtitleRenderTarget(int Width, int Height);
 /// <summary>
 /// Generates subtitle files from timestamped audio transcription segments.
 /// </summary>
-public interface ISubtitlesService
+public interface ISubtitleService
 {
     /// <summary>
     /// Transcribes supported audio or video input into an SRT subtitle file.
@@ -791,20 +791,20 @@ public interface ISubtitlesService
 /// <summary>
 /// Generates plain SRT subtitles and advanced editable drafts using the audio transcription service.
 /// </summary>
-public sealed class SubtitlesService : ISubtitlesService
+public sealed class SubtitleService : ISubtitleService
 {
     private static readonly TimeSpan MinimumPositiveDuration = TimeSpan.FromMilliseconds(1);
 
-    private readonly IAudioTranscriptionService _audioTranscriptionService;
+    private readonly ITranscriptionService _TranscriptionService;
 
-    public SubtitlesService()
-        : this(new AudioTranscriptionService())
+    public SubtitleService()
+        : this(new TranscriptionService())
     {
     }
 
-    internal SubtitlesService(IAudioTranscriptionService audioTranscriptionService)
+    internal SubtitleService(ITranscriptionService TranscriptionService)
     {
-        _audioTranscriptionService = audioTranscriptionService ?? throw new ArgumentNullException(nameof(audioTranscriptionService));
+        _TranscriptionService = TranscriptionService ?? throw new ArgumentNullException(nameof(TranscriptionService));
     }
 
     /// <inheritdoc />
@@ -826,7 +826,7 @@ public sealed class SubtitlesService : ISubtitlesService
         }
 
         var progressState = new ProgressState();
-        var segments = await _audioTranscriptionService.TranscribeToSegmentsAsync(inputPath, progress, cancellationToken).ConfigureAwait(false);
+        var segments = await _TranscriptionService.TranscribeToSegmentsAsync(inputPath, progress, cancellationToken).ConfigureAwait(false);
         Report(progress, progressState, AudioTranscriptionStage.WritingSubtitles, 0d, "Writing subtitle file");
 
         var srt = BuildSrt(segments);
@@ -840,7 +840,7 @@ public sealed class SubtitlesService : ISubtitlesService
     public async Task<TranscriptionDraft> GenerateAdvancedTranscriptionDraftAsync(string inputPath, IProgress<AudioTranscriptionProgress>? progress = null, CancellationToken cancellationToken = default)
     {
         var progressState = new ProgressState();
-        var segments = await _audioTranscriptionService.TranscribeToSegmentsAsync(inputPath, progress, cancellationToken).ConfigureAwait(false);
+        var segments = await _TranscriptionService.TranscribeToSegmentsAsync(inputPath, progress, cancellationToken).ConfigureAwait(false);
 
         Report(progress, progressState, AudioTranscriptionStage.WritingSubtitles, 0d, "Preparing transcription review");
         var draft = BuildTranscriptionDraft(segments);
@@ -871,7 +871,7 @@ public sealed class SubtitlesService : ISubtitlesService
 
         var effectiveOptions = NormalizeOptions(options);
         var progressState = new ProgressState();
-        var segments = await _audioTranscriptionService.TranscribeToSegmentsAsync(inputPath, progress, cancellationToken).ConfigureAwait(false);
+        var segments = await _TranscriptionService.TranscribeToSegmentsAsync(inputPath, progress, cancellationToken).ConfigureAwait(false);
 
         Report(progress, progressState, AudioTranscriptionStage.WritingSubtitles, 0d, "Building karaoke subtitle file");
         var words = BuildWordsFromSegments(segments);

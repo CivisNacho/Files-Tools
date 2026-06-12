@@ -12,7 +12,7 @@ namespace Files_Tools.Services;
 /// <summary>
 /// Defines image processing operations backed by libvips.
 /// </summary>
-public interface IImageProcessingService
+public interface IImageService
 {
     /// <summary>
     /// Executes a full image processing pipeline in one pass.
@@ -345,7 +345,7 @@ public sealed class RgbAdjustOptions
 /// <summary>
 /// NetVips/libvips implementation of processing operations.
 /// </summary>
-public sealed class ImageProcessingService : IImageProcessingService
+public sealed class ImageService : IImageService
 {
     /// <inheritdoc />
     public Task ProcessImageAsync(string inputPath, string outputPath, ProcessImageOptions options, CancellationToken cancellationToken = default)

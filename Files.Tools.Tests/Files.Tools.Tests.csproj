@@ -38,25 +38,31 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Services\ImageProcessingService.cs" Link="Services\ImageProcessingService.cs" />
-    <Compile Include="..\Services\AudioProcessingService.cs" Link="Services\AudioProcessingService.cs" />
+    <!-- Services (renamed from Phase 1/2) -->
+    <Compile Include="..\Services\ImageService.cs" Link="Services\ImageService.cs" />
+    <Compile Include="..\Services\AudioService.cs" Link="Services\AudioService.cs" />
     <Compile Include="..\Services\FfmpegLocator.cs" Link="Services\FfmpegLocator.cs" />
-    <Compile Include="..\Services\AudioTranscriptionService.cs" Link="Services\AudioTranscriptionService.cs" />
+    <Compile Include="..\Services\TranscriptionService.cs" Link="Services\TranscriptionService.cs" />
     <Compile Include="..\Services\Wav2Vec2AlignmentService.cs" Link="Services\Wav2Vec2AlignmentService.cs" />
-    <Compile Include="..\Services\DeepFilterNetDsp.cs" Link="Services\DeepFilterNetDsp.cs" />
     <Compile Include="..\Services\DeepFilterNetService.cs" Link="Services\DeepFilterNetService.cs" />
     <Compile Include="..\Services\FlashSrService.cs" Link="Services\FlashSrService.cs" />
     <Compile Include="..\Services\VoiceStudioService.cs" Link="Services\VoiceStudioService.cs" />
-    <Compile Include="..\Services\SubtitlesService.cs" Link="Services\SubtitlesService.cs" />
+    <Compile Include="..\Services\SubtitleService.cs" Link="Services\SubtitleService.cs" />
     <Compile Include="..\Services\Presets\SubtitlePresetDto.cs" Link="Services\Presets\SubtitlePresetDto.cs" />
     <Compile Include="..\Services\Presets\SubtitleColorJsonConverter.cs" Link="Services\Presets\SubtitleColorJsonConverter.cs" />
     <Compile Include="..\Services\Presets\SubtitlePresetJsonContext.cs" Link="Services\Presets\SubtitlePresetJsonContext.cs" />
     <Compile Include="..\Services\Presets\SubtitlePresetMapper.cs" Link="Services\Presets\SubtitlePresetMapper.cs" />
     <Compile Include="..\Services\Presets\SubtitlePresetLoader.cs" Link="Services\Presets\SubtitlePresetLoader.cs" />
-    <Compile Include="..\Services\VideoProcessingService.cs" Link="Services\VideoProcessingService.cs" />
-    <Compile Include="..\Services\VideoAudioDenoise.cs" Link="Services\VideoAudioDenoise.cs" />
+    <Compile Include="..\Services\VideoService.cs" Link="Services\VideoService.cs" />
+    <Compile Include="..\Services\AudioDenoiseService.cs" Link="Services\AudioDenoiseService.cs" />
     <Compile Include="..\Services\DocumentProcessingService.cs" Link="Services\DocumentProcessingService.cs" />
     <Compile Include="..\Services\LibreOfficeSetupService.cs" Link="Services\LibreOfficeSetupService.cs" />
+    <!-- Infrastructure helpers (Phase 2) -->
+    <Compile Include="..\Services\Infrastructure\TempWorkspace.cs" Link="Services\Infrastructure\TempWorkspace.cs" />
+    <Compile Include="..\Services\Infrastructure\WavIo.cs" Link="Services\Infrastructure\WavIo.cs" />
+    <Compile Include="..\Services\Infrastructure\FfmpegProgress.cs" Link="Services\Infrastructure\FfmpegProgress.cs" />
+    <Compile Include="..\Services\Infrastructure\ProcessRunner.cs" Link="Services\Infrastructure\ProcessRunner.cs" />
+    <!-- Helpers -->
     <Compile Include="..\Helpers\EtaEstimator.cs" Link="Helpers\EtaEstimator.cs" />
     <Compile Include="..\Services\PdfService.cs" Link="Services\PdfService.cs" />
     <Compile Include="..\Services\PdfNativeCli.cs" Link="Services\PdfNativeCli.cs" />

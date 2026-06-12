@@ -1,22 +1,20 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Files_Tools.Helpers;
+using Files_Tools.Services.Infrastructure;
 
 namespace Files_Tools.Services;
 
 /// <summary>
 /// Defines standalone audio-file processing operations backed by local FFmpeg tooling.
 /// </summary>
-public interface IAudioProcessingService
+public interface IAudioService
 {
     /// <summary>
     /// Converts an audio file to a requested container, codec, sample rate, channel count, or bitrate.
@@ -648,7 +646,7 @@ public class AudioProcessingUnsupportedMediaException : InvalidOperationExceptio
 /// <summary>
 /// Thrown when FFmpeg or FFprobe fails during audio processing.
 /// </summary>
-public sealed class AudioProcessingFfmpegException : InvalidOperationException
+public sealed class AudioProcessingFfmpegException : InvalidOperationException, Files_Tools.Services.Infrastructure.IHasExitCode
 {
     /// <summary>
     /// Creates an exception for a failed FFmpeg or FFprobe invocation.
@@ -696,29 +694,29 @@ public class AudioProcessingFileSystemException : IOException
 /// <summary>
 /// FFmpeg-backed implementation for standalone audio-file processing.
 /// </summary>
-public sealed class AudioProcessingService : IAudioProcessingService
+public sealed class AudioService : IAudioService
 {
     private const string FfprobeJsonArgs = "-v error -print_format json -show_streams -show_format";
-    private readonly Lazy<IVideoAudioDenoiseService> _dtlnDenoiseService;
+    private readonly Lazy<IAudioDenoiseService> _dtlnDenoiseService;
 
     /// <summary>
     /// Creates an audio processing service that loads the default DTLN denoise service only when podcast denoise is requested.
     /// </summary>
-    public AudioProcessingService()
-        : this(new Lazy<IVideoAudioDenoiseService>(() => new VideoAudioDenoise()))
+    public AudioService()
+        : this(new Lazy<IAudioDenoiseService>(() => new AudioDenoiseService()))
     {
     }
 
     /// <summary>
     /// Creates an audio processing service with an explicit DTLN denoise service for podcast denoise.
     /// </summary>
-    public AudioProcessingService(IVideoAudioDenoiseService dtlnDenoiseService)
-        : this(new Lazy<IVideoAudioDenoiseService>(() => dtlnDenoiseService))
+    public AudioService(IAudioDenoiseService dtlnDenoiseService)
+        : this(new Lazy<IAudioDenoiseService>(() => dtlnDenoiseService))
     {
         ArgumentNullException.ThrowIfNull(dtlnDenoiseService);
     }
 
-    private AudioProcessingService(Lazy<IVideoAudioDenoiseService> dtlnDenoiseService)
+    private AudioService(Lazy<IAudioDenoiseService> dtlnDenoiseService)
     {
         _dtlnDenoiseService = dtlnDenoiseService;
     }
@@ -1004,7 +1002,14 @@ public sealed class AudioProcessingService : IAudioProcessingService
     private static async Task<AudioProbeInfo> ProbeAudioAsync(string inputPath, CancellationToken cancellationToken)
     {
         var args = new List<string>(SplitArguments(FfprobeJsonArgs)) { Path.GetFullPath(inputPath) };
-        var result = await RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffprobe"), args, cancellationToken, null).ConfigureAwait(false);
+        var runResult = await ProcessRunner.RunWithFallbackAsync(
+            FfmpegLocator.ResolveExecutableCandidates("ffprobe"),
+            args,
+            cancellationToken,
+            standardErrorLineObserver: null,
+            static (message, binary, cmdLine, exitCode, stdout, stderr) =>
+                new AudioProcessingFfmpegException(message, binary, cmdLine, exitCode, stdout, stderr)).ConfigureAwait(false);
+        var result = new ProcessResult(runResult.ExitCode, runResult.StandardOutput, runResult.StandardError);
         using var document = JsonDocument.Parse(result.StandardOutput);
         var root = document.RootElement;
         var stream = root.TryGetProperty("streams", out var streams)
@@ -1085,8 +1090,7 @@ public sealed class AudioProcessingService : IAudioProcessingService
     /// </summary>
     private static string CreateTemporaryFilePath(string fileName)
     {
-        var directory = Path.Combine(Path.GetTempPath(), "files-tools-audio", Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(directory);
+        var directory = TempWorkspace.CreateDirectory("files-tools-audio");
         return Path.Combine(directory, fileName);
     }
 
@@ -1372,9 +1376,16 @@ public sealed class AudioProcessingService : IAudioProcessingService
         await RunFfmpegAsync(args, cancellationToken, observer).ConfigureAwait(false);
     }
 
-    private static Task<ProcessResult> RunFfmpegAsync(IReadOnlyList<string> args, CancellationToken cancellationToken, Action<string>? standardErrorLineObserver = null)
+    private static async Task<ProcessResult> RunFfmpegAsync(IReadOnlyList<string> args, CancellationToken cancellationToken, Action<string>? standardErrorLineObserver = null)
     {
-        return RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffmpeg"), args, cancellationToken, standardErrorLineObserver);
+        var result = await ProcessRunner.RunWithFallbackAsync(
+            FfmpegLocator.ResolveExecutableCandidates("ffmpeg"),
+            args,
+            cancellationToken,
+            standardErrorLineObserver,
+            static (message, binary, cmdLine, exitCode, stdout, stderr) =>
+                new AudioProcessingFfmpegException(message, binary, cmdLine, exitCode, stdout, stderr)).ConfigureAwait(false);
+        return new ProcessResult(result.ExitCode, result.StandardOutput, result.StandardError);
     }
 
     private static Action<string>? CreateProgressObserver(TimeSpan? totalDuration, string description, IProgress<AudioProcessProgress>? progress)
@@ -1388,16 +1399,9 @@ public sealed class AudioProcessingService : IAudioProcessingService
         var lastProcessed = TimeSpan.Zero;
         return line =>
         {
-            if (line.StartsWith("out_time=", StringComparison.Ordinal))
+            if (FfmpegProgress.TryParseTime(line, out var parsed))
             {
-                lastProcessed = ParseProgressTimestamp(line["out_time=".Length..]);
-                return;
-            }
-
-            if (line.StartsWith("out_time_ms=", StringComparison.Ordinal) &&
-                long.TryParse(line["out_time_ms=".Length..], NumberStyles.Integer, CultureInfo.InvariantCulture, out var outTimeMs))
-            {
-                lastProcessed = TimeSpan.FromMilliseconds(outTimeMs / 1000d);
+                lastProcessed = parsed;
                 return;
             }
 
@@ -1501,114 +1505,6 @@ public sealed class AudioProcessingService : IAudioProcessingService
         });
     }
 
-    private static async Task<ProcessResult> RunProcessWithFallbackAsync(IReadOnlyList<string> binaryCandidates, IReadOnlyList<string> arguments, CancellationToken cancellationToken, Action<string>? standardErrorLineObserver)
-    {
-        AudioProcessingFfmpegException? lastException = null;
-        foreach (var candidate in binaryCandidates)
-        {
-            try
-            {
-                return await RunProcessAsync(candidate, arguments, cancellationToken, standardErrorLineObserver).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (AudioProcessingFfmpegException ex) when (CanFallbackToPath(candidate, ex, binaryCandidates))
-            {
-                lastException = ex;
-            }
-        }
-
-        throw lastException ?? new AudioProcessingFfmpegException("No FFmpeg executable candidates were available.", "ffmpeg", string.Empty, null, string.Empty, string.Empty);
-    }
-
-    private static async Task<ProcessResult> RunProcessAsync(string binaryPath, IReadOnlyList<string> arguments, CancellationToken cancellationToken, Action<string>? standardErrorLineObserver)
-    {
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = binaryPath,
-            RedirectStandardError = true,
-            RedirectStandardOutput = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            WorkingDirectory = Path.GetDirectoryName(binaryPath) ?? AppContext.BaseDirectory
-        };
-
-        foreach (var argument in arguments)
-        {
-            startInfo.ArgumentList.Add(argument);
-        }
-
-        using var process = new Process { StartInfo = startInfo, EnableRaisingEvents = true };
-        try
-        {
-            if (!process.Start())
-            {
-                throw new InvalidOperationException($"Unable to start process '{binaryPath}'.");
-            }
-        }
-        catch (Exception ex)
-        {
-            throw new AudioProcessingFfmpegException("Failed to start FFmpeg/FFprobe process.", binaryPath, FormatCommandLine(binaryPath, arguments), null, string.Empty, ex.Message, ex);
-        }
-
-        using var cancellationRegistration = cancellationToken.Register(() =>
-        {
-            try
-            {
-                if (!process.HasExited)
-                {
-                    process.Kill(entireProcessTree: true);
-                }
-            }
-            catch
-            {
-                // Best effort cancellation cleanup.
-            }
-        });
-
-        var stdoutTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
-        var stderrBuilder = new StringBuilder();
-        var stderrTask = Task.Run(async () =>
-        {
-            while (await process.StandardError.ReadLineAsync(cancellationToken).ConfigureAwait(false) is string line)
-            {
-                stderrBuilder.AppendLine(line);
-                standardErrorLineObserver?.Invoke(line);
-            }
-        }, cancellationToken);
-
-        await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
-        var stdout = await stdoutTask.ConfigureAwait(false);
-        await stderrTask.ConfigureAwait(false);
-        var stderr = stderrBuilder.ToString();
-
-        if (process.ExitCode != 0)
-        {
-            throw new AudioProcessingFfmpegException("FFmpeg/FFprobe exited with a non-zero code.", binaryPath, FormatCommandLine(binaryPath, arguments), process.ExitCode, stdout, stderr);
-        }
-
-        return new ProcessResult(process.ExitCode, stdout, stderr);
-    }
-
-    private static bool CanFallbackToPath(string candidate, AudioProcessingFfmpegException exception, IReadOnlyList<string> candidates)
-    {
-        return candidates.Count > 1 && Path.IsPathRooted(candidate) && exception.ExitCode is null;
-    }
-
-    private static string FormatCommandLine(string binaryPath, IReadOnlyList<string> arguments)
-    {
-        return string.Join(" ", new[] { Quote(binaryPath) }.Concat(arguments.Select(Quote)));
-    }
-
-    private static string Quote(string value)
-    {
-        return value.Contains(' ', StringComparison.Ordinal) || value.Contains('"', StringComparison.Ordinal)
-            ? "\"" + value.Replace("\"", "\\\"", StringComparison.Ordinal) + "\""
-            : value;
-    }
-
     private static IEnumerable<string> SplitArguments(string args)
     {
         return args.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -1670,16 +1566,6 @@ public sealed class AudioProcessingService : IAudioProcessingService
         }
 
         return property.ValueKind == JsonValueKind.String && long.TryParse(property.GetString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out value) ? value : null;
-    }
-
-    private static TimeSpan ParseProgressTimestamp(string value)
-    {
-        if (TimeSpan.TryParseExact(value, @"hh\:mm\:ss\.ffffff", CultureInfo.InvariantCulture, out var precise))
-        {
-            return precise;
-        }
-
-        return TimeSpan.TryParse(value, CultureInfo.InvariantCulture, out var parsed) ? parsed : TimeSpan.Zero;
     }
 
     private static string ToFfmpegTimestamp(TimeSpan value)

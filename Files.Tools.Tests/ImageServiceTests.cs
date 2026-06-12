@@ -4,17 +4,17 @@ using NetVips;
 namespace Files.Tools.Tests;
 
 [TestClass]
-public class ImageProcessingServiceTests
+public class ImageServiceTests
 {
     private string _tempRoot = null!;
-    private ImageProcessingService _service = null!;
+    private ImageService _service = null!;
 
     [TestInitialize]
     public void Initialize()
     {
         _tempRoot = Path.Combine(Path.GetTempPath(), "files-tools-tests", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_tempRoot);
-        _service = new ImageProcessingService();
+        _service = new ImageService();
     }
 
     [TestCleanup]

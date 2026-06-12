@@ -12,6 +12,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Files_Tools.Helpers;
+using Files_Tools.Services.Infrastructure;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 
@@ -20,7 +21,7 @@ namespace Files_Tools.Services;
 /// <summary>
 /// Defines local DTLN-backed denoise operations for standalone audio files and video audio streams.
 /// </summary>
-public interface IVideoAudioDenoiseService
+public interface IAudioDenoiseService
 {
     /// <summary>
     /// Applies the configured denoise strategy to a standalone audio file and writes a processed audio file.
@@ -38,7 +39,7 @@ public interface IVideoAudioDenoiseService
     Task<DenoiseResult> DenoiseVideoAudioAsync(
         string inputVideoPath,
         string outputVideoPath,
-        VideoAudioDenoiseOptions options,
+        AudioDenoiseServiceOptions options,
         IProgress<DenoiseProgress>? progress = null,
         CancellationToken cancellationToken = default);
 
@@ -159,7 +160,7 @@ public class AudioDenoiseOptions
 /// <summary>
 /// Options used when denoising a selected audio stream and remuxing it into a video container.
 /// </summary>
-public sealed class VideoAudioDenoiseOptions : AudioDenoiseOptions
+public sealed class AudioDenoiseServiceOptions : AudioDenoiseOptions
 {
     /// <summary>
     /// Absolute FFmpeg audio stream index to process. When null, the first audio stream is used.
@@ -414,7 +415,7 @@ public class DenoiseRemuxException : DenoiseProcessingException
 /// <summary>
 /// Captures rich FFmpeg or FFprobe process failure details for diagnostics.
 /// </summary>
-public sealed class DenoiseProcessException : DenoiseProcessingException
+public sealed class DenoiseProcessException : DenoiseProcessingException, Files_Tools.Services.Infrastructure.IHasExitCode
 {
     /// <summary>
     /// Creates an exception for a failed FFmpeg or FFprobe invocation.
@@ -877,7 +878,7 @@ public sealed class DtlnOnnxDenoiseEngine : IDtlnDenoiseEngine, IDisposable
 /// <summary>
 /// FFmpeg-backed media pipeline that prepares audio for DTLN denoise and writes audio or video outputs.
 /// </summary>
-public class VideoAudioDenoiseService : IVideoAudioDenoiseService
+public class AudioDenoiseServiceBase : IAudioDenoiseService
 {
     private const int DtlnSampleRate = 16000;
     private const string FfprobeJsonArgs = "-v error -print_format json -show_streams -show_format";
@@ -903,7 +904,7 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
 
     private readonly IDtlnDenoiseEngine _denoiseEngine;
 
-    public VideoAudioDenoiseService()
+    public AudioDenoiseServiceBase()
         : this(DtlnOnnxDenoiseEngine.CreateDefault())
     {
     }
@@ -911,7 +912,7 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
     /// <summary>
     /// Creates a denoise service that delegates model inference to the supplied DTLN engine.
     /// </summary>
-    public VideoAudioDenoiseService(IDtlnDenoiseEngine denoiseEngine)
+    public AudioDenoiseServiceBase(IDtlnDenoiseEngine denoiseEngine)
     {
         _denoiseEngine = denoiseEngine ?? throw new ArgumentNullException(nameof(denoiseEngine));
     }
@@ -978,7 +979,7 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
     public async Task<DenoiseResult> DenoiseVideoAudioAsync(
         string inputVideoPath,
         string outputVideoPath,
-        VideoAudioDenoiseOptions options,
+        AudioDenoiseServiceOptions options,
         IProgress<DenoiseProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -1050,7 +1051,14 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
             Path.GetFullPath(inputPath)
         };
 
-        var result = await RunProcessWithFallbackAsync(ffprobeCandidates, args, cancellationToken, null).ConfigureAwait(false);
+        var runResult = await ProcessRunner.RunWithFallbackAsync(
+            ffprobeCandidates,
+            args,
+            cancellationToken,
+            standardErrorLineObserver: null,
+            static (message, binary, cmdLine, exitCode, stdout, stderr) =>
+                new DenoiseProcessException(message, binary, cmdLine, exitCode, stdout, stderr)).ConfigureAwait(false);
+        var result = new ProcessResult(runResult.ExitCode, runResult.StandardOutput, runResult.StandardError);
         using var document = JsonDocument.Parse(result.StandardOutput);
         var root = document.RootElement;
         var audioStreams = root.GetProperty("streams")
@@ -1292,7 +1300,13 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         };
 
         var observer = CreateFfmpegProgressObserver(DenoiseProcessingStage.ExtractingAudio, "Preparing model input audio", progress, duration);
-        await RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffmpeg"), args, cancellationToken, observer).ConfigureAwait(false);
+        await ProcessRunner.RunWithFallbackAsync(
+            FfmpegLocator.ResolveExecutableCandidates("ffmpeg"),
+            args,
+            cancellationToken,
+            observer,
+            static (message, binary, cmdLine, exitCode, stdout, stderr) =>
+                new DenoiseProcessException(message, binary, cmdLine, exitCode, stdout, stderr)).ConfigureAwait(false);
     }
 
     private static async Task EncodeAudioAsync(
@@ -1300,7 +1314,7 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         string outputPath,
         int outputSampleRate,
         AudioDenoiseOptions audioOptions,
-        VideoAudioDenoiseOptions? videoOptions,
+        AudioDenoiseServiceOptions? videoOptions,
         IProgress<DenoiseProgress>? progress,
         TimeSpan? duration,
         CancellationToken cancellationToken)
@@ -1334,7 +1348,13 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         args.Add(Path.GetFullPath(outputPath));
 
         var observer = CreateFfmpegProgressObserver(DenoiseProcessingStage.EncodingAudio, "Encoding output audio", progress, duration);
-        await RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffmpeg"), args, cancellationToken, observer).ConfigureAwait(false);
+        await ProcessRunner.RunWithFallbackAsync(
+            FfmpegLocator.ResolveExecutableCandidates("ffmpeg"),
+            args,
+            cancellationToken,
+            observer,
+            static (message, binary, cmdLine, exitCode, stdout, stderr) =>
+                new DenoiseProcessException(message, binary, cmdLine, exitCode, stdout, stderr)).ConfigureAwait(false);
     }
 
     private static async Task RemuxVideoAsync(
@@ -1342,7 +1362,7 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         string processedAudioPath,
         string outputVideoPath,
         int outputSampleRate,
-        VideoAudioDenoiseOptions options,
+        AudioDenoiseServiceOptions options,
         IProgress<DenoiseProgress>? progress,
         TimeSpan? duration,
         CancellationToken cancellationToken)
@@ -1385,7 +1405,13 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         var observer = CreateFfmpegProgressObserver(DenoiseProcessingStage.RemuxingVideo, "Remuxing processed audio", progress, duration);
         try
         {
-            await RunProcessWithFallbackAsync(FfmpegLocator.ResolveExecutableCandidates("ffmpeg"), args, cancellationToken, observer).ConfigureAwait(false);
+            await ProcessRunner.RunWithFallbackAsync(
+                FfmpegLocator.ResolveExecutableCandidates("ffmpeg"),
+                args,
+                cancellationToken,
+                observer,
+                static (message, binary, cmdLine, exitCode, stdout, stderr) =>
+                    new DenoiseProcessException(message, binary, cmdLine, exitCode, stdout, stderr)).ConfigureAwait(false);
         }
         catch (DenoiseProcessException ex)
         {
@@ -1409,16 +1435,9 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
 
         return line =>
         {
-            if (line.StartsWith("out_time=", StringComparison.Ordinal))
+            if (FfmpegProgress.TryParseTime(line, out var parsedTime))
             {
-                lastProcessed = ParseProgressTimestamp(line["out_time=".Length..]);
-                return;
-            }
-
-            if (line.StartsWith("out_time_ms=", StringComparison.Ordinal) &&
-                long.TryParse(line["out_time_ms=".Length..], NumberStyles.Integer, CultureInfo.InvariantCulture, out var outTimeMs))
-            {
-                lastProcessed = TimeSpan.FromMilliseconds(outTimeMs / 1000d);
+                lastProcessed = parsedTime;
                 return;
             }
 
@@ -1471,7 +1490,7 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
             throw new DenoiseValidationException("Output sample rate must be greater than 0.");
         }
 
-        if (options is VideoAudioDenoiseOptions videoOptions)
+        if (options is AudioDenoiseServiceOptions videoOptions)
         {
             if (videoOptions.AudioStreamIndex is < 0)
             {
@@ -1809,154 +1828,6 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
         return arguments.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
     }
 
-    private static async Task<ProcessResult> RunProcessWithFallbackAsync(
-        IReadOnlyList<string> binaryCandidates,
-        IReadOnlyList<string> arguments,
-        CancellationToken cancellationToken,
-        Action<string>? standardErrorLineObserver)
-    {
-        DenoiseProcessException? lastException = null;
-
-        foreach (var candidate in binaryCandidates)
-        {
-            try
-            {
-                return await RunProcessAsync(candidate, arguments, cancellationToken, standardErrorLineObserver).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (DenoiseProcessException ex) when (CanFallbackToPath(candidate, ex, binaryCandidates))
-            {
-                lastException = ex;
-            }
-        }
-
-        throw lastException ?? new DenoiseProcessingException("No FFmpeg executable candidates were available.");
-    }
-
-    private static async Task<ProcessResult> RunProcessAsync(
-        string binaryPath,
-        IReadOnlyList<string> arguments,
-        CancellationToken cancellationToken,
-        Action<string>? standardErrorLineObserver)
-    {
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = binaryPath,
-            RedirectStandardError = true,
-            RedirectStandardOutput = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            WorkingDirectory = Path.GetDirectoryName(binaryPath) ?? AppContext.BaseDirectory
-        };
-
-        foreach (var argument in arguments)
-        {
-            startInfo.ArgumentList.Add(argument);
-        }
-
-        using var process = new Process { StartInfo = startInfo, EnableRaisingEvents = true };
-
-        try
-        {
-            if (!process.Start())
-            {
-                throw new InvalidOperationException($"Unable to start process '{binaryPath}'.");
-            }
-        }
-        catch (Exception ex)
-        {
-            throw new DenoiseProcessException(
-                "Failed to start FFmpeg/FFprobe process.",
-                binaryPath,
-                FormatCommandLine(binaryPath, arguments),
-                null,
-                string.Empty,
-                ex.Message,
-                ex);
-        }
-
-        using var cancellationRegistration = cancellationToken.Register(() =>
-        {
-            try
-            {
-                if (!process.HasExited)
-                {
-                    process.Kill(entireProcessTree: true);
-                }
-            }
-            catch
-            {
-                // Best effort kill on cancellation.
-            }
-        });
-
-        var stdoutTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
-        var stderrBuilder = new StringBuilder();
-        var stderrTask = Task.Run(async () =>
-        {
-            while (await process.StandardError.ReadLineAsync(cancellationToken).ConfigureAwait(false) is string line)
-            {
-                stderrBuilder.AppendLine(line);
-                standardErrorLineObserver?.Invoke(line);
-            }
-        }, cancellationToken);
-
-        await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
-        var stdout = await stdoutTask.ConfigureAwait(false);
-        await stderrTask.ConfigureAwait(false);
-        var stderr = stderrBuilder.ToString();
-
-        if (process.ExitCode != 0)
-        {
-            throw new DenoiseProcessException(
-                "FFmpeg/FFprobe exited with a non-zero code.",
-                binaryPath,
-                FormatCommandLine(binaryPath, arguments),
-                process.ExitCode,
-                stdout,
-                stderr);
-        }
-
-        return new ProcessResult(process.ExitCode, stdout, stderr);
-    }
-
-    private static bool CanFallbackToPath(string candidate, DenoiseProcessException exception, IReadOnlyList<string> candidates)
-    {
-        return candidates.Count > 1 &&
-            !string.Equals(candidate, candidates[^1], StringComparison.OrdinalIgnoreCase) &&
-            exception.ExitCode is null;
-    }
-
-    private static string FormatCommandLine(string binaryPath, IReadOnlyList<string> arguments)
-    {
-        return string.Join(" ", new[] { Quote(binaryPath) }.Concat(arguments.Select(Quote)));
-    }
-
-    private static string Quote(string value)
-    {
-        return value.Contains(' ', StringComparison.Ordinal) || value.Contains('"', StringComparison.Ordinal)
-            ? "\"" + value.Replace("\"", "\\\"", StringComparison.Ordinal) + "\""
-            : value;
-    }
-
-    private static TimeSpan ParseProgressTimestamp(string value)
-    {
-        if (TimeSpan.TryParseExact(value, @"hh\:mm\:ss\.ffffff", CultureInfo.InvariantCulture, out var precise))
-        {
-            return precise;
-        }
-
-        if (TimeSpan.TryParseExact(value, @"hh\:mm\:ss\.ff", CultureInfo.InvariantCulture, out var centiseconds))
-        {
-            return centiseconds;
-        }
-
-        return TimeSpan.TryParse(value, CultureInfo.InvariantCulture, out var parsed) ? parsed : TimeSpan.Zero;
-    }
-
     private sealed record WaveAudio(float[] Samples, int SampleRate, int Channels)
     {
         public string Path { get; init; } = string.Empty;
@@ -1968,12 +1839,12 @@ public class VideoAudioDenoiseService : IVideoAudioDenoiseService
 /// <summary>
 /// Convenience concrete class name for the video/audio denoise feature.
 /// </summary>
-public sealed class VideoAudioDenoise : VideoAudioDenoiseService
+public sealed class AudioDenoiseService : AudioDenoiseServiceBase
 {
     /// <summary>
     /// Creates a denoise service without a configured DTLN engine. Processing will fail until an engine is supplied.
     /// </summary>
-    public VideoAudioDenoise()
+    public AudioDenoiseService()
         : base(DtlnOnnxDenoiseEngine.CreateDefault())
     {
     }
@@ -1981,7 +1852,7 @@ public sealed class VideoAudioDenoise : VideoAudioDenoiseService
     /// <summary>
     /// Creates a denoise service that uses the supplied DTLN engine for model inference.
     /// </summary>
-    public VideoAudioDenoise(IDtlnDenoiseEngine denoiseEngine)
+    public AudioDenoiseService(IDtlnDenoiseEngine denoiseEngine)
         : base(denoiseEngine)
     {
     }

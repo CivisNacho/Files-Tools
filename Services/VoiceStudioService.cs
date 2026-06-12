@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Files_Tools.Services.Infrastructure;
 
 namespace Files_Tools.Services;
 
@@ -78,8 +79,7 @@ public sealed class VoiceStudioService
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
-        var temp = Path.Combine(Path.GetTempPath(), "files-tools-voice", Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(temp);
+        var temp = TempWorkspace.CreateDirectory("files-tools-voice");
         try
         {
             // 1. Extract to 48 kHz mono float WAV.
@@ -94,7 +94,7 @@ public sealed class VoiceStudioService
             if (options.Denoise)
             {
                 progress?.Report(new(VoiceStudioStage.Denoising, 0.25));
-                var samples = WaveReader.ReadMonoFloatWav(stageWav);
+                var samples = WavIo.ReadMonoFloatWav(stageWav);
                 using var dfn = new DeepFilterNetService(_dfnModelPath);
                 var enhanced = await dfn.EnhanceMonoAsync(
                         samples, cancellationToken,
@@ -113,7 +113,7 @@ public sealed class VoiceStudioService
                 await RunFfmpegAsync(
                     ["-y", "-i", stageWav, "-ac", "1", "-ar", FlashSrService.InputSampleRate.ToString(),
                      "-c:a", "pcm_f32le", low], cancellationToken).ConfigureAwait(false);
-                var low16 = WaveReader.ReadMonoFloatWav(low);
+                var low16 = WavIo.ReadMonoFloatWav(low);
                 using var flash = new FlashSrService(_flashModelPath);
                 var full = await flash.UpsampleMonoAsync(
                         low16, cancellationToken,
@@ -162,8 +162,7 @@ public sealed class VoiceStudioService
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
-        var temp = Path.Combine(Path.GetTempPath(), "files-tools-voice", Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(temp);
+        var temp = TempWorkspace.CreateDirectory("files-tools-voice");
         try
         {
             var enhancedWav = Path.Combine(temp, "enhanced.wav");
@@ -294,32 +293,7 @@ public sealed class VoiceStudioService
 
     /// <summary>Writes mono 32-bit float PCM as a WAV file.</summary>
     internal static void WriteMonoFloat32Wav(string path, float[] samples, int sampleRate)
-    {
-        using var stream = File.Create(path);
-        using var w = new BinaryWriter(stream);
-        int dataBytes = samples.Length * 4;
-        const short channels = 1;
-        const short bitsPerSample = 32;
-        int byteRate = sampleRate * channels * (bitsPerSample / 8);
-
-        w.Write(Encoding.ASCII.GetBytes("RIFF"));
-        w.Write(36 + dataBytes);
-        w.Write(Encoding.ASCII.GetBytes("WAVE"));
-        w.Write(Encoding.ASCII.GetBytes("fmt "));
-        w.Write(16);                       // fmt chunk size
-        w.Write((short)3);                 // format = IEEE float
-        w.Write(channels);
-        w.Write(sampleRate);
-        w.Write(byteRate);
-        w.Write((short)(channels * (bitsPerSample / 8))); // block align
-        w.Write(bitsPerSample);
-        w.Write(Encoding.ASCII.GetBytes("data"));
-        w.Write(dataBytes);
-        foreach (var s in samples)
-        {
-            w.Write(s);
-        }
-    }
+        => WavIo.WriteMonoFloat32Wav(path, samples, sampleRate);
 
     private static void TryDeleteDirectory(string dir)
     {

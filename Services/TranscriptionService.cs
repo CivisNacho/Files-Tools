@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Files_Tools.Services.Infrastructure;
 using Whisper.net;
 using Whisper.net.Ggml;
 
@@ -14,7 +15,7 @@ namespace Files_Tools.Services;
 /// <summary>
 /// Defines minimal local Whisper-backed transcription operations.
 /// </summary>
-public interface IAudioTranscriptionService
+public interface ITranscriptionService
 {
     /// <summary>
     /// Returns whether the Whisper model is installed locally.
@@ -159,7 +160,7 @@ public sealed class AudioTranscriptionProgress
 /// <summary>
 /// Minimal Whisper-backed transcription service.
 /// </summary>
-public sealed class AudioTranscriptionService : IAudioTranscriptionService
+public sealed class TranscriptionService : ITranscriptionService
 {
     // The Whisper model is chosen automatically by installed RAM: Large-v3 (~3 GB) on capable machines
     // for best accuracy, and the lighter Large-v3-Turbo (~1.5 GB) on lower-RAM machines.
@@ -176,17 +177,17 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
     /// <summary>
     /// Creates the service with default local media preparation and Whisper adapters.
     /// </summary>
-    public AudioTranscriptionService()
+    public TranscriptionService()
         : this(
             ResolveDefaultModelPath(),
             new WhisperModelInstaller(),
             new WhisperNetTranscriber(),
-            new MediaPreparationService(new AudioProcessingService(), new VideoProcessingService()),
+            new MediaPreparationService(new AudioService(), new VideoService()),
             new Wav2Vec2AlignmentService())
     {
     }
 
-    internal AudioTranscriptionService(
+    internal TranscriptionService(
         string modelPath,
         IWhisperModelInstaller modelInstaller,
         IWhisperTranscriber transcriber,
@@ -877,19 +878,18 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
 
     private sealed class MediaPreparationService : IMediaPreparationService
     {
-        private readonly IAudioProcessingService _audioProcessingService;
-        private readonly IVideoProcessingService _videoProcessingService;
+        private readonly IAudioService _AudioService;
+        private readonly IVideoService _VideoService;
 
-        public MediaPreparationService(IAudioProcessingService audioProcessingService, IVideoProcessingService videoProcessingService)
+        public MediaPreparationService(IAudioService AudioService, IVideoService VideoService)
         {
-            _audioProcessingService = audioProcessingService ?? throw new ArgumentNullException(nameof(audioProcessingService));
-            _videoProcessingService = videoProcessingService ?? throw new ArgumentNullException(nameof(videoProcessingService));
+            _AudioService = AudioService ?? throw new ArgumentNullException(nameof(AudioService));
+            _VideoService = VideoService ?? throw new ArgumentNullException(nameof(VideoService));
         }
 
         public async Task<PreparedAudio> PrepareAsync(string inputPath, IProgress<double>? progress, CancellationToken cancellationToken)
         {
-            var workingDirectory = Path.Combine(Path.GetTempPath(), "files-tools-whisper", Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(workingDirectory);
+            var workingDirectory = TempWorkspace.CreateDirectory("files-tools-whisper");
 
             try
             {
@@ -900,7 +900,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
                 {
                     var extractedAudioPath = Path.Combine(workingDirectory, "extracted.wav");
                     var denoisedAudioPath = Path.Combine(workingDirectory, "denoised.wav");
-                    await _videoProcessingService.ExtractAudioAsync(inputPath, extractedAudioPath, cancellationToken).ConfigureAwait(false);
+                    await _VideoService.ExtractAudioAsync(inputPath, extractedAudioPath, cancellationToken).ConfigureAwait(false);
                     progress?.Report(0.2d);
                     await DenoiseVideoAudioForTranscriptionAsync(extractedAudioPath, denoisedAudioPath, progress, 0.2d, 0.55d, cancellationToken).ConfigureAwait(false);
                     await ConvertToWhisperWaveAsync(denoisedAudioPath, preparedAudioPath, progress, 0.75d, 0.25d, cancellationToken).ConfigureAwait(false);
@@ -941,7 +941,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
                     progress.Report(value);
                 });
 
-            await _audioProcessingService.ConvertAsync(inputPath, outputPath, new AudioConversionOptions
+            await _AudioService.ConvertAsync(inputPath, outputPath, new AudioConversionOptions
             {
                 OutputFormat = "wav",
                 SampleRate = 16000,
@@ -959,7 +959,7 @@ public sealed class AudioTranscriptionService : IAudioTranscriptionService
                     progress.Report(value);
                 });
 
-            await _audioProcessingService.ProcessPodcastAudioAsync(inputPath, outputPath, new AudioPodcastProcessingOptions
+            await _AudioService.ProcessPodcastAudioAsync(inputPath, outputPath, new AudioPodcastProcessingOptions
             {
                 EnableDtlnDenoise = true,
                 DtlnDenoiseMode = AudioDenoiseMode.Mono,

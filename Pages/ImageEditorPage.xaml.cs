@@ -48,7 +48,7 @@ namespace Files_Tools.Pages
         private Rect _dragStartCropRect;
         private Point _dragStartPoint;
         private CropDragMode _cropDragMode = CropDragMode.None;
-        private readonly IImageProcessingService _imageProcessingService = new ImageProcessingService();
+        private readonly IImageService _ImageService = new ImageService();
 
         private enum CropDragMode
         {
@@ -511,7 +511,7 @@ namespace Files_Tools.Pages
                 }
 
                 var processOptions = BuildProcessOptions(options);
-                await _imageProcessingService.ProcessImageAsync(_sourceImageFile.Path, outputPath, processOptions, CancellationToken.None);
+                await _ImageService.ProcessImageAsync(_sourceImageFile.Path, outputPath, processOptions, CancellationToken.None);
 
                 var dialog = new ContentDialog
                 {
@@ -854,7 +854,7 @@ namespace Files_Tools.Pages
 
                 try
                 {
-                    await _imageProcessingService.ProcessImageAsync(_sourceImageFile.Path, previewOutputPath, previewProcessOptions, CancellationToken.None);
+                    await _ImageService.ProcessImageAsync(_sourceImageFile.Path, previewOutputPath, previewProcessOptions, CancellationToken.None);
 
                     var previewStorageFile = await StorageFile.GetFileFromPathAsync(previewOutputPath);
                     using var previewStream = await previewStorageFile.OpenAsync(FileAccessMode.Read);
